@@ -116,9 +116,9 @@ class VISsim():
         crLengths = np.loadtxt(length)
         crDists = np.loadtxt(dist)
 
-        self.cr = dict(cr_u=crLengths[0, :], cr_cdf=crLengths[1, :],
+        self.cr = dict(cr_u=crLengths[:, 0], cr_cdf=crLengths[:, 1],
             cr_cdfn=np.shape(crLengths)[0],
-            cr_v=crDists[0, :], cr_cde=crDists[1, :],
+            cr_v=crDists[:, 0], cr_cde=crDists[:, 1],
             cr_cden=np.shape(crDists)[0])
 
 
@@ -137,16 +137,93 @@ class VISsim():
 
     def readObjectlist(self):
         """
-        Read object list using numpy.loadtxt
+        Read object list using numpy.loadtxt, determine the number of spectral types,
+        and find the file that corresponds to a given spectral type.
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
 
         str = '{0:d} sources read from '.format(np.shape(self.objects)[0], self.information['sourcelist'])
         self.log.info(str)
 
-        if self.debug:
-            print str
+        #find all spectral types
+        self.sp = np.unique(self.objects[:, 3])
 
+        #generate mapping between spectral type and data
+        spectraMapping = {}
+        data = open('data/objects.dat').readlines()
+        for stype in self.sp:
+            if int(stype) == 0:
+                #delta function
+                spectraMapping[stype] = 'PSF'
+            else:
+                for line in data:
+                    tmp = line.split()
+                    if int(tmp[0]) == int(stype):
+                        #found match
+                        if tmp[2].endswith('.fits'):
+                            d = pf.getdata(tmp[2])
+                        else:
+                            d = np.loadtxt(tmp[2], skiprows=2)
+                        spectraMapping[stype] = dict(file=tmp[2], data=d)
+                        break
+
+        self.spectraMapping = spectraMapping
+
+        #TODO: write a check if there are missing spectra and then stop
+        #msk = np.asarray(self.sp, dtype=np.int) != np.asarray(list(spectraMapping.keys()), dtype=np.int)
+        #print msk
+        #if len(msk > 0):
+        #    print 'Missing spectra...'
+
+        if self.debug:
+            print self.spectraMapping
+            print self.sp
+            print str
+            print 'Total number of spectral types is %i' % len(self.sp)
+
+
+    def readPSFs(self, psffile='data/psf.fits'):
+        """
+        Reads in the PSFs
+
+        :Note: at hte moment this supports only a single PSF file
+        """
+        if self.debug:
+            print 'Opening %s' % psffile
+
+        self.PSF = pf.getdata(psffile)
+
+
+    def generateFinemaps(self):
+        """
+
+        """
+        #TODO: write the finemap part
+        for stype in self.sp:
+            if int(stype) == 0:
+                #load PSF
+                pass
+            else:
+                pass
+
+
+    def addObjects(self):
+        """
+
+        """
+        for stype in self.sp:
+            msk = self.objects[:, 0] == stype
+            intscale = 10.0 ** (-0.4 * self.objects[:, 2][msk]) * self.information['magzero'] * self.information[
+                                                                                                'exptime']
+
+            #test if the object falls on the chip
+
+            if int(stype) == 0:
+                #star
+                pass
+            else:
+                #extended
+                pass
 
     def applyFlatfield(self):
         """
@@ -203,7 +280,7 @@ class VISsim():
             #TODO: add monotonicity-preserving piecewise cubic Hermite interpolantion here
         else:
             self.cr['cr_e'] = (fit['en1'] + (fit['en2'] - fit['en1']) * np.random.rand(int(np.floor(cr_n)))) ** (
-            1.0 / fit['q1'])
+                1.0 / fit['q1'])
 
         #write out the cosmics information
 
@@ -218,7 +295,6 @@ class VISsim():
         #past the information
         self.image += CCD_cr
 
-
         #count the covering factor
 
         #output information to ascii and FITS file
@@ -227,9 +303,9 @@ class VISsim():
     def applyNoise(self):
         """
         Apply dark current and the cosmic background.
-        Both values are scaled with the exposure time
+        Scale the dark current with the exposure time, but apply the cosmic background as given.
         """
-        self.image += self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
+        self.image += self.information['exptime'] * self.information['dark'] + self.information['cosmic_bkgd']
 
 
     def applyCosmetics(self, input='./data/cosmetics.dat'):
@@ -329,6 +405,9 @@ class VISsim():
         """
         self.configure()
         self.readObjectlist()
+        self.readPSFs()
+        self.generateFinemaps()
+        self.addObjects()
 
         if self.flatfieldA or self.flatfieldM:
             self.applyFlatfield()
@@ -365,6 +444,9 @@ class VISsim():
         """
         self.configure()
         self.readObjectlist()
+        self.readPSFs()
+        self.generateFinemaps()
+        self.addObjects()
         self.applyFlatfield()
         self.applyChargeInjection()
         self.applyCosmicRays()

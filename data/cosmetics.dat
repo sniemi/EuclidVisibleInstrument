@@ -1,0 +1,4 @@
+#This csv file describes the cosmetic defects in the following format
+#number, x [starts from 0], y [starts from 0], value [in electrons]
+1,2000.20,2000.20,1600
+2,1000.44,1000.54,2000

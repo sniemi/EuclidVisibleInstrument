@@ -646,7 +646,7 @@ class VISsim():
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
                         #convolve with PSF
-                        data = ndimage.filters.convolve(data, self.PSF)
+                        #data = ndimage.filters.convolve(data, self.PSF)
 
                         #overlay on the image
                         self._overlayToCCD2(data, obj, sbig)
@@ -828,6 +828,7 @@ class VISsim():
         Convert floating point arrays to integer arrays.
         """
         self.image = self.image.astype(np.int)
+        self.image[self.image > 2**16-1] = 2**16-1
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(self.image),
                                                                                              np.sum(self.image)))
 

@@ -22,23 +22,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="postprocessing.py" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="postprocessing.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/postproc/postprocessing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="70" column="0" selection-start="1838" selection-end="1838" vertical-scroll-proportion="0.0">
+            <state line="150" column="41" selection-start="4380" selection-end="4380" vertical-scroll-proportion="-0.0495283">
               <folding>
-                <element signature="e#200#230#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CTIprofile.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file:///Volumes/disk_xray10/smn2/euclid-sim/chargeInjectionTest/CTIprofile.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="31" selection-start="524" selection-end="524" vertical-scroll-proportion="0.34013605">
-              <folding>
-                <element signature="e#0#19#0" expanded="true" />
+                <element signature="e#286#316#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -47,7 +36,7 @@
       <file leaf-file-name="simulator.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/simulator/simulator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="231" column="61" selection-start="7899" selection-end="7905" vertical-scroll-proportion="0.0">
+            <state line="826" column="0" selection-start="28515" selection-end="28920" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="e#187#217#0" expanded="true" />
               </folding>
@@ -71,16 +60,16 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/simulator/simulator.py" />
-        <option value="$PROJECT_DIR$/postproc/postprocessing.py" />
         <option value="/Volumes/disk_xray10/smn2/euclid-sim/chargeInjectionTest/CTIprofile.py" />
+        <option value="$PROJECT_DIR$/postproc/postprocessing.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="258" />
-    <option name="y" value="260" />
-    <option name="width" value="1623" />
-    <option name="height" value="1028" />
+    <option name="x" value="62" />
+    <option name="y" value="22" />
+    <option name="width" value="2498" />
+    <option name="height" value="1418" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -176,6 +165,41 @@
     </option>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <module name="vissim-python" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="MULTIPROCESS" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <module name="vissim-python" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <method />
+    </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -244,17 +268,17 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="258" y="260" width="1623" height="1028" extended-state="6" />
+    <frame x="62" y="22" width="2498" height="1418" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Data Sources" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24959217" sideWeight="0.32794458" order="5" side_tool="true" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26188967" sideWeight="0.6666667" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26188967" sideWeight="0.770077" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29771614" sideWeight="0.22555812" order="5" side_tool="true" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.29771614" sideWeight="0.7690531" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16843393" sideWeight="0.7721324" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.26188967" sideWeight="0.22222222" order="1" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.16843393" sideWeight="0.22247884" order="1" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32948422" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -325,9 +349,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///Volumes/disk_xray10/smn2/euclid-sim/chargeInjectionTest/CTIprofile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="28" column="0" selection-start="696" selection-end="696" vertical-scroll-proportion="0.0">
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/simulator/simulator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="231" column="61" selection-start="7899" selection-end="7905" vertical-scroll-proportion="0.0">
+        <state line="826" column="0" selection-start="28515" selection-end="28920" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="e#187#217#0" expanded="true" />
           </folding>
@@ -336,18 +369,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/postproc/postprocessing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="70" column="0" selection-start="1838" selection-end="1838" vertical-scroll-proportion="0.0">
+        <state line="150" column="41" selection-start="4380" selection-end="4380" vertical-scroll-proportion="-0.0495283">
           <folding>
-            <element signature="e#200#230#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///Volumes/disk_xray10/smn2/euclid-sim/chargeInjectionTest/CTIprofile.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="31" selection-start="524" selection-end="524" vertical-scroll-proportion="0.34013605">
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
+            <element signature="e#286#316#0" expanded="true" />
           </folding>
         </state>
       </provider>

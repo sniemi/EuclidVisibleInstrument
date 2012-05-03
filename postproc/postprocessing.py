@@ -31,6 +31,7 @@ class PostProcessing():
         Class Constructor.
         """
         #setup logger
+        self.assumptions = {}
         self.log = lg.setUpLogger('PostProcessing.log')
 
 
@@ -78,6 +79,10 @@ class PostProcessing():
         #new image HDU
         hdu = pf.ImageHDU(data=data)
 
+        #add some header keywords
+        for key, value in self.assumptions.iteritems():
+            hdu.header
+
         #update and verify the header
         hdu.header.add_history('Created by VISsim postprocessing tool at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
@@ -114,6 +119,8 @@ class PostProcessing():
                                                                                              np.sum(datai)))
 
         self.information['ADUs'] = datai
+        self.assumptions.update(eADU=eADU)
+        self.assumptions.update(bias=bias)
         return self.information
 
 
@@ -176,6 +183,11 @@ class PostProcessing():
                             nt, sigma, taur,
                             [self.information['xsize'], self.information['ysize'], len(nt)])
         self.information['CTIed'] = CTIed.transpose()
+
+        self.assumptions.update(nt=nt)
+        self.assumptions.update(taur=taur)
+        self.assumptions.update(sigma=sigma)
+
         return self.information
 
 
@@ -200,6 +212,9 @@ class PostProcessing():
 
         self.information['readnoised'] = data + noise
         self.information['readonoise'] = noise
+
+        self.assumptions.update(readnoise=readout)
+
         return self.information
 
 

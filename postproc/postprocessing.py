@@ -10,7 +10,7 @@ Main code of the Euclid Visible Instrument Simulator
 
 :version: 0.1
 
-:TODO: Need to probably define things in quandrants as the input might be a full CCD
+:TODO: Need to probably define things in quadrants as the input might be a full CCD
 """
 import os, sys, datetime, math
 from optparse import OptionParser
@@ -26,6 +26,7 @@ class PostProcessing():
     to add radiation damage (as defined by the CDM03 model) and add
     readout noise to a simulated image.
     """
+
     def __init__(self):
         """
         Class Constructor.
@@ -81,10 +82,17 @@ class PostProcessing():
 
         #add some header keywords
         for key, value in self.assumptions.iteritems():
-            hdu.header
+            try:
+                hdu.header.update(key, value)
+                #ugly hack to get around the problem that one cannot
+                #input numpy arrays to headers...
+            except:
+                pass
+                #hdu.header.update(key, str(value))
 
         #update and verify the header
-        hdu.header.add_history('Created by VISsim postprocessing tool at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history(
+            'Created by VISsim postprocessing tool at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -113,7 +121,7 @@ class PostProcessing():
         data += bias
 
         datai = data.astype(np.int)
-        datai[datai > 2**16-1] = 2**16-1
+        datai[datai > 2 ** 16 - 1] = 2 ** 16 - 1
 
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(datai),
                                                                                              np.sum(datai)))
@@ -178,10 +186,10 @@ class PostProcessing():
 
         #call Fortran routine
         CTIed = cdm03.cdm03(np.asfortranarray(data.transpose()),
-                            iquadrant%2, iquadrant/2,
-                            dob, rdose,
-                            nt, sigma, taur,
-                            [self.information['xsize'], self.information['ysize'], len(nt)])
+            iquadrant % 2, iquadrant / 2,
+            dob, rdose,
+            nt, sigma, taur,
+            [self.information['xsize'], self.information['ysize'], len(nt)])
         self.information['CTIed'] = CTIed.transpose()
 
         self.assumptions.update(nt=nt)
@@ -218,8 +226,6 @@ class PostProcessing():
         return self.information
 
 
-
-
 def processArgs(printHelp=False):
     """
     Processes command line arguments.
@@ -233,6 +239,7 @@ def processArgs(printHelp=False):
         parser.print_help()
     else:
         return parser.parse_args()
+
 
 if __name__ == '__main__':
     opts, args = processArgs()

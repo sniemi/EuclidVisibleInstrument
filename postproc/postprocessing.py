@@ -1,5 +1,5 @@
 """
-Tools to insert instrument specific features to a simulated image.
+Tools to insert instrument specific features to a simulated image. Supports threading.
 
 :requires: PyFITS
 :requires: NumPy
@@ -8,29 +8,33 @@ Tools to insert instrument specific features to a simulated image.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.2
+:version: 0.3
 """
-import os, sys, datetime, math
-from optparse import OptionParser
+import os, sys, datetime, time, math
+import threading as t
+import Queue as Q
+import glob as g
 import logger as lg
 import pyfits as pf
 import numpy as np
 import cdm03
 
 
-class PostProcessing():
+class PostProcessing(t.Thread):
     """
     Euclid Visible Instrument postprocessing class. This class allows
     to add radiation damage (as defined by the CDM03 model) and add
     readout noise to a simulated image.
     """
 
-    def __init__(self):
+    def __init__(self, queue):
         """
         Class Constructor.
         """
+        t.Thread.__init__(self)
+        self.queue = queue
+
         #setup logger
-        self.assumptions = {}
         self.log = lg.setUpLogger('PostProcessing.log')
 
 
@@ -54,8 +58,7 @@ class PostProcessing():
 
         size = data.shape
 
-        self.information = dict(data=data, header=header, ysize=size[0], xsize=size[1])
-        return self.information
+        return dict(data=data, header=header, ysize=size[0], xsize=size[1])
 
 
     def writeFITSfile(self, data, output):
@@ -77,16 +80,6 @@ class PostProcessing():
 
         #new image HDU
         hdu = pf.ImageHDU(data=data)
-
-        #add some header keywords
-        for key, value in self.assumptions.iteritems():
-            try:
-                hdu.header.update(key, value)
-                #ugly hack to get around the problem that one cannot
-                #input numpy arrays to headers...
-            except:
-                pass
-                #hdu.header.update(key, str(value))
 
         #update and verify the header
         hdu.header.add_history(
@@ -124,10 +117,10 @@ class PostProcessing():
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(datai),
                                                                                              np.sum(datai)))
 
-        self.information['ADUs'] = datai
-        self.assumptions.update(eADU=eADU)
-        self.assumptions.update(bias=bias)
-        return self.information
+        assumptions= {}
+        assumptions.update(eADU=eADU)
+        assumptions.update(bias=bias)
+        return datai, assumptions
 
 
     def radiateFullCCD(self, fullCCD, quads=[0,1,2,3], xsize=2048, ysize=2066):
@@ -141,8 +134,8 @@ class PostProcessing():
         :param quads: quadrants, numbered from lower left
         :type quads: list
 
-        :return: e.g. radiation damaged CCD
-        :rtype: dict
+        :return: radiation damaged image
+        :rtype: ndarray
         """
         out = np.ones(fullCCD.shape)
         for i, quad in enumerate(quads):
@@ -163,8 +156,7 @@ class PostProcessing():
                 tmp = self.applyRadiationDamage(data, iquadrant=quad)
                 out[ysize:, xsize:] = tmp.transpose()
 
-        self.information['CTIed'] = out
-        return self.information
+        return out
 
 
     def applyRadiationDamage(self, data, trapfile='cdm_euclid.dat', dob=0.0, rdose=1.0e10, iquadrant=0):
@@ -172,19 +164,19 @@ class PostProcessing():
         Apply radian damage based on FORTRAN CDM03 model. The method assumes that
         input data covers only a single quadrant defined by the iquadrant integer.
 
-        :param data:
+        :param data: imaging data to which the CDM03 model will be applied to.
         :type data: ndarray
 
         :param trapfile: name of the file containing charge trap information [default=cdm_euclid.dat]
         :type trapfile: str
 
-        :param dob:
+        :param dob:  diffuse (long term) optical background [e-/pixel/transit]
         :type dob: float
 
         :param rdose: radiation dosage (over the full mission)
         :type rdose: float
 
-        :param iquandrant: number of the quandrant to process:
+        :param iquandrant: number of the quadrant to process:
         :type iquandrant: int
 
         cdm03 - Function signature:
@@ -221,16 +213,11 @@ class PostProcessing():
         taur = trapdata[:, 2]
 
         #call Fortran routine, transpose the arrays
-        CTIed = cdm03.cdm03(np.asfortranarray(data),#.transpose()),
+        CTIed = cdm03.cdm03(np.asfortranarray(data),
                             iquadrant % 2, iquadrant / 2,
                             dob, rdose,
                             nt, sigma, taur,
-                            [data.shape[1], data.shape[0], len(nt)])
-        CTIed = CTIed#.transpose()
-
-        self.assumptions.update(nt=nt)
-        self.assumptions.update(taur=taur)
-        self.assumptions.update(sigma=sigma)
+                            [data.shape[0], data.shape[1], len(nt)])
 
         return CTIed
 
@@ -245,60 +232,81 @@ class PostProcessing():
         :param readout: readout noise [default = 4.5]
         :type readout: float
 
-        :return: updated data, noise image, FITS header, xsize, ysize
+        :return: updated data, noise image
         :rtype: dict
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(readout),
-            size=(self.information['ysize'], self.information['xsize']))
+        noise = np.random.normal(loc=0.0, scale=math.sqrt(readout), size=data.shape)
 
         self.log.info('Adding readout noise...')
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
 
-        self.information['readnoised'] = data + noise
-        self.information['readonoise'] = noise
+        readnoised = data + noise
+        readnoise = noise
 
-        self.assumptions.update(readnoise=readout)
+        out = dict(readnoised=readnoised, readnoise=readnoise)
 
-        return self.information
+        return out
 
 
-    def generateCTImap(self):
+    def generateCTImap(self, CTIed, data):
         """
         Calculates a map showing the CTI effect. This map is being
         generated by dividing radiation damaged image with the
         """
-        self.information['CTImap'] = self.information['CTIed'] / self.information['data']
-        return self.information
+        return CTIed / data
 
 
-def processArgs(printHelp=False):
+    def run(self):
+        """
+        The method threading will call.
+        """
+        while True:
+            #grabs a file from queue
+            filename = self.queue.get()
+
+            file = filename.split('/')[-1].split('.fits')[0]
+
+            print 'Started precessing %s\n' % filename
+            start_time = time.time()
+
+            info = self.loadFITS(filename)
+            CTIed = self.radiateFullCCD(info['data'])
+            noised = self.applyReadoutNoise(CTIed)
+            datai, assumptions = self.discretisetoADUs(noised['readnoised'])
+            CTImap = self.generateCTImap(CTIed, info['data'])
+
+            self.writeFITSfile(datai, file+'CTI.fits')
+            self.writeFITSfile(CTImap, file+'CTImap.fits')
+
+            print '\nFinished processing %s.fits, took about %.0f minutes to run' % (file, -(start_time - time.time()) / 60.)
+
+            #signals to queue job is done
+            self.queue.task_done()
+
+
+def main(input_files, cores=6):
     """
-    Processes command line arguments.
+    Main driver function of the wrapper.
     """
-    parser = OptionParser()
+    queue = Q.Queue()
+    #spawn a pool of threads, and pass them queue instance
+    for i in range(cores):
+        th = PostProcessing(queue)
+        th.setDaemon(True)
+        th.start()
 
-    parser.add_option('-i', '--inputfile', dest='inputfile',
-        help="Name of the file to be processed", metavar="string")
+    for file in input_files:
+        queue.put(file)
 
-    if printHelp:
-        parser.print_help()
-    else:
-        return parser.parse_args()
+    #wait on the queue until everything has been processed
+    queue.join()
 
 
 if __name__ == '__main__':
-    opts, args = processArgs()
+    cores = 4
+    inputs = g.glob('*.fits')
 
-    if opts.inputfile is None:
-        processArgs(True)
-        sys.exit(1)
+    #call the main function
+    main(inputs, cores)
 
-    process = PostProcessing()
-    info = process.loadFITS(opts.inputfile)
-    info = process.radiateFullCCD(info['data'])
-    info = process.applyReadoutNoise(info['CTIed'])
-    info = process.discretisetoADUs(info['readnoised'])
-    info = process.generateCTImap()
-
-    process.writeFITSfile(info['ADUs'], 'testCTI.fits')
-    process.writeFITSfile(info['CTImap'], 'testCTImap.fits')
+    print 'All done...'

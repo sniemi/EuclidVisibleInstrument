@@ -1,5 +1,15 @@
 """
+Simple script to fit CDM03 CTI model parameters to measurements.
 
+:requires: SciPy
+:requires: CDM03 (FORTRAN code, use f2py to compile)
+:requires: NumPy
+:requires: matplotlib
+
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
+
+:version: 0.1
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -84,7 +94,7 @@ def fitfunc(p, x):
 
 def plotPosition(values, profile, fits, xstart=1063, len=15, output='StartingPosition.pdf'):
     """
-
+    Simple plotting script.
     """
     prof = np.average(profile, axis=1)
 
@@ -104,9 +114,10 @@ def plotPosition(values, profile, fits, xstart=1063, len=15, output='StartingPos
 
 
 if __name__ == '__main__':
+    #set up logger
     log = lg.setUpLogger('fitting.log')
 
-    #input values
+    #input measurement values (taken from an Excel spreadsheet)
     values = np.loadtxt('CTIdata.txt')
     vals = np.ones((2066, 1)) * 4.0
     ln = len(values)
@@ -114,46 +125,45 @@ if __name__ == '__main__':
     vals[1075:, 0] = 3
     vals = vals[1063:1080,0]
 
-    #model data
+    #data to be CTIed
     data = np.zeros((2066, 1))
     data[1053:1064, :] = 38337.71
 
-    #starting values
+    #Values that were in the CDM03 model prior May 9th 2012
     nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
     sigma = [2.2e-13,2.2e-13,4.72e-15,1.37e-16,2.78e-17,1.93e-17,6.39e-18]
     taur = [0.00000082, 0.0003, 0.002, 0.025, 0.124, 16.7, 496.0]
 
-    #get profile and plot it
+    #get the starting profile and plot it
     profile1 = applyRadiationDamage(data.transpose(), nt, sigma, taur).transpose()
     plotPosition(vals, profile1, dict(nt=nt, sigma=sigma, taur=taur))
 
-    #initial guesses
-    #nt = [ 4.98215103,  0.165762,    0.18071657,  0.09807878,  0.043,       0.39,       1.        ]
-    #taur = [2.28343175e-06,   1.51258659e-04,   8.60120034e-06,   9.92423703e-06,  3.10000000e-02,   4.17500000e+00,   1.24000000e+02]
+    #initial guesses for trap densities and release times
+    #because of lack of data points to fit, I decided to keep sigma fixed
     nt = [ 4.7,  0.15,    0.17,  0.1,  0.043,       0.39,       1.        ]
     taur = [2.2e-06,   1.5e-04,   8.6e-06,   9.8e-06,  0.124,   16.7,   496.0]
 
+    #write these to the log file
     log.info('Initial Guess Values:')
     log.info('nt='+str(nt))
     log.info('sigma='+str(sigma))
     log.info('taur='+str(taur))
 
+    #combine to a single Python list
     params = nt + taur
     params = np.array(params)
 
-    #uneven weighting scheme
+    #even/uneven weighting scheme
     weights = np.arange(17.)*0.01 + 0.1
     weights[7:] = 1.0
     weights = np.ones(17.)
 
-    log.info('Weigts:')
+    #write out the weights
+    log.info('Weights:')
     log.info(str(weights))
 
-    #fitting
-    errfunc = lambda p, x, y: fitfunc(p, x) - y
+    #fitting with SciPy
     errfuncE = lambda p, x, y, errors: (fitfunc(p, x) - y)  / errors
-    #out = scipy.optimize.leastsq(errfunc, params[:], args=(data, vals), full_output=True,
-    #                             maxfev=10000000, ftol=1e-11, xtol=1e-11, factor=50)
     out = scipy.optimize.leastsq(errfuncE, params[:], args=(data, vals, weights), full_output=True,
                                  maxfev=10000000, ftol=1e-11, xtol=1e-11, factor=50)
     print out

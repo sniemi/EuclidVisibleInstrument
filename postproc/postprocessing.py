@@ -65,7 +65,7 @@ class PostProcessing(multiprocessing.Process):
         return dict(data=data, header=header, ysize=size[0], xsize=size[1])
 
 
-    def writeFITSfile(self, data, output):
+    def writeFITSfile(self, data, output, unsigned16bit=True):
         """
         Write out FITS files using PyFITS.
 
@@ -73,6 +73,8 @@ class PostProcessing(multiprocessing.Process):
         :type data: ndarray
         :param output: name of the output file
         :type output: string
+        :param unsigned16bit: whether to scale the data using bzero=32768
+        :type unsigned16bit: bool
 
         :return: None
         """
@@ -85,9 +87,12 @@ class PostProcessing(multiprocessing.Process):
         #new image HDU
         hdu = pf.ImageHDU(data=data)
 
+        if unsigned16bit:
+            hdu.scale('int16', '', bzero=32768)
+
         #update and verify the header
-        hdu.header.add_history(
-            'Created by VISsim postprocessing tool at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('Created by VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('Contact Sami-Niemi (smn2 at mssl.ucl.ac) if questions.')
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -99,6 +104,7 @@ class PostProcessing(multiprocessing.Process):
     def discretisetoADUs(self, data, eADU=3.5, bias=1000.0):
         """
         Convert floating point arrays to integer arrays and convert to ADUs.
+        Adds bias level after converting to ADUs.
 
         :param data: data to be discretised to.
         :type data: ndarray
@@ -268,6 +274,22 @@ class PostProcessing(multiprocessing.Process):
         return CTIed / originalData
 
 
+    def applyLinearCorrection(self, image):
+        """
+        Applies a linear correction after one forward readout through the CDM03 model.
+
+        Bristow & Alexov (2003) algorithm further developed for HST data
+        processing by Massey, Rhodes et al.
+
+        :param image: radiation damaged image
+        :type image: ndarray
+
+        :return: corrected image after single forward readout
+        :rtype: ndarray
+        """
+        return 2.*image - self.radiateFullCCD(image)
+
+
     def run(self):
         """
         This is the method that will be called when multiprocessing.
@@ -284,23 +306,32 @@ class PostProcessing(multiprocessing.Process):
             print 'Started precessing %s\n' % filename
             start_time = time.time()
 
+            #calculate new frames
             info = self.loadFITS(filename)
             CTIed = self.radiateFullCCD(info['data'])
             noised = self.applyReadoutNoise(CTIed)
             datai = self.discretisetoADUs(noised['readnoised'])
             CTImap = self.generateCTImap(CTIed, info['data'])
 
-            self.writeFITSfile(datai, file+'CTI.fits')
-            self.writeFITSfile(CTImap, file+'CTImap.fits')
+            #apply correction
+            #corrected = self.applyLinearCorrection(noised['readnoised'])
+            corrected = self.applyLinearCorrection(CTIed)
+            CTImap2 = self.generateCTImap(corrected, info['data'])
 
-            # store the result
+            #write some outputs
+            self.writeFITSfile(datai, file+'CTI.fits')
+            self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
+            self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
+            self.writeFITSfile(corrected, file+'CTIcorrected.fits')
+
+            # store the result, not really necessary in this case, but for info...
             str = '\nFinished processing %s.fits, took about %.1f minutes to run' % (file, -(start_time - time.time()) / 60.)
             self.result_queue.put(str)
 
 
 
 if __name__ == '__main__':
-    #how many process to use?
+    #how many processes to use?
     num_processes = 6
 
     #find all files to be processed

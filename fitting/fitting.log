@@ -1,0 +1,12 @@
+2012-05-09 13:19:53,057 - fitCDM03values - <module> - INFO - Initial Guess Values:
+2012-05-09 13:19:53,057 - fitCDM03values - <module> - INFO - nt=[4.7, 0.15, 0.17, 0.1, 0.043, 0.39, 1.0]
+2012-05-09 13:19:53,057 - fitCDM03values - <module> - INFO - sigma=[2.2e-13, 2.2e-13, 4.72e-15, 1.37e-16, 2.78e-17, 1.93e-17, 6.39e-18]
+2012-05-09 13:19:53,057 - fitCDM03values - <module> - INFO - taur=[2.2e-06, 0.00015, 8.6e-06, 9.8e-06, 0.124, 16.7, 496.0]
+2012-05-09 13:19:53,058 - fitCDM03values - <module> - INFO - Weigts:
+2012-05-09 13:19:53,058 - fitCDM03values - <module> - INFO - [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+2012-05-09 13:19:55,712 - fitCDM03values - <module> - INFO - Final Values:
+2012-05-09 13:19:55,713 - fitCDM03values - <module> - INFO - nt=[ 4.7    0.15   0.17   0.1    0.043  0.39   1.   ]
+2012-05-09 13:19:55,713 - fitCDM03values - <module> - INFO - sigma=[2.2e-13, 2.2e-13, 4.72e-15, 1.37e-16, 2.78e-17, 1.93e-17, 6.39e-18]
+2012-05-09 13:19:55,713 - fitCDM03values - <module> - INFO - taur=[  2.20000000e-06   1.50000000e-04   8.60000000e-06   9.80000000e-06
+   1.24000000e-01   1.67000000e+01   4.96000000e+02]
+2012-05-09 13:19:55,713 - fitCDM03values - <module> - INFO - Finished!

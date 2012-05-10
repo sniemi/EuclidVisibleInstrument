@@ -314,8 +314,7 @@ class PostProcessing(multiprocessing.Process):
             CTImap = self.generateCTImap(CTIed, info['data'])
 
             #apply correction
-            #corrected = self.applyLinearCorrection(noised['readnoised'])
-            corrected = self.applyLinearCorrection(CTIed)
+            corrected = self.applyLinearCorrection(noised['readnoised'])
             CTImap2 = self.generateCTImap(corrected, info['data'])
 
             #write some outputs

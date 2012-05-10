@@ -37,14 +37,9 @@ DOUBLE PRECISION :: svg=2.5e-10			! geometrical confinement volume of serial reg
 
 DOUBLE PRECISION, ALLOCATABLE :: alpha(:),gamm(:),g(:)
 
-!If uncommented, parameters are set to defaults
-!relative density and release times for -120 degrees [from Gordon Hopkinson final report for Euclid]
-!DOUBLE PRECISION, DIMENSION(zdim) :: nt =(/5.0,0.22,0.2,0.1,0.043,0.39,1.0/)
-DOUBLE PRECISION, DIMENSION(zdim) :: nt 
-
-DOUBLE PRECISION, DIMENSION(zdim) :: tr ! =(/0.00000082,0.0003,0.002,0.025,0.124,16.7,496.0/)
-!capture cross sections from Gaia data, assumed to correspond with traps seen in Euclid testing
-DOUBLE PRECISION, DIMENSION(zdim) :: sigma ! =(/2.2e-13,2.2e-13,4.72e-15,1.37e-16,2.78e-17,1.93e-17,6.39e-18/)
+DOUBLE PRECISION, DIMENSION(zdim) :: nt
+DOUBLE PRECISION, DIMENSION(zdim) :: tr
+DOUBLE PRECISION, DIMENSION(zdim) :: sigma
 
 !allocate memory
 ALLOCATE(ci(xdim),lsf(xdim),slsf(ydim),stot(ydim))

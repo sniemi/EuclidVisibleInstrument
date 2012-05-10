@@ -2,7 +2,7 @@
 Simple script to fit CDM03 CTI model parameters to measurements.
 
 :requires: SciPy
-:requires: CDM03 (FORTRAN code, use f2py to compile)
+:requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
 :requires: NumPy
 :requires: matplotlib
 
@@ -27,7 +27,7 @@ from matplotlib import pyplot as plt
 import simulator.logger as lg
 
 
-def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=1e10):
+def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=6e9):
     """
     Apply radian damage based on FORTRAN CDM03 model. The method assumes that
     input data covers only a single quadrant defined by the iquadrant integer.
@@ -80,19 +80,24 @@ def fitfunc(p, x):
     """
     Functional form to be fitted.
     """
-    #params
-    nt = p[:7]
-    taur = p[7:]
+    #keep sigma and taur fixed
+    nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
+    sigma = [2.2e-13, 2.2e-13, 4.72e-15, 1.37e-16, 2.78e-17, 1.93e-17, 6.39e-18]
+    taur = [0.00000082, 0.0003, 0.002, 0.025, 0.124, 16.7, 496.0]
 
-    #keep sigma fixed
-    sigma = np.array([2.2e-13,2.2e-13,4.72e-15,1.37e-16,2.78e-17,1.93e-17,6.39e-18])
+    #params that are being fit
+    #nt = p[:7]
+    nt[:3] = p[:3]
+    #taur = p[7:]
+    taur[:3] = p[3:]
 
-    y = applyRadiationDamage(x.transpose(), nt, sigma, taur).transpose()[1063:1080, 0]
+    y = applyRadiationDamage(x.transpose(), nt, sigma, taur).transpose()[1063:1090, 0]
+
+    #print y[2], x[1065, 0]
     return y
 
 
-
-def plotPosition(values, profile, fits, xstart=1063, len=15, output='StartingPosition.pdf'):
+def plotPosition(values, profile, fits, xstart=1060, len=13, output='StartingPosition.pdf'):
     """
     Simple plotting script.
     """
@@ -102,12 +107,12 @@ def plotPosition(values, profile, fits, xstart=1063, len=15, output='StartingPos
     ax = fig.add_subplot(111)
 
     plt.text(0.1, 0.95, r'$n_{t}=$'+str(np.around(fits['nt'], decimals=2)), va='top',  transform=ax.transAxes, fontsize=11)
-    plt.text(0.1, 0.90, r'$\sigma=$'+str(fits['sigma']), va='top',  transform=ax.transAxes, fontsize=11)
-    plt.text(0.1, 0.85, r'$\tau_{r}=$'+str(fits['taur']), va='top',  transform=ax.transAxes, fontsize=11)
-    plt.semilogy(prof[xstart:xstart+len], 'rD-', label='Fitted')
-    plt.semilogy(values[:len], 'bo', label='Data')
+    plt.text(0.1, 0.85, r'$\sigma=$'+str(fits['sigma']), va='top',  transform=ax.transAxes, fontsize=11)
+    plt.text(0.1, 0.80, r'$\tau_{r}=$'+str(fits['taur']), va='top',  transform=ax.transAxes, fontsize=11)
+    plt.semilogy(prof[xstart:xstart+len+3], 'rD-', label='Fitted')
+    plt.semilogy(np.arange(len)+3, values[:len], 'bo', label='Data')
     plt.xlabel('Pixels')
-    plt.ylabel('ADUs')
+    plt.ylabel('electrons')
     plt.legend(loc='best')
     plt.savefig(output, numpoints=1)
     plt.close()
@@ -123,11 +128,11 @@ if __name__ == '__main__':
     ln = len(values)
     vals[1063:1063+ln, 0] = values
     vals[1075:, 0] = 3
-    vals = vals[1063:1080,0]
+    vals = vals[1063:1090,0]
 
     #data to be CTIed
     data = np.zeros((2066, 1))
-    data[1053:1064, :] = 38337.71
+    data[1053:1064, :] = 38000.
 
     #Values that were in the CDM03 model prior May 9th 2012
     nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
@@ -138,10 +143,16 @@ if __name__ == '__main__':
     profile1 = applyRadiationDamage(data.transpose(), nt, sigma, taur).transpose()
     plotPosition(vals, profile1, dict(nt=nt, sigma=sigma, taur=taur))
 
+    #get the starting profile and plot it
+    #profile2 = applyRadiationDamage(data.transpose()/10., nt, sigma, taur).transpose()
+    #plotPosition(vals/10., profile2, dict(nt=nt, sigma=sigma, taur=taur), output='LowElectrons.pdf')
+
     #initial guesses for trap densities and release times
     #because of lack of data points to fit, I decided to keep sigma fixed
-    nt = [ 4.7,  0.15,    0.17,  0.1,  0.043,       0.39,       1.        ]
-    taur = [2.2e-06,   1.5e-04,   8.6e-06,   9.8e-06,  0.124,   16.7,   496.0]
+    #nt = [6.0, .44, 0.35, 0.1, 0.043, 0.39, 1.]
+    #nt = [5.7, .6, 0.245, 0.1, 0.043, 0.39, 1.]
+    #nt = [5.1, .18, 0.135, 0.1, 0.043, 0.39, 1.]
+    nt = [5.1, .21, 0.135, 0.1, 0.043, 0.39, 1.] #best
 
     #write these to the log file
     log.info('Initial Guess Values:')
@@ -150,13 +161,13 @@ if __name__ == '__main__':
     log.info('taur='+str(taur))
 
     #combine to a single Python list
-    params = nt + taur
-    params = np.array(params)
+    #params = nt + taur
+    params = nt[:3] + taur[:3]
 
     #even/uneven weighting scheme
-    weights = np.arange(17.)*0.01 + 0.1
+    weights = np.arange(27.)*0.01 + 0.095
     weights[7:] = 1.0
-    weights = np.ones(17.)
+    #weights = np.ones(27.)
 
     #write out the weights
     log.info('Weights:')
@@ -165,18 +176,24 @@ if __name__ == '__main__':
     #fitting with SciPy
     errfuncE = lambda p, x, y, errors: (fitfunc(p, x) - y)  / errors
     out = scipy.optimize.leastsq(errfuncE, params[:], args=(data, vals, weights), full_output=True,
-                                 maxfev=10000000, ftol=1e-11, xtol=1e-11, factor=50)
+                                 maxfev=100000, ftol=1e-14, xtol=1e-14)
     print out
 
     #new params
-    taur = out[0][7:]
-    nt = out[0][:7]
+    #newnt = out[0][:7]
+    newnt = list(nt)
+    newnt[:3] = out[0][:3]
+    #newtaur = out[0][7:]
+    newtaur = list(taur)
+    newtaur[:3] = out[0][3:]
+    #newtaur = np.asarray(taur)
+    #nt[:3] = out[0]
     print
-    print nt
+    print newnt / np.asarray(nt)
     print
-    print taur
-    profile = applyRadiationDamage(data.transpose(), nt, sigma, taur).transpose()
-    plotPosition(vals, profile, dict(nt=nt, sigma=sigma, taur=taur), output='EndPosition.pdf')
+    print newtaur / np.asarray(taur)
+    profile = applyRadiationDamage(data.transpose(), newnt, sigma, newtaur).transpose()
+    plotPosition(vals, profile, dict(nt=newnt, sigma=sigma, taur=newtaur), output='EndPosition.pdf')
 
     #write the numbers to a log
     log.info('Final Values:')

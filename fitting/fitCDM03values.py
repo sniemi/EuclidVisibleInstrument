@@ -87,9 +87,9 @@ def fitfunc(p, x):
 
     #params that are being fit
     #nt = p[:7]
-    nt[:3] = p[:3]
+    nt[1:4] = p#[:3]
     #taur = p[7:]
-    taur[:3] = p[3:]
+    #taur[:3] = p[3:]
 
     y = applyRadiationDamage(x.transpose(), nt, sigma, taur).transpose()[1063:1090, 0]
 
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
     #combine to a single Python list
     #params = nt + taur
-    params = nt[:3] + taur[:3]
+    params = nt[1:4] #+ taur[:3]
 
     #even/uneven weighting scheme
     weights = np.arange(27.)*0.01 + 0.095
@@ -182,10 +182,10 @@ if __name__ == '__main__':
     #new params
     #newnt = out[0][:7]
     newnt = list(nt)
-    newnt[:3] = out[0][:3]
+    newnt[1:4] = out[0][:3]
     #newtaur = out[0][7:]
     newtaur = list(taur)
-    newtaur[:3] = out[0][3:]
+    #newtaur[:3] = out[0][3:]
     #newtaur = np.asarray(taur)
     #nt[:3] = out[0]
     print

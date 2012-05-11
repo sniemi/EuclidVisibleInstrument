@@ -1,66 +1,70 @@
-!MODULE CDM03
-
 SUBROUTINE CDM03(sinp,xdim,ydim,sout,iflip,jflip,dob,rdose,zdim,in_nt,in_sigma,in_tr)
 !------------------------------------------------------------------------------
 ! 
 ! Radiation damage model CDM03, see EUCLID_TN_ESA_AS_003_0-2.pdf for details.
 ! 
+! Modified to work with Euclid VIS instrument by Sami-Matias Niemi
+!	Note that the coordinate system in Gaia (original CDM03 model) and
+!   VIS differ. In VIS the serial register is at the "bottom" while in 
+!   Gaia it is on the "left" side of the CCD quad. 
+!
+!  Note: This subroutine is not very fast at the moment because of the
+!        two extra transposes.
 !------------------------------------------------------------------------------
+! ARGUMENTS:
+! sinp = input image array
+! xdim = dimension of the input array in x direction (parallel)
+! ydim = dimension of the input array in y direction (serial)
+! sout = output image array with added CTI
 ! dob = Diffuse (long term) Optical Background [e-/pixel/transit]
 ! zdim = number of trap species
+!------------------------------------------------------------------------------
 
 USE nrtype
 
 IMPLICIT NONE
 
-INTEGER, INTENT(in) 					:: xdim,ydim,zdim,iflip,jflip
+!inputs, outputs and work variables
+INTEGER, INTENT(in) 					:: xdim, ydim, zdim, iflip, jflip
 DOUBLE PRECISION, INTENT(in) 			:: in_nt(zdim),in_sigma(zdim),in_tr(zdim)
 REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
-REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
+REAL, ALLOCATABLE, INTENT(out) 			:: sout(:,:)
 DOUBLE PRECISION, INTENT(in) 			:: dob,rdose
-INTEGER, ALLOCATABLE 					:: ci(:)
-DOUBLE PRECISION, ALLOCATABLE 			:: s(:,:),no(:,:),sno(:,:)
-DOUBLE PRECISION, ALLOCATABLE 			:: slsf(:),stot(:),lsf(:)
+DOUBLE PRECISION, ALLOCATABLE 			:: s(:,:),no(:,:),sno(:,:), work(:,:)
 INTEGER 								:: i,j,k
-DOUBLE PRECISION 						:: x, y
 
 !model related variables
 DOUBLE PRECISION :: nc,nr				! number of electrons captured, released
 DOUBLE PRECISION :: beta=0.6			! charge cloud expansion parameter [0, 1]
 DOUBLE PRECISION :: fwc=175000.			! full well capacity
 DOUBLE PRECISION :: vth=1.168e7			! electron thermal velocity [cm/s]
-DOUBLE PRECISION :: t=1.024e-2			! parallel line time [s]
+DOUBLE PRECISION :: t=1.024e-2			! parallel line time [s] for 200kHz
+!DOUBLE PRECISION :: t=2.07e-3			! parallel line time [s] for 1MHz
 DOUBLE PRECISION :: vg=6.e-11			! geometric confinement volume
-DOUBLE PRECISION :: st=5.e-6			! serial pixel transfer period [s]
+DOUBLE PRECISION :: st=5.e-6			! serial pixel transfer period [s] for 200kHz
+!DOUBLE PRECISION :: st=2.07e-3 / 2048. ! serial pixel transfer period [s] for 1MHz
 DOUBLE PRECISION :: sfwc=730000.		! serial (readout register) pixel full well capacity
-DOUBLE PRECISION :: svg=2.5e-10			! geometrical confinement volume of serial register pixels [cm**3]
+DOUBLE PRECISION :: svg=1.0e-10			! geometrical confinement volume of serial register pixels [cm**3]
 
+!Trap parameters
+DOUBLE PRECISION, DIMENSION(7) :: nt, tr, sigma
 DOUBLE PRECISION, ALLOCATABLE :: alpha(:),gamm(:),g(:)
 
-DOUBLE PRECISION, DIMENSION(zdim) :: nt
-DOUBLE PRECISION, DIMENSION(zdim) :: tr
-DOUBLE PRECISION, DIMENSION(zdim) :: sigma
-
-!allocate memory
-ALLOCATE(ci(xdim),lsf(xdim),slsf(ydim),stot(ydim))
+!allocate memory for CTI related variables
 ALLOCATE(s(xdim,ydim))
-ALLOCATE(no(ydim,zdim),sno(xdim,zdim))
+ALLOCATE(no(xdim,zdim),sno(ydim,zdim))
 ALLOCATE(alpha(zdim),gamm(zdim),g(zdim))
 
-!set up variables
-x = 0.
-y = 0.
-ci = 0
+!set up variables to zero
 s = 0.
 no = 0.
 sno = 0.
-stot = 0.
 
 !absolute trap density which should be scaled according to radiation dose
 !(nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
-nt=in_nt*rdose			!absolute trap density [per cm**3]
-sigma=in_sigma
-tr=in_tr
+nt = in_nt * rdose				!absolute trap density [per cm**3]
+sigma = in_sigma
+tr = in_tr
 
 ! flip data for Euclid depending on the quadrant being processed
 DO i=1,xdim
@@ -69,20 +73,28 @@ DO i=1,xdim
    ENDDO
 ENDDO
 
-!add some background electrons
-s=s+dob
+!Rotate to move from Euclid to Gaia coordinate system
+!because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
+s = TRANSPOSE(s)
+
+!add background electrons
+s = s + dob
 
 !apply FWC (anti-blooming)
 s=min(s,fwc)
 
-!parallel direction
+!Because of the transpose, we need to be careful what we now call
+!xdim and ydim. In the following loops these have been changed
+!not to exceed the array dimensions.
+
+!start with parallel direction	 
 alpha=t*sigma*vth*fwc**beta/2./vg
 g=nt*2.*vg/fwc**beta
 
-DO i=1,xdim
-   gamm = g * (x + REAL(i))
+DO i=1,ydim
+   gamm = g * REAL(i)
    DO k=1,zdim
-      DO j=1,ydim
+      DO j=1,xdim
          nc=0.
          
          IF(s(i,j).gt.0.01)THEN
@@ -97,15 +109,15 @@ DO i=1,xdim
    ENDDO
 ENDDO
 
-!serial direction
+!now serial direction
 alpha=st*sigma*vth*sfwc**beta/2./svg
 g=nt*2.*svg/sfwc**beta
 
-DO j=1,ydim
-   gamm = g * ( y + REAL(j))
+DO j=1,xdim
+   gamm = g * REAL(j)
    DO k=1,zdim
       IF(tr(k).lt.t)THEN
-         DO i=1,xdim
+         DO i=1,ydim
             nc=0.
             
             IF(s(i,j).gt.0.01)THEN
@@ -121,16 +133,22 @@ DO j=1,ydim
    ENDDO
 ENDDO
 
+!We need to rotate back from Gaia coordinate system
+work = s
+work = TRANSPOSE(work)
+
+!reserve memory for the output and set it to zero
+ALLOCATE(sout(xdim, ydim))
+sout = 0.
+
 ! flip data back to the input orientation
 DO i=1,xdim
    DO j=1,ydim
-      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = s(i,j)
+      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
    ENDDO
 ENDDO
 
 ! free memory
-DEALLOCATE(ci,s,no,sno,slsf,stot,lsf)
-DEALLOCATE(alpha,gamm,g)
+DEALLOCATE(s,no,sno, alpha,gamm,g, work)
 
 END SUBROUTINE cdm03
-!END MODULE CDM03

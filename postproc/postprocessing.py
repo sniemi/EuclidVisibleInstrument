@@ -67,13 +67,23 @@ class PostProcessing(multiprocessing.Process):
         return dict(data=data, header=header, ysize=size[0], xsize=size[1])
     
     
-    def cutoutRegion(self, data):
+    def cutoutRegion(self, data, max=33e3):
         """
         Cuts out a region from the imaging data. The cutout region is specified by
         xstart/stop and ystart/stop that are read out from the self.values dictionary.
+        Also checks if there are values that are above the given cutoff value and sets
+        those pixels to a max value (default=33e3).
+
+        :param data: image array
+        :type data: ndarray
+        :param max: maximum allowed value [default = 33e3]
+        :type max: int or float
+
+        :return: cut out image from the original data
+        :rtype: ndarray
         """
         out = data[self.values['ystart']:self.values['ystop'], self.values['xstart']:self.values['xstop']].copy()
-        out[out > self.values['cutoff']] = 33e3
+        out[out > self.values['cutoff']] = max
         return out
         
 
@@ -146,7 +156,7 @@ class PostProcessing(multiprocessing.Process):
         data += self.values['bias']
 
         datai = data.astype(np.int)
-        datai[datai > 2 ** 16 - 1] = 2 ** 16 - 1
+        datai[datai > 2**16 - 1] = 2**16 - 1
 
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(datai),
                                                                                              np.sum(datai)))
@@ -172,21 +182,21 @@ class PostProcessing(multiprocessing.Process):
 
         for quad in quads:
             if quad == 0:
-                data = fullCCD[ysize:, 0:xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=2)
-                out[ysize:, 0:xsize] = tmp.transpose()
-            elif quad == 1:
-                data = fullCCD[ysize:, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=3)
-                out[ysize:, xsize:] = tmp.transpose()
-            elif quad == 2:
                 data = fullCCD[0:ysize, 0:xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=0)
-                out[0:ysize, 0:xsize] = tmp.transpose()
-            elif quad == 3:
+                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
+                out[0:ysize, 0:xsize] = tmp
+            elif quad == 1:
                 data = fullCCD[0:ysize, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=1)
-                out[0:ysize, xsize:] = tmp.transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
+                out[0:ysize, xsize:] = tmp
+            elif quad == 2:
+                data = fullCCD[ysize:, 0:xsize].copy().transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
+                out[ysize:, 0:xsize] = tmp
+            elif quad == 3:
+                data = fullCCD[ysize:, xsize:].copy().transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
+                out[ysize:, xsize:] = tmp
             else:
                 print 'ERROR -- too many quadrants!!'
 
@@ -224,7 +234,8 @@ class PostProcessing(multiprocessing.Process):
 
         :Note: Because Python/NumPy arrays are different row/column based, one needs
                to be extra careful here. NumPy.asfortranarray will be called to get
-               an array laid out in Fortran order in memory.
+               an array laid out in Fortran order in memory. Before returning the
+               array will be laid out in memory in C-style (row-major order).
 
         :return: image that has been run through the CDM03 model
         :rtype: ndarray
@@ -242,7 +253,7 @@ class PostProcessing(multiprocessing.Process):
                             nt, sigma, taur,
                             [data.shape[0], data.shape[1], len(nt)])
 
-        return CTIed
+        return np.asanyarray(CTIed)
 
 
     def applyReadoutNoise(self, data):
@@ -318,19 +329,25 @@ class PostProcessing(multiprocessing.Process):
             print 'Started processing %s\n' % filename
             start_time = time.time()
 
-            #calculate new frames
+            #load data and cut out a correct region
             info = self.loadFITS(filename)
             data = self.cutoutRegion(info['data'])
+
+            #apply CTI model and calculate a CTI map
             CTIed = self.radiateFullCCD(data)
-            noised = self.applyReadoutNoise(CTIed)
-            datai = self.discretisetoADUs(noised['readnoised'])
             CTImap = self.generateCTImap(CTIed, data)
 
-            #apply correction
+            #apply readout noise to the CTIed image
+            noised = self.applyReadoutNoise(CTIed)
+
+            #apply the first order correction and generate a residual map
             corrected = self.applyLinearCorrection(noised['readnoised'])
             CTImap2 = self.generateCTImap(corrected, data)
 
-            #write some outputs
+            #convert the readout noised image to ADUs
+            datai = self.discretisetoADUs(noised['readnoised'])
+
+            #write the outputs
             self.writeFITSfile(datai, file+'CTI.fits')
             self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
             self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
@@ -344,7 +361,7 @@ class PostProcessing(multiprocessing.Process):
 
 if __name__ == '__main__':
     #how many processes to use?
-    num_processes = 2
+    num_processes = 1
 
     #input values that are used in processing and save to the FITS headers
     values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,

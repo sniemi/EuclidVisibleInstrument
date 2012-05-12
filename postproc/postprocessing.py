@@ -1,9 +1,9 @@
 """
-Tools to insert instrument specific features to a simulated image. Supports multiprocessing.
+A class to insert instrument specific features to a simulated image. Supports multiprocessing.
 
 :requires: PyFITS
 :requires: NumPy
-:requires: CDM03 Fortran code
+:requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -65,7 +65,17 @@ class PostProcessing(multiprocessing.Process):
         self.log.info('Read data from %i extension of file %s' % (ext, filename))
 
         return dict(data=data, header=header, ysize=size[0], xsize=size[1])
-
+    
+    
+    def cutoutRegion(self, data):
+        """
+        Cuts out a region from the imaging data. The cutout region is specified by
+        xstart/stop and ystart/stop that are read out from the self.values dictionary.
+        """
+        out = data[self.values['ystart']:self.values['ystop'], self.values['xstart']:self.values['xstop']].copy()
+        out[out > self.values['cutoff']] = 33e3
+        return out
+        
 
     def writeFITSfile(self, data, output, unsigned16bit=True):
         """
@@ -99,7 +109,18 @@ class PostProcessing(multiprocessing.Process):
 
         #update and verify the header
         hdu.header.add_history('Created with VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
-        hdu.header.add_history('Contact Sami-Niemi (smn2 at mssl.ucl.ac) if questions.')
+        hdu.header.add_history('The following processing steps have been performed:')
+        hdu.header.add_history('1)Original file has been cut to VIS size using xstart/stop and ystart/stop')
+        hdu.header.add_history('2)Pixels with values greater than 65k were set to 33k (to prevent long trails)')
+        hdu.header.add_history('3)CDM03 CTI model were applied to each quadrant separately')
+        hdu.header.add_history('4)All four quadrants were combined to for a single CCD')
+        hdu.header.add_history('5)Readnoise drawn from Normal distribution were added')
+        hdu.header.add_history('6)Values were then converted from electrons to ADUs')
+        hdu.header.add_history('7)Bias level were added')
+        hdu.header.add_history('8)Image was saved to a FITS file in 16bit unsigned integer format')
+        hdu.header.add_history('In addition to these steps also CTI corrected images were produced,')
+        hdu.header.add_history('see CTIcorrected.fits')
+        hdu.header.add_history('Contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk) if questions.')
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -133,7 +154,7 @@ class PostProcessing(multiprocessing.Process):
         return datai
 
 
-    def radiateFullCCD(self, fullCCD, quads=[0,1,2,3], xsize=2048, ysize=2066):
+    def radiateFullCCD(self, fullCCD, quads=(0,1,2,3), xsize=2048, ysize=2066):
         """
         This routine allows the whole CCD to be run through a radiation damage mode.
         The routine takes into account the fact that the amplifiers are in the corners
@@ -147,24 +168,27 @@ class PostProcessing(multiprocessing.Process):
         :return: radiation damaged image
         :rtype: ndarray
         """
-        out = np.ones(fullCCD.shape)
-        for i, quad in enumerate(quads):
-            if i == 0:
-                data = fullCCD[:ysize, :xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad)
-                out[:ysize, :xsize] = tmp.transpose()
-            elif i == 1:
-                data = fullCCD[:ysize, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad)
-                out[:ysize, xsize:] = tmp.transpose()
-            elif i == 2:
-                data = fullCCD[ysize:, :xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad)
-                out[ysize:, :xsize] = tmp.transpose()
-            else:
+        out = np.zeros(fullCCD.shape)
+
+        for quad in quads:
+            if quad == 0:
+                data = fullCCD[ysize:, 0:xsize].copy().transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=2)
+                out[ysize:, 0:xsize] = tmp.transpose()
+            elif quad == 1:
                 data = fullCCD[ysize:, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad)
+                tmp = self.applyRadiationDamage(data, iquadrant=3)
                 out[ysize:, xsize:] = tmp.transpose()
+            elif quad == 2:
+                data = fullCCD[0:ysize, 0:xsize].copy().transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=0)
+                out[0:ysize, 0:xsize] = tmp.transpose()
+            elif quad == 3:
+                data = fullCCD[0:ysize, xsize:].copy().transpose()
+                tmp = self.applyRadiationDamage(data, iquadrant=1)
+                out[0:ysize, xsize:] = tmp.transpose()
+            else:
+                print 'ERROR -- too many quadrants!!'
 
         return out
 
@@ -177,16 +201,7 @@ class PostProcessing(multiprocessing.Process):
         :param data: imaging data to which the CDM03 model will be applied to.
         :type data: ndarray
 
-        :param trapfile: name of the file containing charge trap information [default=cdm_euclid.dat]
-        :type trapfile: str
-
-        :param dob:  diffuse (long term) optical background [e-/pixel/transit]
-        :type dob: float
-
-        :param rdose: radiation dosage (over the full mission)
-        :type rdose: float
-
-        :param iquandrant: number of the quadrant to process:
+        :param iquandrant: number of the quadrant to process
         :type iquandrant: int
 
         cdm03 - Function signature:
@@ -210,7 +225,6 @@ class PostProcessing(multiprocessing.Process):
         :Note: Because Python/NumPy arrays are different row/column based, one needs
                to be extra careful here. NumPy.asfortranarray will be called to get
                an array laid out in Fortran order in memory.
-
 
         :return: image that has been run through the CDM03 model
         :rtype: ndarray
@@ -242,7 +256,7 @@ class PostProcessing(multiprocessing.Process):
         :return: updated data, noise image
         :rtype: dict
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['readout']), size=data.shape)
+        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['rnoise']), size=data.shape)
 
         self.log.info('Adding readout noise...')
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
@@ -301,25 +315,26 @@ class PostProcessing(multiprocessing.Process):
 
             file = filename.split('/')[-1].split('.fits')[0]
 
-            print 'Started precessing %s\n' % filename
+            print 'Started processing %s\n' % filename
             start_time = time.time()
 
             #calculate new frames
             info = self.loadFITS(filename)
-            CTIed = self.radiateFullCCD(info['data'])
+            data = self.cutoutRegion(info['data'])
+            CTIed = self.radiateFullCCD(data)
             noised = self.applyReadoutNoise(CTIed)
             datai = self.discretisetoADUs(noised['readnoised'])
-            CTImap = self.generateCTImap(CTIed, info['data'])
+            CTImap = self.generateCTImap(CTIed, data)
 
             #apply correction
             corrected = self.applyLinearCorrection(noised['readnoised'])
-            CTImap2 = self.generateCTImap(corrected, info['data'])
+            CTImap2 = self.generateCTImap(corrected, data)
 
             #write some outputs
             self.writeFITSfile(datai, file+'CTI.fits')
             self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
             self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
-            self.writeFITSfile(corrected, file+'CTIcorrected.fits')
+            self.writeFITSfile(corrected, file+'CTIcorrected.fits', unsigned16bit=False)
 
             # store the result, not really necessary in this case, but for info...
             str = '\nFinished processing %s.fits, took about %.1f minutes to run' % (file, -(start_time - time.time()) / 60.)
@@ -331,8 +346,11 @@ if __name__ == '__main__':
     #how many processes to use?
     num_processes = 2
 
-    #values
-    values = {'readnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5, 'bias' : 1000.0}
+    #input values that are used in processing and save to the FITS headers
+    values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,
+              'bias' : 1000.0, 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11 ,
+              'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10, 'ystart' : 560, 'xstart' : 560, 'ystop' : 4692,
+              'xstop' : 4656, 'cutoff' : 65000.0}
 
     #find all files to be processed
     inputs = g.glob('*.fits')

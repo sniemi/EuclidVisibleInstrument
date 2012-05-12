@@ -36,7 +36,7 @@ REAL :: work(ydim,xdim)
 INTEGER :: i,j,k
 
 !model related variables
-DOUBLE PRECISION :: nc,nr				! number of electrons captured, released
+DOUBLE PRECISION :: nc,nr			! number of electrons captured, released
 DOUBLE PRECISION :: beta=0.6			! charge cloud expansion parameter [0, 1]
 DOUBLE PRECISION :: fwc=175000.			! full well capacity
 DOUBLE PRECISION :: vth=1.168e7			! electron thermal velocity [cm/s]
@@ -52,15 +52,13 @@ DOUBLE PRECISION :: svg=1.0e-10			! geometrical confinement volume of serial reg
 DOUBLE PRECISION, DIMENSION(7) :: nt, tr, sigma
 DOUBLE PRECISION, DIMENSION(zdim):: alpha,gamm,g
 
-!set up variables to zero
+! set up variables to zero
 s = 0.
 no = 0.
 sno = 0.
 
-print*, '1'
-
-!absolute trap density which should be scaled according to radiation dose
-!(nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
+! absolute trap density which should be scaled according to radiation dose
+! (nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
 nt = in_nt * rdose				!absolute trap density [per cm**3]
 sigma = in_sigma
 tr = in_tr
@@ -75,8 +73,6 @@ ENDDO
 !Rotate to move from Euclid to Gaia coordinate system
 !because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
 s = TRANSPOSE(s)
-
-print*, '2'
 
 !add background electrons
 s = s + dob
@@ -110,8 +106,6 @@ DO i=1,ydim
    ENDDO
 ENDDO
 
-print*, '3'
-
 !now serial direction
 alpha=st*sigma*vth*sfwc**beta/2./svg
 g=nt*2.*svg/sfwc**beta
@@ -136,27 +130,18 @@ DO j=1,xdim
    ENDDO
 ENDDO
 
-print*, '4'
-
 !We need to rotate back from Gaia coordinate system
-print*, '4.5'
-
 work = TRANSPOSE(s)
 
-print*,'5'
+!print*,size(work, 1), size(work, 2)
+!print*,size(sout, 1), size(sout, 2)
+!print*,xdim, ydim
 
 ! flip data back to the input orientation
-!DO i=1,xdim
-!   DO j=1,ydim
-!      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
-!   ENDDO
-!ENDDO
-sout = work
-
-
-print*,'6'
-
-! free memory
-!DEALLOCATE(s,no,sno, alpha,gamm,g, work)
+DO i=1,xdim
+   DO j=1,ydim
+      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
+   ENDDO
+ENDDO
 
 END SUBROUTINE cdm03

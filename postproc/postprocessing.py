@@ -8,7 +8,7 @@ Tools to insert instrument specific features to a simulated image. Supports mult
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.4
+:version: 0.5
 """
 import os, sys, datetime, time, math
 import multiprocessing
@@ -27,7 +27,7 @@ class PostProcessing(multiprocessing.Process):
     readout noise to a simulated image.
     """
 
-    def __init__(self, work_queue, result_queue):
+    def __init__(self, values, work_queue, result_queue):
         """
         Class Constructor.
         """
@@ -38,6 +38,8 @@ class PostProcessing(multiprocessing.Process):
         self.work_queue = work_queue
         self.result_queue = result_queue
         self.kill_received = False
+
+        self.values = values
 
         #setup logger
         self.log = lg.setUpLogger('PostProcessing.log')
@@ -87,11 +89,16 @@ class PostProcessing(multiprocessing.Process):
         #new image HDU
         hdu = pf.ImageHDU(data=data)
 
+        #convert to unsigned 16bit int if requested
         if unsigned16bit:
             hdu.scale('int16', '', bzero=32768)
 
+        #add keywords
+        for key, value in self.values.iteritems():
+            hdu.header.update(key, value)
+
         #update and verify the header
-        hdu.header.add_history('Created by VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('Created with VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.header.add_history('Contact Sami-Niemi (smn2 at mssl.ucl.ac) if questions.')
         hdu.verify('fix')
 
@@ -101,25 +108,21 @@ class PostProcessing(multiprocessing.Process):
         ofd.writeto(output)
 
 
-    def discretisetoADUs(self, data, eADU=3.5, bias=1000.0):
+    def discretisetoADUs(self, data):
         """
         Convert floating point arrays to integer arrays and convert to ADUs.
         Adds bias level after converting to ADUs.
 
         :param data: data to be discretised to.
         :type data: ndarray
-        :param eADU: conversion factor (from electrons to ADUs) [default=3.5]
-        :type eADU: int
-        :param bias: bias level in ADUs that will be added
-        :type bias: float
 
         :return: discretised array in ADUs
         :rtype: ndarray
         """
         #convert to ADUs
-        data /= eADU
+        data /= self.values['eADU']
         #add bias
-        data += bias
+        data += self.values['bias']
 
         datai = data.astype(np.int)
         datai[datai > 2 ** 16 - 1] = 2 ** 16 - 1
@@ -127,10 +130,7 @@ class PostProcessing(multiprocessing.Process):
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(datai),
                                                                                              np.sum(datai)))
 
-        #assumptions = {}
-        #assumptions.update(eADU=eADU)
-        #assumptions.update(bias=bias)
-        return datai #, assumptions
+        return datai
 
 
     def radiateFullCCD(self, fullCCD, quads=[0,1,2,3], xsize=2048, ysize=2066):
@@ -169,7 +169,7 @@ class PostProcessing(multiprocessing.Process):
         return out
 
 
-    def applyRadiationDamage(self, data, trapfile='cdm_euclid.dat', dob=0.0, rdose=1.0e10, iquadrant=0):
+    def applyRadiationDamage(self, data, iquadrant=0):
         """
         Apply radian damage based on FORTRAN CDM03 model. The method assumes that
         input data covers only a single quadrant defined by the iquadrant integer.
@@ -216,7 +216,7 @@ class PostProcessing(multiprocessing.Process):
         :rtype: ndarray
         """
         #read in trap information
-        trapdata = np.loadtxt(trapfile)
+        trapdata = np.loadtxt(self.values['trapfile'])
         nt = trapdata[:, 0]
         sigma = trapdata[:, 1]
         taur = trapdata[:, 2]
@@ -224,27 +224,25 @@ class PostProcessing(multiprocessing.Process):
         #call Fortran routine
         CTIed = cdm03.cdm03(np.asfortranarray(data),
                             iquadrant % 2, iquadrant / 2,
-                            dob, rdose,
+                            self.values['dob'], self.values['rdose'],
                             nt, sigma, taur,
                             [data.shape[0], data.shape[1], len(nt)])
 
         return CTIed
 
 
-    def applyReadoutNoise(self, data, readout=4.5):
+    def applyReadoutNoise(self, data):
         """
         Applies readout noise. The noise is drawn from a Normal (Gaussian) distribution.
         Mean = 0.0, and std = sqrt(readout).
 
         :param data: input data to which the readout noise will be added to
         :type data: ndarray
-        :param readout: readout noise [default = 4.5]
-        :type readout: float
 
         :return: updated data, noise image
         :rtype: dict
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(readout), size=data.shape)
+        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['readout']), size=data.shape)
 
         self.log.info('Adding readout noise...')
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
@@ -331,7 +329,10 @@ class PostProcessing(multiprocessing.Process):
 
 if __name__ == '__main__':
     #how many processes to use?
-    num_processes = 6
+    num_processes = 2
+
+    #values
+    values = {'readnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5, 'bias' : 1000.0}
 
     #find all files to be processed
     inputs = g.glob('*.fits')
@@ -346,7 +347,7 @@ if __name__ == '__main__':
 
     # spawn workers
     for file in inputs:
-        worker = PostProcessing(work_queue, result_queue)
+        worker = PostProcessing(values, work_queue, result_queue)
         worker.start()
 
     # collect the results off the queue

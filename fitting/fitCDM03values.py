@@ -27,7 +27,7 @@ from matplotlib import pyplot as plt
 import simulator.logger as lg
 
 
-def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=3.0e10):
+def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=3e10):
     """
     Apply radian damage based on FORTRAN CDM03 model. The method assumes that
     input data covers only a single quadrant defined by the iquadrant integer.
@@ -87,13 +87,12 @@ def fitfunc(p, x):
 
     #params that are being fit
     #nt = p[:7]
-    nt[0:4] = p#[:3]
+    nt[1:4] = p#[:3]
     #taur = p[7:]
     #taur[:3] = p[3:]
 
     y = applyRadiationDamage(x.transpose(), nt, sigma, taur).transpose()[1063:1090, 0]
 
-    #print y[2], x[1065, 0]
     return y
 
 
@@ -119,11 +118,14 @@ def plotPosition(values, profile, fits, xstart=1060, len=13, output='StartingPos
 
 
 if __name__ == '__main__':
+    electrons = 44000.
+
     #set up logger
     log = lg.setUpLogger('fitting.log')
 
     #input measurement values (taken from an Excel spreadsheet)
     values = np.loadtxt('CTIdata.txt')
+    values = values / np.max(values) * electrons
     vals = np.ones((2066, 1)) * 4.0
     ln = len(values)
     vals[1063:1063+ln, 0] = values
@@ -131,8 +133,9 @@ if __name__ == '__main__':
     vals = vals[1063:1090,0]
 
     #data to be CTIed
-    data = np.zeros((2066, 1))
-    data[1053:1064, :] = 38000.
+    #data = np.zeros((2066, 1))
+    data = np.zeros((2066, 2048))
+    data[1053:1064, :] = electrons
 
     #Values that were in the CDM03 model prior May 9th 2012
     nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
@@ -147,13 +150,8 @@ if __name__ == '__main__':
     #profile2 = applyRadiationDamage(data.transpose()/10., nt, sigma, taur).transpose()
     #plotPosition(vals/10., profile2, dict(nt=nt, sigma=sigma, taur=taur), output='LowElectrons.pdf')
 
-    #initial guesses for trap densities and release times
-    #because of lack of data points to fit, I decided to keep sigma fixed
-    #nt = [6.0, .44, 0.35, 0.1, 0.043, 0.39, 1.]
-    #nt = [5.7, .6, 0.245, 0.1, 0.043, 0.39, 1.]
-    #nt = [5.1, .18, 0.135, 0.1, 0.043, 0.39, 1.]
-    #nt = [5.1, .21, 0.135, 0.1, 0.043, 0.39, 1.] #best
-    nt = [2.0, 1.2, 0.11, 0.1, 0.043, 0.39, 1.]
+    #initial guesses for trap densities
+    nt = [5.0, 0.25, 0.24, 0.14, 0.043, 0.39, 1.]
 
     #write these to the log file
     log.info('Initial Guess Values:')
@@ -163,12 +161,12 @@ if __name__ == '__main__':
 
     #combine to a single Python list
     #params = nt + taur
-    params = nt[0:4] #+ taur[:3]
+    params = nt[1:4] #+ taur[:3]
 
     #even/uneven weighting scheme
     weights = np.arange(27.)*0.01 + 0.095
     weights[7:] = 1.0
-    weights = np.ones(27.)
+    #weights = np.ones(27.)
 
     #write out the weights
     log.info('Weights:')
@@ -177,13 +175,13 @@ if __name__ == '__main__':
     #fitting with SciPy
     errfuncE = lambda p, x, y, errors: (fitfunc(p, x) - y)  / errors
     out = scipy.optimize.leastsq(errfuncE, params[:], args=(data, vals, weights), full_output=True,
-                                 maxfev=100000, ftol=1e-14, xtol=1e-14)
+                                 maxfev=10000000, ftol=1e-16, xtol=1e-16)
     print out
 
     #new params
     #newnt = out[0][:7]
     newnt = list(nt)
-    newnt[0:4] = out[0]#[:3]
+    newnt[1:4] = out[0]#[:3]
     #newtaur = out[0][7:]
     newtaur = list(taur)
     #newtaur[:3] = out[0][3:]

@@ -25,13 +25,15 @@ USE nrtype
 IMPLICIT NONE
 
 !inputs, outputs and work variables
-INTEGER, INTENT(in) 					:: xdim, ydim, zdim, iflip, jflip
-DOUBLE PRECISION, INTENT(in) 			:: in_nt(zdim),in_sigma(zdim),in_tr(zdim)
+INTEGER, INTENT(in) :: xdim, ydim, zdim, iflip, jflip
+REAL, INTENT(in) :: in_nt(zdim),in_sigma(zdim),in_tr(zdim)
 REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
-REAL, ALLOCATABLE, INTENT(out) 			:: sout(:,:)
-DOUBLE PRECISION, INTENT(in) 			:: dob,rdose
-DOUBLE PRECISION, ALLOCATABLE 			:: s(:,:),no(:,:),sno(:,:), work(:,:)
-INTEGER 								:: i,j,k
+REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
+REAL, INTENT(in) :: dob,rdose
+REAL :: no(xdim,zdim),sno(ydim,zdim)
+REAL :: s(xdim, ydim)
+REAL :: work(ydim,xdim)
+INTEGER :: i,j,k
 
 !model related variables
 DOUBLE PRECISION :: nc,nr				! number of electrons captured, released
@@ -48,17 +50,14 @@ DOUBLE PRECISION :: svg=1.0e-10			! geometrical confinement volume of serial reg
 
 !Trap parameters
 DOUBLE PRECISION, DIMENSION(7) :: nt, tr, sigma
-DOUBLE PRECISION, ALLOCATABLE :: alpha(:),gamm(:),g(:)
-
-!allocate memory for CTI related variables
-ALLOCATE(s(xdim,ydim))
-ALLOCATE(no(xdim,zdim),sno(ydim,zdim))
-ALLOCATE(alpha(zdim),gamm(zdim),g(zdim))
+DOUBLE PRECISION, DIMENSION(zdim):: alpha,gamm,g
 
 !set up variables to zero
 s = 0.
 no = 0.
 sno = 0.
+
+print*, '1'
 
 !absolute trap density which should be scaled according to radiation dose
 !(nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
@@ -76,6 +75,8 @@ ENDDO
 !Rotate to move from Euclid to Gaia coordinate system
 !because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
 s = TRANSPOSE(s)
+
+print*, '2'
 
 !add background electrons
 s = s + dob
@@ -109,6 +110,8 @@ DO i=1,ydim
    ENDDO
 ENDDO
 
+print*, '3'
+
 !now serial direction
 alpha=st*sigma*vth*sfwc**beta/2./svg
 g=nt*2.*svg/sfwc**beta
@@ -133,22 +136,27 @@ DO j=1,xdim
    ENDDO
 ENDDO
 
-!We need to rotate back from Gaia coordinate system
-work = s
-work = TRANSPOSE(work)
+print*, '4'
 
-!reserve memory for the output and set it to zero
-ALLOCATE(sout(xdim, ydim))
-sout = 0.
+!We need to rotate back from Gaia coordinate system
+print*, '4.5'
+
+work = TRANSPOSE(s)
+
+print*,'5'
 
 ! flip data back to the input orientation
-DO i=1,xdim
-   DO j=1,ydim
-      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
-   ENDDO
-ENDDO
+!DO i=1,xdim
+!   DO j=1,ydim
+!      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
+!   ENDDO
+!ENDDO
+sout = work
+
+
+print*,'6'
 
 ! free memory
-DEALLOCATE(s,no,sno, alpha,gamm,g, work)
+!DEALLOCATE(s,no,sno, alpha,gamm,g, work)
 
 END SUBROUTINE cdm03

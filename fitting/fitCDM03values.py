@@ -27,7 +27,7 @@ from matplotlib import pyplot as plt
 import simulator.logger as lg
 
 
-def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=6e9):
+def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=3.0e10):
     """
     Apply radian damage based on FORTRAN CDM03 model. The method assumes that
     input data covers only a single quadrant defined by the iquadrant integer.
@@ -87,7 +87,7 @@ def fitfunc(p, x):
 
     #params that are being fit
     #nt = p[:7]
-    nt[1:4] = p#[:3]
+    nt[0:4] = p#[:3]
     #taur = p[7:]
     #taur[:3] = p[3:]
 
@@ -152,7 +152,8 @@ if __name__ == '__main__':
     #nt = [6.0, .44, 0.35, 0.1, 0.043, 0.39, 1.]
     #nt = [5.7, .6, 0.245, 0.1, 0.043, 0.39, 1.]
     #nt = [5.1, .18, 0.135, 0.1, 0.043, 0.39, 1.]
-    nt = [5.1, .21, 0.135, 0.1, 0.043, 0.39, 1.] #best
+    #nt = [5.1, .21, 0.135, 0.1, 0.043, 0.39, 1.] #best
+    nt = [2.0, 1.2, 0.11, 0.1, 0.043, 0.39, 1.]
 
     #write these to the log file
     log.info('Initial Guess Values:')
@@ -162,12 +163,12 @@ if __name__ == '__main__':
 
     #combine to a single Python list
     #params = nt + taur
-    params = nt[1:4] #+ taur[:3]
+    params = nt[0:4] #+ taur[:3]
 
     #even/uneven weighting scheme
     weights = np.arange(27.)*0.01 + 0.095
     weights[7:] = 1.0
-    #weights = np.ones(27.)
+    weights = np.ones(27.)
 
     #write out the weights
     log.info('Weights:')
@@ -182,7 +183,7 @@ if __name__ == '__main__':
     #new params
     #newnt = out[0][:7]
     newnt = list(nt)
-    newnt[1:4] = out[0][:3]
+    newnt[0:4] = out[0]#[:3]
     #newtaur = out[0][7:]
     newtaur = list(taur)
     #newtaur[:3] = out[0][3:]

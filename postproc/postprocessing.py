@@ -1,6 +1,12 @@
 """
 A class to insert instrument specific features to a simulated image. Supports multiprocessing.
 
+:Warning: For a given number of cores the readout noise image seems to be the same.
+          Perhaps the call to the random generator takes the seed from the time and
+          because these are done parallel it ends up being the same in many cases.
+          The seed should perhaps be set manually to random to avoid this. However,
+          at this point I do not see the need to change this.
+
 :requires: PyFITS
 :requires: NumPy
 :requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
@@ -43,9 +49,6 @@ class PostProcessing(multiprocessing.Process):
         #these are also written to the FITS file header
         self.values = values
 
-        #setup logger
-        self.log = lg.setUpLogger('PostProcessing.log')
-
 
     def loadFITS(self, filename, ext=0):
         """
@@ -59,6 +62,8 @@ class PostProcessing(multiprocessing.Process):
         :return: data, FITS header, xsize, ysize
         :rtype: dict
         """
+        self.filename = filename
+
         fh = pf.open(filename)
         data = fh[ext].data
         header = fh[ext].header
@@ -86,6 +91,7 @@ class PostProcessing(multiprocessing.Process):
         """
         out = data[self.values['ystart']:self.values['ystop'], self.values['xstart']:self.values['xstop']].copy()
         out[out > self.values['cutoff']] =self.values['ceil']
+        self.log.info('Cutting out region from %s' % self.filename)
         return out
         
 
@@ -114,13 +120,14 @@ class PostProcessing(multiprocessing.Process):
         #convert to unsigned 16bit int if requested
         if unsigned16bit:
             hdu.scale('int16', '', bzero=32768)
+            hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #add keywords
+        hdu.header.update('origimg', self.filename)
         for key, value in self.values.iteritems():
             hdu.header.update(key, value)
 
         #update and verify the header
-        hdu.header.add_history('Created with VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.header.add_history('The following processing steps have been performed:')
         hdu.header.add_history('1)Original file has been cut to VIS size using xstart/stop and ystart/stop')
         hdu.header.add_history('2)Pixels with values greater than 65k were set to 33k (to prevent long trails)')
@@ -133,6 +140,7 @@ class PostProcessing(multiprocessing.Process):
         hdu.header.add_history('In addition to these steps also CTI corrected images were produced,')
         hdu.header.add_history('see CTIcorrected.fits')
         hdu.header.add_history('Contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk) if questions.')
+        hdu.header.add_history('Created with VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -162,7 +170,6 @@ class PostProcessing(multiprocessing.Process):
 
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(datai),
                                                                                              np.sum(datai)))
-
         return datai
 
 
@@ -187,18 +194,22 @@ class PostProcessing(multiprocessing.Process):
                 data = fullCCD[0:ysize, 0:xsize].copy().transpose()
                 tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
                 out[0:ysize, 0:xsize] = tmp
+                self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 1:
                 data = fullCCD[0:ysize, xsize:].copy().transpose()
                 tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
                 out[0:ysize, xsize:] = tmp
+                self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 2:
                 data = fullCCD[ysize:, 0:xsize].copy().transpose()
                 tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
                 out[ysize:, 0:xsize] = tmp
+                self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 3:
                 data = fullCCD[ysize:, xsize:].copy().transpose()
                 tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
                 out[ysize:, xsize:] = tmp
+                self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             else:
                 print 'ERROR -- too many quadrants!!'
 
@@ -271,8 +282,8 @@ class PostProcessing(multiprocessing.Process):
         """
         noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['rnoise']), size=data.shape)
 
-        self.log.info('Adding readout noise...')
-        self.log.info('Sum of readnoise = %f' % np.sum(noise))
+        self.log.info('Adding readout noise to %s...' % self.filename)
+        self.log.info('Sum of readnoise in %s = %f' % (self.filename, np.sum(noise)))
 
         readnoised = data + noise
         readnoise = noise
@@ -312,6 +323,7 @@ class PostProcessing(multiprocessing.Process):
         :return: corrected image after single forward readout
         :rtype: ndarray
         """
+        self.log.info('Applying 1st order CTI correction (original=%s)' %self.filename)
         return 2.*image - self.radiateFullCCD(image)
 
 
@@ -326,10 +338,18 @@ class PostProcessing(multiprocessing.Process):
             except Queue.Empty:
                 break
 
+            #capture start time
+            start_time = time.time()
+
+            #file to process, path and FITS extension removed
             file = filename.split('/')[-1].split('.fits')[0]
 
-            print 'Started processing %s\n' % filename
-            start_time = time.time()
+            #setup logger
+            self.log = lg.setUpLogger('PostProcessing.log')
+
+            str = 'Started processing %s' % filename
+            print str
+            self.log.info(str)
 
             #load data and cut out a correct region
             info = self.loadFITS(filename)
@@ -350,6 +370,7 @@ class PostProcessing(multiprocessing.Process):
             datai = self.discretisetoADUs(noised['readnoised'])
 
             #write the outputs
+            file = file.replace('.dat', '')
             self.writeFITSfile(datai, file+'CTI.fits')
             self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
             self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
@@ -363,8 +384,7 @@ class PostProcessing(multiprocessing.Process):
 
 if __name__ == '__main__':
     #how many processes to use?
-    num_processes = 4
-    #TODO: this does not work at the moment, fix it!
+    num_processes = 12
 
     #input values that are used in processing and save to the FITS headers
     values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,
@@ -391,7 +411,7 @@ if __name__ == '__main__':
     result_queue = multiprocessing.Queue()
 
     # spawn workers
-    for file in needed:
+    for dummy in range(num_processes):
         worker = PostProcessing(values, work_queue, result_queue)
         worker.start()
 

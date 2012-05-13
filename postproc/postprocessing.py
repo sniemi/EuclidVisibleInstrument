@@ -8,7 +8,7 @@ A class to insert instrument specific features to a simulated image. Supports mu
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.5
+:version: 0.6
 """
 import os, sys, datetime, time, math
 import multiprocessing
@@ -31,14 +31,16 @@ class PostProcessing(multiprocessing.Process):
         """
         Class Constructor.
         """
-        # base class initialization
+        #base class initialization
         multiprocessing.Process.__init__(self)
 
-        # job management queues
+        #job management queues
         self.work_queue = work_queue
         self.result_queue = result_queue
         self.kill_received = False
 
+        #contains all the values used inside the class
+        #these are also written to the FITS file header
         self.values = values
 
         #setup logger
@@ -67,7 +69,7 @@ class PostProcessing(multiprocessing.Process):
         return dict(data=data, header=header, ysize=size[0], xsize=size[1])
     
     
-    def cutoutRegion(self, data, max=33e3):
+    def cutoutRegion(self, data):
         """
         Cuts out a region from the imaging data. The cutout region is specified by
         xstart/stop and ystart/stop that are read out from the self.values dictionary.
@@ -83,7 +85,7 @@ class PostProcessing(multiprocessing.Process):
         :rtype: ndarray
         """
         out = data[self.values['ystart']:self.values['ystop'], self.values['xstart']:self.values['xstop']].copy()
-        out[out > self.values['cutoff']] = max
+        out[out > self.values['cutoff']] =self.values['ceil']
         return out
         
 
@@ -361,33 +363,41 @@ class PostProcessing(multiprocessing.Process):
 
 if __name__ == '__main__':
     #how many processes to use?
-    num_processes = 1
+    num_processes = 4
+    #TODO: this does not work at the moment, fix it!
 
     #input values that are used in processing and save to the FITS headers
     values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,
               'bias' : 1000.0, 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11 ,
               'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10, 'ystart' : 560, 'xstart' : 560, 'ystop' : 4692,
-              'xstop' : 4656, 'cutoff' : 65000.0}
+              'xstop' : 4656, 'cutoff' : 65000.0, 'ceil' : 33e3}
 
     #find all files to be processed
     inputs = g.glob('*.fits')
 
+    needed = []
+    #check if CTI FITS file already exists, skip these
+    for input in inputs:
+        if 'CTI' not in input:
+            if not os.path.isfile(input.replace('.fits', 'CTI.fits')):
+                needed.append(input)
+
     # load up work queue
     work_queue = multiprocessing.Queue()
-    for file in inputs:
+    for file in needed:
         work_queue.put(file)
 
     # create a queue to pass to workers to store the results
     result_queue = multiprocessing.Queue()
 
     # spawn workers
-    for file in inputs:
+    for file in needed:
         worker = PostProcessing(values, work_queue, result_queue)
         worker.start()
 
     # collect the results off the queue
     results = []
-    for file in inputs:
+    for file in needed:
         print(result_queue.get())
 
     print 'All done...'

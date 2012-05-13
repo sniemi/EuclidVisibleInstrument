@@ -8,8 +8,9 @@ SUBROUTINE CDM03(sinp,xdim,ydim,sout,iflip,jflip,dob,rdose,zdim,in_nt,in_sigma,i
 !   VIS differ. In VIS the serial register is at the "bottom" while in 
 !   Gaia it is on the "left" side of the CCD quad. 
 !
-!  Note: This subroutine is not very fast at the moment because of the
-!        two extra transposes.
+! Note: This version is intended to be called from f2py which does not do
+!       well with allocatable arrays.
+!
 !------------------------------------------------------------------------------
 ! ARGUMENTS:
 ! sinp = input image array
@@ -31,8 +32,7 @@ REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
 REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
 REAL, INTENT(in) :: dob,rdose
 REAL :: no(xdim,zdim),sno(ydim,zdim)
-REAL :: s(xdim, ydim)
-REAL :: work(ydim,xdim)
+REAL :: s(ydim, ydim) !we need to allocate array size based on the longer axes (this case y)
 INTEGER :: i,j,k
 
 !model related variables
@@ -63,16 +63,14 @@ nt = in_nt * rdose				!absolute trap density [per cm**3]
 sigma = in_sigma
 tr = in_tr
 
-! flip data for Euclid depending on the quadrant being processed
+! flip data for Euclid depending on the quadrant being processed and
+! rotate (j, i slip in s) to move from Euclid to Gaia coordinate system
+! because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
 DO i=1,xdim
    DO j=1,ydim
-      s(i,j)=sinp(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j))
+      s(j,i) = sinp(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j))
    ENDDO
 ENDDO
-
-!Rotate to move from Euclid to Gaia coordinate system
-!because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
-s = TRANSPOSE(s)
 
 !add background electrons
 s = s + dob
@@ -130,17 +128,11 @@ DO j=1,xdim
    ENDDO
 ENDDO
 
-!We need to rotate back from Gaia coordinate system
-work = TRANSPOSE(s)
-
-!print*,size(work, 1), size(work, 2)
-!print*,size(sout, 1), size(sout, 2)
-!print*,xdim, ydim
-
+! We need to rotate back from Gaia coordinate system and
 ! flip data back to the input orientation
 DO i=1,xdim
    DO j=1,ydim
-      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = work(i,j)
+      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = s(j,i)
    ENDDO
 ENDDO
 

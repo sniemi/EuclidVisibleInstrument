@@ -32,7 +32,7 @@ REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
 REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
 REAL, INTENT(in) :: dob,rdose
 REAL :: no(xdim,zdim),sno(ydim,zdim)
-REAL :: s(ydim, ydim) !we need to allocate array size based on the longer axes (this case y)
+REAL :: s(ydim, xdim)
 INTEGER :: i,j,k
 
 !model related variables

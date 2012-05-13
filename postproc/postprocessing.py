@@ -1,12 +1,6 @@
 """
 A class to insert instrument specific features to a simulated image. Supports multiprocessing.
 
-:Warning: For a given number of cores the readout noise image seems to be the same.
-          Perhaps the call to the random generator takes the seed from the time and
-          because these are done parallel it ends up being the same in many cases.
-          The seed should perhaps be set manually to random to avoid this. However,
-          at this point I do not see the need to change this.
-
 :requires: PyFITS
 :requires: NumPy
 :requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
@@ -14,7 +8,7 @@ A class to insert instrument specific features to a simulated image. Supports mu
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.6
+:version: 0.7
 """
 import os, sys, datetime, time, math
 import multiprocessing
@@ -33,7 +27,7 @@ class PostProcessing(multiprocessing.Process):
     readout noise to a simulated image.
     """
 
-    def __init__(self, values, work_queue, result_queue):
+    def __init__(self, values, work_queue, result_queue, seed):
         """
         Class Constructor.
         """
@@ -48,6 +42,9 @@ class PostProcessing(multiprocessing.Process):
         #contains all the values used inside the class
         #these are also written to the FITS file header
         self.values = values
+
+        #set seed
+        np.random.seed(seed)
 
 
     def loadFITS(self, filename, ext=0):
@@ -381,7 +378,6 @@ class PostProcessing(multiprocessing.Process):
             self.result_queue.put(str)
 
 
-
 if __name__ == '__main__':
     #how many processes to use?
     num_processes = 12
@@ -402,6 +398,13 @@ if __name__ == '__main__':
             if not os.path.isfile(input.replace('.fits', 'CTI.fits')):
                 needed.append(input)
 
+    #check how many files are being processed and set num_processes
+    #to equal or less than the number of files
+    nr = len(needed)
+    if nr < num_processes:
+        num_processes = nr
+    print 'Will process %i files using %i cores...' % (nr, num_processes)
+
     # load up work queue
     work_queue = multiprocessing.Queue()
     for file in needed:
@@ -410,9 +413,13 @@ if __name__ == '__main__':
     # create a queue to pass to workers to store the results
     result_queue = multiprocessing.Queue()
 
-    # spawn workers
-    for dummy in range(num_processes):
-        worker = PostProcessing(values, work_queue, result_queue)
+    # spawn workers with a random seeds, this is needed because
+    # in Unix the seed is passed when forked leading to the
+    # same seed and thus the same random numbers.
+    rds = np.random.rand(num_processes)*100.0
+    for rd in rds:
+        seed = time.time() * rd
+        worker = PostProcessing(values, work_queue, result_queue, int(seed))
         worker.start()
 
     # collect the results off the queue

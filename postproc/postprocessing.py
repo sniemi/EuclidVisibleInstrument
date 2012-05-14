@@ -1,6 +1,8 @@
 """
 A class to insert instrument specific features to a simulated image. Supports multiprocessing.
 
+:Note: The output images will be compressed with gzip to save disk space.
+
 :requires: PyFITS
 :requires: NumPy
 :requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
@@ -8,9 +10,9 @@ A class to insert instrument specific features to a simulated image. Supports mu
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.7
+:version: 0.8
 """
-import os, sys, datetime, time, math
+import os, sys, datetime, time, math, tarfile
 import multiprocessing
 import Queue
 import glob as g
@@ -144,6 +146,25 @@ class PostProcessing(multiprocessing.Process):
 
         #write the actual file
         ofd.writeto(output)
+        self.log.info('Wrote %s' % output)
+
+
+    def compressAndRemoveFile(self, filename):
+        """
+        This method compresses the given file using gzip and removes the parent from
+        the file system.
+
+        :param filename: name of the file to be compressed
+        :type filename: str
+
+        :return: None
+        """
+        #create gzipped tar ball
+        tar = tarfile.open(filename+'.tar.gz', 'w:gz')
+        tar.add(filename)
+        tar.close()
+        #remove the original file
+        os.remove(filename)
 
 
     def discretisetoADUs(self, data):
@@ -366,12 +387,16 @@ class PostProcessing(multiprocessing.Process):
             #convert the readout noised image to ADUs
             datai = self.discretisetoADUs(noised['readnoised'])
 
-            #write the outputs
+            #write the outputs and compress
             file = file.replace('.dat', '')
             self.writeFITSfile(datai, file+'CTI.fits')
-            self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
-            self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
+            self.compressAndRemoveFile(file+'CTI.fits')
             self.writeFITSfile(corrected, file+'CTIcorrected.fits', unsigned16bit=False)
+            self.compressAndRemoveFile(file+'CTIcorrected.fits')
+            self.writeFITSfile(CTImap, file+'CTImap.fits', unsigned16bit=False)
+            self.compressAndRemoveFile(file+'CTImap.fits')
+            self.writeFITSfile(CTImap2, file+'CTIresidual.fits', unsigned16bit=False)
+            self.compressAndRemoveFile(file+'CTIresidual.fits')
 
             # store the result, not really necessary in this case, but for info...
             str = '\nFinished processing %s.fits, took about %.1f minutes to run' % (file, -(start_time - time.time()) / 60.)

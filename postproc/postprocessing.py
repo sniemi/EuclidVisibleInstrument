@@ -412,7 +412,7 @@ if __name__ == '__main__':
     values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,
               'bias' : 1000.0, 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11 ,
               'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10, 'ystart' : 560, 'xstart' : 560, 'ystop' : 4692,
-              'xstop' : 4656, 'cutoff' : 65000.0, 'ceil' : 33e3}
+              'xstop' : 4656, 'cutoff' : 1e11, 'ceil' : 1e11}
 
     #find all files to be processed
     inputs = g.glob('*.fits')

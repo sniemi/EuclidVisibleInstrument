@@ -163,8 +163,10 @@ class PostProcessing(multiprocessing.Process):
         tar = tarfile.open(filename+'.tar.gz', 'w:gz')
         tar.add(filename)
         tar.close()
+        self.log.info('Compressed %s to %s.tar.gz' % (filename, filename))
         #remove the original file
         os.remove(filename)
+        self.log.info('Removed %s' % filename)
 
 
     def discretisetoADUs(self, data):

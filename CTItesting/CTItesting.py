@@ -1,4 +1,5 @@
 """
+This script can be used to test the CDM03 CTI model.
 
 :requires: PyFITS
 :requires: NumPy
@@ -9,6 +10,8 @@
 
 :version: 0.1
 """
+import matplotlib
+matplotlib.use('PDF')
 import os, sys, datetime
 import numpy as np
 import pyfits as pf
@@ -183,14 +186,14 @@ def plotProfiles(vertical, horizontal, lines, len=50, width=9, xsize=2048, ysize
     ax = fig.add_subplot(111)
 
     ax.semilogy(profileQ0v[lines['xstart1']+width: lines['xstart1']+width+len], ls='-', label='Q0 serial CTI')
-    ax.semilogy(profileQ1v[lines['xstart1']+width: lines['xstart1']+width+len], ls=':', label='Q1 serial CTI')
-    ax.semilogy(profileQ2v[lines['xstart1']+width: lines['xstart1']+width+len], ls='-.', label='Q2 serial CTI')
-    ax.semilogy(profileQ3v[lines['xstart1']+width: lines['xstart1']+width+len], ls='--', label='Q3 serial CTI')
+    #ax.semilogy(profileQ1v[lines['xstart1']+width: lines['xstart1']+width+len], ls=':', label='Q1 serial CTI')
+    #ax.semilogy(profileQ2v[lines['xstart1']+width: lines['xstart1']+width+len], ls='-.', label='Q2 serial CTI')
+    #ax.semilogy(profileQ3v[lines['xstart1']+width: lines['xstart1']+width+len], ls='--', label='Q3 serial CTI')
 
     ax.semilogy(profileQ0h[lines['ystart1']+width: lines['ystart1']+width+len], ls='-', label='Q0 parallel CTI')
-    ax.semilogy(profileQ1h[lines['ystart1']+width: lines['ystart1']+width+len], ls=':', label='Q1 parallel CTI')
-    ax.semilogy(profileQ2h[lines['ystart1']+width: lines['ystart1']+width+len], ls='-.', label='Q2 parallel CTI')
-    ax.semilogy(profileQ3h[lines['ystart1']+width: lines['ystart1']+width+len], ls='--', label='Q3 parallel CTI')
+    #ax.semilogy(profileQ1h[lines['ystart1']+width: lines['ystart1']+width+len], ls=':', label='Q1 parallel CTI')
+    #ax.semilogy(profileQ2h[lines['ystart1']+width: lines['ystart1']+width+len], ls='-.', label='Q2 parallel CTI')
+    #ax.semilogy(profileQ3h[lines['ystart1']+width: lines['ystart1']+width+len], ls='--', label='Q3 parallel CTI')
 
     #measurements
     plt.semilogy([4,5,6,7,8,9,10], [50, 27, 16, 11, 9, 8, 7.5], 'y*', label='Alex parallel')

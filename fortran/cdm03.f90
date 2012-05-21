@@ -31,8 +31,8 @@ REAL, INTENT(in) :: in_nt(zdim),in_sigma(zdim),in_tr(zdim)
 REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
 REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
 REAL, INTENT(in) :: dob,rdose
-REAL :: no(xdim,zdim),sno(ydim,zdim)
-REAL :: s(ydim, xdim)
+REAL :: no(ydim,zdim),sno(xdim,zdim)
+REAL :: s(ydim, ydim)
 INTEGER :: i,j,k
 
 !model related variables
@@ -56,6 +56,7 @@ DOUBLE PRECISION, DIMENSION(zdim):: alpha,gamm,g
 s = 0.
 no = 0.
 sno = 0.
+sout = 0.
 
 ! absolute trap density which should be scaled according to radiation dose
 ! (nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
@@ -68,7 +69,7 @@ tr = in_tr
 ! because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
 DO i=1,xdim
    DO j=1,ydim
-      s(j,i) = sinp(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j))
+      s(i,j) = sinp(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j))
    ENDDO
 ENDDO
 
@@ -86,10 +87,10 @@ s=min(s,fwc)
 alpha=t*sigma*vth*fwc**beta/2./vg
 g=nt*2.*vg/fwc**beta
 
-DO i=1,ydim
+DO i=1,xdim
    gamm = g * REAL(i)
    DO k=1,zdim
-      DO j=1,xdim
+      DO j=1,ydim
          nc=0.
          
          IF(s(i,j).gt.0.01)THEN
@@ -108,11 +109,11 @@ ENDDO
 alpha=st*sigma*vth*sfwc**beta/2./svg
 g=nt*2.*svg/sfwc**beta
 
-DO j=1,xdim
+DO j=1,ydim
    gamm = g * REAL(j)
    DO k=1,zdim
       IF(tr(k).lt.t)THEN
-         DO i=1,ydim
+         DO i=1,xdim
             nc=0.
             
             IF(s(i,j).gt.0.01)THEN
@@ -132,7 +133,7 @@ ENDDO
 ! flip data back to the input orientation
 DO i=1,xdim
    DO j=1,ydim
-      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = s(j,i)
+      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = s(i,j)
    ENDDO
 ENDDO
 

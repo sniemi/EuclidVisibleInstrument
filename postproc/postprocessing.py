@@ -3,6 +3,9 @@ A class to insert instrument specific features to a simulated image. Supports mu
 
 :Note: The output images will be compressed with gzip to save disk space.
 
+:Warning: The logging module used does not work well with multiprocessing, but
+          starts to write multiple entries after a while. This should be fixed.
+
 :requires: PyFITS
 :requires: NumPy
 :requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
@@ -206,33 +209,39 @@ class PostProcessing(multiprocessing.Process):
         :return: radiation damaged image
         :rtype: ndarray
         """
-        out = np.zeros(fullCCD.shape)
+        ydim, xdim = fullCCD.shape
+        out = np.zeros((xdim, ydim))
+
+        #transpose the data, because Python has different convention than Fortran
+        data = fullCCD.transpose().copy()
 
         for quad in quads:
             if quad == 0:
-                data = fullCCD[0:ysize, 0:xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
-                out[0:ysize, 0:xsize] = tmp
+                d = data[0:xsize, 0:ysize]
+                tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
+                out[0:xsize, 0:ysize] = tmp
                 self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 1:
-                data = fullCCD[0:ysize, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
-                out[0:ysize, xsize:] = tmp
+                d = data[xsize:, :ysize]
+                tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
+                out[xsize:, :ysize] = tmp
                 self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 2:
-                data = fullCCD[ysize:, 0:xsize].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
-                out[ysize:, 0:xsize] = tmp
+                d = data[:xsize, ysize:]
+                tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
+                out[:xsize, ysize:] = tmp
                 self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             elif quad == 3:
-                data = fullCCD[ysize:, xsize:].copy().transpose()
-                tmp = self.applyRadiationDamage(data, iquadrant=quad).copy().transpose()
-                out[ysize:, xsize:] = tmp
+                d = data[xsize:, ysize:]
+                tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
+                out[xsize:, ysize:] = tmp
                 self.log.info('Adding CTI to Q%i of %s' % (quad, self.filename))
             else:
                 print 'ERROR -- too many quadrants!!'
 
-        return out
+        ret = out.transpose()
+
+        return ret
 
 
     def applyRadiationDamage(self, data, iquadrant=0):
@@ -421,7 +430,11 @@ if __name__ == '__main__':
     #check if CTI FITS file already exists, skip these
     for input in inputs:
         if 'CTI' not in input:
-            if not os.path.isfile(input.replace('.fits', 'CTI.fits')):
+            com = input.replace('.dat.fits', 'CTI.fits.tar.gz')
+            noc = input.replace('.dat.fits', 'CTI.fits')
+            if os.path.isfile(com) or os.path.isfile(noc):
+                pass
+            else:
                 needed.append(input)
 
     #check how many files are being processed and set num_processes

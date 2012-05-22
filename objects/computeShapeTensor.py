@@ -1,5 +1,10 @@
 """
+Quick and dirty script to compute shape tensor of a FITS image.
 
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
+
+:version: 0.1
 """
 import numpy as np
 import pyfits as pf
@@ -17,25 +22,26 @@ def computeShapeTensor(data):
     :param data: imaging data as a numpy array
     :type data: ndarray
 
-    :return: shape
+    :return: half of the size of the object in x and y direction
     :rtype: dict
     """
     data = data.transpose()
     xdim, ydim = data.shape
 
-    Qxx=0.
-    Qxy=0.
-    Qyy=0.
+    Qxx = 0.
+    Qxy = 0.
+    Qyy = 0.
     for i in range(xdim):
         for j in range(ydim):
-            Qxx += data[j,i]*(i-0.5*(xdim-1))*(i-0.5*(xdim-1))
-            Qxy += data[j,i]*(i-0.5*(xdim-1))*(j-0.5*(ydim-1))
-            Qyy += data[j,i]*(j-0.5*(ydim-1))*(j-0.5*(ydim-1))
+            Qxx += data[j, i] * (i - 0.5 * (xdim - 1)) * (i - 0.5 * (xdim - 1))
+            Qxy += data[j, i] * (i - 0.5 * (xdim - 1)) * (j - 0.5 * (ydim - 1))
+            Qyy += data[j, i] * (j - 0.5 * (ydim - 1)) * (j - 0.5 * (ydim - 1))
 
-    shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-    shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-    shapex = (np.sqrt(shx / np.sum(data)))
-    shapey = (np.sqrt(shy / np.sum(data)))
+    shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4. * Qxy * Qxy)) / 2.
+    shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4. * Qxy * Qxy)) / 2.
+
+    shapex = np.sqrt(shx / np.sum(data))
+    shapey = np.sqrt(shy / np.sum(data))
 
     return dict(shapex=shapex, shapey=shapey)
 

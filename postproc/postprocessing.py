@@ -132,7 +132,7 @@ class PostProcessing(multiprocessing.Process):
         #update and verify the header
         hdu.header.add_history('The following processing steps have been performed:')
         hdu.header.add_history('1)Original file has been cut to VIS size using xstart/stop and ystart/stop')
-        hdu.header.add_history('2)Pixels with values greater than 65k were set to 33k (to prevent long trails)')
+        hdu.header.add_history('2)Pixels with values greater than CEIL were set to CUTOFF')
         hdu.header.add_history('3)CDM03 CTI model were applied to each quadrant separately')
         hdu.header.add_history('4)All four quadrants were combined to form an image of a single CCD')
         hdu.header.add_history('5)Readnoise drawn from Normal distribution was added to the full image')

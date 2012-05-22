@@ -588,10 +588,10 @@ class VISsim():
                         Qxy += fm[j,i]*(i-0.5*(self.PSFx-1))*(j-0.5*(self.PSFy-1))
                         Qyy += fm[j,i]*(j-0.5*(self.PSFy-1))*(j-0.5*(self.PSFy-1))
 
-                shx = (Qxx + Qyy + math.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                shy = (Qxx + Qyy - math.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                self.shapex[stype] = (math.sqrt(shx / np.sum(fm)))
-                self.shapey[stype] = (math.sqrt(shy / np.sum(fm)))
+                shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
+                shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
+                self.shapex[stype] = (np.sqrt(shx / np.sum(fm)))
+                self.shapey[stype] = (np.sqrt(shy / np.sum(fm)))
 
         #sum of the finemaps
         self.log.info('finemap sum = %f' %np.sum(np.asarray(self.finemap.values())))
@@ -631,7 +631,7 @@ class VISsim():
                         self._overlayToCCD2(data, obj, obj[6])
                     else:
                         #extended source
-                        sbig = (0.2**((22. - obj[2])/7.)) / self.shapey[stype] / 2.
+                        sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
 
                         print "Galaxy: ",j+1,"/",n_objects, " intscale=", intscales[j]," size=",sbig
 

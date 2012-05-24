@@ -24,7 +24,7 @@ import scipy.optimize
 import cdm03
 import numpy as np
 from matplotlib import pyplot as plt
-import simulator.logger as lg
+import support.logger as lg
 
 
 def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=3e10):

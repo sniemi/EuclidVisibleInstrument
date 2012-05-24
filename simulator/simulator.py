@@ -14,11 +14,10 @@ import os, sys, datetime, math
 import ConfigParser
 from optparse import OptionParser
 from scipy.interpolate import InterpolatedUnivariateSpline
-from scipy.interpolate import griddata
 from scipy import ndimage
-import logger as lg
 import pyfits as pf
 import numpy as np
+from support import logger as lg
 
 
 class VISsim():

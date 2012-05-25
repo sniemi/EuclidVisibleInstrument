@@ -112,16 +112,26 @@ class reduceVISdata():
         self.data = self.data
 
 
-    def applyLinearCorrection(self):
+    def applyCTICorrection(self):
         """
-        Applies a linear correction after one forward readout through the CDM03 model.
+        Applies a third order (three forward reads) CTI correction using CDM03 CTI model.
 
         Bristow & Alexov (2003) algorithm further developed for HST data
         processing by Massey, Rhodes et al.
         """
-        self.log.info('Applying 1st order CTI correction')
+        self.log.info('Applying 3rd order CTI correction')
+        #first order
         cti = CTI.CDM03(self.values, self.data, self.log)
-        self.data = 2.*self.data - cti.radiateFullCCD()
+        cti1 = cti.radiateFullCCD()
+        correction1 = 2.*self.data.copy() - cti1
+        #second order
+        cti = CTI.CDM03(self.values, cti1, self.log)
+        cti2 = cti.radiateFullCCD()
+        correction2 = self.data.copy() + correction1 - cti2
+        #third order
+        cti = CTI.CDM03(self.values, cti2, self.log)
+        cti3 = cti.radiateFullCCD()
+        self.data += cti2 - cti3
 
 
     def writeFITSfile(self):
@@ -170,7 +180,7 @@ class reduceVISdata():
     def doAll(self):
         self.subtractBias()
         self.flatfield()
-        self.applyLinearCorrection()
+        self.applyCTICorrection()
         self.writeFITSfile()
 
 
@@ -208,10 +218,9 @@ if __name__ == '__main__':
         output = opts.output
 
     #input values that are used in processing and save to the FITS headers
-    values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat',
-              'bias' : 1000.0, 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11 ,
-              'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10, 'output' : output, 'input' : opts.input,
-              'unsigned16bit' : True, 'ext': 1, 'biasframe' : opts.bias}
+    values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
+                  vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
+                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

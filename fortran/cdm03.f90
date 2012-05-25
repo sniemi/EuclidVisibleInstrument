@@ -44,7 +44,7 @@ DOUBLE PRECISION :: t=1.024e-2			! parallel line time [s] for 200kHz
 !DOUBLE PRECISION :: t=2.07e-3			! parallel line time [s] for 1MHz
 DOUBLE PRECISION :: vg=6.e-11			! geometric confinement volume
 DOUBLE PRECISION :: st=5.e-6			! serial pixel transfer period [s] for 200kHz
-!DOUBLE PRECISION :: st=2.07e-3 / 2048. ! serial pixel transfer period [s] for 1MHz
+!DOUBLE PRECISION :: st=2.07e-3 / 2048.         ! serial pixel transfer period [s] for 1MHz
 DOUBLE PRECISION :: sfwc=730000.		! serial (readout register) pixel full well capacity
 DOUBLE PRECISION :: svg=1.0e-10			! geometrical confinement volume of serial register pixels [cm**3]
 

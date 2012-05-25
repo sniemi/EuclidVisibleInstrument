@@ -206,3 +206,5 @@ if __name__ == '__main__':
     tile = tileCCD(inputs, log)
     tile.runAll()
 
+    log.info('CCD tiled, script will exit...')
+

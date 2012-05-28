@@ -128,17 +128,14 @@ class reduceVISdata():
 
         self.log.info('Applying 3rd order CTI correction')
         #first order
-        cti = CTI.CDM03(self.values, self.data, self.log)
-        cti1 = cti.radiateFullCCD()
-        correction1 = 2.*self.data.copy() - cti1
+        cti1 = CTI.CDM03(self.values, self.data, self.log).radiateFullCCD()
+        corrected1 = 2.*self.data.copy() - cti1
         #second order
-        cti = CTI.CDM03(self.values, cti1, self.log)
-        cti2 = cti.radiateFullCCD()
-        correction2 = self.data.copy() + correction1 - cti2
+        cti2 = CTI.CDM03(self.values, corrected1, self.log).radiateFullCCD()
+        corrected2 = self.data.copy() + corrected1 - cti2
         #third order
-        cti = CTI.CDM03(self.values, cti2, self.log)
-        cti3 = cti.radiateFullCCD()
-        self.data += cti2 - cti3
+        cti3 = CTI.CDM03(self.values, corrected2, self.log).radiateFullCCD()
+        self.data += corrected2 - cti3
 
         #divide with the gain
         self.log.info('Dividing the data with the gain factor = %.3f to convert ADUs' % self.values['gain'])
@@ -232,7 +229,7 @@ if __name__ == '__main__':
     #input values that are used in processing and save to the FITS headers
     values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
                   vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
-                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5)
+                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5, exptime=565.0)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

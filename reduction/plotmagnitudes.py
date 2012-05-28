@@ -17,13 +17,15 @@ if __name__ == '__main__':
     data = np.loadtxt('cartesianMatched.csv', delimiter=',', skiprows=1)
     flag = data[:,3]
     mags = data[:,4]
-    magi = data[:,8]
+    magi = data[:,11]
+
+    #print np.mean(mags[(mags > 18) & (mags < 23)]/magi[(mags > 18) & (mags < 23)])
 
     msk = ~(flag > 0)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_title('2.5 pixel cartesian matching')
+    ax.set_title('1.0 pixel cartesian matching')
     ax.plot(magi, mags/magi, 'bo', label='All')
     ax.plot(magi[msk], mags[msk]/magi[msk], 'rs', label='Flag=0')
     ax.set_xlabel('Input Magnitude')

@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.set_title('1.0 pixel cartesian matching')
+    ax.set_title('2.5 pixel cartesian matching')
     ax.plot(magi, mags/magi, 'bo', label='All')
     ax.plot(magi[msk], mags[msk]/magi[msk], 'rs', label='Flag=0')
     ax.set_xlabel('Input Magnitude')
@@ -35,4 +35,4 @@ if __name__ == '__main__':
     ax.set_ylim(0.95, 1.05)
 
     plt.legend(fancybox=True, shadow=True, numpoints=1)
-    plt.savefig('Magnitudes.pdf')
+    plt.savefig('Magnitudes25.pdf')

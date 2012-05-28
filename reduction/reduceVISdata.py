@@ -114,33 +114,32 @@ class reduceVISdata():
 
     def applyCTICorrection(self):
         """
-        Applies a third order (three forward reads) CTI correction in electrons using CDM03 CTI model.
-
+        Applies a CTI correction in electrons using CDM03 CTI model.
         Converts the data to electrons using the gain value given in self.values.
-        Applies CTI correction and converts back to ADUs using the same gain factor.
+        The number of forward reads is defined by self.values['order'] parameter.
 
         Bristow & Alexov (2003) algorithm further developed for HST data
         processing by Massey, Rhodes et al.
         """
+        if self.values['order'] < 1:
+            self.log.warning('Order < 1, no CTI correction (forward modeling) applied!')
+            return
+
         #multiply with the gain
         self.log.info('Multiplying the data with the gain factor = %.3f to convert electrons' % self.values['gain'])
         self.data *= self.values['gain']
 
-        self.log.info('Applying 3rd order CTI correction')
-        #first order
-        cti1 = CTI.CDM03(self.values, self.data, self.log).radiateFullCCD()
-        corrected1 = 2.*self.data.copy() - cti1
-        #second order
-        cti2 = CTI.CDM03(self.values, corrected1, self.log).radiateFullCCD()
-        corrected2 = self.data.copy() + corrected1 - cti2
-        #third order
-        cti3 = CTI.CDM03(self.values, corrected2, self.log).radiateFullCCD()
-        self.data += corrected2 - cti3
+        #make a copy
+        out = self.data.copy()
+
+        self.log.info('Applying %i forward reads for CTI correction' % self.values['order'])
+        for x in range(self.values['order']):
+            out += self.data.copy() - CTI.CDM03(self.values, out.copy(), self.log).radiateFullCCD()
+            self.log.info('Forward read %i performed'% (x + 1))
 
         #divide with the gain
         self.log.info('Dividing the data with the gain factor = %.3f to convert ADUs' % self.values['gain'])
-        self.data /= self.values['gain']
-
+        self.data = out / self.values['gain']
 
 
     def writeFITSfile(self):
@@ -174,7 +173,7 @@ class reduceVISdata():
         hdu.header.add_history('The following processing steps have been performed:')
         hdu.header.add_history('1)Bias correction')
         hdu.header.add_history('2)Flat fielding (not done currently)')
-        hdu.header.add_history('3)CTI correction  (three forward reads)')
+        hdu.header.add_history('3)CTI correction  (%i forward reads)' % self.values['order'])
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
         hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
@@ -229,7 +228,8 @@ if __name__ == '__main__':
     #input values that are used in processing and save to the FITS headers
     values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
                   vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
-                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5, exptime=565.0)
+                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5, exptime=565.0,
+                  order=3)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

@@ -5,7 +5,7 @@ Does the following steps::
 
     1 Bias correction
     2 Flat fielding (not yet implemented)
-    3 CTI correction
+    3 CTI correction (conversion to electrons and back to ADUs)
 
 :requires: PyFITS
 :requires: NumPy
@@ -14,7 +14,7 @@ Does the following steps::
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
 import numpy as np
 import pyfits as pf
@@ -114,11 +114,18 @@ class reduceVISdata():
 
     def applyCTICorrection(self):
         """
-        Applies a third order (three forward reads) CTI correction using CDM03 CTI model.
+        Applies a third order (three forward reads) CTI correction in electrons using CDM03 CTI model.
+
+        Converts the data to electrons using the gain value given in self.values.
+        Applies CTI correction and converts back to ADUs using the same gain factor.
 
         Bristow & Alexov (2003) algorithm further developed for HST data
         processing by Massey, Rhodes et al.
         """
+        #multiply with the gain
+        self.log.info('Multiplying the data with the gain factor = %.3f to convert electrons' % self.values['gain'])
+        self.data *= self.values['gain']
+
         self.log.info('Applying 3rd order CTI correction')
         #first order
         cti = CTI.CDM03(self.values, self.data, self.log)
@@ -132,6 +139,11 @@ class reduceVISdata():
         cti = CTI.CDM03(self.values, cti2, self.log)
         cti3 = cti.radiateFullCCD()
         self.data += cti2 - cti3
+
+        #divide with the gain
+        self.log.info('Dividing the data with the gain factor = %.3f to convert ADUs' % self.values['gain'])
+        self.data /= self.values['gain']
+
 
 
     def writeFITSfile(self):
@@ -165,7 +177,7 @@ class reduceVISdata():
         hdu.header.add_history('The following processing steps have been performed:')
         hdu.header.add_history('1)Bias correction')
         hdu.header.add_history('2)Flat fielding (not done currently)')
-        hdu.header.add_history('3)CTI correction with a single forward reading')
+        hdu.header.add_history('3)CTI correction  (three forward reads)')
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
         hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
@@ -220,7 +232,7 @@ if __name__ == '__main__':
     #input values that are used in processing and save to the FITS headers
     values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
                   vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
-                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias)
+                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

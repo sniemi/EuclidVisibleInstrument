@@ -14,7 +14,7 @@ Does the following steps::
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.2
+:version: 0.3
 """
 import numpy as np
 import pyfits as pf
@@ -48,7 +48,9 @@ class reduceVISdata():
         Input files are taken from the input dictionary given
         when class was initiated.
         """
-        self.data = pf.getdata(self.values['input'], self.values['ext'])
+        fh = pf.open(self.values['input'])
+        self.data = fh[self.values['ext']].data
+        self.hdu = fh[self.values['ext']].header
         self.log.info('Read data from {0:>s} extension {1:d}'.format(self.values['input'], self.values['ext']))
 
 
@@ -150,10 +152,10 @@ class reduceVISdata():
             os.remove(self.values['output'])
 
         #create a new FITS file, using HDUList instance
-        ofd = pf.HDUList(pf.PrimaryHDU())
+        ofd = pf.HDUList()
 
-        #new image HDU
-        hdu = pf.ImageHDU(data=self.data)
+        #new image HDU, this will go to zero th extension now
+        hdu = pf.PrimaryHDU(self.data, self.hdu)
 
         #convert to unsigned 16bit int if requested
         if self.values['unsigned16bit']:
@@ -228,8 +230,8 @@ if __name__ == '__main__':
     #input values that are used in processing and save to the FITS headers
     values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
                   vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
-                  input=opts.input, unsigned16bit=True, ext=1, biasframe=opts.bias, gain=3.5, exptime=565.0,
-                  order=3)
+                  input=opts.input, unsigned16bit=True, ext=0, biasframe=opts.bias, gain=3.5, exposure=565.0,
+                  exptime=565.0, order=3)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

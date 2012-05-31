@@ -7,7 +7,11 @@ Contains a class to create a single VIS CCD image from separate quadrant files.
 :author: Sami-Matias Niemi
 :contact: smn2@mmsl.ucl.ac.uk
 
-:version: 0.1
+To Run::
+
+    python tileCCD.py -f 'Q*_00_00_VISscience.fits'
+
+:version: 0.2
 """
 import pyfits as pf
 import numpy as np
@@ -31,14 +35,17 @@ class tileCCD():
 
     def readData(self):
         """
-        Reads in data from all the input files.
-        Input files are taken from the input dictionary given
-        when class was initiated.
+        Reads in data from all the input files and the header from the first file.
+        Input files are taken from the input dictionary given when class was initiated.
         """
         data = {}
-        for file in self.inputs['files']:
-            data[file] = pf.getdata(file, self.inputs['ext'])
+        for i, file in enumerate(self.inputs['files']):
+            fh = pf.open(file)
+            if i == 0:
+                self.hdu = fh[self.inputs['ext']].header
+            data[file] = fh[self.inputs['ext']].data
             self.log.info('Read data from {0:>s} extension {1:d}'.format(file, self.inputs['ext']))
+            fh.close()
 
         self.data = data
         return self.data
@@ -105,10 +112,10 @@ class tileCCD():
             data = self.CCDdata
 
         #create a new FITS file, using HDUList instance
-        ofd = pf.HDUList(pf.PrimaryHDU())
+        ofd = pf.HDUList()
 
         #new image HDU
-        hdu = pf.ImageHDU(data=data)
+        hdu = pf.PrimaryHDU(data, self.hdu)
 
         #convert to unsigned 16bit int if requested
         if unsigned16bit:
@@ -165,7 +172,6 @@ def processArgs(printHelp=False):
 
 
 if __name__ == '__main__':
-
     opts, args = processArgs()
 
     if opts.files is None:
@@ -190,7 +196,7 @@ if __name__ == '__main__':
     #look for files
     files = g.glob(opts.files)
     files.sort()
-    if len(files) / 4. > 1.0:
+    if len(files) / 4. > 1.0 or len(files) == 0:
         print 'Detected %i input files, but the current version does not support anything but tiling four files...' % len(files)
         sys.exit(9)
 

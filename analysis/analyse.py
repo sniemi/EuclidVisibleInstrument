@@ -45,6 +45,8 @@ class analyseVISdata():
                              clean_size_max=250,
                              sigma=2.6,
                              disk_struct=3,
+                             xcutout=15,
+                             ycutout=15,
                              output='foundsources.txt',
                              ellipticityOutput='ellipticities.txt')
         self.settings.update(kwargs)
@@ -112,17 +114,26 @@ class analyseVISdata():
         R2s = []
         for x, y in zip(self.x, self.y):
             #cut out a square region around x and y coordinates
-            xmin = int(max(x - 30., 0.))
-            ymin = int(max(y - 30., 0.))
-            xmax = int(min(x + 31., self.settings['sizeX']))
-            ymax = int(min(y + 31., self.settings['sizeY']))
+            #force the region to be symmetric around the galaxy
+            xmin = max(x - self.settings['xcutout'], 0.)
+            ymin = max(y - self.settings['ycutout'], 0.)
+            xmax = min(x + self.settings['xcutout'] + 1., self.settings['sizeX'])
+            ymax = min(y + self.settings['ycutout'] + 1., self.settings['sizeY'])
 
-            if xmax - xmin < 20 or ymax - ymin < 20:
-                self.log.warning('Very little pixels around the object..')
+            xsize = min(x-xmin, xmax-x)
+            ysize = min(y-ymin, ymax-y)
+
+            xcutmin = int(x - xsize)
+            xcutmax = int(x + xsize)
+            ycutmin = int(y - ysize)
+            ycutmax = int(y + ysize)
+
+            if xcutmax - xcutmin < 10 or ycutmax - ycutmin < 10:
+                self.log.warning('Very few pixels around the object, derived results may not be accurate...')
 
             self.log.info('Measuring ellipticity of an object located at (x, y) = (%f, %f)' % (x, y))
 
-            img = self.data[ymin:ymax, xmin:xmax].copy()
+            img = self.data[ycutmin:ycutmax, xcutmin:xcutmax].copy()
             sh = shape.shapeMeasurement(img, self.log)
             results = sh.measureRefinedEllipticity()
 
@@ -135,6 +146,8 @@ class analyseVISdata():
                                                                           results['centreY']+ycent,
                                                                           results['ellipticity'],
                                                                           results['R2']))
+
+            #print x - results['centreX']-xcent, y -results['centreY']-ycent
 
             #save the results
             ells.append(results['ellipticity'])
@@ -153,7 +166,14 @@ class analyseVISdata():
         Outputs results to an ascii file defined in self.settings.
         """
         fh = open(self.settings['ellipticityOutput'], 'w')
-        fh.write('#X, Y, ellipticity R2\n')
+
+        #write header
+        fh.write('# 1 X\n')
+        fh.write('# 2 Y\n')
+        fh.write('# 3 ELLIPTICITY\n')
+        fh.write('# 4 R2\n')
+
+        #loop over data
         for x, y, e, R2 in zip(self.results['Xcentres'],
                                self.results['Ycentres'],
                                self.results['ellipticities'],

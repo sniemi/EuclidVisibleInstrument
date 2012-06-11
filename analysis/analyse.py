@@ -19,6 +19,7 @@ from optparse import OptionParser
 from sourceFinder import sourceFinder
 from support import sextutils
 from support import logger as lg
+from analysis import shape
 
 
 class analyseVISdata():
@@ -44,7 +45,8 @@ class analyseVISdata():
                              clean_size_max=250,
                              sigma=2.6,
                              disk_struct=3,
-                             output='foundsources.txt')
+                             output='foundsources.txt',
+                             ellipticityOutput='ellipticities.txt')
         self.settings.update(kwargs)
         self._loadData()
 
@@ -59,6 +61,9 @@ class analyseVISdata():
         self.log.info('Reading data from %s extension=%i' % (self.settings['filename'], self.settings['extension']))
         fh = pf.open(self.settings['filename'])
         self.data = fh[self.settings['extension']].data
+        ysize, xsize = self.data.shape
+        self.settings['sizeX'] = xsize
+        self.settings['sizeY'] = ysize
 
 
     def findSources(self):
@@ -98,13 +103,63 @@ class analyseVISdata():
         """
         Measures ellipticity for all objects with coordinates (self.x, self.y).
 
-        Ellipticity is measures using...
+        Ellipticity is measured using Guassian weighted quadrupole moments.
+        See shape.py and especially the ShapeMeasurement class for more details.
         """
-        pass
+        ells = []
+        xs = []
+        ys = []
+        R2s = []
+        for x, y in zip(self.x, self.y):
+            #cut out a square region around x and y coordinates
+            xmin = int(max(x - 30., 0.))
+            ymin = int(max(y - 30., 0.))
+            xmax = int(min(x + 31., self.settings['sizeX']))
+            ymax = int(min(y + 31., self.settings['sizeY']))
+
+            if xmax - xmin < 20 or ymax - ymin < 20:
+                self.log.warning('Very little pixels around the object..')
+
+            self.log.info('Measuring ellipticity of an object located at (x, y) = (%f, %f)' % (x, y))
+
+            img = self.data[ymin:ymax, xmin:xmax].copy()
+            sh = shape.shapeMeasurement(img, self.log)
+            results = sh.measureRefinedEllipticity()
+
+            #get shifts for x and y centroids for the cutout image
+            cutsizey, cutsizex = img.shape
+            xcent = int(x - cutsizex/2.)
+            ycent = int(y - cutsizey/2.)
+
+            self.log.info('Centroiding (x, y) = (%f, %f), e=%f, R2=%f' % (results['centreX']+xcent,
+                                                                          results['centreY']+ycent,
+                                                                          results['ellipticity'],
+                                                                          results['R2']))
+
+            #save the results
+            ells.append(results['ellipticity'])
+            xs.append(results['centreX']+xcent)
+            ys.append(results['centreY']+ycent)
+            R2s.append(results['R2'])
+
+        out = dict(Xcentres=xs, Ycentres=ys, ellipticities=ells, R2s=R2s)
+        self.results = out
+
+        return self.results
 
 
-
-
+    def writeResults(self):
+        """
+        Outputs results to an ascii file defined in self.settings.
+        """
+        fh = open(self.settings['ellipticityOutput'], 'w')
+        fh.write('#X, Y, ellipticity R2\n')
+        for x, y, e, R2 in zip(self.results['Xcentres'],
+                               self.results['Ycentres'],
+                               self.results['ellipticities'],
+                               self.results['R2s']):
+            fh.write('%f %f %f %f\n' % (x, y, e, R2))
+        fh.close()
 
 
     def doAll(self):
@@ -114,7 +169,11 @@ class analyseVISdata():
             self.readSources()
         else:
             self.findSources()
-        self.measureEllipticity()
+        results = self.measureEllipticity()
+        self.writeResults()
+        for key, value in self.settings.iteritems():
+            self.log.info('%s = %s' % (key, value))
+        return results
 
 
 def processArgs(printHelp=False):
@@ -151,4 +210,6 @@ if __name__ == '__main__':
     log.info('\n\nStarting to analyse %s' % opts.input)
 
     analyse = analyseVISdata(opts.input, log, **settings)
-    analyse.doAll()
+    results = analyse.doAll()
+
+    log.info('All done...')

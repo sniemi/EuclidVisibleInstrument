@@ -7,14 +7,26 @@ then the program assumes that X_IMAGE and Y_IMAGE columns are present
 in the input file.
 
 :requires: PyFITS
+:requires: matplotlib
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
+import matplotlib
+matplotlib.rc('text', usetex=True)
+matplotlib.rcParams['font.size'] = 17
+matplotlib.rc('xtick', labelsize=14)
+matplotlib.rc('axes', linewidth=1.1)
+matplotlib.rcParams['legend.fontsize'] = 11
+matplotlib.rcParams['legend.handlelength'] = 3
+matplotlib.rcParams['xtick.major.size'] = 5
+matplotlib.rcParams['ytick.major.size'] = 5
+matplotlib.use('PDF')
 import pyfits as pf
 import sys
+import matplotlib.pyplot as plt
 from optparse import OptionParser
 from sourceFinder import sourceFinder
 from support import sextutils
@@ -24,6 +36,12 @@ from analysis import shape
 
 class analyseVISdata():
     """
+    Simple class that can be used to find objects and measure their ellipticities.
+
+    One can either choose to use a Python based source finding algorithm or
+    give a SExtractor catalog as an input. If an input catalog is provided
+    then the program assumes that X_IMAGE and Y_IMAGE columns are present
+    in the input file.
     """
     def __init__(self, filename, log, **kwargs):
         """
@@ -40,14 +58,16 @@ class analyseVISdata():
         self.log = log
         self.settings = dict(filename=filename,
                              extension=0,
-                             above_background=2.0,
-                             clean_size_min=2,
-                             clean_size_max=250,
-                             sigma=2.6,
+                             above_background=2.5,
+                             clean_size_min=3,
+                             clean_size_max=200,
+                             sigma=2.7,
                              disk_struct=3,
                              xcutout=15,
                              ycutout=15,
+                             bins=20,
                              output='foundsources.txt',
+                             outputPlot='ellipticities.pdf',
                              ellipticityOutput='ellipticities.txt')
         self.settings.update(kwargs)
         self._loadData()
@@ -182,6 +202,20 @@ class analyseVISdata():
         fh.close()
 
 
+    def plotEllipticityDistribution(self):
+        """
+        Creates as simple plot to show the ellipticity distribution derived.
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.hist(self.results['ellipticities'], bins=self.settings['bins'], normed=True, range=(0,1), alpha=0.7,
+                hatch='/', label='Ellipticity')
+        ax.set_xlabel('Ellipticity')
+        ax.set_ylabel('Probability Density')
+        plt.savefig(self.settings['outputPlot'])
+        plt.close()
+
+
     def doAll(self):
         """
         """
@@ -191,6 +225,7 @@ class analyseVISdata():
             self.findSources()
         results = self.measureEllipticity()
         self.writeResults()
+        self.plotEllipticityDistribution()
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
         return results

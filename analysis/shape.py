@@ -8,7 +8,7 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 
 :version: 0.1
 """
-import math
+import math, pprint
 import numpy as np
 
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
         results = sh.measureRefinedEllipticity()
 
         print file
-        print results
+        pprint.pprint(results)
         print
 
     file = 'psf.fits'
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     results = sh.measureRefinedEllipticity()
 
     print file
-    print results
+    pprint.pprint(results)
     print
 
     log.info('All done\n\n')

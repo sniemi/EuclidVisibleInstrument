@@ -79,8 +79,8 @@ class sourceFinder():
         self.log.info('Background: average={0:.4f} and rms={1:.4f}'.format(mean, rms))
 
         #find objects above the background
-        self.mask = ndimage.median_filter(self.image, self.settings['sigma']) > rms * self.settings[
-                                                                                      'above_background'] + mean
+        filtered = ndimage.median_filter(self.image, self.settings['sigma'])
+        self.mask = filtered > rms * self.settings['above_background'] + mean
         #mask_pix = im > rms * above_background + mean
         #mask = (mask + mask_pix) >= 1
 

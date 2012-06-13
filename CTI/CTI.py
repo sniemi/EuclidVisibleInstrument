@@ -10,7 +10,10 @@ A simple class to run CDM03 CTI model.
 :version: 0.1
 """
 import numpy as np
-import cdm03
+try:
+    import cdm03
+except:
+    print 'No CDM03 module available, please compile it: f2py -c -m cdm03 cdm03.f90'
 
 
 class CDM03():

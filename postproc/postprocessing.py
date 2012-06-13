@@ -19,10 +19,13 @@ import os, sys, datetime, time, math, tarfile
 import multiprocessing
 import Queue
 import glob as g
-import logger as lg
+from support import logger as lg
 import pyfits as pf
 import numpy as np
-import cdm03
+try:
+    import cdm03
+except:
+    print 'No CDM03 module available, please compile it: f2py -c -m cdm03 cdm03.f90'
 
 
 class PostProcessing(multiprocessing.Process):

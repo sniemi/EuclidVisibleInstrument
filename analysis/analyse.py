@@ -42,6 +42,16 @@ class analyseVISdata():
     give a SExtractor catalog as an input. If an input catalog is provided
     then the program assumes that X_IMAGE and Y_IMAGE columns are present
     in the input file.
+
+    :param filename: name of the FITS file to be analysed.
+    :type filename: string
+    :param log: logger
+    :type log: instance
+    :param kwargs: additional keyword arguments
+    :type kwargs: dict
+
+    Settings dictionary contains all parameter values needed
+    for source finding and analysis.
     """
     def __init__(self, filename, log, **kwargs):
         """
@@ -183,7 +193,14 @@ class analyseVISdata():
 
     def writeResults(self):
         """
-        Outputs results to an ascii file defined in self.settings.
+        Outputs results to an ascii file defined in self.settings. This ascii file
+        is in SExtractor format and contains the following columns::
+
+          1. X coordinate
+          2. Y coordinate
+          3. ellipticity
+          4. R_{2}
+
         """
         fh = open(self.settings['ellipticityOutput'], 'w')
 
@@ -204,7 +221,7 @@ class analyseVISdata():
 
     def plotEllipticityDistribution(self):
         """
-        Creates as simple plot to show the ellipticity distribution derived.
+        Creates a simple plot showing the derived ellipticity distribution.
         """
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -218,6 +235,7 @@ class analyseVISdata():
 
     def doAll(self):
         """
+        Run all class methods sequentially.
         """
         if self.settings['sourceFile']:
             self.readSources()

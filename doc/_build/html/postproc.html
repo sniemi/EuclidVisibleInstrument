@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Postprocessing tools &mdash; VIS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Data reduction tools" href="reduction.html" />
+    <link rel="prev" title="VIS data analysis tools" href="analysis.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reduction.html" title="Data reduction tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="VIS data analysis tools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="analysis.html"
+                        title="previous chapter">VIS data analysis tools</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reduction.html"
+                        title="next chapter">Data reduction tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/postproc.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-postproc.postprocessing">
+<span id="postprocessing-tools"></span><h1>Postprocessing tools<a class="headerlink" href="#module-postproc.postprocessing" title="Permalink to this headline">¶</a></h1>
+<p>A class to insert instrument specific features to a simulated image. Supports multiprocessing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">The output images will be compressed with gzip to save disk space.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Warning:</th><td class="field-body">The logging module used does not work well with multiprocessing, but
+starts to write multiple entries after a while. This should be fixed.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.8</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="postproc.postprocessing.PostProcessing">
+<em class="property">class </em><tt class="descclassname">postproc.postprocessing.</tt><tt class="descname">PostProcessing</tt><big>(</big><em>values</em>, <em>work_queue</em>, <em>result_queue</em>, <em>seed</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Euclid Visible Instrument postprocessing class. This class allows
+to add radiation damage (as defined by the CDM03 model) and add
+readout noise to a simulated image.</p>
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.applyLinearCorrection">
+<tt class="descname">applyLinearCorrection</tt><big>(</big><em>image</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.applyLinearCorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a linear correction after one forward readout through the CDM03 model.</p>
+<p>Bristow &amp; Alexov (2003) algorithm further developed for HST data
+processing by Massey, Rhodes et al.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image</strong> (<em>ndarray</em>) &#8211; radiation damaged image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">corrected image after single forward readout</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.applyRadiationDamage">
+<tt class="descname">applyRadiationDamage</tt><big>(</big><em>data</em>, <em>iquadrant=0</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.applyRadiationDamage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply radian damage based on FORTRAN CDM03 model. The method assumes that
+input data covers only a single quadrant defined by the iquadrant integer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; imaging data to which the CDM03 model will be applied to.</li>
+<li><strong>iquandrant</strong> (<em>int</em>) &#8211; number of the quadrant to process</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="docutils">
+<dt>cdm03 - Function signature:</dt>
+<dd>sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[xdim,ydim,zdim])</dd>
+<dt>Required arguments:</dt>
+<dd>sinp : input rank-2 array(&#8216;f&#8217;) with bounds (xdim,ydim)
+iflip : input int
+jflip : input int
+dob : input float
+rdose : input float
+in_nt : input rank-1 array(&#8216;d&#8217;) with bounds (zdim)
+in_sigma : input rank-1 array(&#8216;d&#8217;) with bounds (zdim)
+in_tr : input rank-1 array(&#8216;d&#8217;) with bounds (zdim)</dd>
+<dt>Optional arguments:</dt>
+<dd>xdim := shape(sinp,0) input int
+ydim := shape(sinp,1) input int
+zdim := len(in_nt) input int</dd>
+<dt>Return objects:</dt>
+<dd>sout : rank-2 array(&#8216;f&#8217;) with bounds (xdim,ydim)</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">Because Python/NumPy arrays are different row/column based, one needs
+to be extra careful here. NumPy.asfortranarray will be called to get
+an array laid out in Fortran order in memory. Before returning the
+array will be laid out in memory in C-style (row-major order).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">image that has been run through the CDM03 model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.applyReadoutNoise">
+<tt class="descname">applyReadoutNoise</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.applyReadoutNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies readout noise. The noise is drawn from a Normal (Gaussian) distribution.
+Mean = 0.0, and std = sqrt(readout).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>ndarray</em>) &#8211; input data to which the readout noise will be added to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">updated data, noise image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.compressAndRemoveFile">
+<tt class="descname">compressAndRemoveFile</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.compressAndRemoveFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method compresses the given file using gzip and removes the parent from
+the file system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) &#8211; name of the file to be compressed</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.cutoutRegion">
+<tt class="descname">cutoutRegion</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.cutoutRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cuts out a region from the imaging data. The cutout region is specified by
+xstart/stop and ystart/stop that are read out from the self.values dictionary.
+Also checks if there are values that are above the given cutoff value and sets
+those pixels to a max value (default=33e3).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; image array</li>
+<li><strong>max</strong> (<em>int or float</em>) &#8211; maximum allowed value [default = 33e3]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">cut out image from the original data</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.discretisetoADUs">
+<tt class="descname">discretisetoADUs</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.discretisetoADUs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert floating point arrays to integer arrays and convert to ADUs.
+Adds bias level after converting to ADUs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>ndarray</em>) &#8211; data to be discretised to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">discretised array in ADUs</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.generateCTImap">
+<tt class="descname">generateCTImap</tt><big>(</big><em>CTIed</em>, <em>originalData</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.generateCTImap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a map showing the CTI effect. This map is being
+generated by dividing radiation damaged image with the original
+data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>CTIed</strong> (<em>ndarray</em>) &#8211; Radiation damaged image</li>
+<li><strong>originalData</strong> (<em>ndarray</em>) &#8211; Original image before any radiation damage</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">CTI map (ratio of radiation damaged image and original data)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.loadFITS">
+<tt class="descname">loadFITS</tt><big>(</big><em>filename</em>, <em>ext=0</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.loadFITS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads data from a given FITS file and extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211; name of the FITS file</li>
+<li><strong>ext</strong> (<em>int</em>) &#8211; FITS header extension [default=0]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">data, FITS header, xsize, ysize</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.radiateFullCCD">
+<tt class="descname">radiateFullCCD</tt><big>(</big><em>fullCCD</em>, <em>quads=(0</em>, <em>1</em>, <em>2</em>, <em>3)</em>, <em>xsize=2048</em>, <em>ysize=2066</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.radiateFullCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>This routine allows the whole CCD to be run through a radiation damage mode.
+The routine takes into account the fact that the amplifiers are in the corners
+of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fullCCD</strong> (<em>ndarray</em>) &#8211; image of containing the whole CCD</li>
+<li><strong>quads</strong> (<em>list</em>) &#8211; quadrants, numbered from lower left</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">radiation damaged image</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.run">
+<tt class="descname">run</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the method that will be called when multiprocessing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.postprocessing.PostProcessing.writeFITSfile">
+<tt class="descname">writeFITSfile</tt><big>(</big><em>data</em>, <em>output</em>, <em>unsigned16bit=True</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out FITS files using PyFITS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file</li>
+<li><strong>output</strong> (<em>string</em>) &#8211; name of the output file</li>
+<li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-postproc.tileCCD"></span><p>Contains a class to create a single VIS CCD image from separate quadrant files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mmsl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mmsl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<p>To Run:</p>
+<div class="highlight-python"><pre>python tileCCD.py -f 'Q*_00_00_VISscience.fits'</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="postproc.tileCCD.tileCCD">
+<em class="property">class </em><tt class="descclassname">postproc.tileCCD.</tt><tt class="descname">tileCCD</tt><big>(</big><em>inputs</em>, <em>log</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to create a single VIS CCD image from separate quadrants files.</p>
+<dl class="method">
+<dt id="postproc.tileCCD.tileCCD.readData">
+<tt class="descname">readData</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.readData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in data from all the input files and the header from the first file.
+Input files are taken from the input dictionary given when class was initiated.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileCCD.tileCCD.runAll">
+<tt class="descname">runAll</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.runAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper to perform all class methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileCCD.tileCCD.tileCCD">
+<tt class="descname">tileCCD</tt><big>(</big><em>xsize=2048</em>, <em>ysize=2066</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.tileCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tiles quadrants to a single CCD.</p>
+<p>Assume that the input file naming convention is Qx_CCDX_CCDY_name.fits.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xsize</strong> (<em>int</em>) &#8211; length of a quadrant in column direction</li>
+<li><strong>ysize</strong> (<em>int</em>) &#8211; length of a quadrant in row direction</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileCCD.tileCCD.writeFITSfile">
+<tt class="descname">writeFITSfile</tt><big>(</big><em>data=None</em>, <em>unsigned16bit=True</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out FITS files using PyFITS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file, if None use self.data</li>
+<li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reduction.html" title="Data reduction tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="VIS data analysis tools"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

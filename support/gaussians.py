@@ -16,7 +16,9 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import numpy as np
 import pyfits as pf
-import math, os, datetime
+import math, os, datetime, pprint
+from analysis import shape
+from support import logger as lg
 
 
 def Gaussian2D(x, y, sizex, sizey, sigmax, sigmay):
@@ -100,6 +102,24 @@ def writeFITSfile(data, output):
 
 
 if __name__ == '__main__':
-    gaussian2d = Gaussian2D(100, 100, 200, 200, 35.0, 15.0)
+    log = lg.setUpLogger('gaussians.log')
+    log.info('Testing gaussians...')
+
+    #generate a 2D gaussian with given properties...
+    gaussian2d = Gaussian2D(125, 125, 250, 250, 20.0, 10.0)
+
+    #plot
     plot3D(gaussian2d)
+
+    #write FITS file
     writeFITSfile(gaussian2d['Gaussian'], 'gaussian.fits')
+
+    #calculate shape and printout results
+    settings = dict(sampling=10.0)
+    sh = shape.shapeMeasurement(gaussian2d['Gaussian'], log, **settings)
+    results = sh.measureRefinedEllipticity()
+    print file
+    pprint.pprint(results)
+    print
+
+    log.info('All done\n\n')

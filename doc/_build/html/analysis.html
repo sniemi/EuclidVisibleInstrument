@@ -26,8 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="index.html" />
-    <link rel="next" title="Postprocessing tools" href="postproc.html" />
-    <link rel="prev" title="Welcome to VIS’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Data reduction tools" href="reduction.html" /> 
   </head>
   <body>
 
@@ -44,10 +43,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="postproc.html" title="Postprocessing tools"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to VIS’s documentation!"
+          <a href="reduction.html" title="Data reduction tools"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -57,12 +53,19 @@
 
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">VIS data analysis tools</a><ul>
+<li><a class="reference internal" href="#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
+<li><a class="reference internal" href="#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
+<li><a class="reference internal" href="#object-finding">Object finding</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to VIS&#8217;s documentation!</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="postproc.html"
-                        title="next chapter">Postprocessing tools</a></p>
+  <p class="topless"><a href="reduction.html"
+                        title="previous chapter">Data reduction tools</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/analysis.txt"
@@ -91,8 +94,10 @@
             
   <div class="section" id="module-analysis.analyse">
 <span id="vis-data-analysis-tools"></span><h1>VIS data analysis tools<a class="headerlink" href="#module-analysis.analyse" title="Permalink to this headline">¶</a></h1>
-<p>Simple method to find objects and measure their ellipticity.</p>
-<p>One can either choose to use a Python based source finding algorithm or
+<div class="section" id="object-finding-and-measuring-ellipticity">
+<h2>Object finding and measuring ellipticity<a class="headerlink" href="#object-finding-and-measuring-ellipticity" title="Permalink to this headline">¶</a></h2>
+<p>This script provides a class that can be used to analyse VIS data.
+One can either choose to use a Python based source finding algorithm or
 give a SExtractor catalog as an input. If an input catalog is provided
 then the program assumes that X_IMAGE and Y_IMAGE columns are present
 in the input file.</p>
@@ -112,6 +117,7 @@ in the input file.</p>
 </tr>
 </tbody>
 </table>
+</div>
 <dl class="class">
 <dt id="analysis.analyse.analyseVISdata">
 <em class="property">class </em><tt class="descclassname">analysis.analyse.</tt><tt class="descname">analyseVISdata</tt><big>(</big><em>filename</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyse.analyseVISdata" title="Permalink to this definition">¶</a></dt>
@@ -185,7 +191,9 @@ is in SExtractor format and contains the following columns:</p>
 
 </dd></dl>
 
-<span class="target" id="module-analysis.shape"></span><p>Simple class to measure quadrupole moments and ellipticity of an object.</p>
+<span class="target" id="module-analysis.shape"></span><div class="section" id="measuring-a-shape-of-an-object">
+<h2>Measuring a shape of an object<a class="headerlink" href="#measuring-a-shape-of-an-object" title="Permalink to this headline">¶</a></h2>
+<p>Simple class to measure quadrupole moments and ellipticity of an object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -200,10 +208,25 @@ is in SExtractor format and contains the following columns:</p>
 </tr>
 </tbody>
 </table>
+</div>
 <dl class="class">
 <dt id="analysis.shape.shapeMeasurement">
 <em class="property">class </em><tt class="descclassname">analysis.shape.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>data</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shape measuring class</p>
+<dd><p>Provives methods to measure the shape of an object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; name of the FITS file to be analysed.</li>
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; additional keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Settings dictionary contains all parameter values needed.</p>
 <dl class="method">
 <dt id="analysis.shape.shapeMeasurement.circular2DGaussian">
 <tt class="descname">circular2DGaussian</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigma</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.circular2DGaussian" title="Permalink to this definition">¶</a></dt>
@@ -259,7 +282,9 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 
 </dd></dl>
 
-<span class="target" id="module-analysis.sourceFinder"></span><p>Simple source finder that can be used to find objects from astronomical images.</p>
+<span class="target" id="module-analysis.sourceFinder"></span><div class="section" id="object-finding">
+<h2>Object finding<a class="headerlink" href="#object-finding" title="Permalink to this headline">¶</a></h2>
+<p>Simple source finder that can be used to find objects from astronomical images.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -278,10 +303,24 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 </tr>
 </tbody>
 </table>
+</div>
 <dl class="class">
 <dt id="analysis.sourceFinder.sourceFinder">
 <em class="property">class </em><tt class="descclassname">analysis.sourceFinder.</tt><tt class="descname">sourceFinder</tt><big>(</big><em>image</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class provides methods for source finding.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>image</strong> (<em>numpy.ndarray</em>) &#8211; 2D image array</li>
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger</li>
+<li><strong>kwargs</strong> (<em>dictionary</em>) &#8211; additional keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="analysis.sourceFinder.sourceFinder.cleanSample">
 <tt class="descname">cleanSample</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.cleanSample" title="Permalink to this definition">¶</a></dt>
@@ -400,10 +439,7 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="postproc.html" title="Postprocessing tools"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="Welcome to VIS’s documentation!"
+          <a href="reduction.html" title="Data reduction tools"
              >previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

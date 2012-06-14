@@ -1,10 +1,13 @@
 """
-A class to insert instrument specific features to a simulated image. Supports multiprocessing.
+Inserting instrument characteristics
+====================================
 
-:Note: The output images will be compressed with gzip to save disk space.
+This file provides a class to insert instrument specific features to a simulated image. Supports multiprocessing.
 
-:Warning: The logging module used does not work well with multiprocessing, but
-          starts to write multiple entries after a while. This should be fixed.
+.. Note:: The output images will be compressed with gzip to save disk space.
+
+.. Warning:: The logging module used does not work well with multiprocessing, but
+             starts to write multiple entries after a while. This should be fixed.
 
 :requires: PyFITS
 :requires: NumPy
@@ -276,10 +279,10 @@ class PostProcessing(multiprocessing.Process):
         Return objects:
           sout : rank-2 array('f') with bounds (xdim,ydim)
 
-        :Note: Because Python/NumPy arrays are different row/column based, one needs
-               to be extra careful here. NumPy.asfortranarray will be called to get
-               an array laid out in Fortran order in memory. Before returning the
-               array will be laid out in memory in C-style (row-major order).
+        .. Note:: Because Python/NumPy arrays are different row/column based, one needs
+                  to be extra careful here. NumPy.asfortranarray will be called to get
+                  an array laid out in Fortran order in memory. Before returning the
+                  array will be laid out in memory in C-style (row-major order).
 
         :return: image that has been run through the CDM03 model
         :rtype: ndarray

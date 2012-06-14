@@ -1,6 +1,8 @@
 """
-Simple method to find objects and measure their ellipticity.
+Object finding and measuring ellipticity
+========================================
 
+This script provides a class that can be used to analyse VIS data.
 One can either choose to use a Python based source finding algorithm or
 give a SExtractor catalog as an input. If an input catalog is provided
 then the program assumes that X_IMAGE and Y_IMAGE columns are present
@@ -85,10 +87,15 @@ class analyseVISdata():
 
     def _loadData(self):
         """
-        Load data from a given file. Assumes that the data are in a FITS file.
-        Filename and FITS extension are read from the settings dictionary.
+        Load data from a given FITS file. Assumes that the data are in a FITS file.
+        Filename and FITS extension are read from the settings dictionary initiated when the class instance was
+        generated.
 
-        Read data are stored in self.data
+        This method is called automatically when the class is being initiated.
+
+        Read data are stored in self.data.
+
+        :return: None
         """
         self.log.info('Reading data from %s extension=%i' % (self.settings['filename'], self.settings['extension']))
         fh = pf.open(self.settings['filename'])

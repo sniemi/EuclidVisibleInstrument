@@ -11,10 +11,10 @@ The subpackages include methods to study CTI effects and fit new trap species, r
 analyse data, and to include instrumental characteristics such as readout noise and CTI to "pristine" images.
 
 
-Postprocessing
-==============
+Instrument characteristics
+==========================
 
-The postproc subpackage contains methods related to either generating a CCD mosaics from simulated data
+The *postproc* subpackage contains methods related to either generating a CCD mosaics from simulated data
 that is in quadrants like the VIS reference simulator produces or including instrument characteristics
 to simulated images that contain only Poisson noise and background. For more detailed documentation
 of the classes, please see:
@@ -28,7 +28,7 @@ of the classes, please see:
 Data reduction
 ==============
 
-The reduction subpackage contains a simple script to reduce VIS data. For more detailed documentation
+The *reduction* subpackage contains a simple script to reduce VIS data. For more detailed documentation
 of the classes, please see:
 
 .. toctree::
@@ -40,7 +40,7 @@ of the classes, please see:
 Data Analysis
 =============
 
-The analysis subpackage contains classes and scripts related to data analysis. A simple source finder and shape
+The *analysis* subpackage contains classes and scripts related to data analysis. A simple source finder and shape
 measuring classes are provided together with a wrapper to analyse reduced VIS data. For more detailed
 documentation of the classes, please see:
 
@@ -49,43 +49,49 @@ documentation of the classes, please see:
 
    analysis
 
-The dat subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
+The *data* subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
 flat fielding files, PSFs, and an example configuration file.
 
 
-Fitting
-=======
+Charge Transfer Inefficiency
+============================
 
-This subpackage contains a simple script that can be used to fit trap species so that the CTI trails
-forming behind charge injection lines agree with measured data.
+The *fitting* subpackage contains a simple script that can be used to fit trap species so that the
+Charge Transfer Inefficiency (CTI) trails forming behind charge injection lines agree with measured data.
 
 
-Fortran codes
-=============
+Fortran code for CTI
+--------------------
 
-The fortran folder contains a CDM03 CTI model Fortran code. For speed the model is in Fortran because it
-contains several nested loops. One can use f2py to compile to code to a format that can be imported
+The *fortran* folder contains a CDM03 CTI model Fortran code. For speed the CDM03 model has been written in Fortran
+because it contains several nested loops. One can use f2py to compile the code to a format that can be imported
 from Python.
 
 
-Objects
-=======
+Supporting methods and files
+============================
 
-A few postage stamps showing observed galaxies have been placed to the objects directory.
+Objects
+-------
+
+A few postage stamps showing observed galaxies have been placed to the *objects* directory. These FITS files
+can be used for, e.g., testing the shape measurement code.
+
+
+Code
+----
+
+The *support* subpackage contains some support classes and methods related to generating log files and read in
+data.
 
 
 Simulator
-=========
+---------
 
-This subpackage should contain a script to generate simulated VIS data, however, **do not use** this
+The *simulator* subpackage should contain a script to generate simulated VIS data, however, **do not use** this
 script because it does not work properly.
 
 
-Supporting code
-===============
-
-The supporting subpackage contains some support classes and methods related to generating log files and read in
-data.
 
 
 
@@ -95,4 +101,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

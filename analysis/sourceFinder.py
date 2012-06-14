@@ -1,4 +1,7 @@
 """
+Object finding
+==============
+
 Simple source finder that can be used to find objects from astronomical images.
 
 :reqiures: NumPy
@@ -23,6 +26,14 @@ from scipy import ndimage
 class sourceFinder():
     """
     This class provides methods for source finding.
+
+    :param image: 2D image array
+    :type image: numpy.ndarray
+    :param log: logger
+    :type log: instance
+
+    :param kwargs: additional keyword arguments
+    :type kwargs: dictionary
     """
 
     def __init__(self, image, log, **kwargs):

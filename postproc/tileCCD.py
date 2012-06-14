@@ -1,11 +1,14 @@
 """
-Contains a class to create a single VIS CCD image from separate quadrant files.
+Genrating a mosaic
+==================
+
+This file contains a class to create a single VIS CCD image from separate files one for each quadrant.
 
 :requires: NumPy
 :requires: PyFITS
 
 :author: Sami-Matias Niemi
-:contact: smn2@mmsl.ucl.ac.uk
+:contact: smn2@mssl.ucl.ac.uk
 
 To Run::
 

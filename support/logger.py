@@ -1,6 +1,8 @@
 """
 These functions can be used for logging information.
 
+.. Warning:: logger is not multiprocessing safe.
+
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
@@ -8,9 +10,6 @@ These functions can be used for logging information.
 """
 import logging
 import logging.handlers
-
-__author__ = 'Sami-Matias Niemi'
-__version__ = '0.3'
 
 
 def setUpLogger(log_filename, loggername='logger'):

@@ -1,4 +1,7 @@
 """
+Measuring a shape of an object
+==============================
+
 Simple class to measure quadrupole moments and ellipticity of an object.
 
 :requires: NumPy
@@ -14,7 +17,16 @@ import numpy as np
 
 class shapeMeasurement():
     """
-    Shape measuring class
+    Provives methods to measure the shape of an object.
+
+    :param data: name of the FITS file to be analysed.
+    :type data: ndarray
+    :param log: logger
+    :type log: instance
+    :param kwargs: additional keyword arguments
+    :type kwargs: dict
+
+    Settings dictionary contains all parameter values needed.
     """
 
     def __init__(self, data, log, **kwargs):

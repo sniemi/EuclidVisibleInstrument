@@ -56,7 +56,7 @@
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to VIS&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#postprocessing">Postprocessing</a><ul>
+<li><a class="reference internal" href="#instrument-characteristics">Instrument characteristics</a><ul>
 </ul>
 </li>
 <li><a class="reference internal" href="#data-reduction">Data reduction</a><ul>
@@ -65,11 +65,16 @@
 <li><a class="reference internal" href="#data-analysis">Data Analysis</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#fitting">Fitting</a></li>
-<li><a class="reference internal" href="#fortran-codes">Fortran codes</a></li>
+<li><a class="reference internal" href="#charge-transfer-inefficiency">Charge Transfer Inefficiency</a><ul>
+<li><a class="reference internal" href="#fortran-code-for-cti">Fortran code for CTI</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#supporting-methods-and-files">Supporting methods and files</a><ul>
 <li><a class="reference internal" href="#objects">Objects</a></li>
+<li><a class="reference internal" href="#code">Code</a></li>
 <li><a class="reference internal" href="#simulator">Simulator</a></li>
-<li><a class="reference internal" href="#supporting-code">Supporting code</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
@@ -120,21 +125,25 @@
 The subpackages include methods to study CTI effects and fit new trap species, reduce and
 analyse data, and to include instrumental characteristics such as readout noise and CTI to &#8220;pristine&#8221; images.</p>
 </div>
-<div class="section" id="postprocessing">
-<h1>Postprocessing<a class="headerlink" href="#postprocessing" title="Permalink to this headline">¶</a></h1>
-<p>The postproc subpackage contains methods related to either generating a CCD mosaics from simulated data
+<div class="section" id="instrument-characteristics">
+<h1>Instrument characteristics<a class="headerlink" href="#instrument-characteristics" title="Permalink to this headline">¶</a></h1>
+<p>The <em>postproc</em> subpackage contains methods related to either generating a CCD mosaics from simulated data
 that is in quadrants like the VIS reference simulator produces or including instrument characteristics
 to simulated images that contain only Poisson noise and background. For more detailed documentation
 of the classes, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#genrating-a-mosaic">Genrating a mosaic</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
 <div class="section" id="data-reduction">
 <h1>Data reduction<a class="headerlink" href="#data-reduction" title="Permalink to this headline">¶</a></h1>
-<p>The reduction subpackage contains a simple script to reduce VIS data. For more detailed documentation
+<p>The <em>reduction</em> subpackage contains a simple script to reduce VIS data. For more detailed documentation
 of the classes, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -144,41 +153,50 @@ of the classes, please see:</p>
 </div>
 <div class="section" id="data-analysis">
 <h1>Data Analysis<a class="headerlink" href="#data-analysis" title="Permalink to this headline">¶</a></h1>
-<p>The analysis subpackage contains classes and scripts related to data analysis. A simple source finder and shape
+<p>The <em>analysis</em> subpackage contains classes and scripts related to data analysis. A simple source finder and shape
 measuring classes are provided together with a wrapper to analyse reduced VIS data. For more detailed
 documentation of the classes, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">VIS data analysis tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">VIS data analysis tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#object-finding">Object finding</a></li>
+</ul>
+</li>
 </ul>
 </div>
-<p>The dat subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
+<p>The <em>data</em> subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
 flat fielding files, PSFs, and an example configuration file.</p>
 </div>
-<div class="section" id="fitting">
-<h1>Fitting<a class="headerlink" href="#fitting" title="Permalink to this headline">¶</a></h1>
-<p>This subpackage contains a simple script that can be used to fit trap species so that the CTI trails
-forming behind charge injection lines agree with measured data.</p>
-</div>
-<div class="section" id="fortran-codes">
-<h1>Fortran codes<a class="headerlink" href="#fortran-codes" title="Permalink to this headline">¶</a></h1>
-<p>The fortran folder contains a CDM03 CTI model Fortran code. For speed the model is in Fortran because it
-contains several nested loops. One can use f2py to compile to code to a format that can be imported
+<div class="section" id="charge-transfer-inefficiency">
+<h1>Charge Transfer Inefficiency<a class="headerlink" href="#charge-transfer-inefficiency" title="Permalink to this headline">¶</a></h1>
+<p>The <em>fitting</em> subpackage contains a simple script that can be used to fit trap species so that the
+Charge Transfer Inefficiency (CTI) trails forming behind charge injection lines agree with measured data.</p>
+<div class="section" id="fortran-code-for-cti">
+<h2>Fortran code for CTI<a class="headerlink" href="#fortran-code-for-cti" title="Permalink to this headline">¶</a></h2>
+<p>The <em>fortran</em> folder contains a CDM03 CTI model Fortran code. For speed the CDM03 model has been written in Fortran
+because it contains several nested loops. One can use f2py to compile the code to a format that can be imported
 from Python.</p>
 </div>
+</div>
+<div class="section" id="supporting-methods-and-files">
+<h1>Supporting methods and files<a class="headerlink" href="#supporting-methods-and-files" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="objects">
-<h1>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h1>
-<p>A few postage stamps showing observed galaxies have been placed to the objects directory.</p>
+<h2>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
+<p>A few postage stamps showing observed galaxies have been placed to the <em>objects</em> directory. These FITS files
+can be used for, e.g., testing the shape measurement code.</p>
+</div>
+<div class="section" id="code">
+<h2>Code<a class="headerlink" href="#code" title="Permalink to this headline">¶</a></h2>
+<p>The <em>support</em> subpackage contains some support classes and methods related to generating log files and read in
+data.</p>
 </div>
 <div class="section" id="simulator">
-<h1>Simulator<a class="headerlink" href="#simulator" title="Permalink to this headline">¶</a></h1>
-<p>This subpackage should contain a script to generate simulated VIS data, however, <strong>do not use</strong> this
+<h2>Simulator<a class="headerlink" href="#simulator" title="Permalink to this headline">¶</a></h2>
+<p>The <em>simulator</em> subpackage should contain a script to generate simulated VIS data, however, <strong>do not use</strong> this
 script because it does not work properly.</p>
 </div>
-<div class="section" id="supporting-code">
-<h1>Supporting code<a class="headerlink" href="#supporting-code" title="Permalink to this headline">¶</a></h1>
-<p>The supporting subpackage contains some support classes and methods related to generating log files and read in
-data.</p>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>

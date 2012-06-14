@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="index.html" />
     <link rel="next" title="Data reduction tools" href="reduction.html" />
-    <link rel="prev" title="VIS data analysis tools" href="analysis.html" /> 
+    <link rel="prev" title="Welcome to VIS’s documentation!" href="index.html" /> 
   </head>
   <body>
 
@@ -47,7 +47,7 @@
           <a href="reduction.html" title="Data reduction tools"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="analysis.html" title="VIS data analysis tools"
+          <a href="index.html" title="Welcome to VIS’s documentation!"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -57,9 +57,18 @@
 
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Postprocessing tools</a><ul>
+<li><a class="reference internal" href="#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
+<li><a class="reference internal" href="#genrating-a-mosaic">Genrating a mosaic</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
-  <p class="topless"><a href="analysis.html"
-                        title="previous chapter">VIS data analysis tools</a></p>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to VIS&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="reduction.html"
                         title="next chapter">Data reduction tools</a></p>
@@ -91,16 +100,22 @@
             
   <div class="section" id="module-postproc.postprocessing">
 <span id="postprocessing-tools"></span><h1>Postprocessing tools<a class="headerlink" href="#module-postproc.postprocessing" title="Permalink to this headline">¶</a></h1>
-<p>A class to insert instrument specific features to a simulated image. Supports multiprocessing.</p>
+<div class="section" id="inserting-instrument-characteristics">
+<h2>Inserting instrument characteristics<a class="headerlink" href="#inserting-instrument-characteristics" title="Permalink to this headline">¶</a></h2>
+<p>This file provides a class to insert instrument specific features to a simulated image. Supports multiprocessing.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The output images will be compressed with gzip to save disk space.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The logging module used does not work well with multiprocessing, but
+starts to write multiple entries after a while. This should be fixed.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note:</th><td class="field-body">The output images will be compressed with gzip to save disk space.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Warning:</th><td class="field-body">The logging module used does not work well with multiprocessing, but
-starts to write multiple entries after a while. This should be fixed.</td>
-</tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
@@ -115,6 +130,7 @@ starts to write multiple entries after a while. This should be fixed.</td>
 </tr>
 </tbody>
 </table>
+</div>
 <dl class="class">
 <dt id="postproc.postprocessing.PostProcessing">
 <em class="property">class </em><tt class="descclassname">postproc.postprocessing.</tt><tt class="descname">PostProcessing</tt><big>(</big><em>values</em>, <em>work_queue</em>, <em>result_queue</em>, <em>seed</em><big>)</big><a class="headerlink" href="#postproc.postprocessing.PostProcessing" title="Permalink to this definition">¶</a></dt>
@@ -177,18 +193,20 @@ zdim := len(in_nt) input int</dd>
 <dt>Return objects:</dt>
 <dd>sout : rank-2 array(&#8216;f&#8217;) with bounds (xdim,ydim)</dd>
 </dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Because Python/NumPy arrays are different row/column based, one needs
+to be extra careful here. NumPy.asfortranarray will be called to get
+an array laid out in Fortran order in memory. Before returning the
+array will be laid out in memory in C-style (row-major order).</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">Because Python/NumPy arrays are different row/column based, one needs
-to be extra careful here. NumPy.asfortranarray will be called to get
-an array laid out in Fortran order in memory. Before returning the
-array will be laid out in memory in C-style (row-major order).</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image that has been run through the CDM03 model</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">image that has been run through the CDM03 model</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
 </tr>
 </tbody>
 </table>
@@ -382,7 +400,9 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 
 </dd></dl>
 
-<span class="target" id="module-postproc.tileCCD"></span><p>Contains a class to create a single VIS CCD image from separate quadrant files.</p>
+<span class="target" id="module-postproc.tileCCD"></span><div class="section" id="genrating-a-mosaic">
+<h2>Genrating a mosaic<a class="headerlink" href="#genrating-a-mosaic" title="Permalink to this headline">¶</a></h2>
+<p>This file contains a class to create a single VIS CCD image from separate files one for each quadrant.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -393,7 +413,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mmsl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mmsl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -408,6 +428,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 </tr>
 </tbody>
 </table>
+</div>
 <dl class="class">
 <dt id="postproc.tileCCD.tileCCD">
 <em class="property">class </em><tt class="descclassname">postproc.tileCCD.</tt><tt class="descname">tileCCD</tt><big>(</big><em>inputs</em>, <em>log</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD" title="Permalink to this definition">¶</a></dt>
@@ -488,7 +509,7 @@ Input files are taken from the input dictionary given when class was initiated.<
           <a href="reduction.html" title="Data reduction tools"
              >next</a> |</li>
         <li class="right" >
-          <a href="analysis.html" title="VIS data analysis tools"
+          <a href="index.html" title="Welcome to VIS’s documentation!"
              >previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

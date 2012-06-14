@@ -222,4 +222,14 @@ if __name__ == '__main__':
     pprint.pprint(results)
     print
 
+    file = 'stamp.fits'
+    log.info('Processing file %s' % file)
+    data = pf.getdata(file)
+    sh = shapeMeasurement(data, log)
+    results = sh.measureRefinedEllipticity()
+
+    print file
+    pprint.pprint(results)
+    print
+
     log.info('All done\n\n')

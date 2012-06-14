@@ -30,12 +30,12 @@ class generateFakeData():
 
         """
         self.log = log
-        self.settings = dict(dynrange=1.e5,
+        self.settings = dict(dynrange=1e4,
                              gain=3.5,
                              magzero=25.58,
                              exptime=565.0,
                              rdnoise=4.5,
-                             background=97.0,
+                             background=0.049,
                              xdim=4096,
                              ydim=4132,
                              star='gaussian',
@@ -47,6 +47,8 @@ class generateFakeData():
                              egalmix=0.4,
                              output='image.fits')
         self.settings.update(kwargs)
+        for key, value in self.settings.iteritems():
+            self.log.info('%s = %s' % (key, value))
         #self._createEmptyImage()
 
 
@@ -84,11 +86,12 @@ class generateFakeData():
         self.log.info('Wrote %s' % self.settings['output'])
 
 
-
     def createStarlist(self, nstars=20, output='stars.dat'):
         """
         Generates an ascii file with uniform random x and y positions.
         The magnitudes of stars are taken from an isotropic and homogeneous power-law distribution.
+
+        The output ascii file contains the following columns: xc yc magnitude
 
         :param nstars: number of stars to include
         :type nstars: int
@@ -98,14 +101,16 @@ class generateFakeData():
         self.log.info('Generating a list of stars; including %i stars to %s' % (nstars, output))
         if os.path.isfile(output):
             os.remove(output)
-        iraf.starlist(output, nstars, xmax=self.settings['xdim'], ymax=self.settings['ydim'],
-                      minmag=-1, maxmag=10)
+        iraf.starlist(output, nstars, xmax=self.settings['xdim'], ymax=self.settings['ydim'])#,
+                      #minmag=5, maxmag=15)
 
 
-    def createGalaxylist(self, ngalaxies=50, output='galaxies.dat'):
+    def createGalaxylist(self, ngalaxies=150, output='galaxies.dat'):
         """
         Generates an ascii file with uniform random x and y positions.
         The magnitudes of galaxies are taken from an isotropic and homogeneous power-law distribution.
+
+        The output ascii file contains the following columns: xc yc magnitude model radius ar pa <save>
 
         :param ngalaxies: number of galaxies to include
         :type ngalaxies: int
@@ -116,7 +121,7 @@ class generateFakeData():
         if os.path.isfile(output):
             os.remove(output)
         iraf.gallist(output, ngalaxies, xmax=self.settings['xdim'], ymax=self.settings['ydim'],
-                     egalmix=self.settings['egalmix'], maxmag=15.0, minmag=7)
+                     egalmix=self.settings['egalmix'], maxmag=23.0, minmag=10)
 
 
     def addObjects(self, inputlist='galaxies.dat'):
@@ -127,7 +132,7 @@ class generateFakeData():
         :type inputlist: str
 
         """
-        self.log.info('Adding objects from %s' % inputlist)
+        self.log.info('Adding objects from %s to %s' % (inputlist, self.settings['output']))
         iraf.artdata.dynrange = self.settings['dynrange']
         iraf.mkobjects(self.settings['output'],
                        output='',
@@ -152,18 +157,15 @@ class generateFakeData():
                         comments=iraf.yes)
 
 
-    def runAll(self):
+    def runAll(self, nostars=True):
         """
-
+        Run all methods sequentially.
         """
-        self.createStarlist()
+        if nostars:
+            self.createStarlist()
+            self.addObjects(inputlist='stars.dat')
         self.createGalaxylist()
-        self.addObjects(inputlist='stars.dat')
         self.addObjects()
-
-        for key, value in self.settings.iteritems():
-            self.log.info('%s = %s' % (key, value))
-
 
 
 if __name__ == '__main__':
@@ -177,5 +179,11 @@ if __name__ == '__main__':
     settings = dict(rdnoise=0.0, background=0.0, output='nonoise.fits', poisson=iraf.no)
     fakedata = generateFakeData(log, **settings)
     fakedata.runAll()
+
+    #postage stamp galaxy
+    settings = dict(rdnoise=0.0, background=0.0, output='stamp.fits', poisson=iraf.no, xdim=200, ydim=200)
+    fakedata = generateFakeData(log, **settings)
+    #fakedata.createGalaxylist(ngalaxies=1, output='singlegalaxy.dat')
+    fakedata.addObjects(inputlist='singlegalaxy.dat')
 
     log.info('All done...\n\n\n')

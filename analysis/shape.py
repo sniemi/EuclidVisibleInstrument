@@ -5,14 +5,16 @@ Measuring a shape of an object
 Simple class to measure quadrupole moments and ellipticity of an object.
 
 :requires: NumPy
+:requres: PyFITS
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
-import math, pprint
+import math, pprint, os, datetime
 import numpy as np
+import pyfits as pf
 
 
 class shapeMeasurement():
@@ -92,12 +94,12 @@ class shapeMeasurement():
         #squared and cross term
         Xpos2 = Xpos * Xpos
         Ypos2 = Ypos * Ypos
-        XYpos2 = Ypos * Xpos
+        XYpos = Ypos * Xpos
 
         #integrand
         Qyyint = Ypos2 * image
         Qxxint = Xpos2 * image
-        Qlxint = XYpos2 * image
+        Qlxint = XYpos * image
 
         #summ over and normalize to get the quadrupole moments
         Qyy = np.sum(Qyyint) / imsum
@@ -182,13 +184,47 @@ class shapeMeasurement():
             GaussianWeighted = self.data * gaussian['Gaussian']
             quad = self.quadrupoles(GaussianWeighted)
 
-        # R2 in um2
+        # The squared radius R2 in um2
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2
 
         out = dict(centreX=quad['centreX']+1, centreY=quad['centreY']+1,
-                   e1=quad['e1'], e2=quad['e2'], ellipticity=quad['ellipticity'], R2=R2)
-
+                   e1=quad['e1'], e2=quad['e2'],
+                   ellipticity=quad['ellipticity'],
+                   R2=R2,
+                   GaussianWeighted=GaussianWeighted)
         return out
+
+
+    def writeFITS(self, data, output):
+        """
+        Write out a FITS file using PyFITS.
+
+        :param data: data to write to a FITS file
+        :type data: ndarray
+        :param output: name of the output file
+        :type output: string
+
+        :return: None
+        """
+        if os.path.isfile(output):
+            os.remove(output)
+
+        #create a new FITS file, using HDUList instance
+        ofd = pf.HDUList(pf.PrimaryHDU())
+
+        #new image HDU
+        hdu = pf.ImageHDU(data=data)
+
+        #update and verify the header
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.verify('fix')
+
+        ofd.append(hdu)
+
+        #write the actual file
+        ofd.writeto(output)
+        self.log.info('Wrote %s' % output)
 
 
 if __name__ == '__main__':
@@ -197,7 +233,7 @@ if __name__ == '__main__':
     import glob as g
     from support import logger as lg
 
-    files = g.glob('blob*.fits')
+    files = g.glob('blob?.fits')
 
     log = lg.setUpLogger('shape.log')
     log.info('Testing shape measuring class...')
@@ -207,6 +243,7 @@ if __name__ == '__main__':
         data = pf.getdata(file)
         sh = shapeMeasurement(data, log)
         results = sh.measureRefinedEllipticity()
+        sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
 
         print file
         pprint.pprint(results)
@@ -215,9 +252,10 @@ if __name__ == '__main__':
     file = 'psf.fits'
     log.info('Processing file %s' % file)
     data = pf.getdata(file)
-    sh = shapeMeasurement(data, log)
+    settings = dict(sigma=1.5)
+    sh = shapeMeasurement(data, log, **settings)
     results = sh.measureRefinedEllipticity()
-
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
     print file
     pprint.pprint(results)
     print
@@ -225,9 +263,10 @@ if __name__ == '__main__':
     file = 'stamp.fits'
     log.info('Processing file %s' % file)
     data = pf.getdata(file)
-    sh = shapeMeasurement(data, log)
+    settings = dict(sigma=3.0)
+    sh = shapeMeasurement(data, log, **settings)
     results = sh.measureRefinedEllipticity()
-
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
     print file
     pprint.pprint(results)
     print
@@ -235,9 +274,10 @@ if __name__ == '__main__':
     file = 'gaussian.fits'
     log.info('Processing file %s' % file)
     data = pf.getdata(file)
-    sh = shapeMeasurement(data, log)
+    settings = dict(sampling=0.2)
+    sh = shapeMeasurement(data, log, **settings)
     results = sh.measureRefinedEllipticity()
-
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
     print file
     pprint.pprint(results)
     print

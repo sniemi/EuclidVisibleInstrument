@@ -157,6 +157,38 @@ class generateFakeData():
                         comments=iraf.yes)
 
 
+    def maskCrazyValues(self, filename=None):
+        """
+        For some reason mkobjects sometimes adds crazy values to an image.
+        This method tries to remove those values and set them to more reasonable ones.
+        The values > 65k are set to the median of the image.
+
+        :param filename: name of the input file to modify [default = self.settings['output']]
+        :type filename: str
+
+        :return: None
+        """
+        if filename is None:
+            filename = self.settings['output']
+
+        fh = pf.open(filename, mode='update')
+        hdu = fh[0]
+        data = fh[0].data
+
+        msk = data > 65000.
+        median = np.median(data)
+        data[msk] = median
+
+        hdu.scale('int16', '', bzero=32768)
+        hdu.header.add_history('Scaled to unsigned 16bit integer!')
+
+        #update the header
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+
+        fh.close()
+
+
     def runAll(self, nostars=True):
         """
         Run all methods sequentially.
@@ -166,6 +198,7 @@ class generateFakeData():
             self.addObjects(inputlist='stars.dat')
         self.createGalaxylist()
         self.addObjects()
+        self.maskCrazyValues()
 
 
 if __name__ == '__main__':
@@ -176,14 +209,14 @@ if __name__ == '__main__':
     fakedata.runAll()
 
     #no noise or background
-    settings = dict(rdnoise=0.0, background=0.0, output='nonoise.fits', poisson=iraf.no)
+    settings = dict(rdnoise=0.0, background=1/565., output='nonoise.fits', poisson=iraf.no)
     fakedata = generateFakeData(log, **settings)
     fakedata.runAll()
 
     #postage stamp galaxy
     settings = dict(rdnoise=0.0, background=0.0, output='stamp.fits', poisson=iraf.no, xdim=200, ydim=200)
     fakedata = generateFakeData(log, **settings)
-    #fakedata.createGalaxylist(ngalaxies=1, output='singlegalaxy.dat')
     fakedata.addObjects(inputlist='singlegalaxy.dat')
+    fakedata.maskCrazyValues('stamp.fits')
 
     log.info('All done...\n\n\n')

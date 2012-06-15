@@ -15,7 +15,7 @@ Simple source finder that can be used to find objects from astronomical images.
 """
 import matplotlib
 matplotlib.use('PDF')
-import datetime
+import datetime, sys
 from itertools import groupby, izip, count
 from time import time
 import numpy as np
@@ -74,31 +74,47 @@ class sourceFinder():
         """
         Find all pixels above the median pixel after smoothing with a Gaussian filter.
 
-        :Note: maybe one should use mode instead of median
+        .. note:: maybe one should use mode instead of median?
         """
         #smooth the image
         img = ndimage.gaussian_filter(self.image, sigma=self.settings['sigma'])
+        med = np.median(img)
+        self.log.info('Median of the gaussian filtered image = %f' % med)
 
         #find pixels above the median
-        msk = self.image > np.median(img)
+        msk = self.image > med
         #get background image and calculate statistics
         backgrd = self.image[~msk]
-        std = np.std(backgrd).item() #items required if image was memmap'ed by pyfits
-        mean = np.mean(backgrd[backgrd > 0.0]).item() #items required if image was memmap'ed by pyfits
-        rms = np.sqrt(std ** 2 + mean ** 2)
+        #only take values greater than zero
+        backgrd = backgrd[backgrd > 0.0]
+
+        if len(backgrd) < 1:
+            #no real background in the image, a special case, a bit of a hack for now
+            mean = 0.0
+            rms = 1.0
+            #find objects above the background
+            self.mask = self.image > rms * self.settings['above_background'] + mean
+            self.settings['clean_size_min'] = 1.0
+            self.settings['clean_size_max'] = min(self.image.shape) / 1.5
+        else:
+            std = np.std(backgrd).item() #items required if image was memmap'ed by pyfits
+            mean = np.mean(backgrd).item() #items required if image was memmap'ed by pyfits
+            rms = np.sqrt(std ** 2 + mean ** 2)
+
+            #find objects above the background
+            filtered = ndimage.median_filter(self.image, self.settings['sigma'])
+            self.mask = filtered > rms * self.settings['above_background'] + mean
 
         self.log.info('Background: average={0:.4f} and rms={1:.4f}'.format(mean, rms))
-
-        #find objects above the background
-        filtered = ndimage.median_filter(self.image, self.settings['sigma'])
-        self.mask = filtered > rms * self.settings['above_background'] + mean
-        #mask_pix = im > rms * above_background + mean
-        #mask = (mask + mask_pix) >= 1
 
         #get labels
         self.label_im, self.nb_labels = ndimage.label(self.mask)
 
         self.log.info('Finished the initial run and found {0:d} objects...'.format(self.nb_labels))
+
+        if self.nb_labels < 1:
+            self.log.error('Cannot find any objects, will abort')
+            sys.exit(-9)
 
         return self.mask, self.label_im, self.nb_labels
 
@@ -218,8 +234,8 @@ class sourceFinder():
 
         fh = open(self.settings['output'], 'w')
         rg = open(self.settings['output'].split('.')[0]+'.reg', 'w')
-        fh.write('#X coordinate in pixels [starts from 1]\n')
-        fh.write('#Y coordinate in pixels [starts from 1]\n')
+        fh.write('#1 X coordinate in pixels [starts from 1]\n')
+        fh.write('#2 Y coordinate in pixels [starts from 1]\n')
         rg.write('#File written on {0:>s}\n'.format(datetime.datetime.isoformat(datetime.datetime.now())))
         for x, y in zip(self.xcms, self.ycms):
             fh.write('%10.3f %10.3f\n' % (x + 1, y + 1))

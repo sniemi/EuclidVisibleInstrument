@@ -75,9 +75,10 @@ class analyseVISdata():
                              clean_size_max=200,
                              sigma=2.7,
                              disk_struct=3,
-                             xcutout=15,
-                             ycutout=15,
+                             xcutout=50,
+                             ycutout=50,
                              bins=20,
+                             sampling=1.0,
                              output='foundsources.txt',
                              outputPlot='ellipticities.pdf',
                              ellipticityOutput='ellipticities.txt')
@@ -103,6 +104,7 @@ class analyseVISdata():
         ysize, xsize = self.data.shape
         self.settings['sizeX'] = xsize
         self.settings['sizeY'] = ysize
+        self.log.debug('Image dimensions (x,y) = (%i, %i)' % (xsize, ysize))
 
 
     def findSources(self):
@@ -166,12 +168,13 @@ class analyseVISdata():
             ycutmax = int(y + ysize)
 
             if xcutmax - xcutmin < 10 or ycutmax - ycutmin < 10:
-                self.log.warning('Very few pixels around the object, derived results may not be accurate...')
+                self.log.warning('Very few pixels around the object, will skip this one...')
+                continue
 
             self.log.info('Measuring ellipticity of an object located at (x, y) = (%f, %f)' % (x, y))
 
             img = self.data[ycutmin:ycutmax, xcutmin:xcutmax].copy()
-            sh = shape.shapeMeasurement(img, self.log)
+            sh = shape.shapeMeasurement(img, self.log, **dict(sampling=self.settings['sampling']))
             results = sh.measureRefinedEllipticity()
 
             #get shifts for x and y centroids for the cutout image
@@ -248,11 +251,15 @@ class analyseVISdata():
             self.readSources()
         else:
             self.findSources()
+
         results = self.measureEllipticity()
+
         self.writeResults()
         self.plotEllipticityDistribution()
+
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
+
         return results
 
 
@@ -266,6 +273,8 @@ def processArgs(printHelp=False):
                       help="Input file to process", metavar='string')
     parser.add_option('-s', '--sourcefile', dest='sourcefile',
                       help='Name of input source file [optional]', metavar='string')
+    parser.add_option('-a', '--sampling', dest='sampling',
+                      help='Change the sampling in the shape measuring algorithm', metavar='sampling')
 
     if printHelp:
         parser.print_help()
@@ -285,6 +294,8 @@ if __name__ == '__main__':
         settings['sourceFile'] = None
     else:
         settings['sourceFile'] = opts.sourcefile
+    if not opts.sampling is None:
+        settings['sampling'] = float(opts.sampling)
 
     log = lg.setUpLogger('analyse.log')
     log.info('\n\nStarting to analyse %s' % opts.input)

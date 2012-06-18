@@ -19,7 +19,7 @@ import pyfits as pf
 
 class shapeMeasurement():
     """
-    Provives methods to measure the shape of an object.
+    Provides methods to measure the shape of an object.
 
     :param data: name of the FITS file to be analysed.
     :type data: ndarray
@@ -52,7 +52,8 @@ class shapeMeasurement():
                              sampling=1.0,
                              platescale=120.0,
                              pixelSize=12.0,
-                             sigma=0.75)
+                             sigma=0.75,
+                             weighted=True)
         self.settings.update(kwargs)
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
@@ -163,8 +164,9 @@ class shapeMeasurement():
     def measureRefinedEllipticity(self):
         """
         Derive a refined iterated ellipticity measurement for a given object.
-        Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
 
+        By default ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
+        If self.settings['weigted'] is False then no weighting scheme is used.
         The number of iterations is defined in self.settings['iterations'].
 
         :return centroids, ellipticity (including projected e1 and e2), and R2
@@ -179,10 +181,16 @@ class shapeMeasurement():
         quad = self.quadrupoles(self.data)
 
         for x in range(self.settings['iterations']):
-            self.log.info('Iteration %i with circular symmetric Gaussian weights' % x)
-            gaussian = self.circular2DGaussian(quad['centreX']+1, quad['centreY']+1, self.settings['sampleSigma'])
-            GaussianWeighted = self.data * gaussian['Gaussian']
+            if self.settings['weighted']:
+                self.log.info('Iteration %i with circular symmetric Gaussian weights' % x)
+                gaussian = self.circular2DGaussian(quad['centreX']+1, quad['centreY']+1, self.settings['sampleSigma'])
+                GaussianWeighted = self.data * gaussian['Gaussian']
+            else:
+                self.log.info('Iteration %i with no weighting' % x)
+                GaussianWeighted = self.data
+
             quad = self.quadrupoles(GaussianWeighted)
+
 
         # The squared radius R2 in um2
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2

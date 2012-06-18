@@ -58,6 +58,13 @@ def Gaussian2D(x, y, sizex, sizey, sigmax, sigmay):
 
 
 def plot3D(data):
+    """
+    Plot a 3d image of the input data. Assumes that the input dictionary
+    contains X, Y, and Z.
+
+    :param data: input data including X and Y mesh and Z-values
+    :type data: dict
+    """
     fig = plt.figure(figsize=(12,12))
     rect = fig.add_subplot(111, visible=False).get_position()
     ax = Axes3D(fig, rect)
@@ -68,6 +75,30 @@ def plot3D(data):
     fig.colorbar(surf, shrink=0.5, aspect=10)
 
     plt.savefig('gaussian.pdf')
+
+
+def plotEllipticityDependency(data, ellipticity, log):
+    """
+    Generate a simple plot: size of the Gaussian weighting function vs. derived ellipticity.
+    """
+    x = []
+    y = []
+    for sigma in range(1, 25):
+        settings = dict(sigma=sigma)
+        sh = shape.shapeMeasurement(data, log, **settings)
+        results = sh.measureRefinedEllipticity()
+        x.append(sigma)
+        y.append(results['ellipticity'])
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, 'bo-')
+    ax.plot([min(x), max(x)], [ellipticity, ellipticity], 'k--')
+    ax.set_xlabel(r'$\sigma$ [arcseconds]')
+    ax.set_ylabel('Ellipticity')
+    ax.set_ylim(0, 1.01)
+    plt.savefig('EvsSigma.pdf')
+    plt.close()
 
 
 def writeFITSfile(data, output):
@@ -101,12 +132,36 @@ def writeFITSfile(data, output):
     ofd.writeto(output)
 
 
+def ellipticityFromSigmas(sigmax, sigmay):
+    """
+    Calculate ellipticity from standard deviations of a 2D Gaussian.
+
+    :param sigmax: standard deviation in x direction
+    :type sigmax: float or ndarray
+    :param sigmay: standard deviation in y direction
+    :type sigmay: float or ndarray
+
+    :return: ellipticity
+    :rtype: float or ndarray
+    """
+    e = (np.float(sigmax)**2 - sigmay**2) / (sigmax**2 + sigmay**2)
+    return np.abs(e)
+
+
 if __name__ == '__main__':
     log = lg.setUpLogger('gaussians.log')
     log.info('Testing gaussians...')
 
+    xsize, ysize = 250, 250
+    xcen, ycen = 125, 125
+    sigmax = 27.25
+    sigmay = 14.15
+
+    #calculate ellipticity from Sigmas
+    e = ellipticityFromSigmas(sigmax, sigmay)
+
     #generate a 2D gaussian with given properties...
-    gaussian2d = Gaussian2D(125, 125, 250, 250, 20.0, 10.0)
+    gaussian2d = Gaussian2D(xcen, ycen, xsize, ysize, sigmax, sigmay)
 
     #plot
     plot3D(gaussian2d)
@@ -115,11 +170,14 @@ if __name__ == '__main__':
     writeFITSfile(gaussian2d['Gaussian'], 'gaussian.fits')
 
     #calculate shape and printout results
-    settings = dict(sampling=10.0)
+    settings = dict(sampling=10.0, weighted=False)
     sh = shape.shapeMeasurement(gaussian2d['Gaussian'], log, **settings)
     results = sh.measureRefinedEllipticity()
-    print file
-    pprint.pprint(results)
     print
+    pprint.pprint(results)
+    print e, (e - results['ellipticity']) / e * 100.
+
+    #generate a plot sigma vs ellipticity for a given Gaussian
+    plotEllipticityDependency(gaussian2d['Gaussian'], e, log)
 
     log.info('All done\n\n')

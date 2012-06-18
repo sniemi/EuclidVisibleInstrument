@@ -107,13 +107,15 @@ in the input file.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
 </tr>
 </tbody>
 </table>
@@ -200,11 +202,13 @@ is in SExtractor format and contains the following columns:</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
-<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+<tr class="field-even field"><th class="field-name">requres:</th><td class="field-body">PyFITS</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
 </tr>
 </tbody>
 </table>
@@ -212,7 +216,7 @@ is in SExtractor format and contains the following columns:</p>
 <dl class="class">
 <dt id="analysis.shape.shapeMeasurement">
 <em class="property">class </em><tt class="descclassname">analysis.shape.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>data</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Provives methods to measure the shape of an object.</p>
+<dd><p>Provides methods to measure the shape of an object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -255,9 +259,10 @@ is in SExtractor format and contains the following columns:</p>
 <dl class="method">
 <dt id="analysis.shape.shapeMeasurement.measureRefinedEllipticity">
 <tt class="descname">measureRefinedEllipticity</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.measureRefinedEllipticity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derive a refined iterated ellipticity measurement for a given object.
-Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
-<p>The number of iterations is defined in self.settings[&#8216;iterations&#8217;].</p>
+<dd><p>Derive a refined iterated ellipticity measurement for a given object.</p>
+<p>By default ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
+If self.settings[&#8216;weigted&#8217;] is False then no weighting scheme is used.
+The number of iterations is defined in self.settings[&#8216;iterations&#8217;].</p>
 <p>:return centroids, ellipticity (including projected e1 and e2), and R2
 :rtype: dict</p>
 </dd></dl>
@@ -275,6 +280,27 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">quadrupoles, centroid, and ellipticity (also the projected components e1, e2)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="analysis.shape.shapeMeasurement.writeFITS">
+<tt class="descname">writeFITS</tt><big>(</big><em>data</em>, <em>output</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.writeFITS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a FITS file using PyFITS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file</li>
+<li><strong>output</strong> (<em>string</em>) &#8211; name of the output file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -299,7 +325,7 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
 </tr>
 </tbody>
 </table>
@@ -331,14 +357,10 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 <dt id="analysis.sourceFinder.sourceFinder.find">
 <tt class="descname">find</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.find" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find all pixels above the median pixel after smoothing with a Gaussian filter.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Note :</th><td class="field-body">maybe one should use mode instead of median</td>
-</tr>
-</tbody>
-</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">maybe one should use mode instead of median?</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -359,6 +381,10 @@ Ellipticity is defined in terms of the Gaussian weighted quadrupole moments.</p>
 <dt id="analysis.sourceFinder.sourceFinder.getCenterOfMass">
 <tt class="descname">getCenterOfMass</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.getCenterOfMass" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finds the center-of-mass for all objects using numpy.ndimage.center_of_mass method.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">these positions are zero indexed!</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

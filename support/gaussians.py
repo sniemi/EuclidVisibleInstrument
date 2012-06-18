@@ -1,4 +1,6 @@
 """
+Functions related to 2D gaussian functions and comparing ellipticities
+derived either analytically or using quadrupole moments.
 
 :requires: NumPy
 :requires: PyFITS
@@ -7,7 +9,7 @@
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -83,7 +85,7 @@ def plotEllipticityDependency(data, ellipticity, log):
     """
     x = []
     y = []
-    for sigma in range(1, 25):
+    for sigma in range(1, 30):
         settings = dict(sigma=sigma)
         sh = shape.shapeMeasurement(data, log, **settings)
         results = sh.measureRefinedEllipticity()
@@ -152,8 +154,8 @@ if __name__ == '__main__':
     log = lg.setUpLogger('gaussians.log')
     log.info('Testing gaussians...')
 
-    xsize, ysize = 250, 250
-    xcen, ycen = 125, 125
+    xsize, ysize = 300, 300
+    xcen, ycen = 150, 150
     sigmax = 27.25
     sigmay = 14.15
 
@@ -170,7 +172,7 @@ if __name__ == '__main__':
     writeFITSfile(gaussian2d['Gaussian'], 'gaussian.fits')
 
     #calculate shape and printout results
-    settings = dict(sampling=10.0, weighted=False)
+    settings = dict(sigma=15., weighted=False)
     sh = shape.shapeMeasurement(gaussian2d['Gaussian'], log, **settings)
     results = sh.measureRefinedEllipticity()
     print

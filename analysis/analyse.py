@@ -9,6 +9,7 @@ then the program assumes that X_IMAGE and Y_IMAGE columns are present
 in the input file.
 
 :requires: PyFITS
+:requires: NumPy
 :requires: matplotlib
 
 :author: Sami-Matias Niemi
@@ -27,6 +28,7 @@ matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 matplotlib.use('PDF')
 import pyfits as pf
+import numpy as np
 import sys
 import matplotlib.pyplot as plt
 from optparse import OptionParser
@@ -117,8 +119,9 @@ class analyseVISdata():
         source = sourceFinder(self.data, self.log, **self.settings)
         self.sources = source.runAll()
 
-        self.x = self.sources['xcms']
-        self.y = self.sources['ycms']
+        #add one because the numbering starts from zero
+        self.x = np.asarray(self.sources['xcms']) + 1.
+        self.y = np.asarray(self.sources['ycms']) + 1.
 
 
     def readSources(self):

@@ -11,7 +11,7 @@ Simple source finder that can be used to find objects from astronomical images.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -59,6 +59,10 @@ class sourceFinder():
                              output='objects.txt')
         self.settings.update(kwargs)
 
+        #write the used parameters to the log
+        for key, value in self.settings.iteritems():
+            self.log.info('%s = %s' % (key, value))
+
 
     def _diskStructure(self, n):
         """
@@ -96,6 +100,7 @@ class sourceFinder():
             self.mask = self.image > rms * self.settings['above_background'] + mean
             self.settings['clean_size_min'] = 1.0
             self.settings['clean_size_max'] = min(self.image.shape) / 1.5
+            self.log.warning('Trouble finding background, will modify cleaning sizes...')
         else:
             std = np.std(backgrd).item() #items required if image was memmap'ed by pyfits
             mean = np.mean(backgrd).item() #items required if image was memmap'ed by pyfits
@@ -170,6 +175,8 @@ class sourceFinder():
     def getCenterOfMass(self):
         """
         Finds the center-of-mass for all objects using numpy.ndimage.center_of_mass method.
+
+        .. Note:: these positions are zero indexed!
 
         :return: xposition, yposition, center-of-masses
         :rtype: list

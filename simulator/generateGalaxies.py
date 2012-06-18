@@ -23,11 +23,10 @@ import os, datetime
 
 class generateFakeData():
     """
-
+    Generates an image frame with stars and galaxies using IRAF's artdata.
     """
     def __init__(self, log, **kwargs):
         """
-
         """
         self.log = log
         self.settings = dict(dynrange=1e4,
@@ -49,41 +48,6 @@ class generateFakeData():
         self.settings.update(kwargs)
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
-        #self._createEmptyImage()
-
-
-    def _createEmptyImage(self, unsigned16bit=True):
-        """
-
-        :param unsigned16bit: whether to scale the data using bzero=32768
-        :type unsigned16bit: bool
-        """
-        self.image = np.zeros((self.settings['ydim'], self.settings['xdim']))
-
-        if os.path.isfile(self.settings['output']):
-            os.remove(self.settings['output'])
-
-        #create a new FITS file, using HDUList instance
-        ofd = pf.HDUList(pf.PrimaryHDU())
-
-        #new image HDU
-        hdu = pf.ImageHDU(data=self.image)
-
-        #convert to unsigned 16bit int if requested
-        if unsigned16bit:
-            hdu.scale('int16', '', bzero=32768)
-            hdu.header.add_history('Scaled to unsigned 16bit integer!')
-
-        #update and verify the header
-        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
-        hdu.verify('fix')
-
-        ofd.append(hdu)
-
-        #write the actual file
-        ofd.writeto(self.settings['output'])
-        self.log.info('Wrote %s' % self.settings['output'])
 
 
     def createStarlist(self, nstars=20, output='stars.dat'):
@@ -126,11 +90,10 @@ class generateFakeData():
 
     def addObjects(self, inputlist='galaxies.dat'):
         """
-        Add objects from inputlist to the output image.
+        Add object(s) from inputlist to the output image.
 
         :param inputlist: name of the input list
         :type inputlist: str
-
         """
         self.log.info('Adding objects from %s to %s' % (inputlist, self.settings['output']))
         iraf.artdata.dynrange = self.settings['dynrange']
@@ -209,7 +172,7 @@ if __name__ == '__main__':
     fakedata.runAll()
 
     #no noise or background
-    settings = dict(rdnoise=0.0, background=1/565., output='nonoise.fits', poisson=iraf.no)
+    settings = dict(rdnoise=0.0, background=0.0, output='nonoise.fits', poisson=iraf.no)
     fakedata = generateFakeData(log, **settings)
     fakedata.runAll()
 

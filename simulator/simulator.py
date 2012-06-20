@@ -1,5 +1,9 @@
 """
-Main code of the Euclid Visible Instrument Simulator
+A Python version of the Euclid Visible Instrument Simulator.
+
+.. Warning:: This code has not been fully developed and thus it should not be used for production runs.
+             Some parts of the code are not finished and none are tested. This is simply a prototype
+             that can be used to test different aspects of image simulations.
 
 :requires: PyFITS
 :requires: NumPy
@@ -8,7 +12,7 @@ Main code of the Euclid Visible Instrument Simulator
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.3
+:version: 0.4
 """
 import os, sys, datetime, math
 import ConfigParser
@@ -27,6 +31,13 @@ class VISsim():
     The image that is being build is in::
 
         self.image
+
+    :param configfile: name of the configuration file
+    :type configfile: string
+    :param debug: debugging mode on/off
+    :type debug: boolean
+    :param section: name of the section of the configuration file to process
+    :type section: string
     """
 
     def __init__(self, configfile, debug, section='SCIENCE'):
@@ -125,22 +136,6 @@ class VISsim():
         #create empty array
         crImage = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
-#        #delta x and y
-#        dxs = l * np.cos(phi)
-#        dys = l * np.sin(phi)
-#
-#        #pixels in x-direction
-#        ilos = np.floor(x0 - l)
-#        ilos[ilos < 1.0] = 1.0
-#        ihis = 1 + np.floor(x0 + l)
-#        ihis[ihis > self.information['xsize']] = self.information['xsize']
-#
-#        #pixels in y-directions
-#        jlos = np.floor(y0 - l)
-#        jlos[jlos < 1.0] = 1.0
-#        jhis = 1 + np.floor(y0 + l)
-#        jhis[jhis > self.information['ysize']] = self.information['ysize']
-
         #this is very slow way to do this
         for cosmics in range(0, len(l)):
             #delta x and y
@@ -221,7 +216,6 @@ class VISsim():
         Reads in the cosmic ray track information from two input files.
         Stores the information to a dictionary called cr.
         """
-        #TODO: double check that cosmic ray information is read correctly
         length = 'data/cdf_cr_length.dat'
         dist = 'data/cdf_cr_total.dat'
 
@@ -266,7 +260,7 @@ class VISsim():
         """
         Tests if the object falls on the detector.
 
-        :param object: object to be placed to the self.image
+        :param object: object to be placed to the self.image.
 
         :return: whether the object falls on the detector or not
         :rtype: boolean
@@ -275,7 +269,7 @@ class VISsim():
         nx = self.finemap[object[3]].shape[0]
         mx = self.information['xsize']
         my = self.information['ysize']
-        fac = object[6]
+        fac = object[4]
         xt = object[0]
         yt = object[1]
 
@@ -299,10 +293,14 @@ class VISsim():
         return True
 
 
-    def _overlayToCCD2(self, data, obj, fac):
+    def _overlayToCCD(self, data, obj):
         """
         Overlay data from a source object onto the self.image.
 
+        :param data: ndarray of data to be overlaid on to self.image
+        :type data: ndarray
+        :param obj: object information such as position
+        :type obj: list
         """
         #object magnification and center x and y coordinates
         xt = obj[0]
@@ -312,14 +310,11 @@ class VISsim():
         nx = data.shape[1]
         ny = data.shape[0]
 
-        if fac > 1:
-            fac = 1.0
-
-        # Assess the boundary box of the input image.
-        xlo = (1 - nx) * 0.5 * fac  + xt
-        xhi = (nx - 1) * 0.5 * fac  + xt + 1
-        ylo = (1 - ny) * 0.5 * fac  + yt
-        yhi = (ny - 1) * 0.5 * fac  + yt + 1
+        # Assess the boundary box of the input image
+        xlo = (1 - nx) * 0.5 + xt
+        xhi = (nx - 1) * 0.5 + xt + 1
+        ylo = (1 - ny) * 0.5 + yt
+        yhi = (ny - 1) * 0.5 + yt + 1
 
         i1 = int(np.floor(xlo + 0.5))
         if i1 < 1:
@@ -344,127 +339,6 @@ class VISsim():
 
         #add to the image
         self.image[j1:j2, i1:i2] += data[:nj, :ni]
-
-
-    def _overlayToCCD(self, data, obj):
-        """
-        Overlay data from a source object onto the self.image.
-
-        :param data: imaging data of the object
-        :type data: ndarray
-        :param obj: object information
-        :type obj: list
-
-        :Note: rewrite this, now a direct copy from the FORTRAN code, thus there are many nested loops...
-
-        :return: None
-        """
-        fac = obj[6]
-        xt = obj[0]
-        yt = obj[1]
-
-        nx = data.shape[1]
-        ny = data.shape[0]
-
-        #Copy object to 1D array, and calculate its transformed coordinates.
-        npoints = nx * ny
-        xi = np.zeros(npoints)
-        yi = np.zeros(npoints)
-        zi = np.zeros(npoints)
-        for i in range(nx):
-            for j in range(ny):
-                xi[i + nx*(j-1)] = (2*i - nx - 1) * 0.5 * fac  + xt
-                yi[i + nx*(j-1)] = (2*j - ny - 1) * 0.5 * fac  + yt
-                zi[i + nx*(j-1)] = data[j, i]
-
-        # Assess the boundary box of the input image.
-        xlo = (1 - nx) * 0.5 * fac  + xt
-        xhi = (nx - 1) * 0.5 * fac  + xt + 1
-        ylo = (1 - ny) * 0.5 * fac  + yt
-        yhi = (ny - 1) * 0.5 * fac  + yt + 1
-
-        i1 = int(np.floor(xlo + 0.5))
-        if i1 < 1: i1 = 0
-        i2 = int(np.floor(xhi + 0.5) + 1)
-        if i2 > self.information['xsize']: i2 = self.information['xsize']
-        j1 = int(np.floor(ylo + 0.5))
-        if j1 < 1: j1 = 0
-        j2 = int(np.floor(yhi + 0.5))
-        if j2 > self.information['ysize']: j2 = self.information['ysize']
-
-        ni = i2 - i1 + 1
-        nj = j2 - j1 + 1
-        nij = ni * nj
-
-        #Initialise the output image coordinates.
-        xo = np.zeros(nij)
-        yo = np.zeros(nij)
-        for i in range(i1, i2):
-            for j in range(j1, j2):
-                xo[1 + (i - i1) + ni * (j - j1)] = i - 0.5
-                yo[1 + (i - i1) + ni * (j - j1)] = j - 0.5
-
-        #Select the destination points that overlap the input box.
-        N = 0
-        for k in range(nij):
-            if xo[k] >= xlo and xo[k] <= xhi and yo[k] >= ylo and yo[k] <= yhi:
-                N += 1
-
-        if N < 1:
-            #Quit if there are no overlapping points.
-            self.log.debug('No overlapping points, cannot overlay onto the CCD...')
-            return None
-
-        xq = np.zeros(nij)
-        yq = np.zeros(nij)
-        ic = np.zeros(nij)
-        jc = np.zeros(nij)
-
-        for i, k in enumerate(range(nij)):
-            if xo[k] >= xlo and xo[k] <= xhi and yo[k] >= ylo and yo[k] <= yhi:
-                xq[i] = xo[k]
-                yq[i] = yo[k]
-                ic[i] = 1 + np.mod((k - 1), ni)
-                jc[i] = j1 + ((k - ic[i]) / ni)
-
-        ic = ic - 1 + i1
-
-#        LIQ = 2 * np + 1.
-#        LRQ = 6 * np + 5.
-
-        if N >= 1:
-#            CALL E01SGF(np,xi,yi,zi,NW,NQ,IQ,LIQ,RQ,LRQ,IFAIL)
-#            CALL E01SHF(np,xi,yi,zi,IQ,LIQ,RQ,LRQ,N,xq,yq,zq,QX,QY,IFAIL)
-            zq = ndimage.map_coordinates(data,
-                                         np.mgrid[0:self.information['ysize'], 0:self.information['xsize']],
-                                         order=3,
-                                         mode='nearest')
-
-            #Suppress any negative values.
-            zq[zq < 0.] = 0.
-
-            #Add transformed image into the 2D output array.
-            for k in range(N):
-                self.image[jc[k], ic[k]] += zq[jc[k], ic[k]]
-
-        else:
-            i = int(math.floor(xt))
-            j = int(math.floor(yt))
-
-            fi = xt - i
-            fj = yt - j
-
-            if i >= 1 and i <= nx:
-               if j >= 1  and j <= ny:
-                   self.image[j, i] += np.sum(data)*fi*fj
-               if j >= 0 and j <= ny - 1:
-                   self.image[j+1, i] += np.sum(data)*fi*(1. - fj)
-
-            if i >= 0 and i <= nx - 1:
-               if j >= 1 and j <= ny:
-                   self.image[j, i+1] += np.sum(data)*(1. - fi)*fj
-               if j >= 0 and j <= ny - 1:
-                   self.image[j+1, i+1]+= np.sum(data)*(1. - fi)*(1. - fj)
 
 
     def configure(self):
@@ -527,9 +401,9 @@ class VISsim():
 
     def readPSFs(self, psffile='data/psf.fits'):
         """
-        Reads in the PSFs from a file.
+        Reads in the PSF from a FITS file.
 
-        :Note: at the moment this supports only a single PSF file
+        .. note:: at the moment this method supports only a single PSF file.
         """
         self.log.info('Opening PSF file %s' % psffile)
         self.PSF = pf.getdata(psffile)
@@ -541,12 +415,14 @@ class VISsim():
     def generateFinemaps(self):
         """
         Generate finely sampled images of the input data.
+
+        .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
+                     not probably very effective.
         """
         self.finemap = {}
         self.shapex = {}
         self.shapey = {}
 
-        #TODO: rewrite this one
         for k, stype in enumerate(self.sp):
             fm = np.zeros((self.PSFy, self.PSFx))
 
@@ -599,6 +475,9 @@ class VISsim():
     def addObjects(self):
         """
         Add objects from the object list to the CCD image (self.image).
+
+        Scale the object's brightness based on its magnitude. The size of the object
+        is scaled using the brightness.
         """
         n_objects = self.objects.shape[0]
 
@@ -627,7 +506,7 @@ class VISsim():
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
                         #overlays on the image
-                        self._overlayToCCD2(data, obj, obj[6])
+                        self._overlayToCCD(data, obj)
                     else:
                         #extended source
                         sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
@@ -636,19 +515,20 @@ class VISsim():
 
                         #zoom and rotate the image using interpolation and remove negative values
                         data = ndimage.interpolation.zoom(self.finemap[stype], sbig)
-                        data = ndimage.interpolation.rotate(data, obj[5], reshape=False)
+                        data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
                         data[data < 0.0] = 0.0
 
-                        #renormalise and scale
-                        data *= intscales[j] / np.sum(data)
+                        #renormalise and scale to the right magnitude
+                        sum = np.sum(data)
+                        data *= intscales[j] / sum
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
                         #convolve with PSF
-                        #data = ndimage.filters.convolve(data, self.PSF)
+                        data = ndimage.filters.convolve(data, self.PSF)
 
                         #overlay on the image
-                        self._overlayToCCD2(data, obj, sbig)
+                        self._overlayToCCD(data, obj)
 
                 else:
                     #not on the screen
@@ -710,16 +590,6 @@ class VISsim():
         luck = np.random.rand(int(np.floor(cr_n)))
 
         if self.cr['cr_cdfn'] > 1:
-        #number of points = cr_cdfn
-        #independent values = cr_cdf
-        #dependent values = cr_u
-        #derivatices = cr_d
-        #the number of points at which to interpolate = cr_n
-        #at which the interpolant is to be evaluated = luck
-        #contains the value of the interpolant evaluated at the bolve point = cr_l
-        #call e01bef(cr_cdfn,cr_cdf,cr_u,cr_d,ifail)
-        #call e01bff(cr_cdfn,cr_cdf,cr_u,cr_d,cr_n,luck,cr_l,ifail)
-        #Not the same but with SciPy
             ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
             self.cr['cr_l'] = ius(luck)
 
@@ -727,14 +597,11 @@ class VISsim():
             self.cr['cr_l'] = np.sqrt(1.0 - luck ** 2) / luck
 
         if self.cr['cr_cden'] > 1:
-        #TODO: add monotonicity-preserving piecewise cubic Hermite interpolation here
             ius = InterpolatedUnivariateSpline(self.cr['cr_cde'], self.cr['cr_v'])
             self.cr['cr_e'] = ius(luck)
         else:
             self.cr['cr_e'] = (fit['en1'] + (fit['en2'] - fit['en1']) *
                                         np.random.rand(int(np.floor(cr_n)))) ** (1.0 / fit['q1'])
-
-        #write out the cosmics information
 
         #Choose the properties such as positions and an angle from a random Uniform dist
         cr_x = self.information['xsize'] * np.random.rand(int(np.floor(cr_n)))
@@ -897,7 +764,7 @@ class VISsim():
         """
         Driver function, which runs all the steps independent of the boolean flags.
 
-        :Note: Use this for debugging only!
+        .. Note: Use this for debugging only!
         """
         self.configure()
         self.readObjectlist()
@@ -947,4 +814,4 @@ if __name__ == '__main__':
     else:
         simulate = VISsim(opts.configfile, opts.debug, opts.section)
 
-    simulate.runAll()
+    simulate.simulate()

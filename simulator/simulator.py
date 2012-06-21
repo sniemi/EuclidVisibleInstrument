@@ -5,6 +5,13 @@ A Python version of the Euclid Visible Instrument Simulator.
              Some parts of the code are not finished and none are tested. This is simply a prototype
              that can be used to test different aspects of image simulations.
 
+.. todo::
+
+    1. add poisson noise
+    2. finish radiation damage
+    3. check the convolution part
+    4. start using oversampled PSF (need to modify the overlay part)
+
 :requires: PyFITS
 :requires: NumPy
 :requires: SciPy
@@ -19,8 +26,10 @@ import ConfigParser
 from optparse import OptionParser
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import ndimage
+from scipy import signal
 import pyfits as pf
 import numpy as np
+from CTI import CTI
 from support import logger as lg
 
 
@@ -78,6 +87,11 @@ class VISsim():
         self.information['xsize'] = self.config.getint(self.section, 'xsize')
         self.information['ysize'] = self.config.getint(self.section, 'ysize')
 
+        #quadrant and CCD
+        self.information['quadrant'] = self.config.getint(self.section, 'quadrant')
+        self.information['CCDx'] = self.config.getint(self.section, 'CCDx')
+        self.information['CCDy'] = self.config.getint(self.section, 'CCDy')
+
         #noises
         self.information['dark'] = self.config.getfloat(self.section, 'dark')
         self.information['cosmic_bkgd'] = self.config.getfloat(self.section, 'cosmic_bkgd')
@@ -102,6 +116,9 @@ class VISsim():
         #output
         self.information['output'] = self.config.get(self.section, 'output')
 
+        #PSF
+        self.information['PSFfile'] = self.config.get(self.section, 'PSFfile')
+
         #booleans to control the flow
         self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
         self.flatfieldA = self.config.getboolean(self.section, 'flatfieldA')
@@ -114,10 +131,14 @@ class VISsim():
         if self.debug:
             print self.information
 
+        self.log.info('Using the following inputs:')
+        for key, value in self.information.iteritems():
+            self.log.info('%s = %s' % (key, value))
+
 
     def _createEmpty(self):
         """
-        Generates and empty array with zeros.
+        Creates and empty array with zeros.
         """
         self.image = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
@@ -399,17 +420,20 @@ class VISsim():
         self.log.info('Total number of spectral types is %i' % len(self.sp))
 
 
-    def readPSFs(self, psffile='data/psf.fits'):
+    def readPSFs(self):
         """
         Reads in the PSF from a FITS file.
 
         .. note:: at the moment this method supports only a single PSF file.
         """
-        self.log.info('Opening PSF file %s' % psffile)
-        self.PSF = pf.getdata(psffile)
+        #single PSF
+        self.log.info('Opening PSF file %s' % self.information['PSFfile'])
+        self.PSF = pf.getdata(self.information['PSFfile'])
         self.PSFx = self.PSF.shape[1]
         self.PSFy = self.PSF.shape[0]
         self.log.info('PSF sampling (x,y) = (%i, %i) ' % (self.PSFx, self.PSFy))
+        #grid of PSFs
+
 
 
     def generateFinemaps(self):
@@ -454,9 +478,9 @@ class VISsim():
                 self.finemap[stype] = fm
 
                 #Compute a shape tensor.
-                Qxx=0.
-                Qxy=0.
-                Qyy=0.
+                Qxx = 0.
+                Qxy = 0.
+                Qyy = 0.
                 for i in range(0, self.PSFx):
                     for j in range(0, self.PSFy):
                         Qxx += fm[j,i]*(i-0.5*(self.PSFx-1))*(i-0.5*(self.PSFx-1))
@@ -524,8 +548,10 @@ class VISsim():
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
-                        #convolve with PSF
-                        data = ndimage.filters.convolve(data, self.PSF)
+                        #convolve with the PSF
+                        #data = ndimage.filters.convolve(data, self.PSF) #would need padding?
+                        #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
+                        data = signal.convolve2d(data, self.PSF)
 
                         #overlay on the image
                         self._overlayToCCD(data, obj)
@@ -624,11 +650,9 @@ class VISsim():
 
     def applyNoise(self):
         """
-        Apply dark current and the cosmic background.
-
-        Scale the dark current with the exposure time, but apply the cosmic background as given.
+        Apply dark current and the cosmic background. Scale both values with the exposure time.
         """
-        noise = self.information['exptime'] * self.information['dark'] + self.information['cosmic_bkgd']
+        noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
         self.image += noise
 
         self.log.info('Added dark noise and cosmic background, total noise = %f' % noise)
@@ -657,6 +681,8 @@ class VISsim():
     def applyRadiationDamage(self):
         #TODO: write the radiation damage part
         pass
+        #cti = CTI.CDM03(log=self.log)
+        #cti.applyRadiationDamage(self.image, iquadrant=self.information['quadrant'])
 
 
     def applyReadoutNoise(self):

@@ -1,5 +1,8 @@
 """
-Simple script to reduce VIS data.
+VIS Data Reduction and Processing
+=================================
+
+This simple script can be used to reduce (simulated) VIS data.
 
 Does the following steps::
 
@@ -15,6 +18,13 @@ Does the following steps::
 :contact: smn2@mssl.ucl.ac.uk
 
 :version: 0.3
+
+.. todo::
+
+    1. FITS extension should probably be read from the command line
+    2. implement background/sky subtraction
+    3. implement flat fielding
+
 """
 import numpy as np
 import pyfits as pf
@@ -45,8 +55,7 @@ class reduceVISdata():
     def _readData(self):
         """
         Reads in data from all the input files.
-        Input files are taken from the input dictionary given
-        when class was initiated.
+        Input files are taken from the input dictionary given when class was initiated.
         """
         fh = pf.open(self.values['input'])
         self.data = fh[self.values['ext']].data

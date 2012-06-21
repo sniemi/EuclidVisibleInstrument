@@ -1,5 +1,8 @@
 """
-A simple class to run CDM03 CTI model.
+Charge Transfer Inefficiency
+============================
+
+This file contains a simple class to run a CDM03 CTI model developed by Alex Short (ESA).
 
 :requires: NumPy
 :requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
@@ -12,13 +15,20 @@ A simple class to run CDM03 CTI model.
 import numpy as np
 try:
     import cdm03
-except:
+except ImportError:
     print 'No CDM03 module available, please compile it: f2py -c -m cdm03 cdm03.f90'
 
 
 class CDM03():
     """
     Class to run CDM03 CTI model, class Fortran routine to perform the actual CDM03 calculations.
+
+    :param data: input data to be radiated
+    :type data: ndarray
+    :param input: input parameters
+    :type input: dictionary
+    :param log: instance to Python logging
+    :type log: logging instance
     """
     def __init__(self, input, data, log=None):
         """
@@ -144,7 +154,9 @@ class CDM03():
 
     def CDM03Python(self, data, nt, sigma, tr, quadrant, rdose):
         """
-        :Warning: This is not properly written and should NOT be used.
+        Python adaptation of the FORTRAN code.
+
+        .. Warning:: This is not properly written and should NOT be used.
         """
         dob = 0.0
         beta=0.6

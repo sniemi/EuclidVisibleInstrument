@@ -5,43 +5,63 @@ The Euclid Visible Instrument Image Simulator
 This file contains an image simulator for the Euclid VISible instrument.
 
 .. Warning:: This code has not been fully developed or tested. This is a prototype
-             that can be used to test different aspects of image simulations.
+             that can be used to test different aspects of VIS image simulations.
 
 .. todo::
 
     1. test that the radiation damage is correctly implemented
-    2. start using oversampled PSF (need to modify the overlay part)
+    2. start using oversampled PSF
     3. implement bleeding
     4. implement spatially variable PSF
     5. test that the cosmic rays are correctly implemented
+    6. implement CCD offsets
+    7. implement pre- and overscan regions
 
 
 Dependencies
 ------------
 
-:requires: PyFITS
-:requires: NumPy
-:requires: SciPy
+This script depends on the following packages.
+
+:requires: PyFITS (tested with 3.0.3)
+:requires: NumPy (tested with 1.6.2)
+:requires: SciPy (tested with 0.10.0)
 :requires: vissim-python package
 
 
 Testing
 -------
 
-Benchmark using the SCIENCE section of test.config::
+Before trying to run the code, please make sure that you have compiled the
+cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
+please run the SCIENCE section from the test.config as follows::
+
+    python simulator.py -c data/test.config -s TESTSCIENCE
+
+This will produce an image representing VIS lower left (0th) quadrant. Because
+noise and cosmic rays are randomised one cannot directly compare the science
+outputs but we must rely on the outputs that are free from random effects.
+
+In the data subdirectory there is a file called "" which is the comparison
+image without any noise or cosmic rays. To test the functionality, please divide
+your output image () with the on in the data folder. This should lead to a uniformly
+unity image or at least very close given some numerical rounding uncertainties.
+
+Benchmark using the SCIENCE section of the test.config input file::
 
         Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
         6772 objects were place on the detector
 
         real	8m28.781s
         user	8m24.792s
-        sys	    0m1.361s
+        sys	0m1.361s
 
-These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).
+These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
+64-bit Python 2.7.2 installation.
 
 
-Current Version
----------------
+Change Log
+----------
 
 :version: 0.5
 
@@ -73,7 +93,7 @@ from support import logger as lg
 
 class VISsimulator():
     """
-    Euclid Visible Instrument Simulator.
+    Euclid Visible Instrument Image Simulator
 
     The image that is being build is in::
 
@@ -189,7 +209,10 @@ class VISsimulator():
         self.information['sourcelist'] = self.config.get(self.section, 'sourcelist')
 
         #name of the output file
-        self.information['output'] = self.config.get(self.section, 'output')
+        self.information['output'] = 'Q%i_0%i_0%i%s' % (self.information['quadrant'],
+                                                        self.information['CCDx'],
+                                                        self.information['CCDy'],
+                                                        self.config.get(self.section, 'output'))
 
         #PSF related information
         self.information['PSFfile'] = self.config.get(self.section, 'PSFfile')
@@ -590,6 +613,9 @@ class VISsimulator():
         """
         Read object list using numpy.loadtxt, determine the number of spectral types,
         and find the file that corresponds to a given spectral type.
+
+        This method also displaces the object coordinates based on the quadrant and the
+        CCD to be simulated.
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
 
@@ -625,6 +651,22 @@ class VISsimulator():
         #print msk
         #if len(msk > 0):
         #    print 'Missing spectra...'
+
+        #change the image coordinates based on CCD
+        #if self.information['quadrant'] > 1:
+        #    skyy = skyy + ( yn * pix_y / ( ps_y * 3.6))
+        #if self.information['quadrant'] % 2 != 0:
+        #    skyx = skyx - ( xn * pix_x / ( ps_x * 3.6))
+
+        #and quadrant
+        if self.information['quadrant'] > 0:
+            if self.information['quadrant'] > 1:
+                #change y coordinate value
+                self.log.info('Changing y coordinates to take into account quadrant')
+                self.objects[:, 1] -= self.information['ysize']
+            if self.information['quadrant'] % 2 != 0:
+                self.log.info('Changing x coordinates to take into account quadrant')
+                self.objects[:, 0] -= self.information['xsize']
 
         self.log.info('Spectral types:')
         self.log.info(self.sp)
@@ -893,7 +935,7 @@ class VISsimulator():
         CCD_cr = self._crIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
 
         #save image without cosmics rays
-        self._writeFITSfile(self.image, 'nonoisenocr'+self.information['output'])
+        self._writeFITSfile(self.image, 'nonoisenocr' + self.information['output'])
 
         #image without cosmic rays
         self.imagenoCR = self.image.copy()
@@ -909,7 +951,7 @@ class VISsimulator():
         self.log.info('The cosmic ray covering factor is %i pixels ' % area_cr)
 
         #output information to a FITS file
-        self._writeFITSfile(self.cosmicMap, 'cosmicraymap.fits')
+        self._writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
 
 
     def applyNoise(self):
@@ -920,7 +962,7 @@ class VISsimulator():
         Additionally saves the image without noise to a FITS file.
         """
         #save no noise image
-        self._writeFITSfile(self.image, 'nonoise'+self.information['output'])
+        self._writeFITSfile(self.image, 'nonoise' + self.information['output'])
 
         #add dark and background
         noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
@@ -990,7 +1032,7 @@ class VISsimulator():
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
 
         #save the readout noise image
-        self._writeFITSfile(noise, 'readoutnoise.fits')
+        self._writeFITSfile(noise, 'readoutnoise' + self.information['output'])
 
         #add to the image
         self.image += noise
@@ -1044,6 +1086,7 @@ class VISsimulator():
         """
         Write out FITS files using PyFITS.
         """
+
         if os.path.isfile(self.information['output']):
             os.remove(self.information['output'])
 

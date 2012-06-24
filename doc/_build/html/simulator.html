@@ -119,7 +119,6 @@ that can be used to test different aspects of image simulations.</p>
 <ol class="last arabic simple">
 <li>test that the radiation damage is correctly implemented</li>
 <li>start using oversampled PSF (need to modify the overlay part)</li>
-<li>implement charge injection lines</li>
 <li>implement bleeding</li>
 <li>implement spatially variable PSF</li>
 </ol>
@@ -136,17 +135,20 @@ that can be used to test different aspects of image simulations.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
 </tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
+</tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="testing">
 <h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
 <p>Benchmark using the SCIENCE section of test.config:</p>
-<div class="highlight-python"><pre>6772 objects were place on the detector
+<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
+6772 objects were place on the detector
 
-real        5m47.109s
-user        5m43.276s
-sys 0m1.144s</pre>
+real        8m32.042s
+user        8m25.568s
+sys     0m1.385s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).</p>
 </div>
@@ -202,19 +204,29 @@ sys 0m1.144s</pre>
 </tbody>
 </table>
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.addChargeInjection">
+<tt class="descname">addChargeInjection</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addChargeInjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add either horizontal or vertical charge injection line to the image.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.addCosmicRays">
+<tt class="descname">addCosmicRays</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addCosmicRays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.</p>
+<p>Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.addObjects">
 <tt class="descname">addObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add objects from the object list to the CCD image (self.image).</p>
 <p>Scale the object&#8217;s brightness based on its magnitude. The size of the object
 is scaled using the brightness.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">At the moment the convolved data are forced to be of the same size
-as the input. This is obviously not entirely correct, but also the
-data values outside the input region are unreliable. Moreover, if
-using mode=&#8217;full&#8217; the SciPy convolution becomes really slow. One
-should explore other convolutions, for example, fftw package.</p>
-</div>
+<p>For fainter objects the convolved results are on the same sized grid as the
+input. However, for large values (intscale &gt; 1e5) a box with sharp edges
+would be visible if convolution were not done on the full scale. The problem
+is that the values outside the input grid are not very reliable, so these
+objects should be treated with caution.</p>
 </dd></dl>
 
 <dl class="method">
@@ -226,12 +238,6 @@ in the information dictionary (key bias).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="simulator.simulator.VISsimulator.applyChargeInjection">
-<tt class="descname">applyChargeInjection</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyChargeInjection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply either horizontal or vertical charge injection line to the image.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyCosmetics">
 <tt class="descname">applyCosmetics</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyCosmetics" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply cosmetic defects described in the input file.</p>
@@ -239,13 +245,6 @@ in the information dictionary (key bias).</p>
 <p class="first admonition-title">Warning</p>
 <p class="last">This method does not work if the input file has exactly one line.</p>
 </div>
-</dd></dl>
-
-<dl class="method">
-<dt id="simulator.simulator.VISsimulator.applyCosmicRays">
-<tt class="descname">applyCosmicRays</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyCosmicRays" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.</p>
-<p>Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.</p>
 </dd></dl>
 
 <dl class="method">
@@ -289,8 +288,16 @@ be build on.</p>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.discretise">
-<tt class="descname">discretise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">discretise</tt><big>(</big><em>max=65535</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert floating point arrays to integer arrays.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max</strong> (<em>float</em>) &#8211; maximum value the the integer array may contain [default 65k]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -338,7 +345,7 @@ and find the file that corresponds to a given spectral type.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.simulate">
 <tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.simulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a simulated image</p>
+<dd><p>Create a single simulated image defined by the configuration file.</p>
 </dd></dl>
 
 <dl class="method">

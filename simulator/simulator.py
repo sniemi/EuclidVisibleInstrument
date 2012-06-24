@@ -11,9 +11,8 @@ This file contains an image simulator for the Euclid VISible instrument.
 
     1. test that the radiation damage is correctly implemented
     2. start using oversampled PSF (need to modify the overlay part)
-    3. implement charge injection lines
-    4. implement bleeding
-    5. implement spatially variable PSF
+    3. implement bleeding
+    4. implement spatially variable PSF
 
 
 Dependencies
@@ -22,6 +21,7 @@ Dependencies
 :requires: PyFITS
 :requires: NumPy
 :requires: SciPy
+:requires: vissim-python package
 
 
 Testing
@@ -29,11 +29,12 @@ Testing
 
 Benchmark using the SCIENCE section of test.config::
 
+    Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
     6772 objects were place on the detector
 
-    real	5m47.109s
-    user	5m43.276s
-    sys	0m1.144s
+    real	8m32.042s
+    user	8m25.568s
+    sys	    0m1.385s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).
 
@@ -177,6 +178,9 @@ class VISsimulator():
         self.information['RA'] = self.config.getfloat(self.section, 'RA')
         self.information['DEC'] = self.config.getfloat(self.section, 'DEC')
 
+        #charge injection value
+        self.information['injection'] = self.config.getfloat(self.section, 'injection')
+
         #zeropoint
         self.information['magzero'] = self.config.getfloat(self.section, 'magzero')
 
@@ -199,11 +203,13 @@ class VISsimulator():
         #booleans to control the flow
         self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
         self.flatfieldA = self.config.getboolean(self.section, 'flatfieldA')
-        self.chargeInjection = self.config.getboolean(self.section, 'chargeInjection')
+        self.chargeInjectionx = self.config.getboolean(self.section, 'chargeInjectionx')
+        self.chargeInjectiony = self.config.getboolean(self.section, 'chargeInjectiony')
         self.cosmicRays = self.config.getboolean(self.section, 'cosmicRays')
         self.noise = self.config.getboolean(self.section, 'noise')
         self.cosmetics = self.config.getboolean(self.section, 'cosmetics')
         self.radiationDamage = self.config.getboolean(self.section, 'radiationDamage')
+        self.addsources = self.config.getboolean(self.section, 'addSources')
 
         if self.debug:
             print self.information
@@ -522,7 +528,7 @@ class VISsimulator():
                 self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
 
 
-    def _writeFITSfile(self, data, filename):
+    def _writeFITSfile(self, data, filename, unsigned16bit=False):
         """
         Writes out a simple FITS file.
 
@@ -530,6 +536,8 @@ class VISsimulator():
         :type data: ndarray
         :param filename: name of the output file
         :type filename: str
+        :param unsigned16bit: whether to scale the data using bzero=32768
+        :type unsigned16bit: bool
 
         :return: None
         """
@@ -541,6 +549,11 @@ class VISsimulator():
 
         #new image HDU
         hdu = pf.ImageHDU(data=data)
+
+        #convert to unsigned 16bit int if requested
+        if unsigned16bit:
+            hdu.scale('int16', '', bzero=32768)
+            hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #update and verify the header
         hdu.header.add_history('Created by VISsim at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
@@ -814,27 +827,26 @@ class VISsimulator():
             self.log.info('Applied additive flat... ')
 
 
-    def applyChargeInjection(self):
+    def addChargeInjection(self):
         """
-        Apply either horizontal or vertical charge injection line to the image.
+        Add either horizontal or vertical charge injection line to the image.
         """
-        #TODO: write the code
-        pass
-        #        if injection == 1:
-        #            self.image[self.information['ysize']/2-10:self.information['ysize']/2, :] = inject_num
-        #            self.log.info('Adding vertical charge injection line')
-        #        if injection == 2:
-        #            self.image[:, self.information['xsize']/2-10:self.information['xsize']/2] = inject_num
-        #            self.log.info('Adding horizontal charge injection line')
+        if self.chargeInjectionx:
+            #self.image[self.information['ysize']/2self.information['ysize']/2-10:self.information['ysize']/2, :] = self.information['injection']
+            self.image[1500:1511, :] = self.information['injection']
+            self.log.info('Adding vertical charge injection line')
+        if self.chargeInjectiony:
+            #self.image[:, self.information['xsize']/2-10:self.information['xsize']/2] = self.information['injection']
+            self.image[:, 1500:1511] = self.information['injection']
+            self.log.info('Adding horizontal charge injection line')
 
 
-    def applyCosmicRays(self):
+    def addCosmicRays(self):
         """
         Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
 
         Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
         """
-
         self._readCosmicRayInformation()
 
         #estimate the number of cosmics
@@ -875,15 +887,21 @@ class VISsimulator():
         #save image without cosmics rays
         self._writeFITSfile(self.image, 'nonoisenocr'+self.information['output'])
 
+        #image without cosmic rays
+        self.imagenoCR = self.image.copy()
+
         #paste the information
         self.image += CCD_cr
 
+        #save cosmic ray image map
+        self.cosmicMap = CCD_cr
+
         #count the covering factor
-        area_cr = np.count_nonzero(CCD_cr)
+        area_cr = np.count_nonzero(self.cosmicMap)
         self.log.info('The cosmic ray covering factor is %i pixels ' % area_cr)
 
         #output information to a FITS file
-        self._writeFITSfile(CCD_cr, 'cosmicraymap.fits')
+        self._writeFITSfile(self.cosmicMap, 'cosmicraymap.fits')
 
 
     def applyNoise(self):
@@ -899,6 +917,8 @@ class VISsimulator():
         #add dark and background
         noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
         self.image += noise
+        if self.cosmicRays:
+            self.imagenoCR += noise
 
         self.log.info('Added dark noise and cosmic background = %f' % noise)
 
@@ -908,6 +928,9 @@ class VISsimulator():
         self.image = np.random.poisson(self.image)
         self.image[self.image < 0.0] = 0.0
         self.log.info('Added Poisson noise')
+        if self.cosmicRays:
+            self.imagenoCR = np.random.poisson(self.imagenoCR)
+            self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
 
 
     def applyCosmetics(self):
@@ -942,6 +965,9 @@ class VISsimulator():
         self.image = cti.applyRadiationDamage(self.image,
                                               iquadrant=self.information['quadrant'])
         self.log.info('Radiation damage added.')
+        if self.cosmicRays:
+            self.imagenoCR = cti.applyRadiationDamage(self.imagenoCR,
+                                                      iquadrant=self.information['quadrant'])
 
 
     def applyReadoutNoise(self):
@@ -960,6 +986,8 @@ class VISsimulator():
 
         #add to the image
         self.image += noise
+        if self.cosmicRays:
+            self.imagenoCR += noise
 
 
     def electrons2ADU(self):
@@ -968,6 +996,8 @@ class VISsimulator():
         """
         self.image /= self.information['e_ADU']
         self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_ADU'])
+        if self.cosmicRays:
+            self.imagenoCR /= self.information['e_ADU']
 
 
     def applyBias(self):
@@ -979,16 +1009,28 @@ class VISsimulator():
         """
         self.image += self.information['bias']
         self.log.info('Bias of %i counts were added to the image' % self.information['bias'])
+        if self.cosmicRays:
+            self.imagenoCR += self.information['bias']
 
 
-    def discretise(self):
+    def discretise(self, max=2**16-1):
         """
         Convert floating point arrays to integer arrays.
+
+        :param max: maximum value the the integer array may contain [default 65k]
+        :type max: float
         """
+        #also write out an image without cosmics if those were added
+        if self.cosmicRays:
+            self.imagenoCR = self.imagenoCR.astype(np.int)
+            self.imagenoCR[self.imagenoCR > max] = 0.0
+            self._writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
+
         self.image = self.image.astype(np.int)
-        self.image[self.image > 2**16-1] = 2**16-1
+        self.image[self.image > max] = max
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(self.image),
                                                                                              np.sum(self.image)))
+
 
     def writeOutputs(self):
         """
@@ -1002,6 +1044,10 @@ class VISsimulator():
 
         #new image HDU
         hdu = pf.ImageHDU(data=self.image)
+
+        #convert to unsigned 16bit
+        hdu.scale('int16', '', bzero=32768)
+        hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #update and verify the header
         hdu.header.update('RA', self.information['RA'], 'RA of the center of the chip')
@@ -1020,7 +1066,8 @@ class VISsimulator():
                 except:
                     pass
 
-        hdu.header.add_history('Created by VISsim at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -1031,22 +1078,24 @@ class VISsimulator():
 
     def simulate(self):
         """
-        Create a simulated image
+        Create a single simulated image defined by the configuration file.
         """
         self.configure()
         self.readObjectlist()
         self.readPSFs()
         self.generateFinemaps()
-        self.addObjects()
+
+        if self.addsources:
+            self.addObjects()
 
         if self.flatfieldA or self.flatfieldM:
             self.applyFlatfield()
 
-        if self.chargeInjection:
-            self.applyChargeInjection()
+        if self.chargeInjectionx or self.chargeInjectiony:
+            self.addChargeInjection()
 
         if self.cosmicRays:
-            self.applyCosmicRays()
+            self.addCosmicRays()
 
         if self.noise:
             self.applyNoise()
@@ -1078,8 +1127,8 @@ class VISsimulator():
         self.generateFinemaps()
         self.addObjects()
         self.applyFlatfield()
-        self.applyChargeInjection()
-        self.applyCosmicRays()
+        self.addChargeInjection()
+        self.addCosmicRays()
         self.applyNoise()
         self.applyCosmetics()
         self.applyRadiationDamage()

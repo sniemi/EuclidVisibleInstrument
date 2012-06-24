@@ -47,14 +47,17 @@ DOUBLE PRECISION :: svg=1.0e-10         ! geometrical confinement volume of seri
 
 !Trap parameters
 DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma
-DOUBLE PRECISION, DIMENSION(zdim)   :: alpha,gamm,g
+DOUBLE PRECISION, DIMENSION(zdim)   :: alpha, gamm, g
 
 !reserve space based on the longer dimension
-IF (xdim > ydim) THEN
-  ALLOCATE(s(xdim, xdim), sno(xdim, zdim), no(xdim, zdim))
-ELSE
-  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
-ENDIF
+!this works for flip...
+!IF (xdim > ydim) THEN
+!  ALLOCATE(s(xdim, xdim), sno(xdim, zdim), no(xdim, zdim))
+!ELSE
+!  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
+!ENDIF
+
+ALLOCATE(s(xdim, ydim), sno(ydim, zdim), no(ydim, zdim))
 
 ! set up variables to zero
 s(:,:) = 0.
@@ -71,9 +74,14 @@ tr = in_tr
 ! flip data for Euclid depending on the quadrant being processed and
 ! rotate (j, i slip in s) to move from Euclid to Gaia coordinate system
 ! because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
+!DO i = 1, xdim
+!   DO j = 1, ydim
+!      s(j, i) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
+!   ENDDO
+!ENDDO
 DO i = 1, xdim
    DO j = 1, ydim
-      s(j, i) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
+      s(i, j) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
    ENDDO
 ENDDO
 
@@ -91,10 +99,12 @@ s=min(s,fwc)
 alpha=t*sigma*vth*fwc**beta/2./vg
 g=nt*2.*vg/fwc**beta
 
-DO i=1,ydim
+!DO i = 1, ydim
+DO i = 1, xdim
    gamm = g * REAL(i)
-   DO k=1,zdim
-      DO j=1,xdim
+   DO k = 1, zdim
+      !DO j = 1, xdim
+      DO j = 1, ydim
          nc=0.
          
          IF(s(i,j).gt.0.01)THEN
@@ -113,11 +123,13 @@ ENDDO
 alpha=st*sigma*vth*sfwc**beta/2./svg
 g=nt*2.*svg/sfwc**beta
 
-DO j=1,xdim
+!DO j=1,xdim
+DO j = 1, ydim
    gamm = g * REAL(j)
    DO k=1,zdim
       IF(tr(k).lt.t)THEN
-         DO i=1,ydim
+         !DO i = 1, ydim
+         DO i = 1, xdim
             nc=0.
             
             IF(s(i,j).gt.0.01)THEN
@@ -135,9 +147,14 @@ ENDDO
 
 ! We need to rotate back from Gaia coordinate system and
 ! flip data back to the input orientation
+!DO i = 1, xdim
+!   DO j = 1, ydim
+!      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(j, i)
+!   ENDDO
+!ENDDO
 DO i = 1, xdim
    DO j = 1, ydim
-      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(j, i)
+      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(i, j)
    ENDDO
 ENDDO
 

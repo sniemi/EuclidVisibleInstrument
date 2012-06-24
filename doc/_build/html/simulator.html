@@ -154,10 +154,11 @@ please run the SCIENCE section from the test.config as follows:</p>
 <p>This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.</p>
-<p>In the data subdirectory there is a file called &#8220;&#8221; which is the comparison
-image without any noise or cosmic rays. To test the functionality, please divide
-your output image () with the on in the data folder. This should lead to a uniformly
-unity image or at least very close given some numerical rounding uncertainties.</p>
+<p>In the data subdirectory there is a file called &#8220;nonoisenocrQ0_00_00testscience.fits&#8221;,
+which is the comparison image without any noise or cosmic rays. To test the functionality,
+please divide your nonoise and no cosmic ray track output image with the on in the data
+folder. This should lead to a uniformly unity image or at least very close given some
+numerical rounding uncertainties.</p>
 <p>Benchmark using the SCIENCE section of the test.config input file:</p>
 <div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
 6772 objects were place on the detector

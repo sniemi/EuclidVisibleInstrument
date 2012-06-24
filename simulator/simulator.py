@@ -42,10 +42,11 @@ This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
-In the data subdirectory there is a file called "" which is the comparison
-image without any noise or cosmic rays. To test the functionality, please divide
-your output image () with the on in the data folder. This should lead to a uniformly
-unity image or at least very close given some numerical rounding uncertainties.
+In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience.fits",
+which is the comparison image without any noise or cosmic rays. To test the functionality,
+please divide your nonoise and no cosmic ray track output image with the on in the data
+folder. This should lead to a uniformly unity image or at least very close given some
+numerical rounding uncertainties.
 
 Benchmark using the SCIENCE section of the test.config input file::
 

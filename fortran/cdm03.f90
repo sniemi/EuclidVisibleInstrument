@@ -57,7 +57,7 @@ DOUBLE PRECISION, DIMENSION(zdim)   :: alpha, gamm, g
 !  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
 !ENDIF
 
-ALLOCATE(s(xdim, ydim), sno(ydim, zdim), no(ydim, zdim))
+ALLOCATE(s(xdim, ydim), sno(xdim, zdim), no(xdim, zdim))
 
 ! set up variables to zero
 s(:,:) = 0.

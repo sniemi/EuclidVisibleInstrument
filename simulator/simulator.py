@@ -13,6 +13,7 @@ This file contains an image simulator for the Euclid VISible instrument.
     2. start using oversampled PSF (need to modify the overlay part)
     3. implement bleeding
     4. implement spatially variable PSF
+    5. test that the cosmic rays are correctly implemented
 
 
 Dependencies
@@ -29,12 +30,12 @@ Testing
 
 Benchmark using the SCIENCE section of test.config::
 
-    Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
-    6772 objects were place on the detector
+        Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
+        6772 objects were place on the detector
 
-    real	8m32.042s
-    user	8m25.568s
-    sys	    0m1.385s
+        real	8m28.781s
+        user	8m24.792s
+        sys	    0m1.361s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).
 
@@ -228,11 +229,11 @@ class VISsimulator():
 
     def _crIntercepts(self, lum, x0, y0, l, phi):
         """
-        :param lum: luminosities of cosmic ray tracks
+        :param lum: luminosities of the cosmic ray tracks
         :param x0: central positions of the cosmic ray tracks in x-direction
         :param y0: central positions of the cosmic ray tracks in y-direction
         :param l: lengths of the cosmic ray tracks
-        :param phi: orientation angles of cosmic ray tracks
+        :param phi: orientation angles of the cosmic ray tracks
 
         :return: map
         :rtype: nd-array
@@ -250,15 +251,19 @@ class VISsimulator():
             ilo = np.floor(x0[cosmics] - l[cosmics])
 
             if ilo < 1.:
-                ilo = 1.0
+                ilo = 1
+
             ihi = 1 + np.floor(x0[cosmics] + l[cosmics])
+
             if ihi > self.information['xsize']:
                 ihi = self.information['xsize']
 
             #pixels in y-directions
             jlo = np.floor(y0[cosmics] - l[cosmics])
-            if jlo < 1.0:
-                jlo = 1.0
+
+            if jlo < 1.:
+                jlo = 1
+
             jhi = 1 + np.floor(y0[cosmics] + l[cosmics])
             if jhi > self.information['ysize']:
                 jhi = self.information['ysize']
@@ -270,7 +275,7 @@ class VISsimulator():
             n = 0  # count the intercepts
 
             #Compute X intercepts on the pixel grid
-            if dx > 0.0:
+            if dx > 0.:
                 for j in range(int(ilo), int(ihi)):
                     ok = (j - x0[cosmics]) / dx
                     if np.abs(ok) <= 0.5:
@@ -280,7 +285,7 @@ class VISsimulator():
                         y.append(y0[cosmics] + ok * dy)
 
             #Compute Y intercepts on the pixel grid
-            if dy > 0.0:
+            if dy > 0.:
                 for j in range(int(jlo), int(jhi)):
                     ok = (j - y0[cosmics]) / dy
                     if np.abs(ok) <= 0.5:
@@ -299,7 +304,9 @@ class VISsimulator():
             u = np.asarray(u)
             x = np.asarray(x)
             y = np.asarray(y)
+
             args = np.argsort(u)
+
             u = u[args]
             x = x[args]
             y = y[args]
@@ -309,6 +316,7 @@ class VISsimulator():
                 w = u[i + 1] - u[i]
                 cx = 1 + np.floor((x[i + 1] + x[i]) / 2.0)
                 cy = 1 + np.floor((y[i + 1] + y[i]) / 2.0)
+
                 if cx >= 0 and cx < self.information['xsize'] and cy >= 0 and cy < self.information['ysize']:
                     crImage[cy, cx] += (w * lum[cosmics])
 

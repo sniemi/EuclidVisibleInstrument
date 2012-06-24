@@ -1,0 +1,491 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Simulation tools &mdash; VIS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Postprocessing tools" href="postproc.html" />
+    <link rel="prev" title="Welcome to VIS’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="postproc.html" title="Postprocessing tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to VIS’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Simulation tools</a><ul>
+<li><a class="reference internal" href="#the-euclid-visible-instrument-image-simulator">The Euclid Visible Instrument Image Simulator</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#current-version">Current Version</a></li>
+<li><a class="reference internal" href="#contact-information">Contact Information</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#generating-mock-objects-with-iraf">Generating Mock Objects with IRAF</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to VIS&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="postproc.html"
+                        title="next chapter">Postprocessing tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/simulator.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-simulator.simulator">
+<span id="simulation-tools"></span><h1>Simulation tools<a class="headerlink" href="#module-simulator.simulator" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-euclid-visible-instrument-image-simulator">
+<h2>The Euclid Visible Instrument Image Simulator<a class="headerlink" href="#the-euclid-visible-instrument-image-simulator" title="Permalink to this headline">¶</a></h2>
+<p>This file contains an image simulator for the Euclid VISible instrument.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This code has not been fully developed or tested. This is a prototype
+that can be used to test different aspects of image simulations.</p>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ol class="last arabic simple">
+<li>test that the radiation damage is correctly implemented</li>
+<li>start using oversampled PSF (need to modify the overlay part)</li>
+<li>implement charge injection lines</li>
+<li>implement bleeding</li>
+<li>implement spatially variable PSF</li>
+</ol>
+</div>
+<div class="section" id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="testing">
+<h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
+<p>Benchmark using the SCIENCE section of test.config:</p>
+<div class="highlight-python"><pre>6772 objects were place on the detector
+
+real        5m47.109s
+user        5m43.276s
+sys 0m1.144s</pre>
+</div>
+<p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).</p>
+</div>
+<div class="section" id="current-version">
+<h3>Current Version<a class="headerlink" href="#current-version" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.5</td>
+</tr>
+</tbody>
+</table>
+<p>Version and change logs:</p>
+<div class="highlight-python"><pre>0.1: pre-development backbone.
+0.4: first version with most pieces together.
+0.5: this version has all the basic features present, but not fully tested.</pre>
+</div>
+</div>
+<div class="section" id="contact-information">
+<h3>Contact Information<a class="headerlink" href="#contact-information" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<dl class="class">
+<dt id="simulator.simulator.VISsimulator">
+<em class="property">class </em><tt class="descclassname">simulator.simulator.</tt><tt class="descname">VISsimulator</tt><big>(</big><em>configfile</em>, <em>debug</em>, <em>section='SCIENCE'</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Euclid Visible Instrument Simulator.</p>
+<p>The image that is being build is in:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">image</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>configfile</strong> (<em>string</em>) &#8211; name of the configuration file</li>
+<li><strong>debug</strong> (<em>boolean</em>) &#8211; debugging mode on/off</li>
+<li><strong>section</strong> (<em>str</em>) &#8211; name of the section of the configuration file to process</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.addObjects">
+<tt class="descname">addObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add objects from the object list to the CCD image (self.image).</p>
+<p>Scale the object&#8217;s brightness based on its magnitude. The size of the object
+is scaled using the brightness.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">At the moment the convolved data are forced to be of the same size
+as the input. This is obviously not entirely correct, but also the
+data values outside the input region are unreliable. Moreover, if
+using mode=&#8217;full&#8217; the SciPy convolution becomes really slow. One
+should explore other convolutions, for example, fftw package.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyBias">
+<tt class="descname">applyBias</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyBias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a bias level to the image being constructed.</p>
+<p>The value of bias is read from the configure file and stored
+in the information dictionary (key bias).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyChargeInjection">
+<tt class="descname">applyChargeInjection</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyChargeInjection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply either horizontal or vertical charge injection line to the image.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyCosmetics">
+<tt class="descname">applyCosmetics</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyCosmetics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply cosmetic defects described in the input file.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This method does not work if the input file has exactly one line.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyCosmicRays">
+<tt class="descname">applyCosmicRays</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyCosmicRays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.</p>
+<p>Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyFlatfield">
+<tt class="descname">applyFlatfield</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyFlatfield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies multiplicative and/or additive flat field.
+Assumes that these flat fields are found from the
+data folder and are called flat_field_mul.fits and
+flat_field_add.fits, respectively.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyNoise">
+<tt class="descname">applyNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply dark current, the cosmic background, and Poisson noise.
+Scales dark and background with the exposure time.</p>
+<p>Additionally saves the image without noise to a FITS file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyRadiationDamage">
+<tt class="descname">applyRadiationDamage</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyRadiationDamage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies CDM03 radiation model to the image being constructed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyReadoutNoise">
+<tt class="descname">applyReadoutNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyReadoutNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies readout noise to the image being constructed.</p>
+<p>The noise is drawn from a Normal (Gaussian) distribution.
+Mean = 0.0, and std = sqrt(readout noise).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.configure">
+<tt class="descname">configure</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.configure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Configure the simulator with input information and
+create and empty array to which the final image will
+be build on.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.discretise">
+<tt class="descname">discretise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert floating point arrays to integer arrays.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.electrons2ADU">
+<tt class="descname">electrons2ADU</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.electrons2ADU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert from electrons to ADUs using the value read from the configuration file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.generateFinemaps">
+<tt class="descname">generateFinemaps</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.generateFinemaps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate finely sampled images of the input data.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">This should be rewritten. Now a direct conversion from FORTRAN, and thus
+not probably very effective. Also, this now assumed that the PSF is the
+most finely sampled so it sampled all the postage stamps to the same
+grid as the PSF.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.readObjectlist">
+<tt class="descname">readObjectlist</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readObjectlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read object list using numpy.loadtxt, determine the number of spectral types,
+and find the file that corresponds to a given spectral type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.readPSFs">
+<tt class="descname">readPSFs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readPSFs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the PSF from a FITS file.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">at the moment this method supports only a single PSF file.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.runAll">
+<tt class="descname">runAll</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.runAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Driver function, which runs all the steps independent of the boolean flags.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.simulate">
+<tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.simulate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a simulated image</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.writeOutputs">
+<tt class="descname">writeOutputs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.writeOutputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out FITS files using PyFITS.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-simulator.generateGalaxies"></span><div class="section" id="generating-mock-objects-with-iraf">
+<h2>Generating Mock Objects with IRAF<a class="headerlink" href="#generating-mock-objects-with-iraf" title="Permalink to this headline">¶</a></h2>
+<p>This script provides a class that can be used to generate objects such as galaxies using IRAF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyRAF</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="class">
+<dt id="simulator.generateGalaxies.generateFakeData">
+<em class="property">class </em><tt class="descclassname">simulator.generateGalaxies.</tt><tt class="descname">generateFakeData</tt><big>(</big><em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an image frame with stars and galaxies using IRAF&#8217;s artdata.</p>
+<dl class="method">
+<dt id="simulator.generateGalaxies.generateFakeData.addObjects">
+<tt class="descname">addObjects</tt><big>(</big><em>inputlist='galaxies.dat'</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData.addObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add object(s) from inputlist to the output image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>inputlist</strong> (<em>str</em>) &#8211; name of the input list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.generateGalaxies.generateFakeData.createGalaxylist">
+<tt class="descname">createGalaxylist</tt><big>(</big><em>ngalaxies=150</em>, <em>output='galaxies.dat'</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData.createGalaxylist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an ascii file with uniform random x and y positions.
+The magnitudes of galaxies are taken from an isotropic and homogeneous power-law distribution.</p>
+<p>The output ascii file contains the following columns: xc yc magnitude model radius ar pa &lt;save&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ngalaxies</strong> (<em>int</em>) &#8211; number of galaxies to include</li>
+<li><strong>output</strong> (<em>str</em>) &#8211; name of the output ascii file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.generateGalaxies.generateFakeData.createStarlist">
+<tt class="descname">createStarlist</tt><big>(</big><em>nstars=20</em>, <em>output='stars.dat'</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData.createStarlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an ascii file with uniform random x and y positions.
+The magnitudes of stars are taken from an isotropic and homogeneous power-law distribution.</p>
+<p>The output ascii file contains the following columns: xc yc magnitude</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nstars</strong> (<em>int</em>) &#8211; number of stars to include</li>
+<li><strong>output</strong> (<em>str</em>) &#8211; name of the output ascii file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.generateGalaxies.generateFakeData.maskCrazyValues">
+<tt class="descname">maskCrazyValues</tt><big>(</big><em>filename=None</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData.maskCrazyValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>For some reason mkobjects sometimes adds crazy values to an image.
+This method tries to remove those values and set them to more reasonable ones.
+The values &gt; 65k are set to the median of the image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<em>str</em>) &#8211; name of the input file to modify [default = self.settings[&#8216;output&#8217;]]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.generateGalaxies.generateFakeData.runAll">
+<tt class="descname">runAll</tt><big>(</big><em>nostars=True</em><big>)</big><a class="headerlink" href="#simulator.generateGalaxies.generateFakeData.runAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all methods sequentially.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="postproc.html" title="Postprocessing tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to VIS’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

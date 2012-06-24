@@ -34,6 +34,9 @@ templates_path = ['_templates']
 # The suffix of source filenames.
 source_suffix = '.rst'
 
+# Include todos
+todo_include_todos = True
+
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 

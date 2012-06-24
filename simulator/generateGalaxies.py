@@ -1,8 +1,8 @@
 """
-Generating Objects
-==================
+Generating Mock Objects with IRAF
+=================================
 
-This script provides a class that can be used to generate objects such as galaxies.
+This script provides a class that can be used to generate objects such as galaxies using IRAF.
 
 :requires: PyRAF
 :requires: PyFITS
@@ -13,8 +13,11 @@ This script provides a class that can be used to generate objects such as galaxi
 
 :version: 0.1
 """
-from pyraf import iraf
-from iraf import artdata
+try:
+    from pyraf import iraf
+    from iraf import artdata
+except ImportError:
+    print 'Cannot import PyRAF, please install it...'
 import numpy as np
 import pyfits as pf
 from support import logger as lg

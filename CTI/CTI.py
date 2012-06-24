@@ -142,6 +142,13 @@ class CDM03():
         sigma = trapdata[:, 1]
         taur = trapdata[:, 2]
 
+        if self.logger:
+            self.log.info('nt=' + str(nt))
+            self.log.info('sigma= ' + str(sigma))
+            self.log.info('taur= ' + str(taur))
+            self.log.info('dob=%f' % self.values['dob'])
+            self.log.info('rdose=%e' % self.values['rdose'])
+
         #call Fortran routine
         CTIed = cdm03.cdm03(np.asfortranarray(data),
                             iquadrant % 2, iquadrant / 2,

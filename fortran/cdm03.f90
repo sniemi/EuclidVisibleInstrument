@@ -21,55 +21,59 @@ SUBROUTINE CDM03(sinp,xdim,ydim,sout,iflip,jflip,dob,rdose,zdim,in_nt,in_sigma,i
 ! zdim = number of trap species
 !------------------------------------------------------------------------------
 
-USE nrtype
-
 IMPLICIT NONE
 
 !inputs, outputs and work variables
-INTEGER, INTENT(in) :: xdim, ydim, zdim, iflip, jflip
-REAL, INTENT(in) :: in_nt(zdim),in_sigma(zdim),in_tr(zdim)
-REAL, DIMENSION(xdim,ydim), INTENT(in)  :: sinp
-REAL, DIMENSION(xdim,ydim), INTENT(out) :: sout
-REAL, INTENT(in) :: dob,rdose
-REAL :: no(ydim,zdim),sno(ydim,zdim)
-REAL :: s(ydim, ydim)
-INTEGER :: i,j,k
+INTEGER, INTENT(in)                      :: xdim, ydim, zdim, iflip, jflip
+REAL, INTENT(in)                         :: in_nt(zdim), in_sigma(zdim), in_tr(zdim)
+REAL, DIMENSION(xdim, ydim), INTENT(in)  :: sinp
+REAL, DIMENSION(xdim, ydim), INTENT(out) :: sout
+REAL, INTENT(in)                         :: dob,rdose
+REAL, ALLOCATABLE                        :: no(:,:), sno(:,:), s(:,:)
+INTEGER                                  :: i,j,k
 
 !model related variables
-DOUBLE PRECISION :: nc,nr			! number of electrons captured, released
-DOUBLE PRECISION :: beta=0.6			! charge cloud expansion parameter [0, 1]
-DOUBLE PRECISION :: fwc=175000.			! full well capacity
-DOUBLE PRECISION :: vth=1.168e7			! electron thermal velocity [cm/s]
-DOUBLE PRECISION :: t=1.024e-2			! parallel line time [s] for 200kHz
-!DOUBLE PRECISION :: t=2.07e-3			! parallel line time [s] for 1MHz
-DOUBLE PRECISION :: vg=6.e-11			! geometric confinement volume
-DOUBLE PRECISION :: st=5.e-6			! serial pixel transfer period [s] for 200kHz
-!DOUBLE PRECISION :: st=2.07e-3 / 2048.         ! serial pixel transfer period [s] for 1MHz
-DOUBLE PRECISION :: sfwc=730000.		! serial (readout register) pixel full well capacity
-DOUBLE PRECISION :: svg=1.0e-10			! geometrical confinement volume of serial register pixels [cm**3]
+DOUBLE PRECISION :: nc,nr               ! number of electrons captured, released
+DOUBLE PRECISION :: beta=0.6            ! charge cloud expansion parameter [0, 1]
+DOUBLE PRECISION :: fwc=175000.         ! full well capacity
+DOUBLE PRECISION :: vth=1.168e7         ! electron thermal velocity [cm/s]
+DOUBLE PRECISION :: t=1.024e-2          ! parallel line time [s] for 200kHz
+!DOUBLE PRECISION :: t=2.07e-3          ! parallel line time [s] for 1MHz
+DOUBLE PRECISION :: vg=6.e-11           ! geometric confinement volume
+DOUBLE PRECISION :: st=5.e-6            ! serial pixel transfer period [s] for 200kHz
+!DOUBLE PRECISION :: st=2.07e-3 / 2048. ! serial pixel transfer period [s] for 1MHz
+DOUBLE PRECISION :: sfwc=730000.        ! serial (readout register) pixel full well capacity
+DOUBLE PRECISION :: svg=1.0e-10         ! geometrical confinement volume of serial register pixels [cm**3]
 
 !Trap parameters
-DOUBLE PRECISION, DIMENSION(7) :: nt, tr, sigma
-DOUBLE PRECISION, DIMENSION(zdim):: alpha,gamm,g
+DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma
+DOUBLE PRECISION, DIMENSION(zdim)   :: alpha,gamm,g
+
+!reserve space based on the longer dimension
+IF (xdim > ydim) THEN
+  ALLOCATE(s(xdim, xdim), sno(xdim, zdim), no(xdim, zdim))
+ELSE
+  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
+ENDIF
 
 ! set up variables to zero
-s = 0.
+s(:,:) = 0.
 no = 0.
 sno = 0.
 sout = 0.
 
 ! absolute trap density which should be scaled according to radiation dose
 ! (nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
-nt = in_nt * rdose				!absolute trap density [per cm**3]
+nt = in_nt * rdose                    !absolute trap density [per cm**3]
 sigma = in_sigma
 tr = in_tr
 
 ! flip data for Euclid depending on the quadrant being processed and
 ! rotate (j, i slip in s) to move from Euclid to Gaia coordinate system
 ! because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
-DO i=1,xdim
-   DO j=1,ydim
-      s(j,i) = sinp(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j))
+DO i = 1, xdim
+   DO j = 1, ydim
+      s(j, i) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
    ENDDO
 ENDDO
 
@@ -131,9 +135,9 @@ ENDDO
 
 ! We need to rotate back from Gaia coordinate system and
 ! flip data back to the input orientation
-DO i=1,xdim
-   DO j=1,ydim
-      sout(i+iflip*(xdim+1-2*i),j+jflip*(ydim+1-2*j)) = s(j,i)
+DO i = 1, xdim
+   DO j = 1, ydim
+      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(j, i)
    ENDDO
 ENDDO
 

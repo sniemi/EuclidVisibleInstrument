@@ -1,25 +1,61 @@
 """
-A Python version of the Euclid Visible Instrument Simulator.
+The Euclid Visible Instrument Image Simulator
+=============================================
 
-.. Warning:: This code has not been fully developed and thus it should not be used for production runs.
-             Some parts of the code are not finished and none are tested. This is simply a prototype
+This file contains an image simulator for the Euclid VISible instrument.
+
+.. Warning:: This code has not been fully developed or tested. This is a prototype
              that can be used to test different aspects of image simulations.
 
 .. todo::
 
-    1. add poisson noise
-    2. finish radiation damage
-    3. check the convolution part
-    4. start using oversampled PSF (need to modify the overlay part)
+    1. test that the radiation damage is correctly implemented
+    2. start using oversampled PSF (need to modify the overlay part)
+    3. implement charge injection lines
+    4. implement bleeding
+    5. implement spatially variable PSF
+
+
+Dependencies
+------------
 
 :requires: PyFITS
 :requires: NumPy
 :requires: SciPy
 
+
+Testing
+-------
+
+Benchmark using the SCIENCE section of test.config::
+
+    6772 objects were place on the detector
+
+    real	5m47.109s
+    user	5m43.276s
+    sys	0m1.144s
+
+These numbers have been obtained with my laptop (2.2 GHz Intel Core i7).
+
+
+Current Version
+---------------
+
+:version: 0.5
+
+Version and change logs::
+
+    0.1: pre-development backbone.
+    0.4: first version with most pieces together.
+    0.5: this version has all the basic features present, but not fully tested.
+
+
+
+Contact Information
+-------------------
+
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
-
-:version: 0.4
 """
 import os, sys, datetime, math
 import ConfigParser
@@ -33,7 +69,7 @@ from CTI import CTI
 from support import logger as lg
 
 
-class VISsim():
+class VISsimulator():
     """
     Euclid Visible Instrument Simulator.
 
@@ -46,7 +82,7 @@ class VISsim():
     :param debug: debugging mode on/off
     :type debug: boolean
     :param section: name of the section of the configuration file to process
-    :type section: string
+    :type section: str
     """
 
     def __init__(self, configfile, debug, section='SCIENCE'):
@@ -81,7 +117,41 @@ class VISsim():
 
     def _processConfigs(self):
         """
-        Processes configuration information and produces several dictionaries.
+        Processes configuration information and save the information to a dictionary self.information.
+
+        The configuration file may look as follows::
+
+            [SCIENCE]
+            quadrant = 0
+            CCDx = 0
+            CCDy = 0
+            xsize = 2048
+            ysize = 2066
+            dark = 0.001
+            readout = 4.5
+            bias = 1000.0
+            cosmic_bkgd = 0.172
+            e_ADU = 3.5
+            magzero = 1.7059e10
+            exposures = 1
+            exptime = 565.0
+            RA = 145.95
+            DEC = -38.16
+            sourcelist = source_ngp.dat
+            PSFfile = data/interpolated_psf.fits
+            trapfile = data/cdm_euclid.dat
+            cosmeticsFile = ./data/cosmetics.dat
+            output = science.fits
+            noise = yes
+            cosmetics = no
+            chargeInjection = no
+            radiationDamage = yes
+            cosmicRays = yes
+            flatfieldM = no
+            flatfieldA = no
+
+        For explanation of each field, see /data/test.config.
+
         """
         #sizes
         self.information['xsize'] = self.config.getint(self.section, 'xsize')
@@ -92,7 +162,7 @@ class VISsim():
         self.information['CCDx'] = self.config.getint(self.section, 'CCDx')
         self.information['CCDy'] = self.config.getint(self.section, 'CCDy')
 
-        #noises
+        #noise values
         self.information['dark'] = self.config.getfloat(self.section, 'dark')
         self.information['cosmic_bkgd'] = self.config.getfloat(self.section, 'cosmic_bkgd')
         self.information['readout'] = self.config.getfloat(self.section, 'readout')
@@ -110,14 +180,21 @@ class VISsim():
         #zeropoint
         self.information['magzero'] = self.config.getfloat(self.section, 'magzero')
 
-        #inputs
+        #name of the input source list
         self.information['sourcelist'] = self.config.get(self.section, 'sourcelist')
 
-        #output
+        #name of the output file
         self.information['output'] = self.config.get(self.section, 'output')
 
-        #PSF
+        #PSF related information
         self.information['PSFfile'] = self.config.get(self.section, 'PSFfile')
+        self.information['variablePSF'] = False
+
+        #charge traps input file
+        self.information['trapfile'] = self.config.get(self.section, 'trapfile')
+
+        #cosmetic defects input file
+        self.information['cosmeticsFile'] = self.config.get(self.section, 'cosmeticsFile')
 
         #booleans to control the flow
         self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
@@ -314,6 +391,59 @@ class VISsim():
         return True
 
 
+    def _gammln(self, xx):
+        """
+        Logarithm of the gamma function.
+        """
+        gammln_cof = [76.18009173,
+                      -86.50532033,
+                      24.01409822,
+                      -1.231739516e0,
+                      0.120858003e-2,
+                      -0.536382e-5]
+        gammln_stp = 2.50662827465
+        x = xx
+        y = x
+        tmp = x + 5.5
+        tmp = (x + .5) * np.log(tmp) - tmp
+        ser = 1.000000000190015
+        for j in range(6):
+            y = y + 1.0
+            ser += gammln_cof[j] / y
+        return tmp + np.log(gammln_stp * ser / x)
+
+
+    def _slowPoissonNoise(self, value):
+        """
+
+        """
+        if value < 12:
+            g = np.exp(-value)
+            em = -1
+            t = 1
+            while t > g:
+                em += 1
+                t *= np.random.unform()
+                return em
+        else:
+            sq = np.sqrt(2.*value)
+            al = np.log(value)
+            g = value * al - self._gammln(value+1.)
+
+            em = -1
+            while em < 0:
+                y = np.tan(math.pi * np.random.uniform())
+                em = int(sq*y + value)
+
+            t = 0.9 * (1. + y**2) * np.exp(em * al - self._gammln(em+1.) - g)
+            while np.random.uniform() > t:
+                t = 0.9 * (1. + y**2) * np.exp(em * al - self._gammln(em+1.) - g)
+                y = np.tan(math.pi * np.random.uniform())
+                em = int(sq * y + value)
+
+            return em
+
+
     def _overlayToCCD(self, data, obj):
         """
         Overlay data from a source object onto the self.image.
@@ -359,7 +489,67 @@ class VISsim():
         self.log.info('Adding an object to (x,y)=({0:.1f}, {1:.1f})'.format(xt, yt))
 
         #add to the image
-        self.image[j1:j2, i1:i2] += data[:nj, :ni]
+        if ni == nx and nj == ny:
+            #full frame
+            self.image[j1:j2, i1:i2] += data
+        elif ni < nx and nj == ny:
+            #x smaller
+            if int(np.floor(xlo + 0.5)) < 1:
+                #small values, left side
+                self.image[j1:j2, i1:i2] += data[:, nx-ni:]
+            else:
+                #large values, right side
+                self.image[j1:j2, i1:i2] += data[:, :ni]
+            pass
+        elif nj < ny and ni == nx:
+            #y smaller
+            if int(np.floor(ylo + 0.5)) < 1:
+                #small values, bottom
+                self.image[j1:j2, i1:i2] += data[ny-nj:, :]
+            else:
+                #large values, top
+                self.image[j1:j2, i1:i2] += data[:nj, :]
+            pass
+        else:
+            #both smaller, can be in any of the four corners
+            if int(np.floor(xlo + 0.5)) < 1 and int(np.floor(ylo + 0.5)) < 1:
+                self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
+            elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(ylo + 0.5)) > self.information['ysize']:
+                self.image[j1:j2, i1:i2] += data[:nj, nx-ni:]
+            elif int(np.floor(xlo + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
+                self.image[j1:j2, i1:i2] += data[ny-nj:, :ni]
+            else:
+                self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
+
+
+    def _writeFITSfile(self, data, filename):
+        """
+        Writes out a simple FITS file.
+
+        :param data: data to be written
+        :type data: ndarray
+        :param filename: name of the output file
+        :type filename: str
+
+        :return: None
+        """
+        if os.path.isfile(filename):
+            os.remove(filename)
+
+        #create a new FITS file, using HDUList instance
+        ofd = pf.HDUList(pf.PrimaryHDU())
+
+        #new image HDU
+        hdu = pf.ImageHDU(data=data)
+
+        #update and verify the header
+        hdu.header.add_history('Created by VISsim at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.verify('fix')
+
+        ofd.append(hdu)
+
+        #write the actual file
+        ofd.writeto(filename)
 
 
     def configure(self):
@@ -426,14 +616,18 @@ class VISsim():
 
         .. note:: at the moment this method supports only a single PSF file.
         """
-        #single PSF
-        self.log.info('Opening PSF file %s' % self.information['PSFfile'])
-        self.PSF = pf.getdata(self.information['PSFfile'])
-        self.PSFx = self.PSF.shape[1]
-        self.PSFy = self.PSF.shape[0]
-        self.log.info('PSF sampling (x,y) = (%i, %i) ' % (self.PSFx, self.PSFy))
-        #grid of PSFs
-
+        if self.information['variablePSF']:
+            #grid of PSFs
+            self.log.debug('Spatially variable PSF:')
+            self.log.error('NOT IMPLEMENTED!')
+        else:
+            #single PSF
+            self.log.debug('Spatially static PSF:')
+            self.log.info('Opening PSF file %s' % self.information['PSFfile'])
+            self.PSF = pf.getdata(self.information['PSFfile'])
+            self.PSFx = self.PSF.shape[1]
+            self.PSFy = self.PSF.shape[0]
+            self.log.info('PSF sampling (x,y) = (%i, %i) ' % (self.PSFx, self.PSFy))
 
 
     def generateFinemaps(self):
@@ -441,16 +635,22 @@ class VISsim():
         Generate finely sampled images of the input data.
 
         .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
-                     not probably very effective.
+                     not probably very effective. Also, this now assumed that the PSF is the
+                     most finely sampled so it sampled all the postage stamps to the same
+                     grid as the PSF.
         """
         self.finemap = {}
         self.shapex = {}
         self.shapey = {}
 
         for k, stype in enumerate(self.sp):
+
+            #now assumes that PSF is the most finely sampled
+            #and places all the postage stamps to PSF grid
             fm = np.zeros((self.PSFy, self.PSFx))
 
             if stype == 0:
+                #PSF
                 i = self.PSFx
                 j = self.PSFy
                 i1 = (self.PSFx - i) / 2
@@ -458,7 +658,9 @@ class VISsim():
                 j1 = (self.PSFy - j) / 2
                 j2 = j1 + self.PSFy
                 fm[j1:j2, i1:i2] = self.PSF
+
                 fm /= np.sum(fm)
+
                 self.finemap[stype] = fm
                 self.shapex[stype] = 0
                 self.shapey[stype] = 0
@@ -474,10 +676,12 @@ class VISsim():
 
                 fm[j1:j2, i1:i2] = data
 
+                #normalize to sum to unity
                 fm /= np.sum(fm)
                 self.finemap[stype] = fm
 
-                #Compute a shape tensor.
+                #Compute a shape tensor, translated from Fortran so not very
+                #effective.
                 Qxx = 0.
                 Qxy = 0.
                 Qyy = 0.
@@ -492,7 +696,8 @@ class VISsim():
                 self.shapex[stype] = (np.sqrt(shx / np.sum(fm)))
                 self.shapey[stype] = (np.sqrt(shy / np.sum(fm)))
 
-        #sum of the finemaps
+        #sum of the finemaps, this should be exactly the number of finemaps
+        #because these have been normalized to sum to unity.
         self.log.info('finemap sum = %f' %np.sum(np.asarray(self.finemap.values())))
 
 
@@ -502,14 +707,24 @@ class VISsim():
 
         Scale the object's brightness based on its magnitude. The size of the object
         is scaled using the brightness.
+
+        For fainter objects the convolved results are on the same sized grid as the
+        input. However, for large values (intscale > 1e5) a box with sharp edges
+        would be visible if convolution were not done on the full scale. The problem
+        is that the values outside the input grid are not very reliable, so these
+        objects should be treated with caution.
         """
+        #total number of objects in the input catalogue and counter for visible objects
         n_objects = self.objects.shape[0]
+        visible = 0
 
         self.log.info('Number of CCD transits = %i' % self.information['exposures'])
         self.log.info('Number of objects to be inserted is %i' % n_objects)
 
-        #calculate the scaling factors
-        intscales = 10.0**(-0.4 * self.objects[:, 2]) * self.information['magzero'] * self.information['exptime']
+        #calculate the scaling factors from the magnitudes
+        intscales = 10.0**(-0.4 * self.objects[:, 2]) * \
+                    self.information['magzero'] * \
+                    self.information['exptime']
 
         #loop over exposures
         for i in range(self.information['exposures']):
@@ -518,9 +733,12 @@ class VISsim():
                 stype = obj[3]
 
                 if self._objectOnDetector(obj):
+                    visible += 1
                     if stype == 0:
                         #point source, apply PSF
-                        print "Star:   ",j+1,"/",n_objects, "  intscale=", intscales[j]
+                        txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                        print txt
+                        self.log.info(txt)
 
                         #blending of PSF no implemented
 
@@ -535,11 +753,15 @@ class VISsim():
                         #extended source
                         sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
 
-                        print "Galaxy: ",j+1,"/",n_objects, " intscale=", intscales[j]," size=",sbig
+                        txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
+                              " intscale=" + str(intscales[j]) + " size=" + str(sbig)
+                        print txt
+                        self.log.info(txt)
 
-                        #zoom and rotate the image using interpolation and remove negative values
-                        data = ndimage.interpolation.zoom(self.finemap[stype], sbig)
-                        data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                        #rotate and zoom the image using interpolation and remove negative values
+                        data = ndimage.interpolation.rotate(self.finemap[stype], obj[4], reshape=False)
+                        data = ndimage.interpolation.zoom(data, sbig)
                         data[data < 0.0] = 0.0
 
                         #renormalise and scale to the right magnitude
@@ -548,10 +770,18 @@ class VISsim():
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
-                        #convolve with the PSF
-                        #data = ndimage.filters.convolve(data, self.PSF) #would need padding?
-                        #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
-                        data = signal.convolve2d(data, self.PSF)
+                        if self.information['variablePSF']:
+                            #spatially variable PSF, we need to convolve with the appropriate PSF
+                            #data = ndimage.filters.convolve(data, self.PSF) #would need padding?
+                            #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
+                            data = signal.convolve2d(data, self.PSF, mode='same')
+                        else:
+                            if intscales[j] > 1e5:
+                                #For very large values, a boxing effect is
+                                #visible unless full convolution is being used.
+                                data = signal.convolve2d(data, self.PSF, mode='full')
+                            else:
+                                data = signal.convolve2d(data, self.PSF, mode='same')
 
                         #overlay on the image
                         self._overlayToCCD(data, obj)
@@ -559,6 +789,11 @@ class VISsim():
                 else:
                     #not on the screen
                     print 'OFFscreen: ', j+1
+                    self.log.info('Object %i was outside the detector area' % (j+1))
+
+
+        self.log.info('%i objects were place on the detector' % visible)
+        print '%i objects were place on the detector' % visible
 
 
     def applyFlatfield(self):
@@ -637,6 +872,9 @@ class VISsim():
         #find the intercepts
         CCD_cr = self._crIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
 
+        #save image without cosmics rays
+        self._writeFITSfile(self.image, 'nonoisenocr'+self.information['output'])
+
         #paste the information
         self.image += CCD_cr
 
@@ -650,24 +888,36 @@ class VISsim():
 
     def applyNoise(self):
         """
-        Apply dark current and the cosmic background. Scale both values with the exposure time.
+        Apply dark current, the cosmic background, and Poisson noise.
+        Scales dark and background with the exposure time.
+
+        Additionally saves the image without noise to a FITS file.
         """
+        #save no noise image
+        self._writeFITSfile(self.image, 'nonoise'+self.information['output'])
+
+        #add dark and background
         noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
         self.image += noise
 
-        self.log.info('Added dark noise and cosmic background, total noise = %f' % noise)
+        self.log.info('Added dark noise and cosmic background = %f' % noise)
+
+        #for a in range(self.information['xsize']):
+        #    for b in range(self.information['ysize']):
+        #        self.image[b, a] = self._slowPoissonNoise(self.image[b, a])
+        self.image = np.random.poisson(self.image)
+        self.image[self.image < 0.0] = 0.0
+        self.log.info('Added Poisson noise')
 
 
-    def applyCosmetics(self, input='./data/cosmetics.dat'):
+    def applyCosmetics(self):
         """
         Apply cosmetic defects described in the input file.
 
-        :param input: name of the input file, the file should be csv type
-        :type input: str
+        .. Warning:: This method does not work if the input file has exactly one line.
         """
-        cosmetics = np.loadtxt(input, delimiter=',')
+        cosmetics = np.loadtxt(self.information['cosmeticsFile'], delimiter=',')
 
-        #TODO: this does not work if there is exactly one line in the file
         for line in cosmetics:
             x = int(np.floor(line[1]))
             y = int(np.floor(line[2]))
@@ -679,26 +929,42 @@ class VISsim():
 
 
     def applyRadiationDamage(self):
-        #TODO: write the radiation damage part
-        pass
-        #cti = CTI.CDM03(log=self.log)
-        #cti.applyRadiationDamage(self.image, iquadrant=self.information['quadrant'])
+        """
+        Applies CDM03 radiation model to the image being constructed.
+        """
+        #save image without CTI
+        self._writeFITSfile(self.image, 'nocti' + self.information['output'])
+
+        self.log.debug('Starting to apply radiation damage model...')
+        #at this point we can give fake data...
+        cti = CTI.CDM03(dict(trapfile=(self.information['trapfile'])), [-1,], log=self.log)
+        #here we need the right input data
+        self.image = cti.applyRadiationDamage(self.image,
+                                              iquadrant=self.information['quadrant'])
+        self.log.info('Radiation damage added.')
 
 
     def applyReadoutNoise(self):
         """
-        Applies readout noise. The noise is drawn from a Normal (Gaussian) distribution.
+        Applies readout noise to the image being constructed.
+
+        The noise is drawn from a Normal (Gaussian) distribution.
         Mean = 0.0, and std = sqrt(readout noise).
         """
         noise = np.random.normal(loc=0.0, scale=math.sqrt(self.information['readout']),
                                  size=(self.information['ysize'], self.information['xsize']))
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
+
+        #save the readout noise image
+        self._writeFITSfile(noise, 'readoutnoise.fits')
+
+        #add to the image
         self.image += noise
 
 
     def electrons2ADU(self):
         """
-        Convert from electrons to ADU using the value read from the configuration file.
+        Convert from electrons to ADUs using the value read from the configuration file.
         """
         self.image /= self.information['e_ADU']
         self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_ADU'])
@@ -706,7 +972,7 @@ class VISsim():
 
     def applyBias(self):
         """
-        Add bias level to the image.
+        Adds a bias level to the image being constructed.
 
         The value of bias is read from the configure file and stored
         in the information dictionary (key bias).
@@ -740,6 +1006,20 @@ class VISsim():
         #update and verify the header
         hdu.header.update('RA', self.information['RA'], 'RA of the center of the chip')
         hdu.header.update('DEC', self.information['DEC'], 'DEC of the center of the chip')
+
+        #add input keywords to the header
+        for key, value in self.information.iteritems():
+            #truncate long keys
+            if len(key) > 8:
+                key = key[:7]
+            try:
+                hdu.header.update(key, value)
+            except:
+                try:
+                    hdu.header.update(key, str(value))
+                except:
+                    pass
+
         hdu.header.add_history('Created by VISsim at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
@@ -836,8 +1116,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     if opts.section is None:
-        simulate = VISsim(opts.configfile, opts.debug)
+        simulate = VISsimulator(opts.configfile, opts.debug)
     else:
-        simulate = VISsim(opts.configfile, opts.debug, opts.section)
+        simulate = VISsimulator(opts.configfile, opts.debug, opts.section)
 
     simulate.simulate()

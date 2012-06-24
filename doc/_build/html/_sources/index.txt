@@ -11,6 +11,18 @@ The subpackages include methods to study CTI effects and fit new trap species, r
 analyse data, and to include instrumental characteristics such as readout noise and CTI to "pristine" images.
 
 
+Generating simulated images
+===========================
+
+The *simulator* subpackage contains scripts to generate simulated VIS images, however, this package
+is under heavy development and should therefore be treated with caution.
+
+.. toctree::
+   :maxdepth: 4
+
+   simulator
+
+
 Instrument characteristics
 ==========================
 
@@ -83,15 +95,6 @@ Code
 
 The *support* subpackage contains some support classes and methods related to generating log files and read in
 data.
-
-
-Simulator
----------
-
-The *simulator* subpackage should contain a script to generate simulated VIS data, however, **do not use** this
-script because it does not work properly.
-
-
 
 
 

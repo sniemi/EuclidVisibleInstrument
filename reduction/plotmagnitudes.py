@@ -29,7 +29,7 @@ def plot(filename, rad=1.0):
     #cntsin = 565 * 10**(-0.4*magi) / 3.5 * 1.7059e10
 
     #info
-    print np.mean(mags[(mags > 18) & (mags < 23)] - magi[(mags > 18) & (mags < 23)])
+    print np.median(mags[(mags > 18) & (mags < 23)] - magi[(mags > 18) & (mags < 23)])
 
     #write out x and y of those with large mag diff
     fh = open('largediff.txt', 'w')

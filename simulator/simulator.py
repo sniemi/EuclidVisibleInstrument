@@ -689,6 +689,7 @@ class VISsimulator():
             self.log.debug('Spatially static PSF:')
             self.log.info('Opening PSF file %s' % self.information['PSFfile'])
             self.PSF = pf.getdata(self.information['PSFfile'])
+            self.PSF /= np.sum(self.PSF)
             self.PSFx = self.PSF.shape[1]
             self.PSFy = self.PSF.shape[0]
             self.log.info('PSF sampling (x,y) = (%i, %i) ' % (self.PSFx, self.PSFy))

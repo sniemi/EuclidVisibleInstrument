@@ -1,6 +1,6 @@
 """
-Genrating a mosaic
-==================
+Generating a mosaic
+===================
 
 This file contains a class to create a single VIS CCD image from separate files one for each quadrant.
 
@@ -12,7 +12,7 @@ This file contains a class to create a single VIS CCD image from separate files 
 
 To Run::
 
-    python tileCCD.py -f 'Q*_00_00_VISscience.fits'
+    python tileCCD.py -f 'Q*science.fits' -e 1
 
 :version: 0.2
 """
@@ -56,7 +56,7 @@ class tileCCD():
 
     def tileCCD(self, xsize=2048, ysize=2066):
         """
-        Tiles quadrants to a single CCD.
+        Tiles quadrants to form a single CCD image.
 
         Assume that the input file naming convention is Qx_CCDX_CCDY_name.fits.
 
@@ -64,9 +64,11 @@ class tileCCD():
         :type xsize: int
         :param ysize: length of a quadrant in row direction
         :type ysize: int
+
+        :return: image array of size (ysize*2, xsize*2)
+        :rtype: dnarray
         """
         self.CCDdata = np.zeros((ysize*2, xsize*2))
-
 
         for key, data in self.data.iteritems():
             #use regular expression to find the numbers
@@ -161,7 +163,7 @@ def processArgs(printHelp=False):
     parser = OptionParser()
 
     parser.add_option('-f', '--files', dest='files',
-                      help="Input files to compile e.g. 'Q*_00_00_VISscience.fits'", metavar='string')
+                      help="Input files to compile e.g. 'Q*_00_00science.fits'", metavar='string')
     parser.add_option('-o', '--output', dest='output',
                       help="Name of the output file, default=VISCCD.fits", metavar='string')
     parser.add_option('-e', '--extension', type='int', dest='ext',

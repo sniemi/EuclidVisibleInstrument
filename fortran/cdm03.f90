@@ -3,13 +3,13 @@ SUBROUTINE CDM03(sinp,xdim,ydim,sout,iflip,jflip,dob,rdose,zdim,in_nt,in_sigma,i
 ! 
 ! Radiation damage model CDM03, see EUCLID_TN_ESA_AS_003_0-2.pdf for details.
 ! 
-! Modified to work with Euclid VIS instrument by Sami-Matias Niemi
+! Modified to work with Euclid VIS instrument by Sami-Matias Niemi.
+!
 !	Note that the coordinate system in Gaia (original CDM03 model) and
 !   VIS differ. In VIS the serial register is at the "bottom" while in 
 !   Gaia it is on the "left" side of the CCD quad. 
 !
-! Note: This version is intended to be called from f2py which does not do
-!       well with allocatable arrays.
+! Note: This version is intended to be called from f2py.
 !
 !------------------------------------------------------------------------------
 ! ARGUMENTS:
@@ -23,16 +23,18 @@ SUBROUTINE CDM03(sinp,xdim,ydim,sout,iflip,jflip,dob,rdose,zdim,in_nt,in_sigma,i
 
 IMPLICIT NONE
 
-!inputs, outputs and work variables
-INTEGER, INTENT(in)                      :: xdim, ydim, zdim, iflip, jflip
-REAL, INTENT(in)                         :: in_nt(zdim), in_sigma(zdim), in_tr(zdim)
-REAL, DIMENSION(xdim, ydim), INTENT(in)  :: sinp
-REAL, DIMENSION(xdim, ydim), INTENT(out) :: sout
-REAL, INTENT(in)                         :: dob,rdose
-REAL, ALLOCATABLE                        :: no(:,:), sno(:,:), s(:,:)
-INTEGER                                  :: i,j,k
+!inputs and outputs
+INTEGER, INTENT(in)                                  :: xdim, ydim, zdim, iflip, jflip
+DOUBLE PRECISION, DIMENSION(zdim), INTENT(in)        :: in_nt, in_sigma, in_tr
+DOUBLE PRECISION, DIMENSION(xdim, ydim), INTENT(in)  :: sinp
+DOUBLE PRECISION, DIMENSION(xdim, ydim), INTENT(out) :: sout
+DOUBLE PRECISION, INTENT(in)                         :: dob, rdose
 
-!model related variables
+!work variables
+DOUBLE PRECISION, ALLOCATABLE                        :: no(:,:), sno(:,:), s(:,:)
+INTEGER                                              :: i, j, k
+
+!CDM03 model related variables
 DOUBLE PRECISION :: nc,nr               ! number of electrons captured, released
 DOUBLE PRECISION :: beta=0.6            ! charge cloud expansion parameter [0, 1]
 DOUBLE PRECISION :: fwc=175000.         ! full well capacity
@@ -45,9 +47,8 @@ DOUBLE PRECISION :: st=5.e-6            ! serial pixel transfer period [s] for 2
 DOUBLE PRECISION :: sfwc=730000.        ! serial (readout register) pixel full well capacity
 DOUBLE PRECISION :: svg=1.0e-10         ! geometrical confinement volume of serial register pixels [cm**3]
 
-!Trap parameters
-DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma
-DOUBLE PRECISION, DIMENSION(zdim)   :: alpha, gamm, g
+! trap related variables
+DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma, alpha, gamm, g
 
 !reserve space based on the longer dimension
 !this works for flip...
@@ -56,14 +57,13 @@ DOUBLE PRECISION, DIMENSION(zdim)   :: alpha, gamm, g
 !ELSE
 !  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
 !ENDIF
-
-ALLOCATE(s(xdim, ydim), sno(xdim, zdim), no(xdim, zdim))
+ALLOCATE(s(xdim, ydim), sno(xdim, zdim), no(ydim, zdim))
 
 ! set up variables to zero
 s(:,:) = 0.
-no = 0.
-sno = 0.
-sout = 0.
+no(:,:) = 0.
+sno(:,:) = 0.
+sout(:,:) = 0.
 
 ! absolute trap density which should be scaled according to radiation dose
 ! (nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
@@ -157,5 +157,7 @@ DO i = 1, xdim
       sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(i, j)
    ENDDO
 ENDDO
+
+DEALLOCATE(s, sno, no)
 
 END SUBROUTINE cdm03

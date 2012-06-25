@@ -63,6 +63,10 @@ class CDM03():
         The routine takes into account the fact that the amplifiers are in the corners
         of the CCD. The routine assumes that the CCD is using four amplifiers.
 
+        There is an excess of .copy() calls, which should probably be cleaned up. However,
+        given that I had problem with the Fortran code, I have kept the calls. If memory
+        becomes an issue then this should be cleaned.
+
         :return: radiation damaged image
         :rtype: ndarray
         """
@@ -77,19 +81,19 @@ class CDM03():
                 self.log.info('Adding CTI to Q%i' % quad)
 
             if quad == 0:
-                d = data[0:self.values['xsize'], 0:self.values['ysize']]
+                d = data[0:self.values['xsize'], 0:self.values['ysize']].copy()
                 tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
                 out[0:self.values['xsize'], 0:self.values['ysize']] = tmp
             elif quad == 1:
-                d = data[self.values['xsize']:, :self.values['ysize']]
+                d = data[self.values['xsize']:, :self.values['ysize']].copy()
                 tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
                 out[self.values['xsize']:, :self.values['ysize']] = tmp
             elif quad == 2:
-                d = data[:self.values['xsize'], self.values['ysize']:]
+                d = data[:self.values['xsize'], self.values['ysize']:].copy()
                 tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
                 out[:self.values['xsize'], self.values['ysize']:] = tmp
             elif quad == 3:
-                d = data[self.values['xsize']:, self.values['ysize']:]
+                d = data[self.values['xsize']:, self.values['ysize']:].copy()
                 tmp = self.applyRadiationDamage(d, iquadrant=quad).copy()
                 out[self.values['xsize']:, self.values['ysize']:] = tmp
             else:

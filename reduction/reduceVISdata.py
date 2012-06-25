@@ -24,7 +24,6 @@ Does the following steps::
     1. FITS extension should probably be read from the command line
     2. implement background/sky subtraction
     3. implement flat fielding
-
 """
 import numpy as np
 import pyfits as pf
@@ -131,6 +130,9 @@ class reduceVISdata():
 
         Bristow & Alexov (2003) algorithm further developed for HST data
         processing by Massey, Rhodes et al.
+
+        There is probably an excess of .copy() calls here, but I had some problems
+        when calling the Fortran code so I added them for now.
         """
         if self.values['order'] < 1:
             self.log.warning('Order < 1, no CTI correction (forward modeling) applied!')
@@ -145,8 +147,11 @@ class reduceVISdata():
 
         self.log.info('Applying %i forward reads for CTI correction' % self.values['order'])
         for x in range(self.values['order']):
-            out += self.data.copy() - CTI.CDM03(self.values, out.copy(), self.log).radiateFullCCD()
+            rd = CTI.CDM03(self.values, out.copy(), self.log)
+            damaged = rd.radiateFullCCD()
+            out += self.data.copy() - damaged
             self.log.info('Forward read %i performed'% (x + 1))
+            del(rd)
 
         #divide with the gain
         self.log.info('Dividing the data with the gain factor = %.3f to convert ADUs' % self.values['gain'])

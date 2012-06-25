@@ -27,7 +27,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="index.html" />
     <link rel="next" title="Data reduction tools" href="reduction.html" />
-    <link rel="prev" title="Welcome to VIS’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Simulation tools" href="simulator.html" /> 
   </head>
   <body>
 
@@ -47,7 +47,7 @@
           <a href="reduction.html" title="Data reduction tools"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to VIS’s documentation!"
+          <a href="simulator.html" title="Simulation tools"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -61,14 +61,14 @@
   <ul>
 <li><a class="reference internal" href="#">Postprocessing tools</a><ul>
 <li><a class="reference internal" href="#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
-<li><a class="reference internal" href="#genrating-a-mosaic">Genrating a mosaic</a></li>
+<li><a class="reference internal" href="#generating-a-mosaic">Generating a mosaic</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">Welcome to VIS&#8217;s documentation!</a></p>
+  <p class="topless"><a href="simulator.html"
+                        title="previous chapter">Simulation tools</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="reduction.html"
                         title="next chapter">Data reduction tools</a></p>
@@ -400,8 +400,8 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 
 </dd></dl>
 
-<span class="target" id="module-postproc.tileCCD"></span><div class="section" id="genrating-a-mosaic">
-<h2>Genrating a mosaic<a class="headerlink" href="#genrating-a-mosaic" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-postproc.tileCCD"></span><div class="section" id="generating-a-mosaic">
+<h2>Generating a mosaic<a class="headerlink" href="#generating-a-mosaic" title="Permalink to this headline">¶</a></h2>
 <p>This file contains a class to create a single VIS CCD image from separate files one for each quadrant.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -418,7 +418,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 </tbody>
 </table>
 <p>To Run:</p>
-<div class="highlight-python"><pre>python tileCCD.py -f 'Q*_00_00_VISscience.fits'</pre>
+<div class="highlight-python"><pre>python tileCCD.py -f 'Q*science.fits' -e 1</pre>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -449,16 +449,22 @@ Input files are taken from the input dictionary given when class was initiated.<
 <dl class="method">
 <dt id="postproc.tileCCD.tileCCD.tileCCD">
 <tt class="descname">tileCCD</tt><big>(</big><em>xsize=2048</em>, <em>ysize=2066</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.tileCCD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tiles quadrants to a single CCD.</p>
+<dd><p>Tiles quadrants to form a single CCD image.</p>
 <p>Assume that the input file naming convention is Qx_CCDX_CCDY_name.fits.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>xsize</strong> (<em>int</em>) &#8211; length of a quadrant in column direction</li>
 <li><strong>ysize</strong> (<em>int</em>) &#8211; length of a quadrant in row direction</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">image array of size (ysize*2, xsize*2)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dnarray</p>
 </td>
 </tr>
 </tbody>
@@ -509,7 +515,7 @@ Input files are taken from the input dictionary given when class was initiated.<
           <a href="reduction.html" title="Data reduction tools"
              >next</a> |</li>
         <li class="right" >
-          <a href="index.html" title="Welcome to VIS’s documentation!"
+          <a href="simulator.html" title="Simulation tools"
              >previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

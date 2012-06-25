@@ -125,6 +125,14 @@
 </tr>
 </tbody>
 </table>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ol class="last arabic simple">
+<li>FITS extension should probably be read from the command line</li>
+<li>implement background/sky subtraction</li>
+<li>implement flat fielding</li>
+</ol>
+</div>
 </div>
 <dl class="class">
 <dt id="reduction.reduceVISdata.reduceVISdata">
@@ -138,6 +146,8 @@ Converts the data to electrons using the gain value given in self.values.
 The number of forward reads is defined by self.values[&#8216;order&#8217;] parameter.</p>
 <p>Bristow &amp; Alexov (2003) algorithm further developed for HST data
 processing by Massey, Rhodes et al.</p>
+<p>There is probably an excess of .copy() calls here, but I had some problems
+when calling the Fortran code so I added them for now.</p>
 </dd></dl>
 
 <dl class="method">

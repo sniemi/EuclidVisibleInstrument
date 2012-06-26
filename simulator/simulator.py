@@ -1152,11 +1152,41 @@ class VISsimulator():
 
     def applyBleeding(self):
         """
+        Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.
 
+        Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
+        serial direction.
         """
-        #find all pixels above full well
-        msk = self.image > self.information['fwc']
-        pass
+        self.log.info('Applying column bleeding...')
+        #loop over each column, as bleeding is modelled column-wise
+        for i, column in enumerate(self.image.T):
+            sum = 0.0
+            for j, value in enumerate(column):
+                #first round - from bottom to top (need to half the bleeding)
+                overload = value - self.information['fwc']
+                if overload > 0.0:
+                    overload /= 2.0
+                    self.image[j, i] -= overload
+                    sum += overload
+                elif sum > 0.0:
+                    if -overload > sum:
+                        overload = -sum
+                    self.image[j, i] -= overload
+                    sum += overload
+
+            sum = 0.0
+            for j, value in enumerate(column[::-1]):
+                #second round - from top to bottom (bleeding was halfed aready, so now full)
+                overload = value - self.information['fwc']
+                if overload > 0.0:
+                    self.image[-j, i] -= overload
+                    sum += overload
+                elif sum > 0.0:
+                    if -overload > sum:
+                        overload = -sum
+                    self.image[-j, i] -= overload
+                    sum += overload
+
 
 
     def discretise(self, max=2**16-1):

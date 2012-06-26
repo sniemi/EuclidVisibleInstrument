@@ -23,7 +23,7 @@ Does the following steps::
 
     1. FITS extension should probably be read from the command line
     2. implement background/sky subtraction
-    3. implement flat fielding
+    3. implement flat fielding (multiplicative effect)
 """
 import numpy as np
 import pyfits as pf

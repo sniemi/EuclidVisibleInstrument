@@ -4,18 +4,51 @@ The Euclid Visible Instrument Image Simulator
 
 This file contains an image simulator for the Euclid VISible instrument.
 
-.. Warning:: This code has not been fully developed or tested. This is a prototype
-             that can be used to test different aspects of VIS image simulations.
+The approximate sequence of events in the simulator is as follows:
 
-.. todo::
+      #. Read in a configuration file, which defines for example,
+         detector characteristics (bias, dark and readout noise, gain,
+         plate scale and pixel scale, oversampling factor, exposure time etc.).
+      #. Read in another file containing charge trap definitions (for CTI modelling).
+      #. Read in a file defining the cosmic rays (trail lengths and distrb.)
+      #. Read in CCD offset information, displace the image, and modify
+         the output file name to contain the CCD and quadrant information
+         (note that VIS has 6 x 6 detectors)
+      #. Read in source list and determine the number of different object types
+      #. Read in the file which assigns data to a given object index
+      #. Load the PSF model (2D map, field dependent, or a simple model)
+      #. Generate a finemap (oversampled image) for each object type, if object
+         is 2D image and simple PSF model is used then calculate the shape tensor.
+         Each type of object is then placed onto its own finely sampled submap.
+      #. Loop over the number of exposures to co-add and:
 
-    1. test that the radiation damage is correctly implemented
-    2. start using oversampled PSF
-    3. implement bleeding
-    4. implement spatially variable PSF
-    5. test that the cosmic rays are correctly implemented
-    6. implement CCD offsets
-    7. implement pre- and overscan regions
+            * determine an integer scale of an object by scaling the object magnitude
+              with the zeropoint and exposure time.
+            * determine uf the object lands on to the detector.
+            * determine uf the object is a star or an extended source (galaxy).
+            * if object is extended determine the size and scale counts with the
+              derived integer scale (point a), convolve with the PSF, and finally
+              overlay onto the detector according to its position.
+            * if object is a star, optimally blend the PSF, scale counts with the derived
+              integer scale, find the bounding box of nonzero pixels, and finally
+              overlay onto the detector according to its position.
+
+      #. Optionally apply a multiplicative and/or additive flat-field map.
+      #. Optionally add charge injection line (horizontal and/or vertical).
+      #. Optionally paste random (in position) cosmic ray streaks onto the CCD.
+      #. Photon and dark noise background is added to the pixel grid.
+      #. A Poissonian distribution of counts is generated for each point on the
+         pixel grid.
+      #. Optionally add cosmetic defects (from an input file).
+      #. Optionally add pre- and overscans in the serial direction.
+      #. Apply the radiation damage model (currently CDM03).!
+      #. Add readout noise (selected from a Gaussian distribution) and convert from
+         electrons to ADUs.
+      #. Add bias and discretise the counts.
+      #. The map is converted to FITS and output is written to the local disk.
+
+.. Warning:: This code is still work in progress and new features are being added.
+             Testing has been performed, but bugs may be lurking in corners.
 
 
 Dependencies
@@ -36,7 +69,7 @@ Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows::
 
-    python simulator.py -c data/test.config -s TESTSCIENCE
+    python simulator.py -c data/test.config -s TESTSCIENCE -d
 
 This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
@@ -71,8 +104,24 @@ Version and change logs::
     0.1: pre-development backbone.
     0.4: first version with most pieces together.
     0.5: this version has all the basic features present, but not fully tested.
-    0.6: implemented pre/overscan,
+    0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
+         image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
 
+
+Future Work
+-----------
+
+.. todo::
+
+    #. test that the radiation damage is correctly implemented (especially given overscan)
+    #. start using oversampled PSF
+    #. implement bleeding
+    #. implement spatially variable PSF
+    #. test that the cosmic rays are correctly implemented
+    #. implement CCD offsets (for focal plane simulations)
+    #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
+    #. implement a Gaussian random draw from the size-magnitude distribution
+    #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
 
 
 Contact Information
@@ -81,9 +130,10 @@ Contact Information
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 """
-import os, sys, datetime, math
+import os, sys, datetime, math, pprint
 import ConfigParser
 from optparse import OptionParser
+import scipy
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy import ndimage
 from scipy import signal
@@ -206,6 +256,9 @@ class VISsimulator():
         #charge traps input file
         self.information['trapfile'] = self.config.get(self.section, 'trapfile')
 
+        #flat field file
+        self.information['flatfieldFile'] = self.config.get(self.section, 'flatfieldFile')
+
         #cosmetic defects input file
         self.information['cosmeticsFile'] = self.config.get(self.section, 'cosmeticsFile')
 
@@ -219,9 +272,11 @@ class VISsimulator():
         self.cosmetics = self.config.getboolean(self.section, 'cosmetics')
         self.radiationDamage = self.config.getboolean(self.section, 'radiationDamage')
         self.addsources = self.config.getboolean(self.section, 'addSources')
+        self.bleeding = self.config.getboolean(self.section, 'bleeding')
+        self.overscans = self.config.getboolean(self.section, 'overscans')
 
         if self.debug:
-            print self.information
+            pprint.pprint(self.information)
 
         self.log.info('Using the following inputs:')
         for key, value in self.information.iteritems():
@@ -336,16 +391,16 @@ class VISsimulator():
         Reads in the cosmic ray track information from two input files.
         Stores the information to a dictionary called cr.
         """
+        self.log.info('Reading infor cosmic ray information...')
+
         length = 'data/cdf_cr_length.dat'
         dist = 'data/cdf_cr_total.dat'
 
         crLengths = np.loadtxt(length)
         crDists = np.loadtxt(dist)
 
-        self.cr = dict(cr_u=crLengths[:, 0], cr_cdf=crLengths[:, 1],
-            cr_cdfn=np.shape(crLengths)[0],
-            cr_v=crDists[:, 0], cr_cde=crDists[:, 1],
-            cr_cden=np.shape(crDists)[0])
+        self.cr = dict(cr_u=crLengths[:, 0], cr_cdf=crLengths[:, 1], cr_cdfn=np.shape(crLengths)[0],
+                       cr_v=crDists[:, 0], cr_cde=crDists[:, 1], cr_cden=np.shape(crDists)[0])
 
 
     def _writeFITSfile(self, image, filename):
@@ -475,9 +530,9 @@ class VISsimulator():
         :param obj: object information such as position
         :type obj: list
         """
-        #object magnification and center x and y coordinates
-        xt = obj[0]
-        yt = obj[1]
+        #objec centre x and y coordinates, zero indexing
+        xt = obj[0] - 1
+        yt = obj[1] - 1
 
         #input array size
         nx = data.shape[1]
@@ -509,39 +564,42 @@ class VISsimulator():
         nj = j2 - j1
 
         self.log.info('Adding an object to (x,y)=({0:.1f}, {1:.1f})'.format(xt, yt))
+        self.log.info('Bounding box = [%i, %i : %i, %i]' % (i1, i2, j1, j2))
 
         #add to the image
         if ni == nx and nj == ny:
-            #full frame
+            #full frame will fit
             self.image[j1:j2, i1:i2] += data
         elif ni < nx and nj == ny:
-            #x smaller
+            #x dimensions shorter
             if int(np.floor(xlo + 0.5)) < 1:
                 #small values, left side
                 self.image[j1:j2, i1:i2] += data[:, nx-ni:]
             else:
                 #large values, right side
                 self.image[j1:j2, i1:i2] += data[:, :ni]
-            pass
         elif nj < ny and ni == nx:
-            #y smaller
+            #y dimensions shorter
             if int(np.floor(ylo + 0.5)) < 1:
                 #small values, bottom
                 self.image[j1:j2, i1:i2] += data[ny-nj:, :]
             else:
                 #large values, top
                 self.image[j1:j2, i1:i2] += data[:nj, :]
-            pass
         else:
-            #both smaller, can be in any of the four corners
+            #both lengths smaller, can be in any of the four corners
             if int(np.floor(xlo + 0.5)) < 1 and int(np.floor(ylo + 0.5)) < 1:
+                #left lower
                 self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
-            elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(ylo + 0.5)) > self.information['ysize']:
+            elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(yhi + 0.5)) > self.information['ysize']:
+                #left upper
                 self.image[j1:j2, i1:i2] += data[:nj, nx-ni:]
-            elif int(np.floor(xlo + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
+            elif int(np.floor(xhi + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
+                #right lower
                 self.image[j1:j2, i1:i2] += data[ny-nj:, :ni]
             else:
-                self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
+                #right upper
+                self.image[j1:j2, i1:i2] += data[:nj, :ni]
 
 
     def _writeFITSfile(self, data, filename, unsigned16bit=False):
@@ -596,8 +654,8 @@ class VISsimulator():
 
     def readObjectlist(self):
         """
-        Read object list using numpy.loadtxt, determine the number of spectral types,
-        and find the file that corresponds to a given spectral type.
+        Read object list using numpy.loadtxt, determine the number of object types,
+        and find the file that corresponds to a given object type.
 
         This method also displaces the object coordinates based on the quadrant and the
         CCD to be simulated.
@@ -607,10 +665,10 @@ class VISsimulator():
         str = '{0:d} sources read from {1:s}'.format(np.shape(self.objects)[0], self.information['sourcelist'])
         self.log.info(str)
 
-        #find all spectral types
+        #find all object types
         self.sp = np.asarray(np.unique(self.objects[:, 3]), dtype=np.int)
 
-        #generate mapping between spectral type and data
+        #generate mapping between object type and data
         spectraMapping = {}
         data = open('data/objects.dat').readlines()
         for stype in self.sp:
@@ -655,7 +713,7 @@ class VISsimulator():
 
         self.log.info('Spectral types:')
         self.log.info(self.sp)
-        self.log.info('Total number of spectral types is %i' % len(self.sp))
+        self.log.info('Total number of object types is %i' % len(self.sp))
 
 
     def readPSFs(self):
@@ -684,28 +742,26 @@ class VISsimulator():
         Generate finely sampled images of the input data.
 
         .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
-                     not probably very effective. Also, this now assumed that the PSF is the
-                     most finely sampled so it sampled all the postage stamps to the same
-                     grid as the PSF.
+                     not probably very effective. Assumes the PSF sampling for other finemaps.
         """
         self.finemap = {}
         self.shapex = {}
         self.shapey = {}
 
+        finemapsampling = 1
+
         for k, stype in enumerate(self.sp):
 
-            #now assumes that PSF is the most finely sampled
-            #and places all the postage stamps to PSF grid
-            fm = np.zeros((self.PSFy, self.PSFx))
+            #finemap array
+            fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling))
 
             if stype == 0:
                 #PSF
-                i = self.PSFx
-                j = self.PSFy
-                i1 = (self.PSFx - i) / 2
+                i1 = (self.PSFx*finemapsampling - self.PSFx) / 2
                 i2 = i1 + self.PSFx
-                j1 = (self.PSFy - j) / 2
+                j1 = (self.PSFy*finemapsampling - self.PSFy) / 2
                 j2 = j1 + self.PSFy
+
                 fm[j1:j2, i1:i2] = self.PSF
 
                 fm /= np.sum(fm)
@@ -714,14 +770,20 @@ class VISsimulator():
                 self.shapex[stype] = 0
                 self.shapey[stype] = 0
             else:
+                #input file
                 data = self.spectraMapping[stype]['data']
-                i = data.shape[1]
-                j = data.shape[0]
+                nx = data.shape[1]
+                ny = data.shape[0]
 
-                i1 = 1 + (self.PSFx - i) / 2
-                i2 = i1 + i
-                j1 = 1 + (self.PSFy - j) / 2
-                j2 = j1 + j
+                i1 = (self.PSFx*finemapsampling - nx) / 2
+                if i1 < 1:
+                    i1 = 0
+                i2 = i1 + ny
+
+                j1 = (self.PSFy*finemapsampling - ny) / 2
+                if j1 < 1:
+                    j1 = 0
+                j2 = j1 + nx
 
                 fm[j1:j2, i1:i2] = data
 
@@ -734,16 +796,19 @@ class VISsimulator():
                 Qxx = 0.
                 Qxy = 0.
                 Qyy = 0.
-                for i in range(0, self.PSFx):
-                    for j in range(0, self.PSFy):
-                        Qxx += fm[j,i]*(i-0.5*(self.PSFx-1))*(i-0.5*(self.PSFx-1))
-                        Qxy += fm[j,i]*(i-0.5*(self.PSFx-1))*(j-0.5*(self.PSFy-1))
-                        Qyy += fm[j,i]*(j-0.5*(self.PSFy-1))*(j-0.5*(self.PSFy-1))
+                for i in range(0, self.PSFx*finemapsampling):
+                    for j in range(0, self.PSFy*finemapsampling):
+                        Qxx += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(i-0.5*(self.PSFx*finemapsampling-1))
+                        Qxy += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
+                        Qyy += fm[j,i]*(j-0.5*(self.PSFy*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
 
                 shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
                 shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
                 self.shapex[stype] = (np.sqrt(shx / np.sum(fm)))
                 self.shapey[stype] = (np.sqrt(shy / np.sum(fm)))
+
+            if self.debug:
+                scipy.misc.imsave('finemap%i.jpg' % (k+1), (fm / np.max(fm) * 255))
 
         #sum of the finemaps, this should be exactly the number of finemaps
         #because these have been normalized to sum to unity.
@@ -779,6 +844,7 @@ class VISsimulator():
         for i in range(self.information['exposures']):
             #loop over the number of objects
             for j, obj in enumerate(self.objects):
+
                 stype = obj[3]
 
                 if self._objectOnDetector(obj):
@@ -789,17 +855,21 @@ class VISsimulator():
                         print txt
                         self.log.info(txt)
 
-                        #blending of PSF no implemented
-
                         #renormalise and scale with the intscale
                         data = self.finemap[stype] / np.sum(self.finemap[stype]) * intscales[j]
 
+                        #for oversampled there should be scaling here
+                        #data = ndimage.interpolation.zoom(data, 1./self.information['PSFscaling'])
+
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
-                        #overlays on the image
+                        #overlay the scaled PSF on the image
                         self._overlayToCCD(data, obj)
                     else:
-                        #extended source
+                        #extended source, rename finemap
+                        data = self.finemap[stype].copy()
+
+                        #size
                         sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
 
                         txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
@@ -807,10 +877,11 @@ class VISsimulator():
                         print txt
                         self.log.info(txt)
 
-
                         #rotate and zoom the image using interpolation and remove negative values
-                        data = ndimage.interpolation.rotate(self.finemap[stype], obj[4], reshape=False)
-                        data = ndimage.interpolation.zoom(data, sbig)
+                        if obj[4] != 0.0:
+                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+                        if sbig != 1.0:
+                            data = ndimage.interpolation.zoom(data, sbig, mode='constant', cval=0.0)
                         data[data < 0.0] = 0.0
 
                         #renormalise and scale to the right magnitude
@@ -819,21 +890,28 @@ class VISsimulator():
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
+                        if self.debug:
+                            self._writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
+
                         if self.information['variablePSF']:
                             #spatially variable PSF, we need to convolve with the appropriate PSF
                             #data = ndimage.filters.convolve(data, self.PSF) #would need padding?
                             #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
-                            data = signal.convolve2d(data, self.PSF, mode='same')
+                            conv = signal.convolve2d(data, self.PSF, mode='same')
                         else:
                             if intscales[j] > 1e5:
                                 #For very large values, a boxing effect is
                                 #visible unless full convolution is being used.
-                                data = signal.convolve2d(data, self.PSF, mode='full')
+                                conv = signal.convolve2d(data, self.PSF, mode='full')
                             else:
-                                data = signal.convolve2d(data, self.PSF, mode='same')
+                                conv = signal.convolve2d(data, self.PSF, mode='same')
 
-                        #overlay on the image
-                        self._overlayToCCD(data, obj)
+                        if self.debug:
+                            scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
+                            self._writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+
+                        #overlay the convolved image on the image
+                        self._overlayToCCD(conv, obj)
 
                 else:
                     #not on the screen
@@ -848,19 +926,21 @@ class VISsimulator():
     def applyFlatfield(self):
         """
         Applies multiplicative and/or additive flat field.
-        Assumes that these flat fields are found from the
-        data folder and are called flat_field_mul.fits and
-        flat_field_add.fits, respectively.
+
+        Because the pixel-to-pixel non-uniformity effect (i.e. multiplicative) flat fielding takes place
+        before CTI and other effects, the flat field file must be the same size as the pixels that see
+        the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
+
+        .. Note:: The additive flat fielding effect has not been included yet.
         """
         if self.flatfieldM:
-            flatM = pf.getdata('data/flat_field_mul.fits')
+            flatM = pf.getdata(self.information['flatfieldFile'])
             self.image *= flatM
-            self.log.info('Applied multiplicative flat... ')
+            self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldFile'])
 
         if self.flatfieldA:
-            flatA = pf.getdata('data/flat_field_add.fits')
-            self.image += flatA
-            self.log.info('Applied additive flat... ')
+            print 'ERROR - Additive flat fielding not implemented yet!'
+            #self.log.info('Applied additive flat... ')
 
 
     def addChargeInjection(self):
@@ -964,6 +1044,7 @@ class VISsimulator():
         self.image = np.random.poisson(self.image)
         self.image[self.image < 0.0] = 0.0
         self.log.info('Added Poisson noise')
+
         if self.cosmicRays:
             self.imagenoCR = np.random.poisson(self.imagenoCR)
             self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
@@ -998,10 +1079,11 @@ class VISsimulator():
         #at this point we can give fake data...
         cti = CTI.CDM03(dict(trapfile=(self.information['trapfile'])), [-1,], log=self.log)
         #here we need the right input data
-        self.image = cti.applyRadiationDamage(self.image,
-                                              iquadrant=self.information['quadrant'])
+        self.image = cti.applyRadiationDamage(self.image, iquadrant=self.information['quadrant'])
         self.log.info('Radiation damage added.')
+
         if self.cosmicRays:
+            self.log.info('Adding radiation damage to the no cosmic rays image...')
             self.imagenoCR = cti.applyRadiationDamage(self.imagenoCR,
                                                       iquadrant=self.information['quadrant'])
 
@@ -1014,7 +1096,7 @@ class VISsimulator():
         Mean = 0.0, and std = sqrt(readout noise).
         """
         noise = np.random.normal(loc=0.0, scale=math.sqrt(self.information['readout']),
-                                 size=(self.information['ysize'], self.information['xsize']))
+                                 size=self.image.shape)
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
 
         #save the readout noise image
@@ -1051,12 +1133,30 @@ class VISsimulator():
 
     def addPreOverScans(self):
         """
+        Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
 
+        The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.
         """
         self.log.info('Adding pre- and overscan regions')
         canvas = np.zeros((self.information['ysize'],
-                          (self.information['xsize'] + self.information['prescx']+ self.information['overscx'])))
-        ca
+                          (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
+        canvas[:, self.information['prescx']+1: self.information['prescx'] + 1 + self.information['xsize']] = self.image
+        self.image = canvas
+
+        if self.cosmicRays:
+            canvas = np.zeros((self.information['ysize'],
+                              (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
+            canvas[:, self.information['prescx']+1:self.information['prescx']+1+self.information['xsize']] =  self.imagenoCR
+            self.imagenoCR = canvas
+
+
+    def applyBleeding(self):
+        """
+
+        """
+        #find all pixels above full well
+        msk = self.image > self.information['fwc']
+        pass
 
 
     def discretise(self, max=2**16-1):
@@ -1124,7 +1224,7 @@ class VISsimulator():
 
     def simulate(self):
         """
-        Create a single simulated image defined by the configuration file.
+        Create a single simulated image of one quadrant defined by the configuration file.
         """
         self.configure()
         self.readObjectlist()
@@ -1143,46 +1243,24 @@ class VISsimulator():
         if self.cosmicRays:
             self.addCosmicRays()
 
+        if self.bleeding:
+            self.applyBleeding()
+
         if self.noise:
             self.applyNoise()
 
         if self.cosmetics:
             self.applyCosmetics()
 
-        #add overscan, because CTI affects this
+        if self.overscans:
+            self.addPreOverScans()
 
         if self.radiationDamage:
             self.applyRadiationDamage()
 
-        #add prescan
-
         if self.noise:
             self.applyReadoutNoise()
 
-        self.electrons2ADU()
-        self.applyBias()
-        self.discretise()
-        self.writeOutputs()
-
-
-    def runAll(self):
-        """
-        Driver function, which runs all the steps independent of the boolean flags.
-
-        .. Note: Use this for debugging only!
-        """
-        self.configure()
-        self.readObjectlist()
-        self.readPSFs()
-        self.generateFinemaps()
-        self.addObjects()
-        self.applyFlatfield()
-        self.addChargeInjection()
-        self.addCosmicRays()
-        self.applyNoise()
-        self.applyCosmetics()
-        self.applyRadiationDamage()
-        self.applyReadoutNoise()
         self.electrons2ADU()
         self.applyBias()
         self.discretise()

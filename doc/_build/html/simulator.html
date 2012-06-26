@@ -64,6 +64,7 @@
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li><a class="reference internal" href="#testing">Testing</a></li>
 <li><a class="reference internal" href="#change-log">Change Log</a></li>
+<li><a class="reference internal" href="#future-work">Future Work</a></li>
 <li><a class="reference internal" href="#contact-information">Contact Information</a></li>
 </ul>
 </li>
@@ -109,22 +110,77 @@
 <div class="section" id="the-euclid-visible-instrument-image-simulator">
 <h2>The Euclid Visible Instrument Image Simulator<a class="headerlink" href="#the-euclid-visible-instrument-image-simulator" title="Permalink to this headline">¶</a></h2>
 <p>This file contains an image simulator for the Euclid VISible instrument.</p>
+<p>The approximate sequence of events in the simulator is as follows:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first">Read in a configuration file, which defines for example,
+detector characteristics (bias, dark and readout noise, gain,
+plate scale and pixel scale, oversampling factor, exposure time etc.).</p>
+</li>
+<li><p class="first">Read in another file containing charge trap definitions (for CTI modelling).</p>
+</li>
+<li><p class="first">Read in a file defining the cosmic rays (trail lengths and distrb.)</p>
+</li>
+<li><p class="first">Read in CCD offset information, displace the image, and modify
+the output file name to contain the CCD and quadrant information
+(note that VIS has 6 x 6 detectors)</p>
+</li>
+<li><p class="first">Read in source list and determine the number of different object types</p>
+</li>
+<li><p class="first">Read in the file which assigns data to a given object index</p>
+</li>
+<li><p class="first">Load the PSF model (2D map, field dependent, or a simple model)</p>
+</li>
+<li><p class="first">Generate a finemap (oversampled image) for each object type, if object
+is 2D image and simple PSF model is used then calculate the shape tensor.
+Each type of object is then placed onto its own finely sampled submap.</p>
+</li>
+<li><p class="first">Loop over the number of exposures to co-add and:</p>
+<blockquote>
+<div><ul class="simple">
+<li>determine an integer scale of an object by scaling the object magnitude
+with the zeropoint and exposure time.</li>
+<li>determine uf the object lands on to the detector.</li>
+<li>determine uf the object is a star or an extended source (galaxy).</li>
+<li>if object is extended determine the size and scale counts with the
+derived integer scale (point a), convolve with the PSF, and finally
+overlay onto the detector according to its position.</li>
+<li>if object is a star, optimally blend the PSF, scale counts with the derived
+integer scale, find the bounding box of nonzero pixels, and finally
+overlay onto the detector according to its position.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Optionally apply a multiplicative and/or additive flat-field map.</p>
+</li>
+<li><p class="first">Optionally add charge injection line (horizontal and/or vertical).</p>
+</li>
+<li><p class="first">Optionally paste random (in position) cosmic ray streaks onto the CCD.</p>
+</li>
+<li><p class="first">Photon and dark noise background is added to the pixel grid.</p>
+</li>
+<li><p class="first">A Poissonian distribution of counts is generated for each point on the
+pixel grid.</p>
+</li>
+<li><p class="first">Optionally add cosmetic defects (from an input file).</p>
+</li>
+<li><p class="first">Optionally add pre- and overscans in the serial direction.</p>
+</li>
+<li><p class="first">Apply the radiation damage model (currently CDM03).!</p>
+</li>
+<li><p class="first">Add readout noise (selected from a Gaussian distribution) and convert from
+electrons to ADUs.</p>
+</li>
+<li><p class="first">Add bias and discretise the counts.</p>
+</li>
+<li><p class="first">The map is converted to FITS and output is written to the local disk.</p>
+</li>
+</ol>
+</div></blockquote>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">This code has not been fully developed or tested. This is a prototype
-that can be used to test different aspects of VIS image simulations.</p>
-</div>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<ol class="last arabic simple">
-<li>test that the radiation damage is correctly implemented</li>
-<li>start using oversampled PSF</li>
-<li>implement bleeding</li>
-<li>implement spatially variable PSF</li>
-<li>test that the cosmic rays are correctly implemented</li>
-<li>implement CCD offsets</li>
-<li>implement pre- and overscan regions</li>
-</ol>
+<p class="last">This code is still work in progress and new features are being added.
+Testing has been performed, but bugs may be lurking in corners.</p>
 </div>
 <div class="section" id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
@@ -149,7 +205,7 @@ that can be used to test different aspects of VIS image simulations.</p>
 <p>Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows:</p>
-<div class="highlight-python"><pre>python simulator.py -c data/test.config -s TESTSCIENCE</pre>
+<div class="highlight-python"><pre>python simulator.py -c data/test.config -s TESTSCIENCE -d</pre>
 </div>
 <p>This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
@@ -176,14 +232,33 @@ sys     0m1.361s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.5</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.6</td>
 </tr>
 </tbody>
 </table>
 <p>Version and change logs:</p>
 <div class="highlight-python"><pre>0.1: pre-development backbone.
 0.4: first version with most pieces together.
-0.5: this version has all the basic features present, but not fully tested.</pre>
+0.5: this version has all the basic features present, but not fully tested.
+0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
+     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).</pre>
+</div>
+</div>
+<div class="section" id="future-work">
+<h3>Future Work<a class="headerlink" href="#future-work" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<ol class="last arabic simple">
+<li>test that the radiation damage is correctly implemented (especially given overscan)</li>
+<li>start using oversampled PSF</li>
+<li>implement bleeding</li>
+<li>implement spatially variable PSF</li>
+<li>test that the cosmic rays are correctly implemented</li>
+<li>implement CCD offsets (for focal plane simulations)</li>
+<li>implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)</li>
+<li>implement a Gaussian random draw from the size-magnitude distribution</li>
+<li>move the cosmic ray track information file definitions to the input file (now hardcoded in the method)</li>
+</ol>
 </div>
 </div>
 <div class="section" id="contact-information">
@@ -248,12 +323,24 @@ objects should be treated with caution.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.addPreOverScans">
+<tt class="descname">addPreOverScans</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addPreOverScans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.</p>
+<p>The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyBias">
 <tt class="descname">applyBias</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyBias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a bias level to the image being constructed.</p>
 <p>The value of bias is read from the configure file and stored
 in the information dictionary (key bias).</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyBleeding">
+<tt class="descname">applyBleeding</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyBleeding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyCosmetics">
@@ -268,10 +355,14 @@ in the information dictionary (key bias).</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyFlatfield">
 <tt class="descname">applyFlatfield</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyFlatfield" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies multiplicative and/or additive flat field.
-Assumes that these flat fields are found from the
-data folder and are called flat_field_mul.fits and
-flat_field_add.fits, respectively.</p>
+<dd><p>Applies multiplicative and/or additive flat field.</p>
+<p>Because the pixel-to-pixel non-uniformity effect (i.e. multiplicative) flat fielding takes place
+before CTI and other effects, the flat field file must be the same size as the pixels that see
+the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The additive flat fielding effect has not been included yet.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -331,17 +422,15 @@ be build on.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">This should be rewritten. Now a direct conversion from FORTRAN, and thus
-not probably very effective. Also, this now assumed that the PSF is the
-most finely sampled so it sampled all the postage stamps to the same
-grid as the PSF.</p>
+not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 </div>
 </dd></dl>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.readObjectlist">
 <tt class="descname">readObjectlist</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readObjectlist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read object list using numpy.loadtxt, determine the number of spectral types,
-and find the file that corresponds to a given spectral type.</p>
+<dd><p>Read object list using numpy.loadtxt, determine the number of object types,
+and find the file that corresponds to a given object type.</p>
 <p>This method also displaces the object coordinates based on the quadrant and the
 CCD to be simulated.</p>
 </dd></dl>
@@ -357,15 +446,9 @@ CCD to be simulated.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="simulator.simulator.VISsimulator.runAll">
-<tt class="descname">runAll</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.runAll" title="Permalink to this definition">¶</a></dt>
-<dd><p>Driver function, which runs all the steps independent of the boolean flags.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="simulator.simulator.VISsimulator.simulate">
 <tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.simulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a single simulated image defined by the configuration file.</p>
+<dd><p>Create a single simulated image of one quadrant defined by the configuration file.</p>
 </dd></dl>
 
 <dl class="method">

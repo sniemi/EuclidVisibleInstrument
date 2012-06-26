@@ -50,6 +50,9 @@ DOUBLE PRECISION :: svg=1.0e-10         ! geometrical confinement volume of seri
 ! trap related variables
 DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma, alpha, gamm, g
 
+!debug
+PRINT *, xdim, ydim
+
 !reserve space based on the longer dimension
 !this works for flip...
 !IF (xdim > ydim) THEN

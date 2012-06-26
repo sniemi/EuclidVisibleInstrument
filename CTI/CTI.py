@@ -114,28 +114,29 @@ class CDM03():
         :param iquandrant: number of the quadrant to process
         :type iquandrant: int
 
-        cdm03 - Function signature:
-          sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[xdim,ydim,zdim])
-        Required arguments:
-          sinp : input rank-2 array('f') with bounds (xdim,ydim)
-          iflip : input int
-          jflip : input int
-          dob : input float
-          rdose : input float
-          in_nt : input rank-1 array('d') with bounds (zdim)
-          in_sigma : input rank-1 array('d') with bounds (zdim)
-          in_tr : input rank-1 array('d') with bounds (zdim)
-        Optional arguments:
-          xdim := shape(sinp,0) input int
-          ydim := shape(sinp,1) input int
-          zdim := len(in_nt) input int
-        Return objects:
-          sout : rank-2 array('f') with bounds (xdim,ydim)
+        cdm03 - Function signature::
 
-        :Note: Because Python/NumPy arrays are different row/column based, one needs
-               to be extra careful here. NumPy.asfortranarray will be called to get
-               an array laid out in Fortran order in memory. Before returning the
-               array will be laid out in memory in C-style (row-major order).
+              sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[xdim,ydim,zdim])
+            Required arguments:
+              sinp : input rank-2 array('d') with bounds (xdim,ydim)
+              iflip : input int
+              jflip : input int
+              dob : input float
+              rdose : input float
+              in_nt : input rank-1 array('d') with bounds (zdim)
+              in_sigma : input rank-1 array('d') with bounds (zdim)
+              in_tr : input rank-1 array('d') with bounds (zdim)
+            Optional arguments:
+              xdim := shape(sinp,0) input int
+              ydim := shape(sinp,1) input int
+              zdim := len(in_nt) input int
+            Return objects:
+              sout : rank-2 array('d') with bounds (xdim,ydim)
+
+        .. Note:: Because Python/NumPy arrays are different row/column based, one needs
+                  to be extra careful here. NumPy.asfortranarray will be called to get
+                  an array laid out in Fortran order in memory. Before returning the
+                  array will be laid out in memory in C-style (row-major order).
 
         :return: image that has been run through the CDM03 model
         :rtype: ndarray
@@ -152,13 +153,19 @@ class CDM03():
             self.log.info('taur= ' + str(taur))
             self.log.info('dob=%f' % self.values['dob'])
             self.log.info('rdose=%e' % self.values['rdose'])
+            self.log.info('xsize=%i' % data.shape[1])
+            self.log.info('ysize=%i' % data.shape[0])
 
         #call Fortran routine
+#        CTIed = cdm03.cdm03(np.asfortranarray(data),
+#                            iquadrant % 2, iquadrant / 2,
+#                            self.values['dob'], self.values['rdose'],
+#                            nt, sigma, taur,
+#                            [data.shape[0], data.shape[1], len(nt)])
         CTIed = cdm03.cdm03(np.asfortranarray(data),
                             iquadrant % 2, iquadrant / 2,
                             self.values['dob'], self.values['rdose'],
-                            nt, sigma, taur,
-                            [data.shape[0], data.shape[1], len(nt)])
+                            nt, sigma, taur)
 
         return np.asanyarray(CTIed)
 

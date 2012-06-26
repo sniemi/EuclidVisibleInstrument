@@ -64,13 +64,14 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 Change Log
 ----------
 
-:version: 0.5
+:version: 0.6
 
 Version and change logs::
 
     0.1: pre-development backbone.
     0.4: first version with most pieces together.
     0.5: this version has all the basic features present, but not fully tested.
+    0.6: implemented pre/overscan,
 
 
 
@@ -150,40 +151,23 @@ class VISsimulator():
             CCDy = 0
             xsize = 2048
             ysize = 2066
-            dark = 0.001
-            readout = 4.5
-            bias = 1000.0
-            cosmic_bkgd = 0.172
-            e_ADU = 3.5
-            magzero = 1.7059e10
-            exposures = 1
-            exptime = 565.0
-            RA = 145.95
-            DEC = -38.16
-            sourcelist = source_ngp.dat
-            PSFfile = data/interpolated_psf.fits
-            trapfile = data/cdm_euclid.dat
-            cosmeticsFile = ./data/cosmetics.dat
-            output = science.fits
-            noise = yes
-            cosmetics = no
-            chargeInjection = no
-            radiationDamage = yes
-            cosmicRays = yes
-            flatfieldM = no
-            flatfieldA = no
+
+            TODO: update this
 
         For explanation of each field, see /data/test.config.
 
         """
-        #sizes
+        #image size
         self.information['xsize'] = self.config.getint(self.section, 'xsize')
         self.information['ysize'] = self.config.getint(self.section, 'ysize')
+        self.information['overscx'] = self.config.getint(self.section, 'overscanx')
+        self.information['prescx'] = self.config.getint(self.section, 'prescanx')
 
         #quadrant and CCD
         self.information['quadrant'] = self.config.getint(self.section, 'quadrant')
         self.information['CCDx'] = self.config.getint(self.section, 'CCDx')
         self.information['CCDy'] = self.config.getint(self.section, 'CCDy')
+        self.information['fwc'] = self.config.getint(self.section, 'fullwellcapacity')
 
         #noise values
         self.information['dark'] = self.config.getfloat(self.section, 'dark')
@@ -1065,6 +1049,16 @@ class VISsimulator():
             self.imagenoCR += self.information['bias']
 
 
+    def addPreOverScans(self):
+        """
+
+        """
+        self.log.info('Adding pre- and overscan regions')
+        canvas = np.zeros((self.information['ysize'],
+                          (self.information['xsize'] + self.information['prescx']+ self.information['overscx'])))
+        ca
+
+
     def discretise(self, max=2**16-1):
         """
         Convert floating point arrays to integer arrays.
@@ -1088,7 +1082,6 @@ class VISsimulator():
         """
         Write out FITS files using PyFITS.
         """
-
         if os.path.isfile(self.information['output']):
             os.remove(self.information['output'])
 
@@ -1156,8 +1149,12 @@ class VISsimulator():
         if self.cosmetics:
             self.applyCosmetics()
 
+        #add overscan, because CTI affects this
+
         if self.radiationDamage:
             self.applyRadiationDamage()
+
+        #add prescan
 
         if self.noise:
             self.applyReadoutNoise()

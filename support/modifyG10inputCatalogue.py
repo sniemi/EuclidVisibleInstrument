@@ -18,10 +18,11 @@ def modifyG10catalog(file, xshift=560, yshift=560):
     """
     data = np.loadtxt(file, skiprows=1)
 
-    pixshift = data[:, 0] / 2.
+    xbar = data[:, 14]
+    ybar = data[:, 15]
 
-    x = data[:, 26] #+ pixshift #- xshift
-    y = data[:, 27] #+ pixshift #- yshift
+    x = data[:, 26] + xbar - xshift
+    y = data[:, 27] + ybar - yshift
 
     padisk = data[:, 24]
 
@@ -35,7 +36,7 @@ def modifyG10catalog(file, xshift=560, yshift=560):
     ellipticity = np.sqrt(e1*e1 + e2*e2)
 
     #msk = (x > 0) & (y > 0) & (x <= 4096) & (y <= 4132)
-    msk = padisk > 0.995
+    msk = x < 1e10
 
     x = x[msk]
     y = y[msk]

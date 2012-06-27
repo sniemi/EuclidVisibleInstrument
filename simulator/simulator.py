@@ -770,7 +770,7 @@ class VISsimulator():
                 self.shapey[stype] = 0
             else:
                 #input file
-                data = self.spectraMapping[stype]['data']
+                data = self.objectMapping[stype]['data']
                 nx = data.shape[1]
                 ny = data.shape[0]
 

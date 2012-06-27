@@ -95,7 +95,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 Change Log
 ----------
 
-:version: 0.6
+:version: 0.7
 
 Version and change logs::
 

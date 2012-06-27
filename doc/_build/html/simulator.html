@@ -151,36 +151,34 @@ overlay onto the detector according to its position.</li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Optionally apply a multiplicative and/or additive flat-field map.</p>
+<li><p class="first">Apply a multiplicative flat-field map [optional].</p>
 </li>
-<li><p class="first">Optionally add charge injection line (horizontal and/or vertical).</p>
+<li><p class="first">Add a charge injection line (horizontal and/or vertical) [optional].</p>
 </li>
-<li><p class="first">Optionally paste random (in position) cosmic ray streaks onto the CCD.</p>
+<li><p class="first">Add cosmic ray streaks onto the CCD with random positions [optional].</p>
 </li>
-<li><p class="first">Photon and dark noise background is added to the pixel grid.</p>
+<li><p class="first">Add photon (Poisson) noise and constant dark current to the pixel grid [optional].</p>
 </li>
-<li><p class="first">A Poissonian distribution of counts is generated for each point on the
-pixel grid.</p>
+<li><p class="first">Add cosmetic defects from an input file [optional].</p>
 </li>
-<li><p class="first">Optionally add cosmetic defects (from an input file).</p>
+<li><p class="first">Add pre- and overscan regions in the serial direction [optional].</p>
 </li>
-<li><p class="first">Optionally add pre- and overscans in the serial direction.</p>
+<li><p class="first">Apply the CDM03 radiation damage model [optional].</p>
 </li>
-<li><p class="first">Apply the radiation damage model (currently CDM03).!</p>
+<li><p class="first">Add readout noise (selected from a Gaussian distribution) [optional].</p>
 </li>
-<li><p class="first">Add readout noise (selected from a Gaussian distribution) and convert from
-electrons to ADUs.</p>
+<li><p class="first">Convert from electrons to ADUs using the given gain factor.</p>
 </li>
-<li><p class="first">Add bias and discretise the counts.</p>
+<li><p class="first">Add a given bias level and discretise the counts (16bit).</p>
 </li>
-<li><p class="first">The map is converted to FITS and output is written to the local disk.</p>
+<li><p class="first">Finally the generated image is converted to a FITS file and saved to the working directory.</p>
 </li>
 </ol>
 </div></blockquote>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">This code is still work in progress and new features are being added.
-Testing has been performed, but bugs may be lurking in corners.</p>
+Testing has been performed, but bugs may be lurking in corners, so be careful.</p>
 </div>
 <div class="section" id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
@@ -241,7 +239,8 @@ sys     0m1.361s</pre>
 0.4: first version with most pieces together.
 0.5: this version has all the basic features present, but not fully tested.
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
-     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).</pre>
+     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
+0.7: implemented bleeding.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -249,15 +248,16 @@ sys     0m1.361s</pre>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
-<li>test that the radiation damage is correctly implemented (especially given overscan)</li>
 <li>start using oversampled PSF</li>
-<li>implement bleeding</li>
 <li>implement spatially variable PSF</li>
 <li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
 <li>implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)</li>
 <li>implement a Gaussian random draw from the size-magnitude distribution</li>
 <li>move the cosmic ray track information file definitions to the input file (now hardcoded in the method)</li>
+<li>double check the centering of objects, now the exact centering is not interpolated</li>
+<li>write to the log the boolean choices (flat fielding, bleeding, etc)</li>
+<li>charge injection line positions are now hardcoded to the code, read from the config file</li>
 </ol>
 </div>
 </div>
@@ -340,7 +340,10 @@ in the information dictionary (key bias).</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyBleeding">
 <tt class="descname">applyBleeding</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyBleeding" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.</p>
+<p>Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
+serial direction.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyCosmetics">

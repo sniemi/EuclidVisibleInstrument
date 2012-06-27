@@ -112,7 +112,6 @@ Future Work
 
 .. todo::
 
-    #. test that the radiation damage is correctly implemented (especially given overscan)
     #. start using oversampled PSF
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
@@ -121,6 +120,8 @@ Future Work
     #. implement a Gaussian random draw from the size-magnitude distribution
     #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
     #. double check the centering of objects, now the exact centering is not interpolated
+    #. write to the log the boolean choices (flat fielding, bleeding, etc)
+    #. charge injection line positions are now hardcoded to the code, read from the config file
 
 
 Contact Information
@@ -529,9 +530,9 @@ class VISsimulator():
         :param obj: object information such as position
         :type obj: list
         """
-        #objec centre x and y coordinates, zero indexing
-        xt = obj[0] - 1
-        yt = obj[1] - 1
+        #objec centre x and y coordinates
+        xt = obj[0]
+        yt = obj[1]
 
         #input array size
         nx = data.shape[1]
@@ -952,7 +953,8 @@ class VISsimulator():
             self.log.info('Adding vertical charge injection line')
         if self.chargeInjectiony:
             #self.image[:, self.information['xsize']/2-10:self.information['xsize']/2] = self.information['injection']
-            self.image[:, 1500:1511] = self.information['injection']
+            #self.image[:, 1500:1511] = self.information['injection']
+            self.image[:, 1950:1961] = self.information['injection']
             self.log.info('Adding horizontal charge injection line')
 
 
@@ -1141,13 +1143,13 @@ class VISsimulator():
         self.log.info('Adding pre- and overscan regions')
         canvas = np.zeros((self.information['ysize'],
                           (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
-        canvas[:, self.information['prescx']+1: self.information['prescx'] + 1 + self.information['xsize']] = self.image
+        canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.image
         self.image = canvas
 
         if self.cosmicRays:
             canvas = np.zeros((self.information['ysize'],
                               (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
-            canvas[:, self.information['prescx']+1:self.information['prescx']+1+self.information['xsize']] =  self.imagenoCR
+            canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.imagenoCR
             self.imagenoCR = canvas
 
 
@@ -1167,7 +1169,6 @@ class VISsimulator():
                 overload = value - self.information['fwc']
                 if overload > 0.:
                     overload /= 2.
-                    print self.image[j, i] - overload
                     self.image[j, i] -= overload
                     sum += overload
                 elif sum > 0.:

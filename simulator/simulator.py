@@ -33,22 +33,20 @@ The approximate sequence of events in the simulator is as follows:
               integer scale, find the bounding box of nonzero pixels, and finally
               overlay onto the detector according to its position.
 
-      #. Optionally apply a multiplicative and/or additive flat-field map.
-      #. Optionally add charge injection line (horizontal and/or vertical).
-      #. Optionally paste random (in position) cosmic ray streaks onto the CCD.
-      #. Photon and dark noise background is added to the pixel grid.
-      #. A Poissonian distribution of counts is generated for each point on the
-         pixel grid.
-      #. Optionally add cosmetic defects (from an input file).
-      #. Optionally add pre- and overscans in the serial direction.
-      #. Apply the radiation damage model (currently CDM03).!
-      #. Add readout noise (selected from a Gaussian distribution) and convert from
-         electrons to ADUs.
-      #. Add bias and discretise the counts.
-      #. The map is converted to FITS and output is written to the local disk.
+      #. Apply a multiplicative flat-field map [optional].
+      #. Add a charge injection line (horizontal and/or vertical) [optional].
+      #. Add cosmic ray streaks onto the CCD with random positions [optional].
+      #. Add photon (Poisson) noise and constant dark current to the pixel grid [optional].
+      #. Add cosmetic defects from an input file [optional].
+      #. Add pre- and overscan regions in the serial direction [optional].
+      #. Apply the CDM03 radiation damage model [optional].
+      #. Add readout noise (selected from a Gaussian distribution) [optional].
+      #. Convert from electrons to ADUs using the given gain factor.
+      #. Add a given bias level and discretise the counts (16bit).
+      #. Finally the generated image is converted to a FITS file and saved to the working directory.
 
 .. Warning:: This code is still work in progress and new features are being added.
-             Testing has been performed, but bugs may be lurking in corners.
+             Testing has been performed, but bugs may be lurking in corners, so be careful.
 
 
 Dependencies
@@ -106,6 +104,7 @@ Version and change logs::
     0.5: this version has all the basic features present, but not fully tested.
     0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
          image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
+    0.7: implemented bleeding.
 
 
 Future Work
@@ -115,7 +114,6 @@ Future Work
 
     #. test that the radiation damage is correctly implemented (especially given overscan)
     #. start using oversampled PSF
-    #. implement bleeding
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
@@ -670,12 +668,12 @@ class VISsimulator():
         self.sp = np.asarray(np.unique(self.objects[:, 3]), dtype=np.int)
 
         #generate mapping between object type and data
-        spectraMapping = {}
+        objectMapping = {}
         data = open('data/objects.dat').readlines()
         for stype in self.sp:
             if stype == 0:
                 #delta function
-                spectraMapping[stype] = 'PSF'
+                objectMapping[stype] = 'PSF'
             else:
                 for line in data:
                     tmp = line.split()
@@ -685,13 +683,13 @@ class VISsimulator():
                             d = pf.getdata(tmp[2])
                         else:
                             d = np.loadtxt(tmp[2], skiprows=2)
-                        spectraMapping[stype] = dict(file=tmp[2], data=d)
+                        objectMapping[stype] = dict(file=tmp[2], data=d)
                         break
 
-        self.spectraMapping = spectraMapping
+        self.objectMapping = objectMapping
 
-        #TODO: write a check if there are missing spectra and then stop
-        #msk = np.asarray(self.sp, dtype=np.int) != np.asarray(list(spectraMapping.keys()), dtype=np.int)
+        #TODO: write a check if there are missing object files and then stop
+        #msk = np.asarray(self.sp, dtype=np.int) != np.asarray(list(objectMapping.keys()), dtype=np.int)
         #print msk
         #if len(msk > 0):
         #    print 'Missing spectra...'
@@ -712,7 +710,7 @@ class VISsimulator():
                 self.log.info('Changing x coordinates to take into account quadrant')
                 self.objects[:, 0] -= self.information['xsize']
 
-        self.log.info('Spectral types:')
+        self.log.info('Object types:')
         self.log.info(self.sp)
         self.log.info('Total number of object types is %i' % len(self.sp))
 
@@ -1184,12 +1182,12 @@ class VISsimulator():
                 #second round - from top to bottom (bleeding was half'd already, so now full)
                 overload = value - self.information['fwc']
                 if overload > 0.:
-                    self.image[-j, i] -= overload
+                    self.image[-j-1, i] -= overload
                     sum += overload
                 elif sum > 0.:
                     if -overload > sum:
                         overload = -sum
-                    self.image[-j, i] -= overload
+                    self.image[-j-1, i] -= overload
                     sum += overload
 
 

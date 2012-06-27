@@ -122,6 +122,7 @@ Future Work
     #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
     #. implement a Gaussian random draw from the size-magnitude distribution
     #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
+    #. double check the centering of objects, now the exact centering is not interpolated
 
 
 Contact Information

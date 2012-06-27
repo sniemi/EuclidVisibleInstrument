@@ -1042,11 +1042,13 @@ class VISsimulator():
         #for a in range(self.information['xsize']):
         #    for b in range(self.information['ysize']):
         #        self.image[b, a] = self._slowPoissonNoise(self.image[b, a])
+        self.image[self.image < 0.0] = 0.0
         self.image = np.random.poisson(self.image)
         self.image[self.image < 0.0] = 0.0
         self.log.info('Added Poisson noise')
 
         if self.cosmicRays:
+            self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
             self.imagenoCR = np.random.poisson(self.imagenoCR)
             self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
 
@@ -1153,11 +1155,42 @@ class VISsimulator():
 
     def applyBleeding(self):
         """
+        Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.
 
+        Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
+        serial direction.
         """
-        #find all pixels above full well
-        msk = self.image > self.information['fwc']
-        pass
+        self.log.info('Applying column bleeding...')
+        #loop over each column, as bleeding is modelled column-wise
+        for i, column in enumerate(self.image.T):
+            sum = 0.
+            for j, value in enumerate(column):
+                #first round - from bottom to top (need to half the bleeding)
+                overload = value - self.information['fwc']
+                if overload > 0.:
+                    overload /= 2.
+                    print self.image[j, i] - overload
+                    self.image[j, i] -= overload
+                    sum += overload
+                elif sum > 0.:
+                    if -overload > sum:
+                        overload = -sum
+                    self.image[j, i] -= overload
+                    sum += overload
+
+        for i, column in enumerate(self.image.T):
+            sum = 0.
+            for j, value in enumerate(column[::-1]):
+                #second round - from top to bottom (bleeding was half'd already, so now full)
+                overload = value - self.information['fwc']
+                if overload > 0.:
+                    self.image[-j, i] -= overload
+                    sum += overload
+                elif sum > 0.:
+                    if -overload > sum:
+                        overload = -sum
+                    self.image[-j, i] -= overload
+                    sum += overload
 
 
     def discretise(self, max=2**16-1):

@@ -692,7 +692,28 @@ class VISsimulator():
             hdu.scale('int16', '', bzero=32768)
             hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
+        #add input keywords to the header
+        for key, value in self.information.iteritems():
+            #truncate long keys
+            if len(key) > 8:
+                key = key[:7]
+            try:
+                hdu.header.update(key.upper(), value)
+            except:
+                try:
+                    hdu.header.update(key.upper(), str(value))
+                except:
+                    pass
+
+        #write booleans
+        for key, value in self.booleans.iteritems():
+            #truncate long keys
+            if len(key) > 8:
+                key = key[:7]
+            hdu.header.update(key.upper(), str(value), 'Boolean Flags')
+
         #update and verify the header
+        hdu.header.add_history('This is an itermediate data product no the final output!')
         hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
                                                                            datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')

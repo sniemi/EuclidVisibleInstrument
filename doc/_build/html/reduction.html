@@ -104,8 +104,11 @@
 <p>This simple script can be used to reduce (simulated) VIS data.</p>
 <p>Does the following steps:</p>
 <div class="highlight-python"><pre>1 Bias correction
-2 Flat fielding (not yet implemented)
+2 Flat fielding
 3 CTI correction (conversion to electrons and back to ADUs)</pre>
+</div>
+<p>To Run:</p>
+<div class="highlight-python"><pre>python reduceVISdata.py -i VISCCD.fits -b superBiasVIS.fits -f SuperFlatField.fits</pre>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -121,7 +124,7 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
 </tr>
 </tbody>
 </table>
@@ -130,7 +133,6 @@
 <ol class="last arabic simple">
 <li>FITS extension should probably be read from the command line</li>
 <li>implement background/sky subtraction</li>
-<li>implement flat fielding (multiplicative effect)</li>
 </ol>
 </div>
 </div>
@@ -153,14 +155,7 @@ when calling the Fortran code so I added them for now.</p>
 <dl class="method">
 <dt id="reduction.reduceVISdata.reduceVISdata.flatfield">
 <tt class="descname">flatfield</tt><big>(</big><big>)</big><a class="headerlink" href="#reduction.reduceVISdata.reduceVISdata.flatfield" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Warning :</th><td class="field-body">Note written yet</td>
-</tr>
-</tbody>
-</table>
+<dd><p>Take into account pixel-to-pixel non-uniformity through multipicative flat fielding.</p>
 </dd></dl>
 
 <dl class="method">

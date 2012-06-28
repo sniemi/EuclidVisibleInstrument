@@ -51,7 +51,12 @@ class tileCCD():
             if i == 0:
                 self.hdu = hdu
 
-            if 'True' in hdu['OVERSCA']:
+            try:
+                overscan = hdu['OVERSCA']
+            except:
+                overscan = 'False'
+
+            if 'True' in overscan:
                 self.log.info('Subtracting pre- and overscan regions')
                 prescanx = hdu['PRESCX']
                 overscanx = hdu['OVERSCX']

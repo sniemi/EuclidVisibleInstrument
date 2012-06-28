@@ -7,8 +7,12 @@ This simple script can be used to reduce (simulated) VIS data.
 Does the following steps::
 
     1 Bias correction
-    2 Flat fielding (not yet implemented)
+    2 Flat fielding
     3 CTI correction (conversion to electrons and back to ADUs)
+
+To Run::
+
+    python reduceVISdata.py -i VISCCD.fits -b superBiasVIS.fits -f SuperFlatField.fits
 
 :requires: PyFITS
 :requires: NumPy
@@ -17,13 +21,12 @@ Does the following steps::
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.3
+:version: 0.4
 
 .. todo::
 
     1. FITS extension should probably be read from the command line
     2. implement background/sky subtraction
-    3. implement flat fielding (multiplicative effect)
 """
 import numpy as np
 import pyfits as pf
@@ -115,11 +118,18 @@ class reduceVISdata():
 
     def flatfield(self):
         """
-        :Warning: Note written yet
+        Take into account pixel-to-pixel non-uniformity through multipicative flat fielding.
         """
-        #TODO: write this part
-        self.log.warning('Flat fielding not implement yet...')
-        self.data = self.data
+        if self.values['flatfield'] is None:
+            self.log.warning('No flat field given, cannot flat field!')
+            self.data = self.data
+            return
+
+        self.log.info('Flat fielding data (multiplicative)')
+        fh = pf.open(self.values['flatfield'])
+        flat = fh[1].data
+
+        self.data /= flat
 
 
     def applyCTICorrection(self):
@@ -214,10 +224,12 @@ def processArgs(printHelp=False):
     """
     parser = OptionParser()
 
-    parser.add_option('-f', '--file', dest='input',
+    parser.add_option('-i', '--input', dest='input',
                       help="Input file to reduce", metavar='string')
     parser.add_option('-b', '--bias', dest='bias',
-                  help='Name of the super bias to use in data reduction', metavar='string')
+                      help='Name of the super bias to use in data reduction', metavar='string')
+    parser.add_option('-f', '--flat', dest='flat',
+                      help='Name of the super flat field to use in data reduction', metavar='string')
     parser.add_option('-o', '--output', dest='output',
                       help="Name of the output file, default=inputReduced.fits", metavar='string')
     if printHelp:
@@ -242,10 +254,10 @@ if __name__ == '__main__':
         output = opts.output
 
     #input values that are used in processing and save to the FITS headers
-    values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
+    values = dict(rnoise=4.5, dob=0, rdose=3e10, trapfile='data/cdm_euclid.dat', bias=1000.0, beta=0.6, fwc=175000,
                   vth=1.168e7, t=1.024e-2, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.0e-10, output=output,
                   input=opts.input, unsigned16bit=True, ext=0, biasframe=opts.bias, gain=3.5, exposure=565.0,
-                  exptime=565.0, order=3)
+                  exptime=565.0, order=3, flatfield=opts.flat)
 
     reduce = reduceVISdata(values, log)
     reduce.doAll()

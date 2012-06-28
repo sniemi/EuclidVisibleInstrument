@@ -59,7 +59,7 @@ def generateCatalog(**kwargs):
     :param deg: galactic latitude, either 30, 60, 90
     """
     settings = dict(ncatalogs=1, outputprefix='catalog', besancon=True,
-                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=80.0,
+                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=120.0,
                     galaxies='data/cdf_galaxies.dat',
                     types=np.asarray([8, 9, 10, 11, 12, 13, 14, 15]),
                     deg=30)

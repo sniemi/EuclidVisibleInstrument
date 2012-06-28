@@ -123,31 +123,29 @@ plate scale and pixel scale, oversampling factor, exposure time etc.).</p>
 </li>
 <li><p class="first">Read in CCD offset information, displace the image, and modify
 the output file name to contain the CCD and quadrant information
-(note that VIS has 6 x 6 detectors)</p>
+(note that VIS has a focal plane of 6 x 6 detectors).</p>
 </li>
-<li><p class="first">Read in source list and determine the number of different object types</p>
+<li><p class="first">Read in source list and determine the number of different object types.</p>
 </li>
-<li><p class="first">Read in the file which assigns data to a given object index</p>
+<li><p class="first">Read in the file which assigns data to a given object index.</p>
 </li>
-<li><p class="first">Load the PSF model (2D map, field dependent, or a simple model)</p>
+<li><p class="first">Load the PSF model (2D map or field dependent maps).</p>
 </li>
 <li><p class="first">Generate a finemap (oversampled image) for each object type, if object
-is 2D image and simple PSF model is used then calculate the shape tensor.
-Each type of object is then placed onto its own finely sampled submap.</p>
+is 2D image then calculate the shape tensor to used for size scaling.
+Each type of object is then placed onto its own finely sampled finemap.</p>
 </li>
 <li><p class="first">Loop over the number of exposures to co-add and:</p>
 <blockquote>
 <div><ul class="simple">
-<li>determine an integer scale of an object by scaling the object magnitude
-with the zeropoint and exposure time.</li>
-<li>determine uf the object lands on to the detector.</li>
-<li>determine uf the object is a star or an extended source (galaxy).</li>
-<li>if object is extended determine the size and scale counts with the
-derived integer scale (point a), convolve with the PSF, and finally
-overlay onto the detector according to its position.</li>
-<li>if object is a star, optimally blend the PSF, scale counts with the derived
-integer scale, find the bounding box of nonzero pixels, and finally
-overlay onto the detector according to its position.</li>
+<li>determine the number of electrons an object should have by scaling the object&#8217;s magnitude
+with the given zeropoint and exposure time.</li>
+<li>determine if the object lands on to the detector or not and whether the object is
+a star or an extended source (galaxy).</li>
+<li>if object is extended determine the size (using size-magnitude relation) and scale counts,
+convolve with the PSF, and finally overlay onto the detector according to its position.</li>
+<li>if object is a star, scale counts according to the derived.
+scaling (first step), and finally overlay onto the detector according to its position.</li>
 </ul>
 </div></blockquote>
 </li>
@@ -390,6 +388,10 @@ Scales dark and background with the exposure time.</p>
 <dt id="simulator.simulator.VISsimulator.applyRadiationDamage">
 <tt class="descname">applyRadiationDamage</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyRadiationDamage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies CDM03 radiation model to the image being constructed.</p>
+<div class="admonition-see-also admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last">Class :<cite>CDM03</cite></p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -403,8 +405,7 @@ Mean = 0.0, and std = sqrt(readout noise).</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.configure">
 <tt class="descname">configure</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.configure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Configure the simulator with input information and
-create and empty array to which the final image will
+<dd><p>Configures the simulator with input information and creates and empty array to which the final image will
 be build on.</p>
 </dd></dl>
 
@@ -434,7 +435,7 @@ defined by the argument max.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.generateFinemaps">
 <tt class="descname">generateFinemaps</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.generateFinemaps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate finely sampled images of the input data.</p>
+<dd><p>Generates finely sampled images of the input data.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">This should be rewritten. Now a direct conversion from FORTRAN, and thus
@@ -445,16 +446,18 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.readObjectlist">
 <tt class="descname">readObjectlist</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readObjectlist" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read object list using numpy.loadtxt, determine the number of object types,
-and find the file that corresponds to a given object type.</p>
+<dd><p>Reads object list using numpy.loadtxt, determines the number of object types,
+and finds the file that corresponds to a given object type.</p>
 <p>This method also displaces the object coordinates based on the quadrant and the
 CCD to be simulated.</p>
+<p>If even a single object type does not have a corresponding input then this method
+forces the program to exit.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.readPSFs">
 <tt class="descname">readPSFs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readPSFs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads in the PSF from a FITS file.</p>
+<dd><p>Reads in a PSF from a FITS file.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">at the moment this method supports only a single PSF file.</p>

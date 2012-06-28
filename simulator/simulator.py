@@ -13,25 +13,23 @@ The approximate sequence of events in the simulator is as follows:
       #. Read in a file defining the cosmic rays (trail lengths and distrb.)
       #. Read in CCD offset information, displace the image, and modify
          the output file name to contain the CCD and quadrant information
-         (note that VIS has 6 x 6 detectors)
-      #. Read in source list and determine the number of different object types
-      #. Read in the file which assigns data to a given object index
-      #. Load the PSF model (2D map, field dependent, or a simple model)
+         (note that VIS has a focal plane of 6 x 6 detectors).
+      #. Read in source list and determine the number of different object types.
+      #. Read in the file which assigns data to a given object index.
+      #. Load the PSF model (2D map or field dependent maps).
       #. Generate a finemap (oversampled image) for each object type, if object
-         is 2D image and simple PSF model is used then calculate the shape tensor.
-         Each type of object is then placed onto its own finely sampled submap.
+         is 2D image then calculate the shape tensor to used for size scaling.
+         Each type of object is then placed onto its own finely sampled finemap.
       #. Loop over the number of exposures to co-add and:
 
-            * determine an integer scale of an object by scaling the object magnitude
-              with the zeropoint and exposure time.
-            * determine uf the object lands on to the detector.
-            * determine uf the object is a star or an extended source (galaxy).
-            * if object is extended determine the size and scale counts with the
-              derived integer scale (point a), convolve with the PSF, and finally
-              overlay onto the detector according to its position.
-            * if object is a star, optimally blend the PSF, scale counts with the derived
-              integer scale, find the bounding box of nonzero pixels, and finally
-              overlay onto the detector according to its position.
+            * determine the number of electrons an object should have by scaling the object's magnitude
+              with the given zeropoint and exposure time.
+            * determine if the object lands on to the detector or not and whether the object is
+              a star or an extended source (galaxy).
+            * if object is extended determine the size (using size-magnitude relation) and scale counts,
+              convolve with the PSF, and finally overlay onto the detector according to its position.
+            * if object is a star, scale counts according to the derived.
+              scaling (first step), and finally overlay onto the detector according to its position.
 
       #. Apply a multiplicative flat-field map [optional].
       #. Add a charge injection line (horizontal and/or vertical) [optional].
@@ -547,7 +545,8 @@ class VISsimulator():
 
     def _slowPoissonNoise(self, value):
         """
-
+        .. deprecated:: 0.5
+           This feature is obsolete because one can also use numpy.random.poisson.
         """
         if value < 12:
             g = np.exp(-value)
@@ -592,6 +591,11 @@ class VISsimulator():
         #input array size
         nx = data.shape[1]
         ny = data.shape[0]
+
+        #if np.isnan(np.sum(data)):
+        #    print data
+        #    print object
+        #    sys.exit()
 
         # Assess the boundary box of the input image
         xlo = (1 - nx) * 0.5 + xt
@@ -701,24 +705,25 @@ class VISsimulator():
 
     def configure(self):
         """
-        Configure the simulator with input information and
-        create and empty array to which the final image will
+        Configures the simulator with input information and creates and empty array to which the final image will
         be build on.
         """
         self._readConfigs()
         self._processConfigs()
         self._createEmpty()
-
         self.log.info('Read in the configuration files and created and empty array')
 
 
     def readObjectlist(self):
         """
-        Read object list using numpy.loadtxt, determine the number of object types,
-        and find the file that corresponds to a given object type.
+        Reads object list using numpy.loadtxt, determines the number of object types,
+        and finds the file that corresponds to a given object type.
 
         This method also displaces the object coordinates based on the quadrant and the
         CCD to be simulated.
+
+        If even a single object type does not have a corresponding input then this method
+        forces the program to exit.
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
 
@@ -749,11 +754,12 @@ class VISsimulator():
 
         self.objectMapping = objectMapping
 
-        #TODO: write a check if there are missing object files and then stop
-        #msk = np.asarray(self.sp, dtype=np.int) != np.asarray(list(objectMapping.keys()), dtype=np.int)
-        #print msk
-        #if len(msk > 0):
-        #    print 'Missing spectra...'
+        #test that we have input data for each object type, if not exit with error
+        if not np.array_equal(self.sp, np.asarray(list(objectMapping.keys()), dtype=np.int)):
+            print self.sp
+            print np.asarray(list(objectMapping.keys()), dtype=np.int)
+            self.log.error('No all object types available, will exit!')
+            sys.exit('No all object types available')
 
         #change the image coordinates based on CCD
         #if self.information['quadrant'] > 1:
@@ -778,9 +784,9 @@ class VISsimulator():
 
     def readPSFs(self):
         """
-        Reads in the PSF from a FITS file.
+        Reads in a PSF from a FITS file.
 
-        .. note:: at the moment this method supports only a single PSF file.
+        .. Note:: at the moment this method supports only a single PSF file.
         """
         if self.information['variablePSF']:
             #grid of PSFs
@@ -799,7 +805,7 @@ class VISsimulator():
 
     def generateFinemaps(self):
         """
-        Generate finely sampled images of the input data.
+        Generates finely sampled images of the input data.
 
         .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
                      not probably very effective. Assumes the PSF sampling for other finemaps.
@@ -808,6 +814,7 @@ class VISsimulator():
         self.shapex = {}
         self.shapey = {}
 
+        #This could be force all the images to be oversampled with a given factor
         finemapsampling = 1
 
         for k, stype in enumerate(self.sp):
@@ -851,8 +858,7 @@ class VISsimulator():
                 fm /= np.sum(fm)
                 self.finemap[stype] = fm
 
-                #Compute a shape tensor, translated from Fortran so not very
-                #effective.
+                #Compute a shape tensor, translated from Fortran so not very effective.
                 Qxx = 0.
                 Qxy = 0.
                 Qyy = 0.
@@ -942,7 +948,16 @@ class VISsimulator():
                             data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
                         if sbig != 1.0:
                             data = ndimage.interpolation.zoom(data, sbig, mode='constant', cval=0.0)
+
+                        #suppress negative values
                         data[data < 0.0] = 0.0
+
+                        #if no values above 0, the galaxy is really small
+                        #thus we can make the galaxy one pixel
+                        if np.alltrue(data == 0.0):
+                            self.log.warning('A faint and small galaxy,' + \
+                                             'will have to assing all flux to single pixel before convolution')
+                            data = np.ones((1,1))
 
                         #renormalise and scale to the right magnitude
                         sum = np.sum(data)
@@ -1013,8 +1028,8 @@ class VISsimulator():
             self.log.info('Adding vertical charge injection line')
         if self.chargeInjectiony:
             #self.image[:, self.information['xsize']/2-10:self.information['xsize']/2] = self.information['injection']
-            #self.image[:, 1500:1511] = self.information['injection']
-            self.image[:, 1950:1961] = self.information['injection']
+            self.image[:, 1500:1511] = self.information['injection']
+            #self.image[:, 1950:1961] = self.information['injection']
             self.log.info('Adding horizontal charge injection line')
 
 
@@ -1134,6 +1149,8 @@ class VISsimulator():
     def applyRadiationDamage(self):
         """
         Applies CDM03 radiation model to the image being constructed.
+
+        .. seealso:: Class :`CDM03`
         """
         #save image without CTI
         self._writeFITSfile(self.image, 'nocti' + self.information['output'])

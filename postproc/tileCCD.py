@@ -14,7 +14,7 @@ To Run::
 
     python tileCCD.py -f 'Q*science.fits' -e 1
 
-:version: 0.2
+:version: 0.3
 """
 import pyfits as pf
 import numpy as np
@@ -40,13 +40,26 @@ class tileCCD():
         """
         Reads in data from all the input files and the header from the first file.
         Input files are taken from the input dictionary given when class was initiated.
+
+        Subtracts the pre- and overscan regions if these were simulated.
         """
         data = {}
         for i, file in enumerate(self.inputs['files']):
             fh = pf.open(file)
+            hdu = fh[self.inputs['ext']].header
+
             if i == 0:
-                self.hdu = fh[self.inputs['ext']].header
-            data[file] = fh[self.inputs['ext']].data
+                self.hdu = hdu
+
+            if 'True' in hdu['OVERSCA']:
+                self.log.info('Subtracting pre- and overscan regions')
+                prescanx = hdu['PRESCX']
+                overscanx = hdu['OVERSCX']
+                data[file] = fh[self.inputs['ext']].data[:, prescanx: -overscanx]
+            else:
+                self.log.info('No overscan simulated, using full array')
+                data[file] = fh[self.inputs['ext']].data
+
             self.log.info('Read data from {0:>s} extension {1:d}'.format(file, self.inputs['ext']))
             fh.close()
 

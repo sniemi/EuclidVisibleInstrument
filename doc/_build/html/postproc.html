@@ -424,7 +424,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
 </tbody>
 </table>
@@ -438,6 +438,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 <tt class="descname">readData</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.readData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads in data from all the input files and the header from the first file.
 Input files are taken from the input dictionary given when class was initiated.</p>
+<p>Subtracts the pre- and overscan regions if these were simulated.</p>
 </dd></dl>
 
 <dl class="method">

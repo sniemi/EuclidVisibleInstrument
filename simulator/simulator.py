@@ -95,7 +95,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 Change Log
 ----------
 
-:version: 0.7
+:version: 0.8
 
 Version and change logs::
 
@@ -105,6 +105,8 @@ Version and change logs::
     0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
          image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
     0.7: implemented bleeding.
+    0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
+         Improved the information that is being written to the FITS header.
 
 
 Future Work
@@ -120,8 +122,8 @@ Future Work
     #. implement a Gaussian random draw from the size-magnitude distribution
     #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
     #. double check the centering of objects, now the exact centering is not interpolated
-    #. write to the log the boolean choices (flat fielding, bleeding, etc)
     #. charge injection line positions are now hardcoded to the code, read from the config file
+    #. CTI model values are not included to the FITS header.
 
 
 Contact Information
@@ -141,6 +143,9 @@ import pyfits as pf
 import numpy as np
 from CTI import CTI
 from support import logger as lg
+
+__author__ = 'Sami-Matias Niemi'
+__version__ = 0.8
 
 
 class VISsimulator():
@@ -195,14 +200,44 @@ class VISsimulator():
 
         The configuration file may look as follows::
 
-            [SCIENCE]
+            [TEST]
             quadrant = 0
             CCDx = 0
             CCDy = 0
             xsize = 2048
             ysize = 2066
-
-            TODO: update this
+            prescanx = 50
+            overscanx = 20
+            fullwellcapacity = 200000
+            dark = 0.001
+            readout = 4.5
+            bias = 1000.0
+            cosmic_bkgd = 0.172
+            e_ADU = 3.5
+            injection = 150000.0
+            magzero = 1.7059e10
+            exposures = 1
+            exptime = 565.0
+            RA = 145.95
+            DEC = -38.16
+            sourcelist = data/source_test.dat
+            PSFfile = data/interpolated_psf.fits
+            trapfile = data/cdm_euclid.dat
+            cosmeticsFile = data/cosmetics.dat
+            flatfieldFile = data/VISFlatField2percent.fits
+            output = test.fits
+            #add sources
+            addSources = yes
+            noise = yes
+            cosmetics = no
+            chargeInjectionx = no
+            chargeInjectiony = no
+            radiationDamage = yes
+            cosmicRays = yes
+            overscans = yes
+            bleeding = yes
+            flatfieldM = yes
+            flatfieldA = no
 
         For explanation of each field, see /data/test.config.
 
@@ -275,11 +310,26 @@ class VISsimulator():
         self.bleeding = self.config.getboolean(self.section, 'bleeding')
         self.overscans = self.config.getboolean(self.section, 'overscans')
 
+        self.booleans = dict(flatfieldM=self.flatfieldM,
+                             flatfieldA=self.flatfieldA,
+                             chargeInjectionx=self.chargeInjectionx,
+                             chargeInjectiony=self.chargeInjectiony,
+                             cosmicRays=self.cosmicRays,
+                             noise=self.noise,
+                             cosmetics=self.cosmetics,
+                             radiationDamage=self.radiationDamage,
+                             addsources=self.addsources,
+                             bleeding=self.bleeding,
+                             overscans=self.overscans)
+
         if self.debug:
             pprint.pprint(self.information)
 
-        self.log.info('Using the following inputs:')
+        self.log.info('Using the following input values:')
         for key, value in self.information.iteritems():
+            self.log.info('%s = %s' % (key, value))
+        self.log.info('Using the following booleans:')
+        for key, value in self.booleans.iteritems():
             self.log.info('%s = %s' % (key, value))
 
 
@@ -440,19 +490,24 @@ class VISsimulator():
         :return: whether the object falls on the detector or not
         :rtype: boolean
         """
-        ny = self.finemap[object[3]].shape[1]
-        nx = self.finemap[object[3]].shape[0]
+        ny, nx = self.finemap[object[3]].shape
         mx = self.information['xsize']
         my = self.information['ysize']
-        fac = object[4]
         xt = object[0]
         yt = object[1]
 
+        if object[3] > 0:
+            #galaxy
+            fac = (0.2**((object[2] - 22.)/7.)) / self.shapey[object[3]] / 2.
+        else:
+            #star
+            fac = 1.0
+
         #Assess the boundary box of the input image.
-        xlo = (1 - nx) * 0.5 * fac  + xt
-        xhi = (nx - 1) * 0.5 * fac  + xt
-        ylo = (1 - ny) * 0.5 * fac  + yt
-        yhi = (ny - 1) * 0.5 * fac  + yt
+        xlo = (1 - nx) * 0.5 * fac + xt
+        xhi = (nx - 1) * 0.5 * fac + xt
+        ylo = (1 - ny) * 0.5 * fac + yt
+        yhi = (ny - 1) * 0.5 * fac + yt
 
         i1 = np.floor(xlo + 0.5)
         i2 = np.floor(xhi + 0.5) + 1
@@ -560,10 +615,14 @@ class VISsimulator():
         if j2 > self.information['ysize']:
             j2 = self.information['ysize']
 
+        if i1 > i2 or j1 > j2:
+            self.log.info('Object does not fall on the detector...')
+            return
+
         ni = i2 - i1
         nj = j2 - j1
 
-        self.log.info('Adding an object to (x,y)=({0:.1f}, {1:.1f})'.format(xt, yt))
+        self.log.info('Adding an object to (x,y)=({0:.4f}, {1:.4f})'.format(xt, yt))
         self.log.info('Bounding box = [%i, %i : %i, %i]' % (i1, i2, j1, j2))
 
         #add to the image
@@ -630,7 +689,8 @@ class VISsimulator():
             hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #update and verify the header
-        hdu.header.add_history('Created by VISsim at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
+                                                                           datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -833,7 +893,7 @@ class VISsimulator():
         visible = 0
 
         self.log.info('Number of CCD transits = %i' % self.information['exposures'])
-        self.log.info('Number of objects to be inserted is %i' % n_objects)
+        self.log.info('Total number of objects in the input catalog = %i' % n_objects)
 
         #calculate the scaling factors from the magnitudes
         intscales = 10.0**(-0.4 * self.objects[:, 2]) * \
@@ -888,7 +948,7 @@ class VISsimulator():
                         sum = np.sum(data)
                         data *= intscales[j] / sum
 
-                        self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
+                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
 
                         if self.debug:
                             self._writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
@@ -1159,6 +1219,8 @@ class VISsimulator():
 
         Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
         serial direction.
+
+        :return: None
         """
         self.log.info('Applying column bleeding...')
         #loop over each column, as bleeding is modelled column-wise
@@ -1194,15 +1256,18 @@ class VISsimulator():
 
     def discretise(self, max=2**16-1):
         """
-        Convert floating point arrays to integer arrays.
+        Converts a floating point image array (self.image) to an integer array with max values
+        defined by the argument max.
 
         :param max: maximum value the the integer array may contain [default 65k]
         :type max: float
+
+        :return: None
         """
         #also write out an image without cosmics if those were added
         if self.cosmicRays:
             self.imagenoCR = self.imagenoCR.astype(np.int)
-            self.imagenoCR[self.imagenoCR > max] = 0.0
+            self.imagenoCR[self.imagenoCR > max] = max
             self._writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
 
         self.image = self.image.astype(np.int)
@@ -1213,7 +1278,10 @@ class VISsimulator():
 
     def writeOutputs(self):
         """
-        Write out FITS files using PyFITS.
+        Writes out a FITS file using PyFITS and converts the image array to 16bit unsigned integer as
+        appropriate for VIS.
+
+        Updates header with the input values and flags used during simulation.
         """
         if os.path.isfile(self.information['output']):
             os.remove(self.information['output'])
@@ -1238,15 +1306,23 @@ class VISsimulator():
             if len(key) > 8:
                 key = key[:7]
             try:
-                hdu.header.update(key, value)
+                hdu.header.update(key.upper(), value)
             except:
                 try:
-                    hdu.header.update(key, str(value))
+                    hdu.header.update(key.upper(), str(value))
                 except:
                     pass
 
+        #write booleans
+        for key, value in self.booleans.iteritems():
+            #truncate long keys
+            if len(key) > 8:
+                key = key[:7]
+            hdu.header.update(key.upper(), str(value), 'Boolean Flags')
+
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
+                                                                           datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -1257,7 +1333,10 @@ class VISsimulator():
 
     def simulate(self):
         """
-        Create a single simulated image of one quadrant defined by the configuration file.
+        Create a single simulated image of a quadrant defined by the configuration file.
+        Will do all steps defined in the config file sequentially.
+
+        :return: None
         """
         self.configure()
         self.readObjectlist()

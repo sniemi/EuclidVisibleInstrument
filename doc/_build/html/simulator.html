@@ -230,7 +230,7 @@ sys     0m1.361s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.7</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.8</td>
 </tr>
 </tbody>
 </table>
@@ -240,7 +240,9 @@ sys     0m1.361s</pre>
 0.5: this version has all the basic features present, but not fully tested.
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
      image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
-0.7: implemented bleeding.</pre>
+0.7: implemented bleeding.
+0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
+     Improved the information that is being written to the FITS header.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -256,8 +258,8 @@ sys     0m1.361s</pre>
 <li>implement a Gaussian random draw from the size-magnitude distribution</li>
 <li>move the cosmic ray track information file definitions to the input file (now hardcoded in the method)</li>
 <li>double check the centering of objects, now the exact centering is not interpolated</li>
-<li>write to the log the boolean choices (flat fielding, bleeding, etc)</li>
 <li>charge injection line positions are now hardcoded to the code, read from the config file</li>
+<li>CTI model values are not included to the FITS header.</li>
 </ol>
 </div>
 </div>
@@ -343,6 +345,14 @@ in the information dictionary (key bias).</p>
 <dd><p>Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.</p>
 <p>Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
 serial direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -401,12 +411,15 @@ be build on.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.discretise">
 <tt class="descname">discretise</tt><big>(</big><em>max=65535</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert floating point arrays to integer arrays.</p>
+<dd><p>Converts a floating point image array (self.image) to an integer array with max values
+defined by the argument max.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max</strong> (<em>float</em>) &#8211; maximum value the the integer array may contain [default 65k]</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
 </tbody>
 </table>
@@ -451,13 +464,24 @@ CCD to be simulated.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.simulate">
 <tt class="descname">simulate</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.simulate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a single simulated image of one quadrant defined by the configuration file.</p>
+<dd><p>Create a single simulated image of a quadrant defined by the configuration file.
+Will do all steps defined in the config file sequentially.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.writeOutputs">
 <tt class="descname">writeOutputs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.writeOutputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write out FITS files using PyFITS.</p>
+<dd><p>Writes out a FITS file using PyFITS and converts the image array to 16bit unsigned integer as
+appropriate for VIS.</p>
+<p>Updates header with the input values and flags used during simulation.</p>
 </dd></dl>
 
 </dd></dl>

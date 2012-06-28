@@ -39,7 +39,8 @@ def drawFromCumulativeDistributionFunction(cpdf, x, number):
 
 def plotDistributionFunction(datax, datay, fitx, fity, output):
     """
-
+    Generates a simple plot showing the observed data points and the fit
+    that was generated based on these data.
     """
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -59,7 +60,7 @@ def generateCatalog(**kwargs):
     :param deg: galactic latitude, either 30, 60, 90
     """
     settings = dict(ncatalogs=1, outputprefix='catalog', besancon=True,
-                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=120.0,
+                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=110.0,
                     galaxies='data/cdf_galaxies.dat',
                     types=np.asarray([8, 9, 10, 11, 12, 13, 14, 15]),
                     deg=30)
@@ -93,15 +94,15 @@ def generateCatalog(**kwargs):
         if settings['deg'] == 30:
             print 'Selecting stars for 30deg'
             tmp = 1
-            sfudge = 1.0
+            sfudge = 0.85
         elif settings['deg'] == 60:
             print 'Selecting stars for 60deg'
             tmp = 2
-            sfudge = 1.0
+            sfudge = 0.8
         else:
             print 'Selecting stars for 90deg'
             tmp = 3
-            sfudge = 1.0
+            sfudge = 0.75
 
         #read in data
         d = np.loadtxt('data/stars.dat', usecols=(0, tmp))

@@ -790,10 +790,12 @@ class VISsimulator():
 
         #and quadrant
         if self.information['quadrant'] > 0:
+
             if self.information['quadrant'] > 1:
                 #change y coordinate value
                 self.log.info('Changing y coordinates to take into account quadrant')
                 self.objects[:, 1] -= self.information['ysize']
+
             if self.information['quadrant'] % 2 != 0:
                 self.log.info('Changing x coordinates to take into account quadrant')
                 self.objects[:, 0] -= self.information['xsize']

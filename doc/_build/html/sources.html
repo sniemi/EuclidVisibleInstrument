@@ -1,0 +1,192 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Generating Object Catalogue &mdash; VIS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Simulation tools" href="simulator.html" />
+    <link rel="prev" title="Welcome to Euclid Visible InStrument (VIS) documentation" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulator.html" title="Simulation tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Euclid Visible InStrument (VIS) documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="simulator.html"
+                        title="next chapter">Simulation tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/sources.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <span class="target" id="module-sources.createObjectCatalogue"></span><div class="section" id="generating-object-catalogue">
+<h1>Generating Object Catalogue<a class="headerlink" href="#generating-object-catalogue" title="Permalink to this headline">¶</a></h1>
+<p>This simple script can be used to generate an object catalogue that can then be used
+as an input for the VIS simulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="sources.createObjectCatalogue.drawFromCumulativeDistributionFunction">
+<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">drawFromCumulativeDistributionFunction</tt><big>(</big><em>cpdf</em>, <em>x</em>, <em>number</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.drawFromCumulativeDistributionFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a number of random x values from a cumulative distribution function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cpdf</strong> (<em>numpy array</em>) &#8211; cumulative distribution function</li>
+<li><strong>x</strong> (<em>numpy array</em>) &#8211; values of the abscissa</li>
+<li><strong>number</strong> (<em>int</em>) &#8211; number of draws</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">randomly drawn x value</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sources.createObjectCatalogue.generateCatalog">
+<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">generateCatalog</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.generateCatalog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a catalogue of stars and galaxies that follow
+realistic number density functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>deg</strong> &#8211; galactic latitude, either 30, 60, 90</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="sources.createObjectCatalogue.plotDistributionFunction">
+<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">plotDistributionFunction</tt><big>(</big><em>datax</em>, <em>datay</em>, <em>fitx</em>, <em>fity</em>, <em>output</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.plotDistributionFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a simple plot showing the observed data points and the fit
+that was generated based on these data.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="simulator.html" title="Simulation tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

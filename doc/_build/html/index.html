@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to VIS’s documentation! &mdash; VIS 0.1 documentation</title>
+    <title>Welcome to Euclid Visible InStrument (VIS) documentation &mdash; VIS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="#" />
-    <link rel="next" title="Simulation tools" href="simulator.html" /> 
+    <link rel="next" title="Generating Object Catalogue" href="sources.html" /> 
   </head>
   <body>
 
@@ -43,7 +43,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulator.html" title="Simulation tools"
+          <a href="sources.html" title="Generating Object Catalogue"
              accesskey="N">next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -55,11 +55,14 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to VIS&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#generating-simulated-images">Generating simulated images</a><ul>
+<li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) documentation</a></li>
+<li><a class="reference internal" href="#creating-object-catalogs">Creating Object Catalogs</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#instrument-characteristics">Instrument characteristics</a><ul>
+<li><a class="reference internal" href="#generating-simulated-images">Generating Simulated Images</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#instrument-characteristics">Instrument Characteristics</a><ul>
 </ul>
 </li>
 <li><a class="reference internal" href="#data-reduction">Data reduction</a><ul>
@@ -77,12 +80,13 @@
 <li><a class="reference internal" href="#code">Code</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#photometric-accuracy">Photometric Accuracy</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="simulator.html"
-                        title="next chapter">Simulation tools</a></p>
+  <p class="topless"><a href="sources.html"
+                        title="next chapter">Generating Object Catalogue</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -109,8 +113,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-vis-s-documentation">
-<h1>Welcome to VIS&#8217;s documentation!<a class="headerlink" href="#welcome-to-vis-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-euclid-visible-instrument-vis-documentation">
+<h1>Welcome to Euclid Visible InStrument (VIS) documentation<a class="headerlink" href="#welcome-to-euclid-visible-instrument-vis-documentation" title="Permalink to this headline">¶</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -119,18 +123,44 @@
 </tr>
 <tr class="field-even field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.0</td>
 </tr>
 </tbody>
 </table>
-<p>This Python package provides subpackages and methods related to the VIS instrument on board the Euclid satellite.
-The subpackages include methods to study CTI effects and fit new trap species, reduce and
-analyse data, and to include instrumental characteristics such as readout noise and CTI to &#8220;pristine&#8221; images.</p>
+<p>This Python package provides subpackages and methods related to the visible instrument (VIS) on board
+the Euclid satellite. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
+characteristics such as readout noise and CTI to &#8220;pristine&#8221; images generated with e.g. GREAT10 photon
+shooting code.</p>
+</div>
+<div class="section" id="creating-object-catalogs">
+<h1>Creating Object Catalogs<a class="headerlink" href="#creating-object-catalogs" title="Permalink to this headline">¶</a></h1>
+<p>The <em>sources</em> subpackage contains a script to generate object catalogs with random x and y positions for
+stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
+based on observations. As the number of stars depends on the galactic latitude, the script allows
+the user to use three different (30, 60, 90 degrees) angles when generating the distribution of stars
+(see the example plot below).</p>
+<div class="align-center figure align-center">
+<img alt="_images/Distributions.png" src="_images/Distributions.png" style="width: 800px;" />
+<p class="caption">Example showing star and galaxy distributions. The solid lines show observations while
+the histograms show the distributions in the generated catalogues.</p>
+</div>
+<p>For the Python code documentation, please see:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="sources.html">Generating Object Catalogue</a></li>
+</ul>
+</div>
 </div>
 <div class="section" id="generating-simulated-images">
-<h1>Generating simulated images<a class="headerlink" href="#generating-simulated-images" title="Permalink to this headline">¶</a></h1>
-<p>The <em>simulator</em> subpackage contains scripts to generate simulated VIS images, however, this package
-is under heavy development and should therefore be treated with caution.</p>
+<h1>Generating Simulated Images<a class="headerlink" href="#generating-simulated-images" title="Permalink to this headline">¶</a></h1>
+<p>The <em>simulator</em> subpackage contains scripts to generate simulated VIS images. Two different methods
+of generating mock images is provided. One which takes observed images (say from HST) as an input and
+another in which analytical profiles are used for galaxies. The former code is custom made while the
+latter relies hevily on IRAF&#8217;s artdata package and mkobjects task.</p>
+<p>The VIS reference simulator is the custom made with real observed galaxies as an input. The IRAF
+based simulator can be used, for example, to train algorithms to derive elliptiticy of an object.
+For more detailed documentation, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="simulator.html">Simulation tools</a><ul>
@@ -147,13 +177,18 @@ is under heavy development and should therefore be treated with caution.</p>
 </li>
 </ul>
 </div>
+<div class="align-center figure align-center">
+<img alt="_images/simu.png" src="_images/simu.png" style="width: 800px;" />
+<p class="caption">An example image generated with the reference simulator. The image shows a part of a single
+CCD.</p>
+</div>
 </div>
 <div class="section" id="instrument-characteristics">
-<h1>Instrument characteristics<a class="headerlink" href="#instrument-characteristics" title="Permalink to this headline">¶</a></h1>
+<h1>Instrument Characteristics<a class="headerlink" href="#instrument-characteristics" title="Permalink to this headline">¶</a></h1>
 <p>The <em>postproc</em> subpackage contains methods related to either generating a CCD mosaics from simulated data
 that is in quadrants like the VIS reference simulator produces or including instrument characteristics
 to simulated images that contain only Poisson noise and background. For more detailed documentation
-of the classes, please see:</p>
+of the Python classes, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing tools</a><ul>
@@ -219,6 +254,21 @@ can be used for, e.g., testing the shape measurement code.</p>
 data.</p>
 </div>
 </div>
+<div class="section" id="photometric-accuracy">
+<h1>Photometric Accuracy<a class="headerlink" href="#photometric-accuracy" title="Permalink to this headline">¶</a></h1>
+<p>The reference simulator code has been tested against photometric accuracy (without aperture correction). A
+simulated image was generated with the reference simulator, sources were identified and photometry performed
+using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
+figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
+around 0.1 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
+single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
+the derived magnitudes are inaccurate.</p>
+<div class="align-center figure align-center">
+<img alt="_images/Magnitudes15.png" src="_images/Magnitudes15.png" style="width: 800px;" />
+<p class="caption">Example showing the recovered photometry from a reference simulator image with realistic noise
+and end-of-life radiation damage, but without aperture correction. The offset is around 0.1mag.</p>
+</div>
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
@@ -244,7 +294,7 @@ data.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="simulator.html" title="Simulation tools"
+          <a href="sources.html" title="Generating Object Catalogue"
              >next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

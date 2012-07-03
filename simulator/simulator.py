@@ -53,9 +53,9 @@ Dependencies
 
 This script depends on the following packages.
 
-:requires: PyFITS (tested with 3.0.3)
-:requires: NumPy (tested with 1.6.2)
-:requires: SciPy (tested with 0.10.0)
+:requires: PyFITS (tested with 3.0.6)
+:requires: NumPy (tested with 1.6.1)
+:requires: SciPy (tested with 0.10.1)
 :requires: vissim-python package
 
 
@@ -66,7 +66,7 @@ Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows::
 
-    python simulator.py -c data/test.config -s TESTSCIENCE -d
+    python simulator.py -c data/test.config -s TESTSCIENCE
 
 This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
@@ -80,12 +80,12 @@ numerical rounding uncertainties.
 
 Benchmark using the SCIENCE section of the test.config input file::
 
-        Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
-        6772 objects were place on the detector
+    Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+    6798 objects were place on the detector
 
-        real	8m28.781s
-        user	8m24.792s
-        sys	0m1.361s
+    real	5m41.421s
+    user	5m36.597s
+    sys	    0m1.327s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation.
@@ -189,7 +189,7 @@ class VISsimulator():
                                 xsize=2048,
                                 ysize=2066,
                                 prescanx=50,
-                                overscanx=20,
+                                ovrscanx=20,
                                 fullwellcapacity=200000,
                                 dark=0.001,
                                 readout=4.5,
@@ -227,7 +227,7 @@ class VISsimulator():
             xsize = 2048
             ysize = 2066
             prescanx = 50
-            overscanx = 20
+            ovrscanx = 20
             fullwellcapacity = 200000
             dark = 0.001
             readout = 4.5
@@ -577,9 +577,6 @@ class VISsimulator():
         xt = obj[0] - 1.0
         yt = obj[1] - 1.0
 
-        if self.information['psfoversampling'] > 1.0:
-            data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'])
-
         #input array size
         nx = data.shape[1]
         ny = data.shape[0]
@@ -838,15 +835,30 @@ class VISsimulator():
             fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling))
 
             if stype == 0:
-                #PSF
-                i1 = (self.PSFx*finemapsampling - self.PSFx) / 2
-                i2 = i1 + self.PSFx
-                j1 = (self.PSFy*finemapsampling - self.PSFy) / 2
-                j2 = j1 + self.PSFy
+                #PSF; scale it to the right size as this is not used for convolution but for stars
+                if self.information['psfoversampling'] > 1.0:
+                    self.log.info('Saving a resampled PSF to finemaps so that i can be used for stars')
+                    data = scipy.ndimage.zoom(self.PSF, 1./self.information['psfoversampling'], order=3)
+                else:
+                    data = self.PSF
 
-                fm[j1:j2, i1:i2] = self.PSF
+                ny, nx = data.shape
 
+                i1 = (self.PSFx*finemapsampling - nx) / 2
+                if i1 < 1:
+                    i1 = 0
+                i2 = i1 + ny
+
+                j1 = (self.PSFy*finemapsampling - ny) / 2
+                if j1 < 1:
+                    j1 = 0
+                j2 = j1 + nx
+
+                fm[j1:j2, i1:i2] = data
+
+                #normalize to sum to unity
                 fm /= np.sum(fm)
+                self.finemap[stype] = fm
 
                 self.finemap[stype] = fm
                 self.shapex[stype] = 0
@@ -855,12 +867,11 @@ class VISsimulator():
                 if self.information['psfoversampling'] > 1.0:
                     data = scipy.ndimage.zoom(self.objectMapping[stype]['data'],
                                               self.information['psfoversampling'],
-                                              order=0)
+                                              order=3)
                 else:
                     data = self.objectMapping[stype]['data']
 
-                nx = data.shape[1]
-                ny = data.shape[0]
+                ny, nx = data.shape
 
                 i1 = (self.PSFx*finemapsampling - nx) / 2
                 if i1 < 1:
@@ -943,10 +954,9 @@ class VISsimulator():
                         self.log.info(txt)
 
                         #renormalise and scale with the intscale
-                        data = self.finemap[stype] / np.sum(self.finemap[stype]) * intscales[j]
-
-                        #for oversampled there should be scaling here
-                        #data = ndimage.interpolation.zoom(data, 1./self.information['PSFscaling'])
+                        data = self.finemap[stype].copy()
+                        sum = np.sum(data)
+                        data *= intscales[j] / sum
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
@@ -964,27 +974,26 @@ class VISsimulator():
                         print txt
                         self.log.info(txt)
 
-                        #rotate and zoom the image using interpolation and remove negative values
+                        #rotate the image using interpolation
                         if obj[4] != 0.0:
                             data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                        #scale the size of the image
                         if sbig != 1.0:
-                            data = ndimage.interpolation.zoom(data, sbig, mode='constant', cval=0.0)
+                            data = scipy.ndimage.zoom(data, sbig, mode='constant', cval=0.0)
 
                         #suppress negative values
                         data[data < 0.0] = 0.0
-
-                        #if no values above 0, the galaxy is really small
-                        #thus we can make the galaxy one pixel
-                        if np.alltrue(data == 0.0):
-                            self.log.warning('A faint and small galaxy,' + \
-                                             'will have to assing all flux to single pixel before convolution')
-                            data = np.ones((1,1))
 
                         #renormalise and scale to the right magnitude
                         sum = np.sum(data)
                         data *= intscales[j] / sum
 
-                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
+                        #if no values above 0, the galaxy is really small and thus we can make the galaxy one pixel
+                        if np.alltrue(data == 0.0):
+                            self.log.warning('A faint and small galaxy,' + \
+                                             'will have to assing all flux to single pixel before convolution')
+                            data = np.ones((1,1))
 
                         if self.debug:
                             self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
@@ -995,16 +1004,27 @@ class VISsimulator():
                             #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
                             conv = signal.convolve2d(data, self.PSF, mode='same')
                         else:
-                            if intscales[j] > 1e5:
-                                #For very large values, a boxing effect is
-                                #visible unless full convolution is being used.
+                            if intscales[j] > 1e6:
+                                #For large values, a boxing effect is
+                                #visible unless a full convolution is being used.
                                 conv = signal.convolve2d(data, self.PSF, mode='full')
                             else:
                                 conv = signal.convolve2d(data, self.PSF, mode='same')
 
+                        #scale the size of the image based on the size and PSF over sampling
+                        if self.information['psfoversampling'] > 1.0:
+                            conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'],
+                                                      mode='constant', cval=0.0)
+
+#                        #renormalise and scale to the right magnitude
+#                        sum = np.sum(conv)
+#                        conv *= intscales[j] / sum
+
                         if self.debug:
                             scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
                             self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+
+                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
 
                         #overlay the convolved image on the image
                         self.overlayToCCD(conv, obj)
@@ -1243,7 +1263,7 @@ class VISsimulator():
         self.log.info('Adding pre- and overscan regions')
 
         canvas = np.zeros((self.information['ysize'],
-                          (self.information['xsize'] + self.information['prescanx'] + self.information['overscanx'])))
+                          (self.information['xsize'] + self.information['prescanx'] + self.information['ovrscanx'])))
 
         #because the pre- and overscans are in x-direction this needs to be taken into account for the
         # 1st and 3rd quadrant
@@ -1251,19 +1271,19 @@ class VISsimulator():
             canvas[:, self.information['prescanx']: self.information['prescanx']+self.information['xsize']] = self.image
             self.image = canvas
         elif self.information['quadrant'] in (1, 3):
-            canvas[:, self.information['overscanx']: self.information['overscanx']+self.information['xsize']] = self.image
+            canvas[:, self.information['ovrscanx']: self.information['ovrscanx']+self.information['xsize']] = self.image
             self.image = canvas
         else:
             self.log.error('Cannot include pre- and overscan because of an unknown quadrant!')
 
         if self.cosmicRays:
             canvas = np.zeros((self.information['ysize'],
-                              (self.information['xsize'] + self.information['prescanx'] + self.information['overscanx'])))
+                              (self.information['xsize'] + self.information['prescanx'] + self.information['ovrscanx'])))
 
             if self.information['quadrant'] in (0, 2):
                 canvas[:, self.information['prescanx']: self.information['prescanx']+self.information['xsize']] = self.imagenoCR
             else:
-                canvas[:, self.information['overscanx']: self.information['overscanx']+self.information['xsize']] = self.imagenoCR
+                canvas[:, self.information['ovrscanx']: self.information['ovrscanx']+self.information['xsize']] = self.imagenoCR
 
             self.imagenoCR = canvas
 

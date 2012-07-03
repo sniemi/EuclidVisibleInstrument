@@ -17,7 +17,7 @@ To execute::
 where -f argument defines the input files to be tiled and the -e argument marks the
 FITS extension from which the imaging data are being read.
 
-:version: 0.3
+:version: 0.4
 """
 import pyfits as pf
 import numpy as np
@@ -44,7 +44,8 @@ class tileCCD():
         Reads in data from all the input files and the header from the first file.
         Input files are taken from the input dictionary given when class was initiated.
 
-        Subtracts the pre- and overscan regions if these were simulated.
+        Subtracts the pre- and overscan regions if these were simulated. Takes into account
+        which quadrant is being processed so that the extra regions are subtracted correctly.
         """
         data = {}
         for i, file in enumerate(self.inputs['files']):
@@ -61,8 +62,8 @@ class tileCCD():
 
             if 'True' in overscan:
                 self.log.info('Subtracting pre- and overscan regions')
-                prescanx = hdu['PRESCX']
-                overscanx = hdu['OVERSCX']
+                prescanx = hdu['PRESCANX']
+                overscanx = hdu['OVRSCAX']
                 quadrant = hdu['QUADRANT']
 
                 if quadrant in (0, 2):

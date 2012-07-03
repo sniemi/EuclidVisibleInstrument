@@ -13,6 +13,29 @@ characteristics such as readout noise and CTI to "pristine" images generated wit
 shooting code.
 
 
+
+Installation
+============
+
+This package contains a mixture of classes and scripts. There is no official or preferred installation
+instructions yet. To get most scripts working you should place the path to the root directory of the package
+to your PYTHONPATH environment variable. In addition, it is useful to compile the Fortran code available
+in the fortran subdirectory with the following command::
+
+    f2py -c -m cdm03 cdm03.f90
+
+and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
+but you still need for example gFortran compiler.
+
+
+Dependencies
+------------
+
+The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
+Thus it is recommended that on installs a Python distribution like `Enthought Python <http://www.enthought.com/>`_,
+which installs all dependencies at once.
+
+
 Creating Object Catalogs
 ========================
 

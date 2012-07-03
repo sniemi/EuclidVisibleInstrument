@@ -1,19 +1,21 @@
-\BOOKMARK [0][-]{chapter.1}{Creating Object Catalogs}{}% 1
-\BOOKMARK [1][-]{section.1.1}{Generating Object Catalogue}{chapter.1}% 2
-\BOOKMARK [0][-]{chapter.2}{Generating Simulated Images}{}% 3
-\BOOKMARK [1][-]{section.2.1}{Simulation tools}{chapter.2}% 4
-\BOOKMARK [0][-]{chapter.3}{Instrument Characteristics}{}% 5
-\BOOKMARK [1][-]{section.3.1}{Postprocessing tools}{chapter.3}% 6
-\BOOKMARK [0][-]{chapter.4}{Data reduction}{}% 7
-\BOOKMARK [1][-]{section.4.1}{Data reduction tools}{chapter.4}% 8
-\BOOKMARK [0][-]{chapter.5}{Data Analysis}{}% 9
-\BOOKMARK [1][-]{section.5.1}{VIS data analysis tools}{chapter.5}% 10
-\BOOKMARK [0][-]{chapter.6}{Charge Transfer Inefficiency}{}% 11
-\BOOKMARK [1][-]{section.6.1}{Fortran code for CTI}{chapter.6}% 12
-\BOOKMARK [0][-]{chapter.7}{Supporting methods and files}{}% 13
-\BOOKMARK [1][-]{section.7.1}{Objects}{chapter.7}% 14
-\BOOKMARK [1][-]{section.7.2}{Code}{chapter.7}% 15
-\BOOKMARK [0][-]{chapter.8}{Photometric Accuracy}{}% 16
-\BOOKMARK [0][-]{chapter.9}{Indices and tables}{}% 17
-\BOOKMARK [0][-]{section*.93}{Python Module Index}{}% 18
-\BOOKMARK [0][-]{section*.94}{Index}{}% 19
+\BOOKMARK [0][-]{chapter.1}{Installation}{}% 1
+\BOOKMARK [1][-]{section.1.1}{Dependencies}{chapter.1}% 2
+\BOOKMARK [0][-]{chapter.2}{Creating Object Catalogs}{}% 3
+\BOOKMARK [1][-]{section.2.1}{Generating Object Catalogue}{chapter.2}% 4
+\BOOKMARK [0][-]{chapter.3}{Generating Simulated Images}{}% 5
+\BOOKMARK [1][-]{section.3.1}{Simulation tools}{chapter.3}% 6
+\BOOKMARK [0][-]{chapter.4}{Instrument Characteristics}{}% 7
+\BOOKMARK [1][-]{section.4.1}{Postprocessing tools}{chapter.4}% 8
+\BOOKMARK [0][-]{chapter.5}{Data reduction}{}% 9
+\BOOKMARK [1][-]{section.5.1}{Data reduction tools}{chapter.5}% 10
+\BOOKMARK [0][-]{chapter.6}{Data Analysis}{}% 11
+\BOOKMARK [1][-]{section.6.1}{VIS data analysis tools}{chapter.6}% 12
+\BOOKMARK [0][-]{chapter.7}{Charge Transfer Inefficiency}{}% 13
+\BOOKMARK [1][-]{section.7.1}{Fortran code for CTI}{chapter.7}% 14
+\BOOKMARK [0][-]{chapter.8}{Supporting methods and files}{}% 15
+\BOOKMARK [1][-]{section.8.1}{Objects}{chapter.8}% 16
+\BOOKMARK [1][-]{section.8.2}{Code}{chapter.8}% 17
+\BOOKMARK [0][-]{chapter.9}{Photometric Accuracy}{}% 18
+\BOOKMARK [0][-]{chapter.10}{Indices and tables}{}% 19
+\BOOKMARK [0][-]{section*.93}{Python Module Index}{}% 20
+\BOOKMARK [0][-]{section*.94}{Index}{}% 21

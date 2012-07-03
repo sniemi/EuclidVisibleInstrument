@@ -132,8 +132,30 @@ characteristics such as readout noise and CTI to ``pristine'' images generated w
 shooting code.
 
 
+\chapter{Installation}
+\label{index:welcome-to-euclid-visible-instrument-vis-documentation}\label{index:installation}
+This package contains a mixture of classes and scripts. There is no official or preferred installation
+instructions yet. To get most scripts working you should place the path to the root directory of the package
+to your PYTHONPATH environment variable. In addition, it is useful to compile the Fortran code available
+in the fortran subdirectory with the following command:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+f2py -c -m cdm03 cdm03.f90
+\end{Verbatim}
+
+and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
+but you still need for example gFortran compiler.
+
+
+\section{Dependencies}
+\label{index:dependencies}
+The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
+Thus it is recommended that on installs a Python distribution like \href{http://www.enthought.com/}{Enthought Python},
+which installs all dependencies at once.
+
+
 \chapter{Creating Object Catalogs}
-\label{index:welcome-to-euclid-visible-instrument-vis-documentation}\label{index:creating-object-catalogs}
+\label{index:creating-object-catalogs}
 The \emph{sources} subpackage contains a script to generate object catalogs with random x and y positions for
 stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
 based on observations. As the number of stars depends on the galactic latitude, the script allows
@@ -352,13 +374,13 @@ please report any weird or inconsistent simulations to the author.
 This script depends on the following packages.
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
-PyFITS (tested with 3.0.3)
+PyFITS (tested with 3.0.6)
 
 \item[{requires}] \leavevmode
-NumPy (tested with 1.6.2)
+NumPy (tested with 1.6.1)
 
 \item[{requires}] \leavevmode
-SciPy (tested with 0.10.0)
+SciPy (tested with 0.10.1)
 
 \item[{requires}] \leavevmode
 vissim-python package
@@ -373,7 +395,7 @@ cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -c data/test.config -s TESTSCIENCE -d
+python simulator.py -c data/test.config -s TESTSCIENCE
 \end{Verbatim}
 
 This will produce an image representing VIS lower left (0th) quadrant. Because
@@ -389,12 +411,12 @@ numerical rounding uncertainties.
 Benchmark using the SCIENCE section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
-6772 objects were place on the detector
+Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+6798 objects were place on the detector
 
-real    8m28.781s
-user    8m24.792s
-sys     0m1.361s
+real        5m41.421s
+user        5m36.597s
+sys     0m1.327s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -772,7 +794,7 @@ The configuration file may look as follows:
 \PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
 \PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
 \PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
-\PYG{n}{overscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
+\PYG{n}{ovrscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
 \PYG{n}{fullwellcapacity} \PYG{o}{=} \PYG{l+m+mi}{200000}
 \PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
 \PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
@@ -1391,7 +1413,7 @@ where -f argument defines the input files to be tiled and the -e argument marks 
 FITS extension from which the imaging data are being read.
 \begin{quote}\begin{description}
 \item[{version}] \leavevmode
-0.3
+0.4
 
 \end{description}\end{quote}
 \index{tileCCD (class in postproc.tileCCD)}
@@ -1406,7 +1428,8 @@ Class to create a single VIS CCD image from separate quadrants files.
 Reads in data from all the input files and the header from the first file.
 Input files are taken from the input dictionary given when class was initiated.
 
-Subtracts the pre- and overscan regions if these were simulated.
+Subtracts the pre- and overscan regions if these were simulated. Takes into account
+which quadrant is being processed so that the extra regions are subtracted correctly.
 
 \end{fulllineitems}
 

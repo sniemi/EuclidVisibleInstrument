@@ -186,11 +186,11 @@ please report any weird or inconsistent simulations to the author.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.3)</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.6)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.2)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.0)</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
 </tr>
@@ -202,7 +202,7 @@ please report any weird or inconsistent simulations to the author.</p>
 <p>Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows:</p>
-<div class="highlight-python"><pre>python simulator.py -c data/test.config -s TESTSCIENCE -d</pre>
+<div class="highlight-python"><pre>python simulator.py -c data/test.config -s TESTSCIENCE</pre>
 </div>
 <p>This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
@@ -213,12 +213,12 @@ please divide your nonoise and no cosmic ray track output image with the on in t
 folder. This should lead to a uniformly unity image or at least very close given some
 numerical rounding uncertainties.</p>
 <p>Benchmark using the SCIENCE section of the test.config input file:</p>
-<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0329649781423
-6772 objects were place on the detector
+<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+6798 objects were place on the detector
 
-real    8m28.781s
-user    8m24.792s
-sys     0m1.361s</pre>
+real        5m41.421s
+user        5m36.597s
+sys     0m1.327s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation.</p>
@@ -524,7 +524,7 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <span class="n">xsize</span> <span class="o">=</span> <span class="mi">2048</span>
 <span class="n">ysize</span> <span class="o">=</span> <span class="mi">2066</span>
 <span class="n">prescanx</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">overscanx</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">ovrscanx</span> <span class="o">=</span> <span class="mi">20</span>
 <span class="n">fullwellcapacity</span> <span class="o">=</span> <span class="mi">200000</span>
 <span class="n">dark</span> <span class="o">=</span> <span class="mf">0.001</span>
 <span class="n">readout</span> <span class="o">=</span> <span class="mf">4.5</span>

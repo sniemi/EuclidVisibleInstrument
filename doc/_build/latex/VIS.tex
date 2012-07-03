@@ -137,15 +137,15 @@ shooting code.
 The \emph{sources} subpackage contains a script to generate object catalogs with random x and y positions for
 stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
 based on observations. As the number of stars depends on the galactic latitude, the script allows
-the user to use three different (30, 60, 90 degrees) angles when generating the distribution of stars
+the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
 (see the example plot below).
 \begin{figure}[htbp]
 \centering
 \capstart
 
 \includegraphics{Distributions.pdf}
-\caption{Example showing star and galaxy distributions. The solid lines show observations while
-the histograms show the distributions in the generated catalogues.}\end{figure}
+\caption{An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+The solid lines show observations while the histograms show the distributions in the output catalogues.}\end{figure}
 
 For the Python code documentation, please see:
 \phantomsection\label{sources:module-sources.createObjectCatalogue}\index{sources.createObjectCatalogue (module)}
@@ -154,6 +154,15 @@ For the Python code documentation, please see:
 \label{sources::doc}\label{sources:generating-object-catalogue}
 This simple script can be used to generate an object catalogue that can then be used
 as an input for the VIS simulator.
+
+To run:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python createObjectCatalogue.py
+\end{Verbatim}
+
+Please note that the script requires files from the data folder. Thus, you should
+place the script to an empty directory and either copy or link to the data directory.
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
 NumPy
@@ -1206,11 +1215,14 @@ Sami-Matias Niemi
 
 \end{description}\end{quote}
 
-To Run:
+To execute:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 python tileCCD.py -f 'Q*science.fits' -e 1
 \end{Verbatim}
+
+where -f argument defines the input files to be tiled and the -e argument marks the
+FITS extension from which the imaging data are being read.
 \begin{quote}\begin{description}
 \item[{version}] \leavevmode
 0.3

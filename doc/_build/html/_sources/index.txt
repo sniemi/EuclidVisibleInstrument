@@ -19,7 +19,7 @@ Creating Object Catalogs
 The *sources* subpackage contains a script to generate object catalogs with random x and y positions for
 stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
 based on observations. As the number of stars depends on the galactic latitude, the script allows
-the user to use three different (30, 60, 90 degrees) angles when generating the distribution of stars
+the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
 (see the example plot below).
 
 .. figure:: figs/Distributions.*
@@ -27,8 +27,8 @@ the user to use three different (30, 60, 90 degrees) angles when generating the 
      :align: center
      :figclass: align-center
 
-     Example showing star and galaxy distributions. The solid lines show observations while
-     the histograms show the distributions in the generated catalogues.
+     An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+     The solid lines show observations while the histograms show the distributions in the output catalogues.
 
 For the Python code documentation, please see:
 

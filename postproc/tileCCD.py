@@ -10,9 +10,12 @@ This file contains a class to create a single VIS CCD image from separate files 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-To Run::
+To execute::
 
     python tileCCD.py -f 'Q*science.fits' -e 1
+
+where -f argument defines the input files to be tiled and the -e argument marks the
+FITS extension from which the imaging data are being read.
 
 :version: 0.3
 """

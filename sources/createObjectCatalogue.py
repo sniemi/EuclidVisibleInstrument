@@ -5,6 +5,13 @@ Generating Object Catalogue
 This simple script can be used to generate an object catalogue that can then be used
 as an input for the VIS simulator.
 
+To run::
+
+    python createObjectCatalogue.py
+
+Please note that the script requires files from the data folder. Thus, you should
+place the script to an empty directory and either copy or link to the data directory.
+
 :requires: NumPy
 :requires: SciPy
 :requires: matplotlib

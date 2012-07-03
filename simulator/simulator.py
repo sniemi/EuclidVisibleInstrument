@@ -199,8 +199,12 @@ class VISsimulator():
                                 magzero=1.7059e10,
                                 exposures=1,
                                 exptime=565.0,
+                                ra=123.0,
+                                dec=45.0,
                                 cosmicraylengths='data/cdf_cr_length.dat',
-                                cosmicraydistance='data/cdf_cr_total.dat')
+                                cosmicraydistance='data/cdf_cr_total.dat',
+                                flatfieldfile='data/VISFlatField2percent.fits',
+                                trapfile='data/cdm_euclid.dat')
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -244,7 +248,7 @@ class VISsimulator():
             PSFfile = data/interpolated_psf.fits
             trapfile = data/cdm_euclid.dat
             cosmeticsFile = data/cosmetics.dat
-            flatfieldFile = data/VISFlatField2percent.fits
+            flatfieldfile = data/VISFlatField2percent.fits
             output = test.fits
             addSources = yes
             noise = yes

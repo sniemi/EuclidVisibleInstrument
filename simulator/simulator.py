@@ -180,11 +180,27 @@ class VISsimulator():
         self.section = section
         self.debug = debug
 
+        #default settings are placed to the information dictionary
+        self.information = dict(psfoversampling=1.0,
+                                 quadrant=0,
+                                 ccdx=0,
+                                 ccdy=0,
+                                 xsize=2048,
+                                 ysize=2066,
+                                 prescanx=50,
+                                 overscanx=20,
+                                 fullwellcapacity=200000,
+                                 dark=0.001,
+                                 readout=4.5,
+                                 bias=100.0,
+                                 cosmic_bcgd=0.172,
+                                 e_adu=3.5,
+                                 magzero=1.7059e10,
+                                 exposures=1,
+                                 exptime=565.0)
+
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
-
-        #dictionary to hold basic information
-        self.information = {}
 
 
     def _readConfigs(self):
@@ -243,60 +259,25 @@ class VISsimulator():
         For explanation of each field, see /data/test.config.
 
         """
-        #image size
-        self.information['xsize'] = self.config.getint(self.section, 'xsize')
-        self.information['ysize'] = self.config.getint(self.section, 'ysize')
-        self.information['overscx'] = self.config.getint(self.section, 'overscanx')
-        self.information['prescx'] = self.config.getint(self.section, 'prescanx')
+        #parse options and update the information dictionary
+        options = self.config.options(self.section)
+        settings = {}
+        for option in options:
+            try:
+                settings[option] = self.config.getint(self.section, option)
+            except ValueError:
+                try:
+                    settings[option] = self.config.getfloat(self.section, option)
+                except ValueError:
+                    settings[option] = self.config.get(self.section, option)
 
-        #quadrant and CCD
-        self.information['quadrant'] = self.config.getint(self.section, 'quadrant')
-        self.information['CCDx'] = self.config.getint(self.section, 'CCDx')
-        self.information['CCDy'] = self.config.getint(self.section, 'CCDy')
-        self.information['fwc'] = self.config.getint(self.section, 'fullwellcapacity')
+        self.information.update(settings)
 
-        #noise values
-        self.information['dark'] = self.config.getfloat(self.section, 'dark')
-        self.information['cosmic_bkgd'] = self.config.getfloat(self.section, 'cosmic_bkgd')
-        self.information['readout'] = self.config.getfloat(self.section, 'readout')
-
-        #bias and conversions
-        self.information['bias'] = self.config.getfloat(self.section, 'bias')
-        self.information['e_ADU'] = self.config.getfloat(self.section, 'e_ADU')
-
-        #exposure time and position on the sky
-        self.information['exposures'] = self.config.getint(self.section, 'exposures')
-        self.information['exptime'] = self.config.getfloat(self.section, 'exptime')
-        self.information['RA'] = self.config.getfloat(self.section, 'RA')
-        self.information['DEC'] = self.config.getfloat(self.section, 'DEC')
-
-        #charge injection value
-        self.information['injection'] = self.config.getfloat(self.section, 'injection')
-
-        #zeropoint
-        self.information['magzero'] = self.config.getfloat(self.section, 'magzero')
-
-        #name of the input source list
-        self.information['sourcelist'] = self.config.get(self.section, 'sourcelist')
-
-        #name of the output file
+        #name of the output file, include quadrants and CCDs
         self.information['output'] = 'Q%i_0%i_0%i%s' % (self.information['quadrant'],
-                                                        self.information['CCDx'],
-                                                        self.information['CCDy'],
+                                                        self.information['ccdx'],
+                                                        self.information['ccdy'],
                                                         self.config.get(self.section, 'output'))
-
-        #PSF related information
-        self.information['PSFfile'] = self.config.get(self.section, 'PSFfile')
-        self.information['variablePSF'] = False
-
-        #charge traps input file
-        self.information['trapfile'] = self.config.get(self.section, 'trapfile')
-
-        #flat field file
-        self.information['flatfieldFile'] = self.config.get(self.section, 'flatfieldFile')
-
-        #cosmetic defects input file
-        self.information['cosmeticsFile'] = self.config.get(self.section, 'cosmeticsFile')
 
         #booleans to control the flow
         self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
@@ -310,6 +291,8 @@ class VISsimulator():
         self.addsources = self.config.getboolean(self.section, 'addSources')
         self.bleeding = self.config.getboolean(self.section, 'bleeding')
         self.overscans = self.config.getboolean(self.section, 'overscans')
+
+        self.information['variablePSF'] = False
 
         self.booleans = dict(flatfieldM=self.flatfieldM,
                              flatfieldA=self.flatfieldA,
@@ -588,8 +571,11 @@ class VISsimulator():
         :type obj: list
         """
         #objec centre x and y coordinates
-        xt = obj[0]
-        yt = obj[1]
+        xt = obj[0] - 1.0
+        yt = obj[1] - 1.0
+
+        if self.information['psfoversampling'] > 1.0:
+            data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'])
 
         #input array size
         nx = data.shape[1]
@@ -821,8 +807,8 @@ class VISsimulator():
         else:
             #single PSF
             self.log.debug('Spatially static PSF:')
-            self.log.info('Opening PSF file %s' % self.information['PSFfile'])
-            self.PSF = pf.getdata(self.information['PSFfile'])
+            self.log.info('Opening PSF file %s' % self.information['psffile'])
+            self.PSF = pf.getdata(self.information['psffile'])
             self.PSF /= np.sum(self.PSF)
             self.PSFx = self.PSF.shape[1]
             self.PSFy = self.PSF.shape[0]
@@ -863,8 +849,13 @@ class VISsimulator():
                 self.shapex[stype] = 0
                 self.shapey[stype] = 0
             else:
-                #input file
-                data = self.objectMapping[stype]['data']
+                if self.information['psfoversampling'] > 1.0:
+                    data = scipy.ndimage.zoom(self.objectMapping[stype]['data'],
+                                              self.information['psfoversampling'],
+                                              order=0)
+                else:
+                    data = self.objectMapping[stype]['data']
+
                 nx = data.shape[1]
                 ny = data.shape[0]
 
@@ -885,6 +876,7 @@ class VISsimulator():
                 self.finemap[stype] = fm
 
                 #Compute a shape tensor, translated from Fortran so not very effective.
+                #TODO: rewrite with numpy meshgrid
                 Qxx = 0.
                 Qxy = 0.
                 Qyy = 0.

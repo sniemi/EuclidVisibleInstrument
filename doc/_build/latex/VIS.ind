@@ -5,7 +5,7 @@
   \item addChargeInjection() (simulator.simulator.VISsimulator method), \hyperpage{10}
   \item addCosmicRays() (simulator.simulator.VISsimulator method), \hyperpage{10}
   \item addObjects() (simulator.generateGalaxies.generateFakeData method), \hyperpage{15}
-  \item addObjects() (simulator.simulator.VISsimulator method), \hyperpage{10}
+  \item addObjects() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item addPreOverScans() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item analyseVISdata (class in analysis.analyse), \hyperpage{25}
   \item analysis.analyse (module), \hyperpage{25}
@@ -17,7 +17,7 @@
   \item applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{24}
   \item applyFlatfield() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{17}
-  \item applyNoise() (simulator.simulator.VISsimulator method), \hyperpage{11}
+  \item applyNoise() (simulator.simulator.VISsimulator method), \hyperpage{12}
   \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{18}
   \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{12}
   \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{18}

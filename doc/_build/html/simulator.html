@@ -252,6 +252,8 @@ sys     0m1.327s</pre>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
+<li>include WCS to the FITS file</li>
+<li>improve the convolution speed (look into fftw)</li>
 <li>implement spatially variable PSF</li>
 <li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
@@ -545,7 +547,7 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <span class="n">PSFfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">interpolated_psf</span><span class="o">.</span><span class="n">fits</span>
 <span class="n">trapfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cdm_euclid</span><span class="o">.</span><span class="n">dat</span>
 <span class="n">cosmeticsFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cosmetics</span><span class="o">.</span><span class="n">dat</span>
-<span class="n">flatfieldFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">VISFlatField2percent</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">flatfieldfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">VISFlatField2percent</span><span class="o">.</span><span class="n">fits</span>
 <span class="n">output</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">fits</span>
 <span class="n">addSources</span> <span class="o">=</span> <span class="n">yes</span>
 <span class="n">noise</span> <span class="o">=</span> <span class="n">yes</span>

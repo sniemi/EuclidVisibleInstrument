@@ -452,6 +452,12 @@ Version and change logs:
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
+include WCS to the FITS file
+
+\item {} 
+improve the convolution speed (look into fftw)
+
+\item {} 
 implement spatially variable PSF
 
 \item {} 
@@ -816,7 +822,7 @@ The configuration file may look as follows:
 \PYG{n}{PSFfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{interpolated\PYGZus{}psf}\PYG{o}{.}\PYG{n}{fits}
 \PYG{n}{trapfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cdm\PYGZus{}euclid}\PYG{o}{.}\PYG{n}{dat}
 \PYG{n}{cosmeticsFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cosmetics}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{flatfieldFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{flatfieldfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
 \PYG{n}{output} \PYG{o}{=} \PYG{n}{test}\PYG{o}{.}\PYG{n}{fits}
 \PYG{n}{addSources} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{noise} \PYG{o}{=} \PYG{n}{yes}

@@ -94,15 +94,15 @@ def generateCatalog(**kwargs):
         if settings['deg'] == 30:
             print 'Selecting stars for 30deg'
             tmp = 1
-            sfudge = 0.85
+            sfudge = 0.82
         elif settings['deg'] == 60:
             print 'Selecting stars for 60deg'
             tmp = 2
-            sfudge = 0.8
+            sfudge = 0.78
         else:
             print 'Selecting stars for 90deg'
             tmp = 3
-            sfudge = 0.75
+            sfudge = 0.74
 
         #read in data
         d = np.loadtxt('data/stars.dat', usecols=(0, tmp))

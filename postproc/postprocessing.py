@@ -25,6 +25,7 @@ import glob as g
 from support import logger as lg
 import pyfits as pf
 import numpy as np
+#from CTI import CTI
 try:
     import cdm03
 except:
@@ -139,15 +140,16 @@ class PostProcessing(multiprocessing.Process):
         hdu.header.add_history('The following processing steps have been performed:')
         hdu.header.add_history('1)Original file has been cut to VIS size using xstart/stop and ystart/stop')
         hdu.header.add_history('2)Pixels with values greater than CEIL were set to CUTOFF')
-        hdu.header.add_history('3)CDM03 CTI model were applied to each quadrant separately')
+        hdu.header.add_history('3)CDM03 CTI model was applied to each quadrant separately')
         hdu.header.add_history('4)All four quadrants were combined to form an image of a single CCD')
-        hdu.header.add_history('5)Readnoise drawn from Normal distribution was added to the full image')
-        hdu.header.add_history('6)Values were then converted from electrons to ADUs (EADU kw)')
-        hdu.header.add_history('7)Bias level (BIAS kw) was added')
-        hdu.header.add_history('8)CTI image saved to a FITS file in 16bit unsigned integer format')
+        hdu.header.add_history('5)Read noise drawn from Normal distribution was added to the full image')
+        hdu.header.add_history('6)Values were then converted from electrons to ADUs (see EADU keyword)')
+        hdu.header.add_history('7)Bias level (see BIAS kw) was added')
+        hdu.header.add_history('8)CTI image was saved to a FITS file in 16bit unsigned integer format')
         hdu.header.add_history('In addition to these steps also CTI corrected image was produced, see CTIcorrected.fits')
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % \
+                               datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)

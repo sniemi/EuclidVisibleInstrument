@@ -21,7 +21,7 @@
   \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{14}
   \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{9}
   \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{14}
-  \item applyReadoutNoise() (simulator.simulator.VISsimulator method), \hyperpage{9}
+  \item applyReadoutNoise() (simulator.simulator.VISsimulator method), \hyperpage{10}
 
   \indexspace
   \bigletter C
@@ -125,7 +125,7 @@
   \item writeFITSfile() (postproc.postprocessing.PostProcessing method), \hyperpage{16}
   \item writeFITSfile() (postproc.tileCCD.tileCCD method), \hyperpage{17}
   \item writeFITSfile() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{20}
-  \item writeOutputs() (simulator.simulator.VISsimulator method), \hyperpage{10}
+  \item writeOutputs() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item writeResults() (analysis.analyse.analyseVISdata method), \hyperpage{22}
 
 \end{theindex}

@@ -14,7 +14,7 @@
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{9}
 \indexentry{applyNoise() (simulator.simulator.VISsimulator method)|hyperpage}{9}
 \indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{9}
-\indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{9}
+\indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{10}
 \indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{10}
 \indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{10}
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{10}
@@ -22,7 +22,7 @@
 \indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{10}
 \indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{10}
 \indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{10}
-\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{10}
+\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{simulator.generateGalaxies (module)|hyperpage}{11}
 \indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{11}
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{11}

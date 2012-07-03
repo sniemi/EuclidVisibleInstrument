@@ -10,35 +10,35 @@ The approximate sequence of events in the simulator is as follows:
          detector characteristics (bias, dark and readout noise, gain,
          plate scale and pixel scale, oversampling factor, exposure time etc.).
       #. Read in another file containing charge trap definitions (for CTI modelling).
-      #. Read in a file defining the cosmic rays (trail lengths and distrb.)
+      #. Read in a file defining the cosmic rays (trail lengths and cumulative distributions).
       #. Read in CCD offset information, displace the image, and modify
          the output file name to contain the CCD and quadrant information
          (note that VIS has a focal plane of 6 x 6 detectors).
       #. Read in source list and determine the number of different object types.
-      #. Read in the file which assigns data to a given object index.
-      #. Load the PSF model (2D map or field dependent maps).
-      #. Generate a finemap (oversampled image) for each object type, if object
-         is 2D image then calculate the shape tensor to used for size scaling.
-         Each type of object is then placed onto its own finely sampled finemap.
-      #. Loop over the number of exposures to co-add and:
+      #. Read in a file which assigns data to a given object index.
+      #. Load the PSF model (a single 2D map or field dependent maps).
+      #. Generate a finemap (oversampled image) for each object type. If an object
+         is a 2D image then calculate the shape tensor to be used for size scaling.
+         Each type of an object is then placed onto its own finely sampled finemap.
+      #. Loop over the number of exposures to co-add and for each object in the object catalog:
 
             * determine the number of electrons an object should have by scaling the object's magnitude
               with the given zeropoint and exposure time.
-            * determine if the object lands on to the detector or not and whether the object is
-              a star or an extended source (galaxy).
-            * if object is extended determine the size (using size-magnitude relation) and scale counts,
+            * determine whether the object lands on to the detector or not and if it is
+              a star or an extended source (i.e. a galaxy).
+            * if object is extended determine the size (using a size-magnitude relation) and scale counts,
               convolve with the PSF, and finally overlay onto the detector according to its position.
-            * if object is a star, scale counts according to the derived.
+            * if object is a star, scale counts according to the derived
               scaling (first step), and finally overlay onto the detector according to its position.
 
       #. Apply a multiplicative flat-field map [optional].
       #. Add a charge injection line (horizontal and/or vertical) [optional].
-      #. Add cosmic ray streaks onto the CCD with random positions [optional].
+      #. Add cosmic ray streaks onto the CCD with random positions but known distribution [optional].
       #. Add photon (Poisson) noise and constant dark current to the pixel grid [optional].
       #. Add cosmetic defects from an input file [optional].
       #. Add pre- and overscan regions in the serial direction [optional].
       #. Apply the CDM03 radiation damage model [optional].
-      #. Add readout noise (selected from a Gaussian distribution) [optional].
+      #. Add readout noise selected from a Gaussian distribution [optional].
       #. Convert from electrons to ADUs using the given gain factor.
       #. Add a given bias level and discretise the counts (16bit).
       #. Finally the generated image is converted to a FITS file and saved to the working directory.
@@ -93,7 +93,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 Change Log
 ----------
 
-:version: 0.8
+:version: 0.9
 
 Version and change logs::
 
@@ -105,6 +105,8 @@ Version and change logs::
     0.7: implemented bleeding.
     0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
          Improved the information that is being written to the FITS header.
+    0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
+         be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
 
 
 Future Work
@@ -121,7 +123,8 @@ Future Work
     #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
     #. double check the centering of objects, now the exact centering is not interpolated
     #. charge injection line positions are now hardcoded to the code, read from the config file
-    #. CTI model values are not included to the FITS header.
+    #. CTI model values are not included to the FITS header
+    #. implement optional dithered offsets
 
 
 Contact Information
@@ -143,7 +146,7 @@ from CTI import CTI
 from support import logger as lg
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 0.8
+__version__ = 0.9
 
 
 class VISsimulator():
@@ -333,7 +336,7 @@ class VISsimulator():
 
     def _createEmpty(self):
         """
-        Creates and empty array with zeros.
+        Creates and empty array of a given x and y size full of zeros.
         """
         self.image = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
@@ -1237,19 +1240,36 @@ class VISsimulator():
     def addPreOverScans(self):
         """
         Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
+        Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
+        orientation, in these images the regions are mirrored.
 
         The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.
         """
         self.log.info('Adding pre- and overscan regions')
+
         canvas = np.zeros((self.information['ysize'],
                           (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
-        canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.image
-        self.image = canvas
+
+        #because the pre- and overscans are in x-direction this needs to be taken into account for the
+        # 1st and 3rd quadrant
+        if self.information['quadrant'] in (0, 2):
+            canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.image
+            self.image = canvas
+        elif self.information['quadrant'] in (1, 3):
+            canvas[:, self.information['overscx']: self.information['overscx']+self.information['xsize']] = self.image
+            self.image = canvas
+        else:
+            self.log.error('Cannot include pre- and overscan because of an unknown quadrant!')
 
         if self.cosmicRays:
             canvas = np.zeros((self.information['ysize'],
                               (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
-            canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.imagenoCR
+
+            if self.information['quadrant'] in (0, 2):
+                canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.imagenoCR
+            else:
+                canvas[:, self.information['overscx']: self.information['overscx']+self.information['xsize']] = self.imagenoCR
+
             self.imagenoCR = canvas
 
 

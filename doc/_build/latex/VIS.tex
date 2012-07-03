@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{June 28, 2012}
+\date{July 03, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -254,7 +254,7 @@ plate scale and pixel scale, oversampling factor, exposure time etc.).
 Read in another file containing charge trap definitions (for CTI modelling).
 
 \item {} 
-Read in a file defining the cosmic rays (trail lengths and distrb.)
+Read in a file defining the cosmic rays (trail lengths and cumulative distributions).
 
 \item {} 
 Read in CCD offset information, displace the image, and modify
@@ -265,33 +265,33 @@ the output file name to contain the CCD and quadrant information
 Read in source list and determine the number of different object types.
 
 \item {} 
-Read in the file which assigns data to a given object index.
+Read in a file which assigns data to a given object index.
 
 \item {} 
-Load the PSF model (2D map or field dependent maps).
+Load the PSF model (a single 2D map or field dependent maps).
 
 \item {} 
-Generate a finemap (oversampled image) for each object type, if object
-is 2D image then calculate the shape tensor to used for size scaling.
-Each type of object is then placed onto its own finely sampled finemap.
+Generate a finemap (oversampled image) for each object type. If an object
+is a 2D image then calculate the shape tensor to be used for size scaling.
+Each type of an object is then placed onto its own finely sampled finemap.
 
 \item {} 
-Loop over the number of exposures to co-add and:
+Loop over the number of exposures to co-add and for each object in the object catalog:
 \begin{itemize}
 \item {} 
 determine the number of electrons an object should have by scaling the object's magnitude
 with the given zeropoint and exposure time.
 
 \item {} 
-determine if the object lands on to the detector or not and whether the object is
-a star or an extended source (galaxy).
+determine whether the object lands on to the detector or not and if it is
+a star or an extended source (i.e. a galaxy).
 
 \item {} 
-if object is extended determine the size (using size-magnitude relation) and scale counts,
+if object is extended determine the size (using a size-magnitude relation) and scale counts,
 convolve with the PSF, and finally overlay onto the detector according to its position.
 
 \item {} 
-if object is a star, scale counts according to the derived.
+if object is a star, scale counts according to the derived
 scaling (first step), and finally overlay onto the detector according to its position.
 
 \end{itemize}
@@ -303,7 +303,7 @@ Apply a multiplicative flat-field map {[}optional{]}.
 Add a charge injection line (horizontal and/or vertical) {[}optional{]}.
 
 \item {} 
-Add cosmic ray streaks onto the CCD with random positions {[}optional{]}.
+Add cosmic ray streaks onto the CCD with random positions but known distribution {[}optional{]}.
 
 \item {} 
 Add photon (Poisson) noise and constant dark current to the pixel grid {[}optional{]}.
@@ -318,7 +318,7 @@ Add pre- and overscan regions in the serial direction {[}optional{]}.
 Apply the CDM03 radiation damage model {[}optional{]}.
 
 \item {} 
-Add readout noise (selected from a Gaussian distribution) {[}optional{]}.
+Add readout noise selected from a Gaussian distribution {[}optional{]}.
 
 \item {} 
 Convert from electrons to ADUs using the given gain factor.
@@ -394,7 +394,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-0.8
+0.9
 
 \end{description}\end{quote}
 
@@ -409,6 +409,8 @@ Version and change logs:
 0.7: implemented bleeding.
 0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
      Improved the information that is being written to the FITS header.
+0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
+     be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
 \end{Verbatim}
 
 
@@ -444,7 +446,10 @@ double check the centering of objects, now the exact centering is not interpolat
 charge injection line positions are now hardcoded to the code, read from the config file
 
 \item {} 
-CTI model values are not included to the FITS header.
+CTI model values are not included to the FITS header
+
+\item {} 
+implement optional dithered offsets
 
 \end{enumerate}
 \end{notice}
@@ -524,6 +529,8 @@ objects should be treated with caution.
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.addPreOverScans}\pysiglinewithargsret{\bfcode{addPreOverScans}}{}{}
 Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
+Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
+orientation, in these images the regions are mirrored.
 
 The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.
 

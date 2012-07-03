@@ -60,7 +60,12 @@ class tileCCD():
                 self.log.info('Subtracting pre- and overscan regions')
                 prescanx = hdu['PRESCX']
                 overscanx = hdu['OVERSCX']
-                data[file] = fh[self.inputs['ext']].data[:, prescanx: -overscanx]
+                quadrant = hdu['QUADRANT']
+
+                if quadrant in (0, 2):
+                    data[file] = fh[self.inputs['ext']].data[:, prescanx: -overscanx]
+                else:
+                    data[file] = fh[self.inputs['ext']].data[:, overscanx: -prescanx]
             else:
                 self.log.info('No overscan simulated, using full array')
                 data[file] = fh[self.inputs['ext']].data

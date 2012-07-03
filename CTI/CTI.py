@@ -147,8 +147,8 @@ class CDM03():
         sigma = trapdata[:, 1]
         taur = trapdata[:, 2]
 
-        iflip = iquadrant % 2
-        jflip = iquadrant / 2
+        iflip = iquadrant / 2
+        jflip = iquadrant % 2
 
         if self.logger:
             self.log.info('nt=' + str(nt))
@@ -164,11 +164,6 @@ class CDM03():
 
 
         #call Fortran routine
-#        CTIed = cdm03.cdm03(np.asfortranarray(data),
-#                            iquadrant % 2, iquadrant / 2,
-#                            self.values['dob'], self.values['rdose'],
-#                            nt, sigma, taur,
-#                            [data.shape[0], data.shape[1], len(nt)])
         CTIed = cdm03.cdm03(np.asfortranarray(data),
                             iflip, jflip,
                             self.values['dob'], self.values['rdose'],

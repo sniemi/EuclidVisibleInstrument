@@ -52,7 +52,7 @@ DOUBLE PRECISION, DIMENSION(zdim)   :: nt, tr, sigma, alpha, gamm, g
 
 !debug
 !PRINT *, xdim, ydim
-PRINT *, iflip, jflip
+!PRINT *, iflip, jflip
 
 !reserve space based on the longer dimension
 !this works for flip...

@@ -16,7 +16,7 @@ The approximate sequence of events in the simulator is as follows:
          (note that VIS has a focal plane of 6 x 6 detectors).
       #. Read in source list and determine the number of different object types.
       #. Read in a file which assigns data to a given object index.
-      #. Load the PSF model (a single 2D map or field dependent maps).
+      #. Load the PSF model (a single 2D map with a given over sampling or field dependent maps).
       #. Generate a finemap (oversampled image) for each object type. If an object
          is a 2D image then calculate the shape tensor to be used for size scaling.
          Each type of an object is then placed onto its own finely sampled finemap.
@@ -43,8 +43,9 @@ The approximate sequence of events in the simulator is as follows:
       #. Add a given bias level and discretise the counts (16bit).
       #. Finally the generated image is converted to a FITS file and saved to the working directory.
 
-.. Warning:: This code is still work in progress and new features are being added.
-             Testing has been performed, but bugs may be lurking in corners, so be careful.
+.. Warning:: The code is still work in progress and new features are being added.
+             The code has been tested, but nevertheless bugs may be lurking in corners, so
+             please report any weird or inconsistent simulations to the author.
 
 
 Dependencies
@@ -93,7 +94,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 Change Log
 ----------
 
-:version: 0.9
+:version: 1.0
 
 Version and change logs::
 
@@ -107,6 +108,7 @@ Version and change logs::
          Improved the information that is being written to the FITS header.
     0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
          be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
+    1.0: First release. The code can now take an over sampled PSF and use that for convolutions.
 
 
 Future Work
@@ -114,16 +116,15 @@ Future Work
 
 .. todo::
 
-    #. start using oversampled PSF
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
     #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
     #. implement a Gaussian random draw from the size-magnitude distribution
-    #. move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
-    #. double check the centering of objects, now the exact centering is not interpolated
+    #. centering of an object depends on the centering of the postage stamp (should re calculate the centroid)
     #. charge injection line positions are now hardcoded to the code, read from the config file
     #. CTI model values are not included to the FITS header
+    #. include rotation in metrology
     #. implement optional dithered offsets
 
 
@@ -146,7 +147,7 @@ from CTI import CTI
 from support import logger as lg
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 0.9
+__version__ = 1.0
 
 
 class VISsimulator():
@@ -182,28 +183,30 @@ class VISsimulator():
 
         #default settings are placed to the information dictionary
         self.information = dict(psfoversampling=1.0,
-                                 quadrant=0,
-                                 ccdx=0,
-                                 ccdy=0,
-                                 xsize=2048,
-                                 ysize=2066,
-                                 prescanx=50,
-                                 overscanx=20,
-                                 fullwellcapacity=200000,
-                                 dark=0.001,
-                                 readout=4.5,
-                                 bias=100.0,
-                                 cosmic_bcgd=0.172,
-                                 e_adu=3.5,
-                                 magzero=1.7059e10,
-                                 exposures=1,
-                                 exptime=565.0)
+                                quadrant=0,
+                                ccdx=0,
+                                ccdy=0,
+                                xsize=2048,
+                                ysize=2066,
+                                prescanx=50,
+                                overscanx=20,
+                                fullwellcapacity=200000,
+                                dark=0.001,
+                                readout=4.5,
+                                bias=100.0,
+                                cosmic_bkgd=0.172,
+                                e_adu=3.5,
+                                magzero=1.7059e10,
+                                exposures=1,
+                                exptime=565.0,
+                                cosmicraylengths='data/cdf_cr_length.dat',
+                                cosmicraydistance='data/cdf_cr_total.dat')
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
 
 
-    def _readConfigs(self):
+    def readConfigs(self):
         """
         Reads the config file information using configParser.
         """
@@ -211,7 +214,7 @@ class VISsimulator():
         self.config.readfp(open(self.configfile))
 
 
-    def _processConfigs(self):
+    def processConfigs(self):
         """
         Processes configuration information and save the information to a dictionary self.information.
 
@@ -243,7 +246,6 @@ class VISsimulator():
             cosmeticsFile = data/cosmetics.dat
             flatfieldFile = data/VISFlatField2percent.fits
             output = test.fits
-            #add sources
             addSources = yes
             noise = yes
             cosmetics = no
@@ -324,8 +326,10 @@ class VISsimulator():
         self.image = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
 
-    def _crIntercepts(self, lum, x0, y0, l, phi):
+    def cosmicRayIntercepts(self, lum, x0, y0, l, phi):
         """
+        Derive cosmic ray streak intercept points.
+
         :param lum: luminosities of the cosmic ray tracks
         :param x0: central positions of the cosmic ray tracks in x-direction
         :param y0: central positions of the cosmic ray tracks in y-direction
@@ -420,18 +424,17 @@ class VISsimulator():
         return crImage
 
 
-    def _readCosmicRayInformation(self):
+    def readCosmicRayInformation(self):
         """
         Reads in the cosmic ray track information from two input files.
+
         Stores the information to a dictionary called cr.
         """
-        self.log.info('Reading infor cosmic ray information...')
+        self.log.info('Reading in cosmic ray information from %s and %s' % (self.information['cosmicraylengths'],
+                                                                            self.information['cosmicraydistance']))
 
-        length = 'data/cdf_cr_length.dat'
-        dist = 'data/cdf_cr_total.dat'
-
-        crLengths = np.loadtxt(length)
-        crDists = np.loadtxt(dist)
+        crLengths = np.loadtxt(self.information['cosmicraylengths'])
+        crDists = np.loadtxt(self.information['cosmicraydistance'])
 
         self.cr = dict(cr_u=crLengths[:, 0], cr_cdf=crLengths[:, 1], cr_cdfn=np.shape(crLengths)[0],
                        cr_v=crDists[:, 0], cr_cde=crDists[:, 1], cr_cden=np.shape(crDists)[0])
@@ -465,7 +468,7 @@ class VISsimulator():
         ofd.writeto(filename)
 
 
-    def _objectOnDetector(self, object):
+    def objectOnDetector(self, object):
         """
         Tests if the object falls on the detector.
 
@@ -561,7 +564,7 @@ class VISsimulator():
             return em
 
 
-    def _overlayToCCD(self, data, obj):
+    def overlayToCCD(self, data, obj):
         """
         Overlay data from a source object onto the self.image.
 
@@ -654,7 +657,7 @@ class VISsimulator():
                 self.image[j1:j2, i1:i2] += data[:nj, :ni]
 
 
-    def _writeFITSfile(self, data, filename, unsigned16bit=False):
+    def writeFITSfile(self, data, filename, unsigned16bit=False):
         """
         Writes out a simple FITS file.
 
@@ -718,8 +721,8 @@ class VISsimulator():
         Configures the simulator with input information and creates and empty array to which the final image will
         be build on.
         """
-        self._readConfigs()
-        self._processConfigs()
+        self.readConfigs()
+        self.processConfigs()
         self._createEmpty()
         self.log.info('Read in the configuration files and created and empty array')
 
@@ -931,7 +934,7 @@ class VISsimulator():
 
                 stype = obj[3]
 
-                if self._objectOnDetector(obj):
+                if self.objectOnDetector(obj):
                     visible += 1
                     if stype == 0:
                         #point source, apply PSF
@@ -948,7 +951,7 @@ class VISsimulator():
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
                         #overlay the scaled PSF on the image
-                        self._overlayToCCD(data, obj)
+                        self.overlayToCCD(data, obj)
                     else:
                         #extended source, rename finemap
                         data = self.finemap[stype].copy()
@@ -984,7 +987,7 @@ class VISsimulator():
                         self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
 
                         if self.debug:
-                            self._writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
+                            self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
 
                         if self.information['variablePSF']:
                             #spatially variable PSF, we need to convolve with the appropriate PSF
@@ -1001,10 +1004,10 @@ class VISsimulator():
 
                         if self.debug:
                             scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
-                            self._writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+                            self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
 
                         #overlay the convolved image on the image
-                        self._overlayToCCD(conv, obj)
+                        self.overlayToCCD(conv, obj)
 
                 else:
                     #not on the screen
@@ -1027,9 +1030,9 @@ class VISsimulator():
         .. Note:: The additive flat fielding effect has not been included yet.
         """
         if self.flatfieldM:
-            flatM = pf.getdata(self.information['flatfieldFile'])
+            flatM = pf.getdata(self.information['flatfieldfile'])
             self.image *= flatM
-            self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldFile'])
+            self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldfile'])
 
         if self.flatfieldA:
             print 'ERROR - Additive flat fielding not implemented yet!'
@@ -1057,7 +1060,7 @@ class VISsimulator():
 
         Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
         """
-        self._readCosmicRayInformation()
+        self.readCosmicRayInformation()
 
         #estimate the number of cosmics
         cr_n = self.information['xsize'] * self.information['ysize'] * 0.014 / 43.263316
@@ -1092,10 +1095,10 @@ class VISsimulator():
         cr_phi = np.pi * np.random.rand(int(np.floor(cr_n)))
 
         #find the intercepts
-        CCD_cr = self._crIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
+        CCD_cr = self.cosmicRayIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
 
         #save image without cosmics rays
-        self._writeFITSfile(self.image, 'nonoisenocr' + self.information['output'])
+        self.writeFITSfile(self.image, 'nonoisenocr' + self.information['output'])
 
         #image without cosmic rays
         self.imagenoCR = self.image.copy()
@@ -1111,7 +1114,7 @@ class VISsimulator():
         self.log.info('The cosmic ray covering factor is %i pixels ' % area_cr)
 
         #output information to a FITS file
-        self._writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
+        self.writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
 
 
     def applyNoise(self):
@@ -1122,7 +1125,7 @@ class VISsimulator():
         Additionally saves the image without noise to a FITS file.
         """
         #save no noise image
-        self._writeFITSfile(self.image, 'nonoise' + self.information['output'])
+        self.writeFITSfile(self.image, 'nonoise' + self.information['output'])
 
         #add dark and background
         noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
@@ -1171,7 +1174,7 @@ class VISsimulator():
         .. seealso:: Class :`CDM03`
         """
         #save image without CTI
-        self._writeFITSfile(self.image, 'nocti' + self.information['output'])
+        self.writeFITSfile(self.image, 'nocti' + self.information['output'])
 
         self.log.debug('Starting to apply radiation damage model...')
         #at this point we can give fake data...
@@ -1198,7 +1201,7 @@ class VISsimulator():
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
 
         #save the readout noise image
-        self._writeFITSfile(noise, 'readoutnoise' + self.information['output'])
+        self.writeFITSfile(noise, 'readoutnoise' + self.information['output'])
 
         #add to the image
         self.image += noise
@@ -1210,10 +1213,10 @@ class VISsimulator():
         """
         Convert from electrons to ADUs using the value read from the configuration file.
         """
-        self.image /= self.information['e_ADU']
-        self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_ADU'])
+        self.image /= self.information['e_adu']
+        self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_adu'])
         if self.cosmicRays:
-            self.imagenoCR /= self.information['e_ADU']
+            self.imagenoCR /= self.information['e_adu']
 
 
     def applyBias(self):
@@ -1235,32 +1238,32 @@ class VISsimulator():
         Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
         orientation, in these images the regions are mirrored.
 
-        The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.
+        The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.
         """
         self.log.info('Adding pre- and overscan regions')
 
         canvas = np.zeros((self.information['ysize'],
-                          (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
+                          (self.information['xsize'] + self.information['prescanx'] + self.information['overscanx'])))
 
         #because the pre- and overscans are in x-direction this needs to be taken into account for the
         # 1st and 3rd quadrant
         if self.information['quadrant'] in (0, 2):
-            canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.image
+            canvas[:, self.information['prescanx']: self.information['prescanx']+self.information['xsize']] = self.image
             self.image = canvas
         elif self.information['quadrant'] in (1, 3):
-            canvas[:, self.information['overscx']: self.information['overscx']+self.information['xsize']] = self.image
+            canvas[:, self.information['overscanx']: self.information['overscanx']+self.information['xsize']] = self.image
             self.image = canvas
         else:
             self.log.error('Cannot include pre- and overscan because of an unknown quadrant!')
 
         if self.cosmicRays:
             canvas = np.zeros((self.information['ysize'],
-                              (self.information['xsize'] + self.information['prescx'] + self.information['overscx'])))
+                              (self.information['xsize'] + self.information['prescanx'] + self.information['overscanx'])))
 
             if self.information['quadrant'] in (0, 2):
-                canvas[:, self.information['prescx']: self.information['prescx']+self.information['xsize']] = self.imagenoCR
+                canvas[:, self.information['prescanx']: self.information['prescanx']+self.information['xsize']] = self.imagenoCR
             else:
-                canvas[:, self.information['overscx']: self.information['overscx']+self.information['xsize']] = self.imagenoCR
+                canvas[:, self.information['overscanx']: self.information['overscanx']+self.information['xsize']] = self.imagenoCR
 
             self.imagenoCR = canvas
 
@@ -1280,7 +1283,7 @@ class VISsimulator():
             sum = 0.
             for j, value in enumerate(column):
                 #first round - from bottom to top (need to half the bleeding)
-                overload = value - self.information['fwc']
+                overload = value - self.information['fullwellcapacity']
                 if overload > 0.:
                     overload /= 2.
                     self.image[j, i] -= overload
@@ -1295,7 +1298,7 @@ class VISsimulator():
             sum = 0.
             for j, value in enumerate(column[::-1]):
                 #second round - from top to bottom (bleeding was half'd already, so now full)
-                overload = value - self.information['fwc']
+                overload = value - self.information['fullwellcapacity']
                 if overload > 0.:
                     self.image[-j-1, i] -= overload
                     sum += overload
@@ -1320,7 +1323,7 @@ class VISsimulator():
         if self.cosmicRays:
             self.imagenoCR = self.imagenoCR.astype(np.int)
             self.imagenoCR[self.imagenoCR > max] = max
-            self._writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
+            self.writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
 
         self.image = self.image.astype(np.int)
         self.image[self.image > max] = max
@@ -1349,8 +1352,8 @@ class VISsimulator():
         hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #update and verify the header
-        hdu.header.update('RA', self.information['RA'], 'RA of the center of the chip')
-        hdu.header.update('DEC', self.information['DEC'], 'DEC of the center of the chip')
+        hdu.header.update('RA', self.information['ra'], 'RA of the center of the chip')
+        hdu.header.update('DEC', self.information['dec'], 'DEC of the center of the chip')
 
         #add input keywords to the header
         for key, value in self.information.iteritems():

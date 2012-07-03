@@ -129,7 +129,7 @@ the output file name to contain the CCD and quadrant information
 </li>
 <li><p class="first">Read in a file which assigns data to a given object index.</p>
 </li>
-<li><p class="first">Load the PSF model (a single 2D map or field dependent maps).</p>
+<li><p class="first">Load the PSF model (a single 2D map with a given over sampling or field dependent maps).</p>
 </li>
 <li><p class="first">Generate a finemap (oversampled image) for each object type. If an object
 is a 2D image then calculate the shape tensor to be used for size scaling.
@@ -175,8 +175,9 @@ scaling (first step), and finally overlay onto the detector according to its pos
 </div></blockquote>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
-<p class="last">This code is still work in progress and new features are being added.
-Testing has been performed, but bugs may be lurking in corners, so be careful.</p>
+<p class="last">The code is still work in progress and new features are being added.
+The code has been tested, but nevertheless bugs may be lurking in corners, so
+please report any weird or inconsistent simulations to the author.</p>
 </div>
 <div class="section" id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
@@ -228,7 +229,7 @@ sys     0m1.361s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.9</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.0</td>
 </tr>
 </tbody>
 </table>
@@ -242,7 +243,8 @@ sys     0m1.361s</pre>
 0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
      Improved the information that is being written to the FITS header.
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
-     be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.</pre>
+     be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
+1.0: First release. The code can now take an over sampled PSF and use that for convolutions.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -250,16 +252,15 @@ sys     0m1.361s</pre>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
-<li>start using oversampled PSF</li>
 <li>implement spatially variable PSF</li>
 <li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
 <li>implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)</li>
 <li>implement a Gaussian random draw from the size-magnitude distribution</li>
-<li>move the cosmic ray track information file definitions to the input file (now hardcoded in the method)</li>
-<li>double check the centering of objects, now the exact centering is not interpolated</li>
+<li>centering of an object depends on the centering of the postage stamp (should re calculate the centroid)</li>
 <li>charge injection line positions are now hardcoded to the code, read from the config file</li>
 <li>CTI model values are not included to the FITS header</li>
+<li>include rotation in metrology</li>
 <li>implement optional dithered offsets</li>
 </ol>
 </div>
@@ -331,7 +332,7 @@ objects should be treated with caution.</p>
 <dd><p>Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
 Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
 orientation, in these images the regions are mirrored.</p>
-<p>The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.</p>
+<p>The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.</p>
 </dd></dl>
 
 <dl class="method">
@@ -415,6 +416,33 @@ be build on.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.cosmicRayIntercepts">
+<tt class="descname">cosmicRayIntercepts</tt><big>(</big><em>lum</em>, <em>x0</em>, <em>y0</em>, <em>l</em>, <em>phi</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.cosmicRayIntercepts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive cosmic ray streak intercept points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lum</strong> &#8211; luminosities of the cosmic ray tracks</li>
+<li><strong>x0</strong> &#8211; central positions of the cosmic ray tracks in x-direction</li>
+<li><strong>y0</strong> &#8211; central positions of the cosmic ray tracks in y-direction</li>
+<li><strong>l</strong> &#8211; lengths of the cosmic ray tracks</li>
+<li><strong>phi</strong> &#8211; orientation angles of the cosmic ray tracks</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">map</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">nd-array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.discretise">
 <tt class="descname">discretise</tt><big>(</big><em>max=65535</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a floating point image array (self.image) to an integer array with max values
@@ -449,6 +477,102 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.objectOnDetector">
+<tt class="descname">objectOnDetector</tt><big>(</big><em>object</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.objectOnDetector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests if the object falls on the detector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object</strong> &#8211; object to be placed to the self.image.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">whether the object falls on the detector or not</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.overlayToCCD">
+<tt class="descname">overlayToCCD</tt><big>(</big><em>data</em>, <em>obj</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.overlayToCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlay data from a source object onto the self.image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; ndarray of data to be overlaid on to self.image</li>
+<li><strong>obj</strong> (<em>list</em>) &#8211; object information such as position</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.processConfigs">
+<tt class="descname">processConfigs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.processConfigs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes configuration information and save the information to a dictionary self.information.</p>
+<p>The configuration file may look as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">TEST</span><span class="p">]</span>
+<span class="n">quadrant</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDx</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDy</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">xsize</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="n">ysize</span> <span class="o">=</span> <span class="mi">2066</span>
+<span class="n">prescanx</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">overscanx</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">fullwellcapacity</span> <span class="o">=</span> <span class="mi">200000</span>
+<span class="n">dark</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="n">readout</span> <span class="o">=</span> <span class="mf">4.5</span>
+<span class="n">bias</span> <span class="o">=</span> <span class="mf">1000.0</span>
+<span class="n">cosmic_bkgd</span> <span class="o">=</span> <span class="mf">0.172</span>
+<span class="n">e_ADU</span> <span class="o">=</span> <span class="mf">3.5</span>
+<span class="n">injection</span> <span class="o">=</span> <span class="mf">150000.0</span>
+<span class="n">magzero</span> <span class="o">=</span> <span class="mf">1.7059e10</span>
+<span class="n">exposures</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">exptime</span> <span class="o">=</span> <span class="mf">565.0</span>
+<span class="n">RA</span> <span class="o">=</span> <span class="mf">145.95</span>
+<span class="n">DEC</span> <span class="o">=</span> <span class="o">-</span><span class="mf">38.16</span>
+<span class="n">sourcelist</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">source_test</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">PSFfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">interpolated_psf</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">trapfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cdm_euclid</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">cosmeticsFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cosmetics</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">flatfieldFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">VISFlatField2percent</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">addSources</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">cosmetics</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">chargeInjectionx</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">chargeInjectiony</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">radiationDamage</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">cosmicRays</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">overscans</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">bleeding</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">flatfieldM</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">flatfieldA</span> <span class="o">=</span> <span class="n">no</span>
+</pre></div>
+</div>
+<p>For explanation of each field, see /data/test.config.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.readConfigs">
+<tt class="descname">readConfigs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readConfigs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the config file information using configParser.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.readCosmicRayInformation">
+<tt class="descname">readCosmicRayInformation</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readCosmicRayInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the cosmic ray track information from two input files.</p>
+<p>Stores the information to a dictionary called cr.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.readObjectlist">
 <tt class="descname">readObjectlist</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readObjectlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads object list using numpy.loadtxt, determines the number of object types,
@@ -479,6 +603,28 @@ Will do all steps defined in the config file sequentially.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.writeFITSfile">
+<tt class="descname">writeFITSfile</tt><big>(</big><em>data</em>, <em>filename</em>, <em>unsigned16bit=False</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out a simple FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to be written</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; name of the output file</li>
+<li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
 </tr>
 </tbody>
 </table>

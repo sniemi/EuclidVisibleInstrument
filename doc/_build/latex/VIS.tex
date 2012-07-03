@@ -277,7 +277,7 @@ Read in source list and determine the number of different object types.
 Read in a file which assigns data to a given object index.
 
 \item {} 
-Load the PSF model (a single 2D map or field dependent maps).
+Load the PSF model (a single 2D map with a given over sampling or field dependent maps).
 
 \item {} 
 Generate a finemap (oversampled image) for each object type. If an object
@@ -341,8 +341,9 @@ Finally the generated image is converted to a FITS file and saved to the working
 \end{enumerate}
 
 \begin{notice}{warning}{Warning:}
-This code is still work in progress and new features are being added.
-Testing has been performed, but bugs may be lurking in corners, so be careful.
+The code is still work in progress and new features are being added.
+The code has been tested, but nevertheless bugs may be lurking in corners, so
+please report any weird or inconsistent simulations to the author.
 \end{notice}
 
 
@@ -403,7 +404,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-0.9
+1.0
 
 \end{description}\end{quote}
 
@@ -420,6 +421,7 @@ Version and change logs:
      Improved the information that is being written to the FITS header.
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
+1.0: First release. The code can now take an over sampled PSF and use that for convolutions.
 \end{Verbatim}
 
 
@@ -427,9 +429,6 @@ Version and change logs:
 \label{simulator:future-work}
 \begin{notice}{note}{Todo}
 \begin{enumerate}
-\item {} 
-start using oversampled PSF
-
 \item {} 
 implement spatially variable PSF
 
@@ -446,16 +445,16 @@ implement additive flat fielding (now only multiplicative pixel non-uniform effe
 implement a Gaussian random draw from the size-magnitude distribution
 
 \item {} 
-move the cosmic ray track information file definitions to the input file (now hardcoded in the method)
-
-\item {} 
-double check the centering of objects, now the exact centering is not interpolated
+centering of an object depends on the centering of the postage stamp (should re calculate the centroid)
 
 \item {} 
 charge injection line positions are now hardcoded to the code, read from the config file
 
 \item {} 
 CTI model values are not included to the FITS header
+
+\item {} 
+include rotation in metrology
 
 \item {} 
 implement optional dithered offsets
@@ -541,7 +540,7 @@ Add pre- and overscan regions to the self.image. These areas are added only in t
 Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
 orientation, in these images the regions are mirrored.
 
-The size of prescan and overscan regions are defined by the prescx and overscx keywords, respectively.
+The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.
 
 \end{fulllineitems}
 
@@ -647,6 +646,40 @@ be build on.
 
 \end{fulllineitems}
 
+\index{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.cosmicRayIntercepts}\pysiglinewithargsret{\bfcode{cosmicRayIntercepts}}{\emph{lum}, \emph{x0}, \emph{y0}, \emph{l}, \emph{phi}}{}
+Derive cosmic ray streak intercept points.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{lum} -- luminosities of the cosmic ray tracks
+
+\item {} 
+\textbf{x0} -- central positions of the cosmic ray tracks in x-direction
+
+\item {} 
+\textbf{y0} -- central positions of the cosmic ray tracks in y-direction
+
+\item {} 
+\textbf{l} -- lengths of the cosmic ray tracks
+
+\item {} 
+\textbf{phi} -- orientation angles of the cosmic ray tracks
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+map
+
+\item[{Return type}] \leavevmode
+nd-array
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{discretise() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
@@ -685,6 +718,114 @@ not probably very effective. Assumes the PSF sampling for other finemaps.
 
 \end{fulllineitems}
 
+\index{objectOnDetector() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.objectOnDetector}\pysiglinewithargsret{\bfcode{objectOnDetector}}{\emph{object}}{}
+Tests if the object falls on the detector.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{object} -- object to be placed to the self.image.
+
+\item[{Returns}] \leavevmode
+whether the object falls on the detector or not
+
+\item[{Return type}] \leavevmode
+boolean
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{overlayToCCD() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.overlayToCCD}\pysiglinewithargsret{\bfcode{overlayToCCD}}{\emph{data}, \emph{obj}}{}
+Overlay data from a source object onto the self.image.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- ndarray of data to be overlaid on to self.image
+
+\item {} 
+\textbf{obj} (\emph{list}) -- object information such as position
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{processConfigs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.processConfigs}\pysiglinewithargsret{\bfcode{processConfigs}}{}{}
+Processes configuration information and save the information to a dictionary self.information.
+
+The configuration file may look as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{p}{[}\PYG{n}{TEST}\PYG{p}{]}
+\PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
+\PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
+\PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
+\PYG{n}{overscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
+\PYG{n}{fullwellcapacity} \PYG{o}{=} \PYG{l+m+mi}{200000}
+\PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
+\PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
+\PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
+\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.172}
+\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.5}
+\PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
+\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{1.7059e10}
+\PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
+\PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
+\PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
+\PYG{n}{DEC} \PYG{o}{=} \PYG{o}{-}\PYG{l+m+mf}{38.16}
+\PYG{n}{sourcelist} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{source\PYGZus{}test}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{PSFfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{interpolated\PYGZus{}psf}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{trapfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cdm\PYGZus{}euclid}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{cosmeticsFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cosmetics}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{flatfieldFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{output} \PYG{o}{=} \PYG{n}{test}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{addSources} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{noise} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{cosmetics} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{chargeInjectionx} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{chargeInjectiony} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{radiationDamage} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{cosmicRays} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{flatfieldA} \PYG{o}{=} \PYG{n}{no}
+\end{Verbatim}
+
+For explanation of each field, see /data/test.config.
+
+\end{fulllineitems}
+
+\index{readConfigs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readConfigs}\pysiglinewithargsret{\bfcode{readConfigs}}{}{}
+Reads the config file information using configParser.
+
+\end{fulllineitems}
+
+\index{readCosmicRayInformation() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readCosmicRayInformation}\pysiglinewithargsret{\bfcode{readCosmicRayInformation}}{}{}
+Reads in the cosmic ray track information from two input files.
+
+Stores the information to a dictionary called cr.
+
+\end{fulllineitems}
+
 \index{readObjectlist() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
@@ -719,6 +860,31 @@ at the moment this method supports only a single PSF file.
 Create a single simulated image of a quadrant defined by the configuration file.
 Will do all steps defined in the config file sequentially.
 \begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{writeFITSfile() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.writeFITSfile}\pysiglinewithargsret{\bfcode{writeFITSfile}}{\emph{data}, \emph{filename}, \emph{unsigned16bit=False}}{}
+Writes out a simple FITS file.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- data to be written
+
+\item {} 
+\textbf{filename} (\emph{str}) -- name of the output file
+
+\item {} 
+\textbf{unsigned16bit} (\emph{bool}) -- whether to scale the data using bzero=32768
+
+\end{itemize}
+
 \item[{Returns}] \leavevmode
 None
 

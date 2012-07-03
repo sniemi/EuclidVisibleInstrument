@@ -543,11 +543,16 @@ Cosmic ray properties (such as location and angle) are chosen from random Unifor
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.addObjects}\pysiglinewithargsret{\bfcode{addObjects}}{}{}
 Add objects from the object list to the CCD image (self.image).
 
-Scale the object's brightness based on its magnitude. The size of the object
-is scaled using the brightness.
+Scale the object's brightness in electrons and size using the input catalog magnitude.
+
+If PSF is over sampled then we should do the convolution in the over sampled
+grid. However, when the PSF is heavily over sampled this operation becomes
+rather slow. Thus, other convolution techniques such as Fast Fourier Transform
+based should be used. Additional complication arises when using an over sampled
+PSF, namely the flux conservation.
 
 For fainter objects the convolved results are on the same sized grid as the
-input. However, for large values (intscale \textgreater{} 1e5) a box with sharp edges
+input. However, for large values (intscale \textgreater{} 1e6) a box with sharp edges
 would be visible if convolution were not done on the full scale. The problem
 is that the values outside the input grid are not very reliable, so these
 objects should be treated with caution.
@@ -2054,7 +2059,7 @@ The reference simulator code has been tested against photometric accuracy (witho
 simulated image was generated with the reference simulator, sources were identified and photometry performed
 using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
 figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
-around 0.1 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
+about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
 the derived magnitudes are inaccurate.
 \begin{figure}[htbp]
@@ -2063,7 +2068,7 @@ the derived magnitudes are inaccurate.
 
 \includegraphics{Magnitudes15.pdf}
 \caption{Example showing the recovered photometry from a reference simulator image with realistic noise
-and end-of-life radiation damage, but without aperture correction. The offset is around 0.1mag.}\end{figure}
+and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.}\end{figure}
 
 
 \chapter{Indices and tables}

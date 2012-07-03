@@ -317,10 +317,14 @@ sys     0m1.327s</pre>
 <dt id="simulator.simulator.VISsimulator.addObjects">
 <tt class="descname">addObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add objects from the object list to the CCD image (self.image).</p>
-<p>Scale the object&#8217;s brightness based on its magnitude. The size of the object
-is scaled using the brightness.</p>
+<p>Scale the object&#8217;s brightness in electrons and size using the input catalog magnitude.</p>
+<p>If PSF is over sampled then we should do the convolution in the over sampled
+grid. However, when the PSF is heavily over sampled this operation becomes
+rather slow. Thus, other convolution techniques such as Fast Fourier Transform
+based should be used. Additional complication arises when using an over sampled
+PSF, namely the flux conservation.</p>
 <p>For fainter objects the convolved results are on the same sized grid as the
-input. However, for large values (intscale &gt; 1e5) a box with sharp edges
+input. However, for large values (intscale &gt; 1e6) a box with sharp edges
 would be visible if convolution were not done on the full scale. The problem
 is that the values outside the input grid are not very reliable, so these
 objects should be treated with caution.</p>

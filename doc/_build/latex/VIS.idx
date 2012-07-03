@@ -13,14 +13,14 @@
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{applyNoise() (simulator.simulator.VISsimulator method)|hyperpage}{11}
-\indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{11}
+\indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{12}
-\indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{12}
+\indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{readConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{14}
@@ -29,14 +29,14 @@
 \indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{14}
-\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{14}
-\indexentry{simulator.generateGalaxies (module)|hyperpage}{14}
+\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{15}
+\indexentry{simulator.generateGalaxies (module)|hyperpage}{15}
 \indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{15}
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
-\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
+\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
 \indexentry{postproc.postprocessing (module)|hyperpage}{17}
 \indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{17}
 \indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{17}

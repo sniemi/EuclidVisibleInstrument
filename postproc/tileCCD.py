@@ -63,7 +63,7 @@ class tileCCD():
             if 'True' in overscan:
                 self.log.info('Subtracting pre- and overscan regions')
                 prescanx = hdu['PRESCANX']
-                overscanx = hdu['OVRSCAX']
+                overscanx = hdu['OVRSCANX']
                 quadrant = hdu['QUADRANT']
 
                 if quadrant in (0, 2):

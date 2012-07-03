@@ -52,7 +52,7 @@ def plot(filename, rad=1.0):
     ax.set_xlabel('Input Magnitude')
     ax.set_ylabel('Delta Magnitude (extracted - input)')
     ax.plot([14,26], [0.0, 0.0], 'g--')
-    ax.set_xlim(14, 26)
+    ax.set_xlim(14, 27)
     ax.set_ylim(-2.0, 1.5)
     plt.legend(fancybox=True, shadow=True, numpoints=1)
     plt.savefig('Magnitudes%s.pdf' % str(rad).replace('.', ''))

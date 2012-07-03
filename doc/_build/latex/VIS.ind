@@ -19,7 +19,7 @@
   \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{17}
   \item applyNoise() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{18}
-  \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{11}
+  \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{12}
   \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{18}
   \item applyReadoutNoise() (simulator.simulator.VISsimulator method), \hyperpage{12}
 
@@ -76,7 +76,7 @@
 
   \indexspace
   \bigletter O
-  \item objectOnDetector() (simulator.simulator.VISsimulator method), \hyperpage{12}
+  \item objectOnDetector() (simulator.simulator.VISsimulator method), \hyperpage{13}
   \item overlayToCCD() (simulator.simulator.VISsimulator method), \hyperpage{13}
 
   \indexspace
@@ -107,13 +107,13 @@
   \item run() (postproc.postprocessing.PostProcessing method), \hyperpage{20}
   \item runAll() (analysis.sourceFinder.sourceFinder method), \hyperpage{28}
   \item runAll() (postproc.tileCCD.tileCCD method), \hyperpage{21}
-  \item runAll() (simulator.generateGalaxies.generateFakeData method), \hyperpage{15}
+  \item runAll() (simulator.generateGalaxies.generateFakeData method), \hyperpage{16}
 
   \indexspace
   \bigletter S
   \item shapeMeasurement (class in analysis.shape), \hyperpage{26}
   \item simulate() (simulator.simulator.VISsimulator method), \hyperpage{14}
-  \item simulator.generateGalaxies (module), \hyperpage{14}
+  \item simulator.generateGalaxies (module), \hyperpage{15}
   \item simulator.simulator (module), \hyperpage{7}
   \item sourceFinder (class in analysis.sourceFinder), \hyperpage{28}
   \item sources.createObjectCatalogue (module), \hyperpage{5}
@@ -135,7 +135,7 @@
   \item writeFITSfile() (postproc.tileCCD.tileCCD method), \hyperpage{21}
   \item writeFITSfile() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{24}
   \item writeFITSfile() (simulator.simulator.VISsimulator method), \hyperpage{14}
-  \item writeOutputs() (simulator.simulator.VISsimulator method), \hyperpage{14}
+  \item writeOutputs() (simulator.simulator.VISsimulator method), \hyperpage{15}
   \item writeResults() (analysis.analyse.analyseVISdata method), \hyperpage{26}
 
 \end{theindex}

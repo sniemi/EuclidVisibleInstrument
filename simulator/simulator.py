@@ -917,11 +917,16 @@ class VISsimulator():
         """
         Add objects from the object list to the CCD image (self.image).
 
-        Scale the object's brightness based on its magnitude. The size of the object
-        is scaled using the brightness.
+        Scale the object's brightness in electrons and size using the input catalog magnitude.
+
+        If PSF is over sampled then we should do the convolution in the over sampled
+        grid. However, when the PSF is heavily over sampled this operation becomes
+        rather slow. Thus, other convolution techniques such as Fast Fourier Transform
+        based should be used. Additional complication arises when using an over sampled
+        PSF, namely the flux conservation.
 
         For fainter objects the convolved results are on the same sized grid as the
-        input. However, for large values (intscale > 1e5) a box with sharp edges
+        input. However, for large values (intscale > 1e6) a box with sharp edges
         would be visible if convolution were not done on the full scale. The problem
         is that the values outside the input grid are not very reliable, so these
         objects should be treated with caution.
@@ -985,23 +990,28 @@ class VISsimulator():
                         #suppress negative values
                         data[data < 0.0] = 0.0
 
+                        #if no values above 0, the galaxy is really small and thus we can make the galaxy one pixel
+                        if np.alltrue(data == 0.0):
+                            self.log.warning('A faint and small galaxy, will have to assign all flux to a single ' +\
+                                             '(super sampled) pixel before convolution')
+
+                            if self.information['psfoversampling'] > 1.0:
+                                tmp = np.round(self.information['psfoversampling'])
+                                data = np.ones((tmp, tmp), dtype=np.float64)
+                            else:
+                                data = np.ones((1, 1), dtype=np.float64)
+
                         #renormalise and scale to the right magnitude
                         sum = np.sum(data)
                         data *= intscales[j] / sum
-
-                        #if no values above 0, the galaxy is really small and thus we can make the galaxy one pixel
-                        if np.alltrue(data == 0.0):
-                            self.log.warning('A faint and small galaxy,' + \
-                                             'will have to assing all flux to single pixel before convolution')
-                            data = np.ones((1,1))
 
                         if self.debug:
                             self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
 
                         if self.information['variablePSF']:
                             #spatially variable PSF, we need to convolve with the appropriate PSF
-                            #data = ndimage.filters.convolve(data, self.PSF) #would need padding?
-                            #data = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
+                            #conv = ndimage.filters.convolve(data, self.PSF) #would need padding?
+                            #conv = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
                             conv = signal.convolve2d(data, self.PSF, mode='same')
                         else:
                             if intscales[j] > 1e6:
@@ -1013,12 +1023,13 @@ class VISsimulator():
 
                         #scale the size of the image based on the size and PSF over sampling
                         if self.information['psfoversampling'] > 1.0:
+                            conv[conv < 0.0] = 0.0
+                            sumOrig = np.sum(conv)
                             conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'],
                                                       mode='constant', cval=0.0)
-
-#                        #renormalise and scale to the right magnitude
-#                        sum = np.sum(conv)
-#                        conv *= intscales[j] / sum
+                            conv[conv < 0.0] = 0.0
+                            sumNew = np.sum(conv)
+                            conv *= sumOrig / sumNew
 
                         if self.debug:
                             scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)

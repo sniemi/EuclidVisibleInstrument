@@ -168,7 +168,7 @@ The reference simulator code has been tested against photometric accuracy (witho
 simulated image was generated with the reference simulator, sources were identified and photometry performed
 using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
 figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
-around 0.1 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
+about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
 the derived magnitudes are inaccurate.
 
@@ -178,7 +178,7 @@ the derived magnitudes are inaccurate.
      :figclass: align-center
 
      Example showing the recovered photometry from a reference simulator image with realistic noise
-     and end-of-life radiation damage, but without aperture correction. The offset is around 0.1mag.
+     and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.
 
 
 Indices and tables

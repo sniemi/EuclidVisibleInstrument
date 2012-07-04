@@ -98,7 +98,7 @@
   \item radiateFullCCD() (postproc.postprocessing.PostProcessing method), \hyperpage{20}
   \item readConfigs() (simulator.simulator.VISsimulator method), \hyperpage{14}
   \item readCosmicRayInformation() (simulator.simulator.VISsimulator method), \hyperpage{14}
-  \item readData() (postproc.tileCCD.tileCCD method), \hyperpage{20}
+  \item readData() (postproc.tileCCD.tileCCD method), \hyperpage{21}
   \item readObjectlist() (simulator.simulator.VISsimulator method), \hyperpage{14}
   \item readPSFs() (simulator.simulator.VISsimulator method), \hyperpage{14}
   \item readSources() (analysis.analyse.analyseVISdata method), \hyperpage{26}
@@ -121,7 +121,7 @@
 
   \indexspace
   \bigletter T
-  \item tileCCD (class in postproc.tileCCD), \hyperpage{20}
+  \item tileCCD (class in postproc.tileCCD), \hyperpage{21}
   \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{21}
 
   \indexspace

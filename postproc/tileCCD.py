@@ -18,6 +18,11 @@ where -f argument defines the input files to be tiled and the -e argument marks 
 FITS extension from which the imaging data are being read.
 
 :version: 0.4
+
+.. todo::
+
+    #. Does not deal properly with multiple WCSs coming in the different quadrants
+
 """
 import pyfits as pf
 import numpy as np
@@ -102,10 +107,10 @@ class tileCCD():
             p = re.compile('\d+')
             ls = p.findall(key)
             #in ls, numbers are [quadrant, CCDx, CCDy]
-            if len(ls) != 3:
+            if len(ls) < 3:
                 print 'Problem when parsing the file name!'
                 print 'Filenames should be in format:'
-                print 'Qx_CCDX_CCDY_filename.fits'
+                print 'Qx_CCDX_CCDYfilename.fits'
                 self.log.error('Problem when parsing the file name!')
                 return self.CCDdata
 

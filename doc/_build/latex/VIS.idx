@@ -51,8 +51,8 @@
 \indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
 \indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
 \indexentry{postproc.tileCCD (module)|hyperpage}{20}
-\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{20}
-\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{20}
+\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{21}
+\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
 \indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
 \indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
 \indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{21}

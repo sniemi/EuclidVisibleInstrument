@@ -8,9 +8,10 @@
 \contentsline {subsection}{\numberline {3.1.1}The Euclid Visible Instrument Image Simulator}{7}{subsection.3.1.1}
 \contentsline {subsubsection}{Dependencies}{8}{subsubsection*.7}
 \contentsline {subsubsection}{Testing}{9}{subsubsection*.8}
-\contentsline {subsubsection}{Change Log}{9}{subsubsection*.9}
-\contentsline {subsubsection}{Future Work}{9}{subsubsection*.10}
-\contentsline {subsubsection}{Contact Information}{10}{subsubsection*.11}
+\contentsline {subsubsection}{Benchmarking}{9}{subsubsection*.9}
+\contentsline {subsubsection}{Change Log}{9}{subsubsection*.10}
+\contentsline {subsubsection}{Future Work}{10}{subsubsection*.11}
+\contentsline {subsubsection}{Contact Information}{10}{subsubsection*.12}
 \contentsline {subsection}{\numberline {3.1.2}Generating Mock Objects with IRAF}{15}{subsection.3.1.2}
 \contentsline {chapter}{\numberline {4}Instrument Characteristics}{17}{chapter.4}
 \contentsline {section}{\numberline {4.1}Postprocessing tools}{17}{section.4.1}
@@ -31,5 +32,5 @@
 \contentsline {section}{\numberline {8.2}Code}{33}{section.8.2}
 \contentsline {chapter}{\numberline {9}Photometric Accuracy}{35}{chapter.9}
 \contentsline {chapter}{\numberline {10}Indices and tables}{37}{chapter.10}
-\contentsline {chapter}{Python Module Index}{39}{section*.93}
-\contentsline {chapter}{Index}{41}{section*.94}
+\contentsline {chapter}{Python Module Index}{39}{section*.94}
+\contentsline {chapter}{Index}{41}{section*.95}

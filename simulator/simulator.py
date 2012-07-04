@@ -51,12 +51,17 @@ The approximate sequence of events in the simulator is as follows:
 Dependencies
 ------------
 
-This script depends on the following packages.
+This script depends on the following packages:
 
 :requires: PyFITS (tested with 3.0.6)
 :requires: NumPy (tested with 1.6.1)
 :requires: SciPy (tested with 0.10.1)
 :requires: vissim-python package
+
+.. Note:: This class is not Python 3 compatible. For example, xrange does not exist
+          in Python 3 (but is used here for speed and memory consumption improvements).
+          In addition, at least the string formatting should be changed if moved to
+          Python 3.x.
 
 
 Testing
@@ -78,17 +83,31 @@ please divide your nonoise and no cosmic ray track output image with the on in t
 folder. This should lead to a uniformly unity image or at least very close given some
 numerical rounding uncertainties.
 
-Benchmark using the SCIENCE section of the test.config input file::
+
+Benchmarking
+------------
+
+A minimal benchmarking has been performed using the SCIENCE section of the test.config input file::
 
     Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
     6798 objects were place on the detector
 
-    real	5m41.421s
-    user	5m36.597s
-    sys	    0m1.327s
+    real	4m51.068s
+    user	4m39.870s
+    sys	    0m4.903s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation.
+64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+as follows::
+
+    python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE
+
+and then analysing the results with e.g. RunSnakeRun.
+
+.. Note: The results above were obtained with nominally sampled PSF. If one uses say three times
+         over sampled PSF then the execution time rises significantly (to about 30 minutes). This
+         is due to the fact that convolution becomes rather expensive when done in the finely
+         sampled PSF domain.
 
 
 Change Log
@@ -117,7 +136,6 @@ Future Work
 .. todo::
 
     #. include WCS to the FITS file
-    #. improve the convolution speed (look into fftw)
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
@@ -128,6 +146,7 @@ Future Work
     #. CTI model values are not included to the FITS header
     #. include rotation in metrology
     #. implement optional dithered offsets
+    #. try to further improve the convolution speed (look into fftw package)
 
 
 Contact Information
@@ -349,7 +368,7 @@ class VISsimulator():
         crImage = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
         #this is very slow way to do this
-        for cosmics in range(0, len(l)):
+        for cosmics in xrange(0, len(l)):
             #delta x and y
             dx = l[cosmics] * np.cos(phi[cosmics])
             dy = l[cosmics] * np.sin(phi[cosmics])
@@ -383,7 +402,7 @@ class VISsimulator():
 
             #Compute X intercepts on the pixel grid
             if dx > 0.:
-                for j in range(int(ilo), int(ihi)):
+                for j in xrange(int(ilo), int(ihi)):
                     ok = (j - x0[cosmics]) / dx
                     if np.abs(ok) <= 0.5:
                         n += 1
@@ -393,7 +412,7 @@ class VISsimulator():
 
             #Compute Y intercepts on the pixel grid
             if dy > 0.:
-                for j in range(int(jlo), int(jhi)):
+                for j in xrange(int(jlo), int(jhi)):
                     ok = (j - y0[cosmics]) / dy
                     if np.abs(ok) <= 0.5:
                         n += 1
@@ -419,7 +438,7 @@ class VISsimulator():
             y = y[args]
 
             #Decide which cell each interval traverses, and the path length.
-            for i in range(1, n - 1):
+            for i in xrange(1, n - 1):
                 w = u[i + 1] - u[i]
                 cx = 1 + np.floor((x[i + 1] + x[i]) / 2.0)
                 cy = 1 + np.floor((y[i + 1] + y[i]) / 2.0)
@@ -532,8 +551,8 @@ class VISsimulator():
         tmp = x + 5.5
         tmp = (x + .5) * np.log(tmp) - tmp
         ser = 1.000000000190015
-        for j in range(6):
-            y = y + 1.0
+        for j in xrange(6):
+            y += 1.
             ser += gammln_cof[j] / y
         return tmp + np.log(gammln_stp * ser / x)
 
@@ -646,7 +665,7 @@ class VISsimulator():
                 self.image[j1:j2, i1:i2] += data[:nj, :]
         else:
             #both lengths smaller, can be in any of the four corners
-            if int(np.floor(xlo + 0.5)) < 1 and int(np.floor(ylo + 0.5)) < 1:
+            if int(np.floor(xlo + 0.5)) < 1 > int(np.floor(ylo + 0.5)):
                 #left lower
                 self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
             elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(yhi + 0.5)) > self.information['ysize']:
@@ -844,7 +863,7 @@ class VISsimulator():
                 #PSF; scale it to the right size as this is not used for convolution but for stars
                 if self.information['psfoversampling'] > 1.0:
                     self.log.info('Saving a resampled PSF to finemaps so that i can be used for stars')
-                    data = scipy.ndimage.zoom(self.PSF, 1./self.information['psfoversampling'], order=3)
+                    data = scipy.ndimage.zoom(self.PSF, 1./self.information['psfoversampling'], order=0)
                 else:
                     data = self.PSF
 
@@ -873,7 +892,7 @@ class VISsimulator():
                 if self.information['psfoversampling'] > 1.0:
                     data = scipy.ndimage.zoom(self.objectMapping[stype]['data'],
                                               self.information['psfoversampling'],
-                                              order=3)
+                                              order=0)
                 else:
                     data = self.objectMapping[stype]['data']
 
@@ -900,8 +919,8 @@ class VISsimulator():
                 Qxx = 0.
                 Qxy = 0.
                 Qyy = 0.
-                for i in range(0, self.PSFx*finemapsampling):
-                    for j in range(0, self.PSFy*finemapsampling):
+                for i in xrange(0, self.PSFx*finemapsampling):
+                    for j in xrange(0, self.PSFy*finemapsampling):
                         Qxx += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(i-0.5*(self.PSFx*finemapsampling-1))
                         Qxy += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
                         Qyy += fm[j,i]*(j-0.5*(self.PSFy*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
@@ -919,160 +938,20 @@ class VISsimulator():
         self.log.info('finemap sum = %f' %np.sum(np.asarray(self.finemap.values())))
 
 
-#    def addObjects(self):
-#        """
-#        Add objects from the object list to the CCD image (self.image).
-#
-#        Scale the object's brightness in electrons and size using the input catalog magnitude.
-#
-#        If PSF is over sampled then we should do the convolution in the over sampled
-#        grid. However, when the PSF is heavily over sampled this operation becomes
-#        rather slow. Thus, other convolution techniques such as Fast Fourier Transform
-#        based should be used. Additional complication arises when using an over sampled
-#        PSF, namely the flux conservation.
-#
-#        For fainter objects the convolved results are on the same sized grid as the
-#        input. However, for large values (intscale > 1e6) a box with sharp edges
-#        would be visible if convolution were not done on the full scale. The problem
-#        is that the values outside the input grid are not very reliable, so these
-#        objects should be treated with caution.
-#        """
-#        #total number of objects in the input catalogue and counter for visible objects
-#        n_objects = self.objects.shape[0]
-#        visible = 0
-#
-#        self.log.info('Number of CCD transits = %i' % self.information['exposures'])
-#        self.log.info('Total number of objects in the input catalog = %i' % n_objects)
-#
-#        #calculate the scaling factors from the magnitudes
-#        intscales = 10.0**(-0.4 * self.objects[:, 2]) * \
-#                    self.information['magzero'] * \
-#                    self.information['exptime']
-#
-#        #loop over exposures
-#        for i in range(self.information['exposures']):
-#            #loop over the number of objects
-#            for j, obj in enumerate(self.objects):
-#
-#                stype = obj[3]
-#
-#                if self.objectOnDetector(obj):
-#                    visible += 1
-#                    if stype == 0:
-#                        #point source, apply PSF
-#                        txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
-#                        print txt
-#                        self.log.info(txt)
-#
-#                        #renormalise and scale with the intscale
-#                        data = self.finemap[stype].copy()
-#                        sum = np.sum(data)
-#                        data *= intscales[j] / sum
-#
-#                        self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
-#
-#                        #overlay the scaled PSF on the image
-#                        self.overlayToCCD(data, obj)
-#                    else:
-#                        #extended source, rename finemap
-#                        data = self.finemap[stype].copy()
-#
-#                        #size
-#                        sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
-#
-#                        txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
-#                              " intscale=" + str(intscales[j]) + " size=" + str(sbig)
-#                        print txt
-#                        self.log.info(txt)
-#
-#                        #rotate the image using interpolation
-#                        if obj[4] != 0.0:
-#                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
-#
-#                        #scale the size of the image
-#                        if sbig != 1.0:
-#                            data = scipy.ndimage.zoom(data, sbig, mode='constant', cval=0.0)
-#
-#                        #suppress negative values
-#                        data[data < 0.0] = 0.0
-#
-#                        #if no values above 0, the galaxy is really small and thus we can make the galaxy one pixel
-#                        if np.alltrue(data == 0.0):
-#                            self.log.warning('A faint and small galaxy, will have to assign all flux to a single ' +\
-#                                             '(super sampled) pixel before convolution')
-#
-#                            if self.information['psfoversampling'] > 1.0:
-#                                tmp = np.round(self.information['psfoversampling'])
-#                                data = np.ones((tmp, tmp), dtype=np.float64)
-#                            else:
-#                                data = np.ones((1, 1), dtype=np.float64)
-#
-#                        #renormalise and scale to the right magnitude
-#                        sum = np.sum(data)
-#                        data *= intscales[j] / sum
-#
-#                        if self.debug:
-#                            self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
-#
-#                        if self.information['variablePSF']:
-#                            #spatially variable PSF, we need to convolve with the appropriate PSF
-#                            #conv = ndimage.filters.convolve(data, self.PSF) #would need padding?
-#                            #conv = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
-#                            conv = signal.convolve2d(data, self.PSF, mode='same')
-#                        else:
-#                            if intscales[j] > 1e6:
-#                                #For large values, a boxing effect is
-#                                #visible unless a full convolution is being used.
-#                                conv = signal.convolve2d(data, self.PSF, mode='full')
-#                            else:
-#                                conv = signal.convolve2d(data, self.PSF, mode='same')
-#
-#                        #scale the size of the image based on the size and PSF over sampling
-#                        if self.information['psfoversampling'] > 1.0:
-#                            conv[conv < 0.0] = 0.0
-#                            sumOrig = np.sum(conv)
-#                            conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'],
-#                                                      mode='constant', cval=0.0)
-#                            conv[conv < 0.0] = 0.0
-#                            sumNew = np.sum(conv)
-#                            conv *= sumOrig / sumNew
-#
-#                        if self.debug:
-#                            scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
-#                            self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
-#
-#                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
-#
-#                        #overlay the convolved image on the image
-#                        self.overlayToCCD(conv, obj)
-#
-#                else:
-#                    #not on the screen
-#                    print 'OFFscreen: ', j+1
-#                    self.log.info('Object %i was outside the detector area' % (j+1))
-#
-#
-#        self.log.info('%i objects were place on the detector' % visible)
-#        print '%i objects were place on the detector' % visible
-
-
-    def addObjects(self):
+    def _addObjects(self):
         """
+        .. deprecated:: 1.0
+           This method was replaced by addObjects because this does not work for over sampled PSFs.
+
         Add objects from the object list to the CCD image (self.image).
 
         Scale the object's brightness in electrons and size using the input catalog magnitude.
 
-        If PSF is over sampled then we should do the convolution in the over sampled
-        grid. However, when the PSF is heavily over sampled this operation becomes
-        rather slow. Thus, other convolution techniques such as Fast Fourier Transform
-        based should be used. Additional complication arises when using an over sampled
-        PSF, namely the flux conservation.
-
-        For fainter objects the convolved results are on the same sized grid as the
-        input. However, for large values (intscale > 1e6) a box with sharp edges
-        would be visible if convolution were not done on the full scale. The problem
-        is that the values outside the input grid are not very reliable, so these
-        objects should be treated with caution.
+        .. Note: scipy.signal.fftconvolve does not support np.float64, thus some accuracy
+                 lost is due to happen when using it. However, it is significantly faster
+                 than scipy.signal.convolve2d so in that sense it is the preferred method.
+                 In future, one should test how much the different convolution techniques
+                 effect the knowledge of the ellipticity and R-squared.
         """
         #total number of objects in the input catalogue and counter for visible objects
         n_objects = self.objects.shape[0]
@@ -1087,7 +966,7 @@ class VISsimulator():
                     self.information['exptime']
 
         #loop over exposures
-        for i in range(self.information['exposures']):
+        for i in xrange(self.information['exposures']):
             #loop over the number of objects
             for j, obj in enumerate(self.objects):
 
@@ -1122,10 +1001,31 @@ class VISsimulator():
                         print txt
                         self.log.info(txt)
 
-                        #rotate the image using interpolation and suppress ringing
+                        #rotate the image using interpolation
                         if obj[4] != 0.0:
-                            data = ndimage.interpolation.rotate(data, obj[4], order=4, reshape=False)
-                            data[data < 1e-7] = 0.0
+                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                        #scale the size of the image
+                        if sbig != 1.0:
+                            data = scipy.ndimage.zoom(data, sbig, order=0, mode='constant', cval=0.0)
+
+                        #suppress negative values
+                        data[data < 0.0] = 0.0
+
+                        #if no values above 0, the galaxy is really small and thus we can make the galaxy one pixel
+                        if np.alltrue(data == 0.0):
+                            self.log.warning('A faint and small galaxy, will have to assign all flux to a single ' +\
+                                             '(super sampled) pixel before convolution')
+
+                            if self.information['psfoversampling'] > 1.0:
+                                tmp = np.round(self.information['psfoversampling'])
+                                data = np.ones((tmp, tmp), dtype=np.float64)
+                            else:
+                                data = np.ones((1, 1), dtype=np.float64)
+
+                        #renormalise and scale to the right magnitude
+                        sum = np.sum(data)
+                        data *= intscales[j] / sum
 
                         if self.debug:
                             self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
@@ -1133,21 +1033,117 @@ class VISsimulator():
                         if self.information['variablePSF']:
                             #spatially variable PSF, we need to convolve with the appropriate PSF
                             #conv = ndimage.filters.convolve(data, self.PSF) #would need padding?
-                            #conv = signal.fftconvolve(data, self.PSF) #does not work with 64-bit?
-                            conv = signal.convolve2d(data, self.PSF, mode='same')
+                            #conv = signal.convolve2d(data, self.PSF, mode='same')
+                            sys.exit('ERROR - Spatially Variable PSF has not been implemented yet!')
                         else:
-                            if intscales[j] > 1e6:
-                                #For large values, a boxing effect is
-                                #visible unless a full convolution is being used.
-                                conv = signal.convolve2d(data, self.PSF)
-                            else:
-                                conv = signal.convolve2d(data, self.PSF, mode='same')
+                            #if intscales[j] > 1e6:
+                            #    conv = signal.convolve2d(data, self.PSF)
+                            #else:
+                            #    conv = signal.convolve2d(data, self.PSF, mode='same')
+                            conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32))#, mode='same')
 
-                        conv[conv < 0.0] = 0.0
+                        if self.debug:
+                            scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
+                            self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+
+                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
+
+                        #overlay the convolved image on the image
+                        self.overlayToCCD(conv, obj)
+
+                else:
+                    #not on the screen
+                    print 'OFFscreen: ', j+1
+                    self.log.info('Object %i was outside the detector area' % (j+1))
+
+
+        self.log.info('%i objects were place on the detector' % visible)
+        print '%i objects were place on the detector' % visible
+
+
+    def addObjects(self):
+        """
+        Add objects from the object list to the CCD image (self.image).
+
+        Scale the object's brightness in electrons and size using the input catalog magnitude.
+
+        .. Note: scipy.signal.fftconvolve does not support np.float64, thus some accuracy
+                 lost is due to happen when using it. However, it is significantly faster
+                 than scipy.signal.convolve2d so in that sense it is the preferred method.
+                 In future, one should test how much the different convolution techniques
+                 effect the knowledge of the ellipticity and R-squared.
+        """
+        #total number of objects in the input catalogue and counter for visible objects
+        n_objects = self.objects.shape[0]
+        visible = 0
+
+        self.log.info('Number of CCD transits = %i' % self.information['exposures'])
+        self.log.info('Total number of objects in the input catalog = %i' % n_objects)
+
+        #calculate the scaling factors from the magnitudes
+        intscales = 10.0**(-0.4 * self.objects[:, 2]) * \
+                    self.information['magzero'] * \
+                    self.information['exptime']
+
+        #loop over exposures
+        for i in xrange(self.information['exposures']):
+            #loop over the number of objects
+            for j, obj in enumerate(self.objects):
+
+                stype = obj[3]
+
+                if self.objectOnDetector(obj):
+                    visible += 1
+                    if stype == 0:
+                        #point source, apply PSF
+                        txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                        print txt
+                        self.log.info(txt)
+
+                        #renormalise and scale with the intscale
+                        data = self.finemap[stype].copy()
+                        sum = np.sum(data)
+                        data *= intscales[j] / sum
+
+                        self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
+
+                        #overlay the scaled PSF on the image
+                        self.overlayToCCD(data, obj)
+                    else:
+                        #extended source, rename finemap
+                        data = self.finemap[stype].copy()
+
+                        #size
+                        sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
+
+                        txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
+                              " intscale=" + str(intscales[j]) + " size=" + str(sbig)
+                        print txt
+                        self.log.info(txt)
+
+                        #rotate the image using interpolation and suppress negative values
+                        if obj[4] != 0.0:
+                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+                            data[data < 0.0] = 0.0
+
+                        if self.debug:
+                            self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
+
+                        if self.information['variablePSF']:
+                            #spatially variable PSF, we need to convolve with the appropriate PSF
+                            #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                            #conv = signal.convolve2d(data, self.PSF, mode='same')
+                            sys.exit('Spatially variable PSF not implemented yet!')
+                        else:
+                            #conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32), mode='same')
+                            conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32))
+
                         #scale the size of the image
                         if sbig != 1.0:
-                            conv = scipy.ndimage.zoom(conv, sbig, mode='constant', cval=0.0)
-                            conv[conv < 0.0] = 0.0
+                            conv = scipy.ndimage.zoom(conv, self.information['psfoversampling']*sbig, order=1)
+
+                        #suppress negative numbers
+                        conv[conv < 1e-10] = 0.0
 
                         #renormalise and scale to the right magnitude
                         sum = np.sum(conv)
@@ -1287,8 +1283,8 @@ class VISsimulator():
 
         self.log.info('Added dark noise and cosmic background = %f' % noise)
 
-        #for a in range(self.information['xsize']):
-        #    for b in range(self.information['ysize']):
+        #for a in xrange(self.information['xsize']):
+        #    for b in xrange(self.information['ysize']):
         #        self.image[b, a] = self._slowPoissonNoise(self.image[b, a])
         self.image[self.image < 0.0] = 0.0
         self.image = np.random.poisson(self.image)

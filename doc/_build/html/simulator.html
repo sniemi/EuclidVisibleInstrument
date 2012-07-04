@@ -63,6 +63,7 @@
 <li><a class="reference internal" href="#the-euclid-visible-instrument-image-simulator">The Euclid Visible Instrument Image Simulator</a><ul>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#benchmarking">Benchmarking</a></li>
 <li><a class="reference internal" href="#change-log">Change Log</a></li>
 <li><a class="reference internal" href="#future-work">Future Work</a></li>
 <li><a class="reference internal" href="#contact-information">Contact Information</a></li>
@@ -181,7 +182,7 @@ please report any weird or inconsistent simulations to the author.</p>
 </div>
 <div class="section" id="dependencies">
 <h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
-<p>This script depends on the following packages.</p>
+<p>This script depends on the following packages:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -196,6 +197,13 @@ please report any weird or inconsistent simulations to the author.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This class is not Python 3 compatible. For example, xrange does not exist
+in Python 3 (but is used here for speed and memory consumption improvements).
+In addition, at least the string formatting should be changed if moved to
+Python 3.x.</p>
+</div>
 </div>
 <div class="section" id="testing">
 <h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
@@ -212,16 +220,23 @@ which is the comparison image without any noise or cosmic rays. To test the func
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
 numerical rounding uncertainties.</p>
-<p>Benchmark using the SCIENCE section of the test.config input file:</p>
+</div>
+<div class="section" id="benchmarking">
+<h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
+<p>A minimal benchmarking has been performed using the SCIENCE section of the test.config input file:</p>
 <div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        5m41.421s
-user        5m36.597s
-sys     0m1.327s</pre>
+real        4m51.068s
+user        4m39.870s
+sys     0m4.903s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation.</p>
+64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+as follows:</p>
+<div class="highlight-python"><pre>python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE</pre>
+</div>
+<p>and then analysing the results with e.g. RunSnakeRun.</p>
 </div>
 <div class="section" id="change-log">
 <h3>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h3>
@@ -253,7 +268,6 @@ sys     0m1.327s</pre>
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
 <li>include WCS to the FITS file</li>
-<li>improve the convolution speed (look into fftw)</li>
 <li>implement spatially variable PSF</li>
 <li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
@@ -264,6 +278,7 @@ sys     0m1.327s</pre>
 <li>CTI model values are not included to the FITS header</li>
 <li>include rotation in metrology</li>
 <li>implement optional dithered offsets</li>
+<li>try to further improve the convolution speed (look into fftw package)</li>
 </ol>
 </div>
 </div>
@@ -320,16 +335,6 @@ sys     0m1.327s</pre>
 <tt class="descname">addObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add objects from the object list to the CCD image (self.image).</p>
 <p>Scale the object&#8217;s brightness in electrons and size using the input catalog magnitude.</p>
-<p>If PSF is over sampled then we should do the convolution in the over sampled
-grid. However, when the PSF is heavily over sampled this operation becomes
-rather slow. Thus, other convolution techniques such as Fast Fourier Transform
-based should be used. Additional complication arises when using an over sampled
-PSF, namely the flux conservation.</p>
-<p>For fainter objects the convolved results are on the same sized grid as the
-input. However, for large values (intscale &gt; 1e6) a box with sharp edges
-would be visible if convolution were not done on the full scale. The problem
-is that the values outside the input grid are not very reliable, so these
-objects should be treated with caution.</p>
 </dd></dl>
 
 <dl class="method">

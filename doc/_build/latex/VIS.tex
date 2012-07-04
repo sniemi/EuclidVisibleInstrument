@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{July 03, 2012}
+\date{July 04, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -371,7 +371,7 @@ please report any weird or inconsistent simulations to the author.
 
 \subsubsection{Dependencies}
 \label{simulator:dependencies}
-This script depends on the following packages.
+This script depends on the following packages:
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
 PyFITS (tested with 3.0.6)
@@ -386,6 +386,13 @@ SciPy (tested with 0.10.1)
 vissim-python package
 
 \end{description}\end{quote}
+
+\begin{notice}{note}{Note:}
+This class is not Python 3 compatible. For example, xrange does not exist
+in Python 3 (but is used here for speed and memory consumption improvements).
+In addition, at least the string formatting should be changed if moved to
+Python 3.x.
+\end{notice}
 
 
 \subsubsection{Testing}
@@ -408,19 +415,29 @@ please divide your nonoise and no cosmic ray track output image with the on in t
 folder. This should lead to a uniformly unity image or at least very close given some
 numerical rounding uncertainties.
 
-Benchmark using the SCIENCE section of the test.config input file:
+
+\subsubsection{Benchmarking}
+\label{simulator:benchmarking}
+A minimal benchmarking has been performed using the SCIENCE section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        5m41.421s
-user        5m36.597s
-sys     0m1.327s
+real        4m51.068s
+user        4m39.870s
+sys     0m4.903s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation.
+64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE
+\end{Verbatim}
+
+and then analysing the results with e.g. RunSnakeRun.
 
 
 \subsubsection{Change Log}
@@ -455,9 +472,6 @@ Version and change logs:
 include WCS to the FITS file
 
 \item {} 
-improve the convolution speed (look into fftw)
-
-\item {} 
 implement spatially variable PSF
 
 \item {} 
@@ -486,6 +500,9 @@ include rotation in metrology
 
 \item {} 
 implement optional dithered offsets
+
+\item {} 
+try to further improve the convolution speed (look into fftw package)
 
 \end{enumerate}
 \end{notice}
@@ -550,18 +567,6 @@ Cosmic ray properties (such as location and angle) are chosen from random Unifor
 Add objects from the object list to the CCD image (self.image).
 
 Scale the object's brightness in electrons and size using the input catalog magnitude.
-
-If PSF is over sampled then we should do the convolution in the over sampled
-grid. However, when the PSF is heavily over sampled this operation becomes
-rather slow. Thus, other convolution techniques such as Fast Fourier Transform
-based should be used. Additional complication arises when using an over sampled
-PSF, namely the flux conservation.
-
-For fainter objects the convolved results are on the same sized grid as the
-input. However, for large values (intscale \textgreater{} 1e6) a box with sharp edges
-would be visible if convolution were not done on the full scale. The problem
-is that the values outside the input grid are not very reliable, so these
-objects should be treated with caution.
 
 \end{fulllineitems}
 

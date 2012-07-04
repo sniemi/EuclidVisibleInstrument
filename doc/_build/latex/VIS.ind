@@ -2,8 +2,8 @@
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 
   \bigletter A
-  \item addChargeInjection() (simulator.simulator.VISsimulator method), \hyperpage{10}
-  \item addCosmicRays() (simulator.simulator.VISsimulator method), \hyperpage{10}
+  \item addChargeInjection() (simulator.simulator.VISsimulator method), \hyperpage{11}
+  \item addCosmicRays() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item addObjects() (simulator.generateGalaxies.generateFakeData method), \hyperpage{15}
   \item addObjects() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item addPreOverScans() (simulator.simulator.VISsimulator method), \hyperpage{11}
@@ -57,7 +57,7 @@
   \item generateCatalog() (in module sources.createObjectCatalogue), \hyperpage{6}
   \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{19}
   \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{15}
-  \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{12}
+  \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{13}
   \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{28}
   \item getCenterOfMass() (analysis.sourceFinder.sourceFinder method), \hyperpage{28}
   \item getContours() (analysis.sourceFinder.sourceFinder method), \hyperpage{28}
@@ -70,7 +70,7 @@
 
   \indexspace
   \bigletter M
-  \item maskCrazyValues() (simulator.generateGalaxies.generateFakeData method), \hyperpage{15}
+  \item maskCrazyValues() (simulator.generateGalaxies.generateFakeData method), \hyperpage{16}
   \item measureEllipticity() (analysis.analyse.analyseVISdata method), \hyperpage{26}
   \item measureRefinedEllipticity() (analysis.shape.shapeMeasurement method), \hyperpage{27}
 

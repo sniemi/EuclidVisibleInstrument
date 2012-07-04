@@ -4,8 +4,8 @@
 \indexentry{plotDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{6}
 \indexentry{simulator.simulator (module)|hyperpage}{7}
 \indexentry{VISsimulator (class in simulator.simulator)|hyperpage}{10}
-\indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{10}
-\indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{10}
+\indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{11}
+\indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{11}
@@ -19,7 +19,7 @@
 \indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{12}
-\indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{12}
+\indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{13}
@@ -35,7 +35,7 @@
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
-\indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
+\indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
 \indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
 \indexentry{postproc.postprocessing (module)|hyperpage}{17}
 \indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{17}

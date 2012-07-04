@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  3 JUL 2012 22:29
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  4 JUL 2012 13:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1008,55 +1008,55 @@ Underfull \hbox (badness 10000) in paragraph at lines 369--370
  []
 
 [8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 506--506
+Underfull \hbox (badness 10000) in paragraph at lines 523--523
 []\T1/ptm/m/it/12 configfile\T1/ptm/m/n/12 , \T1/ptm/m/it/12 de-bug\T1/ptm/m/n/
 12 , \T1/ptm/m/it/12 sec-
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 615--616
+Underfull \hbox (badness 10000) in paragraph at lines 620--621
 
  []
 
-[11]
-Underfull \hbox (badness 10000) in paragraph at lines 750--751
+[11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 755--756
 
  []
 
-[12] [13]
-Underfull \hbox (badness 6542) in paragraph at lines 917--918
+[13] [14]
+Underfull \hbox (badness 6542) in paragraph at lines 922--923
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[14] [15] <simu.pdf, id=327, 2478.25874pt x 1097.09875pt>
+[15] <simu.pdf, id=327, 2478.25874pt x 1097.09875pt>
 File: simu.pdf Graphic file (type pdf)
  <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1062.
+Package pdftex.def Info: simu.pdf used on input line 1067.
 (pdftex.def)             Requested size: 2478.25272pt x 1097.09608pt.
 File: simu.pdf Graphic file (type pdf)
 
 <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1062.
+Package pdftex.def Info: simu.pdf used on input line 1067.
 (pdftex.def)             Requested size: 452.96788pt x 200.51599pt.
  [16 <./simu.pdf>]
 Chapter 4.
 [17
 
 ]
-Overfull \hbox (128.90356pt too wide) in paragraph at lines 1157--1159
+Overfull \hbox (128.90356pt too wide) in paragraph at lines 1162--1164
 []\T1/ptm/m/n/12 sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[
 xdim,ydim,zdim]) 
  []
 
 [18] [19]
-Underfull \hbox (badness 6542) in paragraph at lines 1383--1384
+Underfull \hbox (badness 6542) in paragraph at lines 1388--1389
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
 [20]
-Underfull \hbox (badness 6542) in paragraph at lines 1493--1494
+Underfull \hbox (badness 6542) in paragraph at lines 1498--1499
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
@@ -1081,15 +1081,15 @@ Chapter 8.
 
 ]
 Chapter 9.
-<Magnitudes15.pdf, id=475, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=476, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2075.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2080.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2075.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2080.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
  [35] [36 <./Magnitudes15.pdf>]
 Chapter 10.
@@ -1721,23 +1721,23 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--140
  []
 
 [43])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2117.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2117.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2122.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2122.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2117.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2117.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2122.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2122.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: CB8A2AC130E4F0647F86D13B94342A29;1234.
+(rerunfilecheck)             Checksum: 901A95927F32682265F608A7E435BF8B;1234.
  ) 
 Here is how much of TeX's memory you used:
- 9077 strings out of 493610
- 129341 string characters out of 3142404
- 224356 words of memory out of 3000000
- 11991 multiletter control sequences out of 15000+200000
+ 9079 strings out of 493610
+ 129382 string characters out of 3142404
+ 224405 words of memory out of 3000000
+ 11992 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
  832 hyphenation exceptions out of 8191
- 36i,12n,45p,322b,561s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,12n,45p,322b,623s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2011/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2
 011/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2011/texm
@@ -1747,10 +1747,10 @@ type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/u
 rw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on VIS.pdf (47 pages, 1537790 bytes).
+Output written on VIS.pdf (47 pages, 1537934 bytes).
 PDF statistics:
- 732 PDF objects out of 1000 (max. 8388607)
- 585 compressed objects within 6 object streams
- 204 named destinations out of 1000 (max. 500000)
+ 734 PDF objects out of 1000 (max. 8388607)
+ 587 compressed objects within 6 object streams
+ 205 named destinations out of 1000 (max. 500000)
  184 words of extra memory for PDF output out of 10000 (max. 10000000)
 

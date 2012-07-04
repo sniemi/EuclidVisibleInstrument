@@ -15,7 +15,7 @@
   \item applyBleeding() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item applyCosmetics() (simulator.simulator.VISsimulator method), \hyperpage{11}
   \item applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{24}
-  \item applyFlatfield() (simulator.simulator.VISsimulator method), \hyperpage{11}
+  \item applyFlatfield() (simulator.simulator.VISsimulator method), \hyperpage{12}
   \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{17}
   \item applyNoise() (simulator.simulator.VISsimulator method), \hyperpage{12}
   \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{18}
@@ -44,7 +44,7 @@
 
   \indexspace
   \bigletter E
-  \item electrons2ADU() (simulator.simulator.VISsimulator method), \hyperpage{12}
+  \item electrons2ADU() (simulator.simulator.VISsimulator method), \hyperpage{13}
 
   \indexspace
   \bigletter F

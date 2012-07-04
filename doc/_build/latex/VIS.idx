@@ -11,14 +11,14 @@
 \indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{11}
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{11}
-\indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{11}
+\indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{applyNoise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{12}
 \indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{12}
-\indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{12}
+\indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{13}

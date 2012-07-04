@@ -71,13 +71,13 @@ Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows::
 
-    python simulator.py -c data/test.config -s TESTSCIENCE
+    python simulator.py -c data/test.config -s TESTSCIENCE1X
 
 This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
-In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience.fits",
+In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience1x.fits",
 which is the comparison image without any noise or cosmic rays. To test the functionality,
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
@@ -87,27 +87,27 @@ numerical rounding uncertainties.
 Benchmarking
 ------------
 
-A minimal benchmarking has been performed using the SCIENCE section of the test.config input file::
+A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file::
 
     Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
     6798 objects were place on the detector
 
-    real	4m51.068s
-    user	4m39.870s
-    sys	    0m4.903s
+    real	1m49.176s
+    user	1m45.491s
+    sys	    0m1.422s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
 as follows::
 
-    python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE
+    python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
 
 and then analysing the results with e.g. RunSnakeRun.
 
-.. Note: The results above were obtained with nominally sampled PSF. If one uses say three times
-         over sampled PSF then the execution time rises significantly (to about 30 minutes). This
-         is due to the fact that convolution becomes rather expensive when done in the finely
-         sampled PSF domain.
+.. Note: The result above was obtained with nominally sampled PSF, however, that is only good for
+         testing purposes. If instead one uses say three times over sampled PSF (TESTSCIENCE3x) then the
+         execution time rises significantly (to about minutes). This is mostly due to the fact that convolution
+         becomes rather expensive when done in the finely sampled PSF domain.
 
 
 Change Log
@@ -127,7 +127,8 @@ Version and change logs::
          Improved the information that is being written to the FITS header.
     0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
          be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
-    1.0: First release. The code can now take an over sampled PSF and use that for convolutions.
+    1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
+         to the header.
 
 
 Future Work
@@ -135,10 +136,11 @@ Future Work
 
 .. todo::
 
-    #. include WCS to the FITS file
+    #. check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
+    #. test that the WCS is correctly implemented and allows CCD offsets
     #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
     #. implement a Gaussian random draw from the size-magnitude distribution
     #. centering of an object depends on the centering of the postage stamp (should re calculate the centroid)
@@ -606,11 +608,6 @@ class VISsimulator():
         nx = data.shape[1]
         ny = data.shape[0]
 
-        #if np.isnan(np.sum(data)):
-        #    print data
-        #    print object
-        #    sys.exit()
-
         # Assess the boundary box of the input image
         xlo = (1 - nx) * 0.5 + xt
         xhi = (nx - 1) * 0.5 + xt + 1
@@ -942,6 +939,8 @@ class VISsimulator():
         """
         .. deprecated:: 1.0
            This method was replaced by addObjects because this does not work for over sampled PSFs.
+           In addition, without oversampling most faint-ish objects are merely a few pixels, so the
+           output looks often like the PSF.
 
         Add objects from the object list to the CCD image (self.image).
 
@@ -993,8 +992,9 @@ class VISsimulator():
                         #extended source, rename finemap
                         data = self.finemap[stype].copy()
 
-                        #size
-                        sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
+                        #size scaling along the minor axes
+                        smin = min(self.shapex[stype], self.shapey[stype])
+                        sbig = 0.2**((obj[2] - 22.)/7.) / smin / 2.
 
                         txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
                               " intscale=" + str(intscales[j]) + " size=" + str(sbig)
@@ -1002,7 +1002,7 @@ class VISsimulator():
                         self.log.info(txt)
 
                         #rotate the image using interpolation
-                        if obj[4] != 0.0:
+                        if math.fabs(obj[4]) > 1e-5:
                             data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
 
                         #scale the size of the image
@@ -1066,6 +1066,7 @@ class VISsimulator():
         Add objects from the object list to the CCD image (self.image).
 
         Scale the object's brightness in electrons and size using the input catalog magnitude.
+        The size scaling is a crude fit to Massey et al. plot.
 
         .. Note: scipy.signal.fftconvolve does not support np.float64, thus some accuracy
                  lost is due to happen when using it. However, it is significantly faster
@@ -1113,8 +1114,9 @@ class VISsimulator():
                         #extended source, rename finemap
                         data = self.finemap[stype].copy()
 
-                        #size
-                        sbig = (0.2**((obj[2] - 22.)/7.)) / self.shapey[stype] / 2.
+                        #size scaling along the minor axes
+                        smin = min(self.shapex[stype], self.shapey[stype])
+                        sbig = 0.2**((obj[2] - 22.)/7.) / smin / 2.
 
                         txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
                               " intscale=" + str(intscales[j]) + " size=" + str(sbig)
@@ -1122,8 +1124,12 @@ class VISsimulator():
                         self.log.info(txt)
 
                         #rotate the image using interpolation and suppress negative values
-                        if obj[4] != 0.0:
+                        if math.fabs(obj[4]) > 1e-5:
                             data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                        #scale the size of the galaxy before convolution
+                        if sbig != 1.0:
+                            data = scipy.ndimage.zoom(data, self.information['psfoversampling']*sbig, order=0)
                             data[data < 0.0] = 0.0
 
                         if self.debug:
@@ -1135,25 +1141,29 @@ class VISsimulator():
                             #conv = signal.convolve2d(data, self.PSF, mode='same')
                             sys.exit('Spatially variable PSF not implemented yet!')
                         else:
-                            #conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32), mode='same')
                             conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32))
 
-                        #scale the size of the image
-                        if sbig != 1.0:
-                            conv = scipy.ndimage.zoom(conv, self.information['psfoversampling']*sbig, order=1)
+                        #scale the galaxy image size with the inverse of the PSF over sampling factor
+                        if self.information['psfoversampling'] != 1.0:
+                            conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'], order=1)
 
                         #suppress negative numbers
-                        conv[conv < 1e-10] = 0.0
+                        conv[conv < 0.0] = 0.0
 
                         #renormalise and scale to the right magnitude
                         sum = np.sum(conv)
                         conv *= intscales[j] / sum
 
+                        #tiny galaxies sometimes end up with completely zero array
+                        #checking this costs time, so perhaps this could be removed
+                        if np.isnan(np.sum(conv)):
+                            continue
+
                         if self.debug:
                             scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
                             self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
 
-                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(data))
+                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
 
                         #overlay the convolved image on the image
                         self.overlayToCCD(conv, obj)
@@ -1499,9 +1509,22 @@ class VISsimulator():
         hdu.scale('int16', '', bzero=32768)
         hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
-        #update and verify the header
-        hdu.header.update('RA', self.information['ra'], 'RA of the center of the chip')
-        hdu.header.update('DEC', self.information['dec'], 'DEC of the center of the chip')
+        #add WCS to the header
+        hdu.header.update('WCSAXES', 2)
+        hdu.header.update('CRPIX1', self.image.shape[1]/2.)
+        hdu.header.update('CRPIX2', self.image.shape[0]/2.)
+        hdu.header.update('CRVAL1', self.information['ra'])
+        hdu.header.update('CRVAL2', self.information['dec'])
+        hdu.header.update('CTYPE1', 'RA---TAN')
+        hdu.header.update('CTYPE2', 'DEC--TAN')
+        #north is up, east is left
+        hdu.header.update('CD1_1', -0.1 / 3600.) #pix size in arc sec / deg
+        hdu.header.update('CD1_2', 0.0)
+        hdu.header.update('CD2_1', 0.0)
+        hdu.header.update('CD2_2', 0.1 / 3600.)
+
+        hdu.header.update('DATE-OBS', datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.update('INSTRUME', 'VISsim')
 
         #add input keywords to the header
         for key, value in self.information.iteritems():

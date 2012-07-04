@@ -402,14 +402,14 @@ cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
 please run the SCIENCE section from the test.config as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -c data/test.config -s TESTSCIENCE
+python simulator.py -c data/test.config -s TESTSCIENCE1X
 \end{Verbatim}
 
 This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
-In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience.fits'',
+In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience1x.fits'',
 which is the comparison image without any noise or cosmic rays. To test the functionality,
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
@@ -418,15 +418,15 @@ numerical rounding uncertainties.
 
 \subsubsection{Benchmarking}
 \label{simulator:benchmarking}
-A minimal benchmarking has been performed using the SCIENCE section of the test.config input file:
+A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        4m51.068s
-user        4m39.870s
-sys     0m4.903s
+real        1m29.629s
+user        1m25.179s
+sys 0m1.487s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -434,7 +434,7 @@ These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE
+python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
 \end{Verbatim}
 
 and then analysing the results with e.g. RunSnakeRun.
@@ -460,7 +460,8 @@ Version and change logs:
      Improved the information that is being written to the FITS header.
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
-1.0: First release. The code can now take an over sampled PSF and use that for convolutions.
+1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
+     to the header.
 \end{Verbatim}
 
 
@@ -469,7 +470,7 @@ Version and change logs:
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
-include WCS to the FITS file
+check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
 
 \item {} 
 implement spatially variable PSF
@@ -479,6 +480,9 @@ test that the cosmic rays are correctly implemented
 
 \item {} 
 implement CCD offsets (for focal plane simulations)
+
+\item {} 
+test that the WCS is correctly implemented and allows CCD offsets
 
 \item {} 
 implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
@@ -567,6 +571,7 @@ Cosmic ray properties (such as location and angle) are chosen from random Unifor
 Add objects from the object list to the CCD image (self.image).
 
 Scale the object's brightness in electrons and size using the input catalog magnitude.
+The size scaling is a crude fit to Massey et al. plot.
 
 \end{fulllineitems}
 

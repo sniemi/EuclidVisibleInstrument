@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  5 JUL 2012 10:47
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  5 JUL 2012 14:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -926,181 +926,180 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
 ]
 Chapter 1.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 135.
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 142.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 137.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 146.
 (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [3] [4
 
 ]
 Chapter 2.
-<Distributions.pdf, id=150, 578.16pt x 433.62pt>
-File: Distributions.pdf Graphic file (type pdf)
- <use Distributions.pdf>
-Package pdftex.def Info: Distributions.pdf used on input line 168.
-(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
-File: Distributions.pdf Graphic file (type pdf)
-
-<use Distributions.pdf>
-Package pdftex.def Info: Distributions.pdf used on input line 168.
-(pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [5 <./Distributions.pdf>]
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <12> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 208.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 205.
 
-Overfull \hbox (96.8704pt too wide) in paragraph at lines 208--208
+Overfull \hbox (96.8704pt too wide) in paragraph at lines 205--205
 []\T1/ptm/m/it/12 cpdf\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (81.53453pt too wide) in paragraph at lines 208--208
+Overfull \hbox (81.53453pt too wide) in paragraph at lines 205--205
 \T1/ptm/m/it/12 x\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (97.86652pt too wide) in paragraph at lines 208--208
+Overfull \hbox (97.86652pt too wide) in paragraph at lines 205--205
 \T1/ptm/m/it/12 num-
  []
 
 
-Overfull \hbox (96.67838pt too wide) in paragraph at lines 208--208
+Overfull \hbox (96.67838pt too wide) in paragraph at lines 205--205
 \T1/ptm/m/it/12 ber\T1/pcr/m/n/12 ) 
  []
 
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 212.
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 209.
 
 (/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
-)
-Overfull \hbox (2.07045pt too wide) in paragraph at lines 250--250
+) [5]
+Overfull \hbox (2.07045pt too wide) in paragraph at lines 247--247
 []\T1/ptm/m/it/12 datax\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (2.07045pt too wide) in paragraph at lines 250--250
+Overfull \hbox (2.07045pt too wide) in paragraph at lines 247--247
 \T1/ptm/m/it/12 datay\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
+Underfull \hbox (badness 10000) in paragraph at lines 247--247
 \T1/ptm/m/it/12 fitx\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
+Underfull \hbox (badness 10000) in paragraph at lines 247--247
 \T1/ptm/m/it/12 fity\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--250
+Underfull \hbox (badness 10000) in paragraph at lines 247--247
 \T1/ptm/m/it/12 out-
  []
 
-[6]
-Chapter 3.
-LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 273.
-[7
+<Distributions.pdf, id=161, 578.16pt x 433.62pt>
+File: Distributions.pdf Graphic file (type pdf)
+ <use Distributions.pdf>
+Package pdftex.def Info: Distributions.pdf used on input line 257.
+(pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
+File: Distributions.pdf Graphic file (type pdf)
+
+<use Distributions.pdf>
+Package pdftex.def Info: Distributions.pdf used on input line 257.
+(pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
+ [6 <./Distributions.pdf>] [7] [8
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 370--371
+Chapter 3.
+LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 281.
+[9]
+Underfull \hbox (badness 10000) in paragraph at lines 378--379
 
  []
 
-[8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 528--528
+[10] [11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 540--540
 []\T1/ptm/m/it/12 configfile\T1/ptm/m/n/12 , \T1/ptm/m/it/12 de-bug\T1/ptm/m/n/
 12 , \T1/ptm/m/it/12 sec-
  []
 
-[10]
-Underfull \hbox (badness 10000) in paragraph at lines 626--627
+[13]
+Underfull \hbox (badness 10000) in paragraph at lines 638--639
 
  []
 
-[11] [12]
-Underfull \hbox (badness 10000) in paragraph at lines 761--762
+[14]
+Underfull \hbox (badness 10000) in paragraph at lines 773--774
 
  []
 
-[13] [14]
-Underfull \hbox (badness 6542) in paragraph at lines 949--950
+[15] [16]
+Underfull \hbox (badness 6542) in paragraph at lines 961--962
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[15] <simu.pdf, id=332, 2304.61pt x 1050.92625pt>
+[17] <simu.pdf, id=341, 2304.61pt x 1050.92625pt>
 File: simu.pdf Graphic file (type pdf)
  <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1094.
+Package pdftex.def Info: simu.pdf used on input line 1106.
 (pdftex.def)             Requested size: 2304.6044pt x 1050.9237pt.
 File: simu.pdf Graphic file (type pdf)
 
 <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1094.
+Package pdftex.def Info: simu.pdf used on input line 1106.
 (pdftex.def)             Requested size: 452.96788pt x 206.55743pt.
- [16] [17 <./simu.pdf>] [18
+ [18] [19 <./simu.pdf>] [20
 
 ]
 Chapter 4.
-[19]
-Overfull \hbox (128.90356pt too wide) in paragraph at lines 1189--1191
+[21]
+Overfull \hbox (128.90356pt too wide) in paragraph at lines 1201--1203
 []\T1/ptm/m/n/12 sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[
 xdim,ydim,zdim]) 
  []
 
-[20] [21]
-Underfull \hbox (badness 6542) in paragraph at lines 1415--1416
+[22] [23]
+Underfull \hbox (badness 6542) in paragraph at lines 1427--1428
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[22]
-Underfull \hbox (badness 6542) in paragraph at lines 1537--1538
+[24]
+Underfull \hbox (badness 6542) in paragraph at lines 1549--1550
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[23] [24
+[25] [26
 
 ]
 Chapter 5.
-[25] [26]
+[27] [28]
 Chapter 6.
-[27
+[29
 
-] [28] [29] [30] [31] [32
+] [30] [31] [32] [33] [34
 
 ]
 Chapter 7.
-[33] [34
-
-]
-Chapter 8.
 [35] [36
 
 ]
+Chapter 8.
+[37] [38
+
+]
 Chapter 9.
-<Magnitudes15.pdf, id=492, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=502, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2119.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2135.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2119.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2135.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [37] [38 <./Magnitudes15.pdf>]
+ [39] [40 <./Magnitudes15.pdf>]
 Chapter 10.
-[39
+[41
 
-] [40
+] [42
 
-] [41
+] [43
 
 
-] (./VIS.ind [42
+] (./VIS.ind [44
 
 
 ]
@@ -1333,7 +1332,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 35--36
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
-[43
+[45
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 40--41
@@ -1560,7 +1559,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 89--90
 []\T1/ptm/m/n/12 PostProcessing (class in post-
  []
 
-[44]
+
 Underfull \hbox (badness 10000) in paragraph at lines 90--91
 []\T1/ptm/m/n/12 processConfigs() (sim-u-la-
  []
@@ -1570,7 +1569,7 @@ Underfull \hbox (badness 7151) in paragraph at lines 90--91
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
-
+[46]
 Underfull \hbox (badness 10000) in paragraph at lines 94--95
 []\T1/ptm/m/n/12 quadrupoles() (anal-y-
  []
@@ -1720,24 +1719,24 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--140
 []\T1/ptm/m/n/12 writeResults() (anal-y-
  []
 
-[45])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2161.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2161.
+[47])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2177.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2177.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2161.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2161.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2177.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2177.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: 901A95927F32682265F608A7E435BF8B;1234.
+(rerunfilecheck)             Checksum: B8E5BC52290E2F321B0F3E84CA4712EC;1237.
  ) 
 Here is how much of TeX's memory you used:
- 9089 strings out of 493610
- 129452 string characters out of 3142404
- 224405 words of memory out of 3000000
+ 9092 strings out of 493610
+ 129491 string characters out of 3142404
+ 225412 words of memory out of 3000000
  11992 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
  832 hyphenation exceptions out of 8191
- 36i,12n,45p,322b,574s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,12n,45p,322b,561s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2011/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2
 011/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2011/texm
@@ -1747,10 +1746,10 @@ type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/u
 rw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on VIS.pdf (49 pages, 1363699 bytes).
+Output written on VIS.pdf (51 pages, 1366033 bytes).
 PDF statistics:
- 753 PDF objects out of 1000 (max. 8388607)
- 603 compressed objects within 7 object streams
- 215 named destinations out of 1000 (max. 500000)
+ 767 PDF objects out of 1000 (max. 8388607)
+ 615 compressed objects within 7 object streams
+ 218 named destinations out of 1000 (max. 500000)
  184 words of extra memory for PDF output out of 10000 (max. 10000000)
 

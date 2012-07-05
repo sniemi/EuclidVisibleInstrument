@@ -125,32 +125,36 @@ Sami-Matias Niemi
 
 \end{description}\end{quote}
 
-This Python package provides subpackages and methods related to the visible instrument (VIS) on board
-the Euclid satellite. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+This Python package provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the
+the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
-characteristics such as readout noise and CTI to ``pristine'' images generated with e.g. GREAT10 photon
-shooting code.
+characteristics such as readout noise and CTI to ``pristine'' images generated with e.g. the GREAT10 photon
+shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
+this package tries to provide an end-to-end simulation chain for the VIS instrument.
 
 
 \chapter{Installation}
-\label{index:welcome-to-euclid-visible-instrument-vis-documentation}\label{index:installation}
-This package contains a mixture of classes and scripts. There is no official or preferred installation
-instructions yet. To get most scripts working you should place the path to the root directory of the package
-to your PYTHONPATH environment variable. In addition, it is useful to compile the Fortran code available
-in the fortran subdirectory with the following command:
+\label{index:installation}\label{index:welcome-to-euclid-visible-instrument-vis-python-package-documentation}
+The VIS Python package is held in a GIT repository. You can download or fork the repository
+\href{https://bitbucket.org/niemi/vissim-python/overview}{here}. The package contains a mixture of classes
+and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
+installation instructions yet. To get most scripts working you should place
+the path to the root directory of the package to your PYTHONPATH environment variable. In addition, it is
+useful to compile the Fortran code available in the fortran subdirectory with the following command:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 f2py -c -m cdm03 cdm03.f90
 \end{Verbatim}
 
 and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
-but you still need for example gFortran compiler.
+but you still need for example gFortran compiler to actually compile the Fortran source.
 
 
 \section{Dependencies}
 \label{index:dependencies}
 The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
-Thus it is recommended that on installs a Python distribution like \href{http://www.enthought.com/}{Enthought Python},
+Thus it is recommended that one installs a Python distribution like \href{http://www.enthought.com/}{Enthought Python},
 which installs all dependencies at once.
 
 
@@ -161,13 +165,6 @@ stars and galaxies. The magnitudes of stars and galaxies are drawn from input di
 based on observations. As the number of stars depends on the galactic latitude, the script allows
 the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
 (see the example plot below).
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\includegraphics{Distributions.pdf}
-\caption{An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
-The solid lines show observations while the histograms show the distributions in the output catalogues.}\end{figure}
 
 For the Python code documentation, please see:
 \phantomsection\label{sources:module-sources.createObjectCatalogue}\index{sources.createObjectCatalogue (module)}
@@ -253,10 +250,21 @@ that was generated based on these data.
 
 \end{fulllineitems}
 
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{Distributions.pdf}
+\caption{An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+The solid lines show observations while the histograms show the distributions in the output catalogues.}\end{figure}
+
+Another way of creating a source catalog is to use \emph{generateGalaxies} script in the \emph{simulator} subpackage.
+This script depends on IRAF and uses the makeart IRAF package. There are many more options in this script,
+which basically just calls the makeart's gallist and starlist. For options, see IRAF's documentation.
 
 
-\chapter{Generating Simulated Images}
-\label{index:generating-simulated-images}
+\chapter{Creating Simulated Mock Images}
+\label{index:creating-simulated-mock-images}
 The \emph{simulator} subpackage contains scripts to generate simulated VIS images. Two different methods
 of generating mock images is provided. One which takes observed images (say from HST) as an input and
 another in which analytical profiles are used for galaxies. The former code is custom made while the
@@ -358,7 +366,7 @@ Convert from electrons to ADUs using the given gain factor.
 Add a given bias level and discretise the counts (16bit).
 
 \item {} 
-Finally the generated image is converted to a FITS file, a WCS system is assigned
+Finally the generated image is converted to a FITS file, a WCS is assigned
 and the output is saved to the current working directory.
 
 \end{enumerate}
@@ -410,11 +418,12 @@ This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
-In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience1x.fits'',
+In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience.fits'',
 which is the comparison image without any noise or cosmic rays. To test the functionality,
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties.
+numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
+float64).
 
 
 \subsubsection{Benchmarking}
@@ -425,9 +434,9 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
 Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        1m48.757s
-user        1m44.433s
-sys         0m1.425s
+real        2m53.360s
+user        2m46.551s
+sys         0m1.614s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -457,7 +466,7 @@ Version and change logs:
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
      image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
 0.7: implemented bleeding.
-0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
+0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
      Improved the information that is being written to the FITS header.
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
@@ -472,6 +481,9 @@ Version and change logs:
 \begin{enumerate}
 \item {} 
 check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
+
+\item {} 
+objects.dat is now hard coded into the code, this should be read from the config file
 
 \item {} 
 implement spatially variable PSF
@@ -489,10 +501,10 @@ test that the WCS is correctly implemented and allows CCD offsets
 implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
 
 \item {} 
-implement a Gaussian random draw from the size-magnitude distribution
+implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
 
 \item {} 
-centering of an object depends on the centering of the postage stamp (should re calculate the centroid)
+centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
 
 \item {} 
 charge injection line positions are now hardcoded to the code, read from the config file
@@ -2085,7 +2097,7 @@ Charge Transfer Inefficiency (CTI) trails forming behind charge injection lines 
 \label{index:fortran-code-for-cti}
 The \emph{fortran} folder contains a CDM03 CTI model Fortran code. For speed the CDM03 model has been written in Fortran
 because it contains several nested loops. One can use f2py to compile the code to a format that can be imported
-from Python.
+directly to Python.
 
 
 \chapter{Supporting methods and files}
@@ -2105,9 +2117,13 @@ data.
 
 \chapter{Photometric Accuracy}
 \label{index:photometric-accuracy}
-The reference simulator code has been tested against photometric accuracy (without aperture correction). A
-simulated image was generated with the reference simulator, sources were identified and photometry performed
-using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
+The reference image simulator has been tested against photometric accuracy (without aperture correction). A
+simulated image was generated with the reference simulator (using three times over sampled PSF) after
+which the different quadrants were combiled to form a single CCD. These data were then reduced using the
+reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
+using SExtractor, after which the extracted magnitudes were compared against the input catalog.
+
+The following
 figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
 about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore

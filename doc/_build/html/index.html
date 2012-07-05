@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Euclid Visible InStrument (VIS) documentation &mdash; VIS 0.1 documentation</title>
+    <title>Welcome to Euclid Visible InStrument (VIS) Python Package Documentation &mdash; VIS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -55,7 +55,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) documentation</a></li>
+<li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) Python Package Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a><ul>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
@@ -63,7 +63,7 @@
 <li><a class="reference internal" href="#creating-object-catalogs">Creating Object Catalogs</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#generating-simulated-images">Generating Simulated Images</a><ul>
+<li><a class="reference internal" href="#creating-simulated-mock-images">Creating Simulated Mock Images</a><ul>
 </ul>
 </li>
 <li><a class="reference internal" href="#instrument-characteristics">Instrument Characteristics</a><ul>
@@ -117,8 +117,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-euclid-visible-instrument-vis-documentation">
-<h1>Welcome to Euclid Visible InStrument (VIS) documentation<a class="headerlink" href="#welcome-to-euclid-visible-instrument-vis-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-euclid-visible-instrument-vis-python-package-documentation">
+<h1>Welcome to Euclid Visible InStrument (VIS) Python Package Documentation<a class="headerlink" href="#welcome-to-euclid-visible-instrument-vis-python-package-documentation" title="Permalink to this headline">¶</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -131,26 +131,30 @@
 </tr>
 </tbody>
 </table>
-<p>This Python package provides subpackages and methods related to the visible instrument (VIS) on board
-the Euclid satellite. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+<p>This Python package provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the
+the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
-characteristics such as readout noise and CTI to &#8220;pristine&#8221; images generated with e.g. GREAT10 photon
-shooting code.</p>
+characteristics such as readout noise and CTI to &#8220;pristine&#8221; images generated with e.g. the GREAT10 photon
+shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
+this package tries to provide an end-to-end simulation chain for the VIS instrument.</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>This package contains a mixture of classes and scripts. There is no official or preferred installation
-instructions yet. To get most scripts working you should place the path to the root directory of the package
-to your PYTHONPATH environment variable. In addition, it is useful to compile the Fortran code available
-in the fortran subdirectory with the following command:</p>
+<p>The VIS Python package is held in a GIT repository. You can download or fork the repository
+<a class="reference external" href="https://bitbucket.org/niemi/vissim-python/overview">here</a>. The package contains a mixture of classes
+and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
+installation instructions yet. To get most scripts working you should place
+the path to the root directory of the package to your PYTHONPATH environment variable. In addition, it is
+useful to compile the Fortran code available in the fortran subdirectory with the following command:</p>
 <div class="highlight-python"><pre>f2py -c -m cdm03 cdm03.f90</pre>
 </div>
 <p>and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
-but you still need for example gFortran compiler.</p>
+but you still need for example gFortran compiler to actually compile the Fortran source.</p>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
 <p>The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
-Thus it is recommended that on installs a Python distribution like <a class="reference external" href="http://www.enthought.com/">Enthought Python</a>,
+Thus it is recommended that one installs a Python distribution like <a class="reference external" href="http://www.enthought.com/">Enthought Python</a>,
 which installs all dependencies at once.</p>
 </div>
 </div>
@@ -161,20 +165,23 @@ stars and galaxies. The magnitudes of stars and galaxies are drawn from input di
 based on observations. As the number of stars depends on the galactic latitude, the script allows
 the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
 (see the example plot below).</p>
-<div class="align-center figure align-center">
-<img alt="_images/Distributions.png" src="_images/Distributions.png" style="width: 800px;" />
-<p class="caption">An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
-The solid lines show observations while the histograms show the distributions in the output catalogues.</p>
-</div>
 <p>For the Python code documentation, please see:</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="sources.html">Generating Object Catalogue</a></li>
 </ul>
 </div>
+<div class="align-center figure align-center">
+<img alt="_images/Distributions.png" src="_images/Distributions.png" style="width: 800px;" />
+<p class="caption">An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+The solid lines show observations while the histograms show the distributions in the output catalogues.</p>
 </div>
-<div class="section" id="generating-simulated-images">
-<h1>Generating Simulated Images<a class="headerlink" href="#generating-simulated-images" title="Permalink to this headline">¶</a></h1>
+<p>Another way of creating a source catalog is to use <em>generateGalaxies</em> script in the <em>simulator</em> subpackage.
+This script depends on IRAF and uses the makeart IRAF package. There are many more options in this script,
+which basically just calls the makeart&#8217;s gallist and starlist. For options, see IRAF&#8217;s documentation.</p>
+</div>
+<div class="section" id="creating-simulated-mock-images">
+<h1>Creating Simulated Mock Images<a class="headerlink" href="#creating-simulated-mock-images" title="Permalink to this headline">¶</a></h1>
 <p>The <em>simulator</em> subpackage contains scripts to generate simulated VIS images. Two different methods
 of generating mock images is provided. One which takes observed images (say from HST) as an input and
 another in which analytical profiles are used for galaxies. The former code is custom made while the
@@ -260,7 +267,7 @@ Charge Transfer Inefficiency (CTI) trails forming behind charge injection lines 
 <h2>Fortran code for CTI<a class="headerlink" href="#fortran-code-for-cti" title="Permalink to this headline">¶</a></h2>
 <p>The <em>fortran</em> folder contains a CDM03 CTI model Fortran code. For speed the CDM03 model has been written in Fortran
 because it contains several nested loops. One can use f2py to compile the code to a format that can be imported
-from Python.</p>
+directly to Python.</p>
 </div>
 </div>
 <div class="section" id="supporting-methods-and-files">
@@ -278,9 +285,12 @@ data.</p>
 </div>
 <div class="section" id="photometric-accuracy">
 <h1>Photometric Accuracy<a class="headerlink" href="#photometric-accuracy" title="Permalink to this headline">¶</a></h1>
-<p>The reference simulator code has been tested against photometric accuracy (without aperture correction). A
-simulated image was generated with the reference simulator, sources were identified and photometry performed
-using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
+<p>The reference image simulator has been tested against photometric accuracy (without aperture correction). A
+simulated image was generated with the reference simulator (using three times over sampled PSF) after
+which the different quadrants were combiled to form a single CCD. These data were then reduced using the
+reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
+using SExtractor, after which the extracted magnitudes were compared against the input catalog.</p>
+<p>The following
 figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
 about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore

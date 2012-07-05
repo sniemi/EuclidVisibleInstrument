@@ -41,7 +41,7 @@ The approximate sequence of events in the simulator is as follows:
       #. Add readout noise selected from a Gaussian distribution [optional].
       #. Convert from electrons to ADUs using the given gain factor.
       #. Add a given bias level and discretise the counts (16bit).
-      #. Finally the generated image is converted to a FITS file, a WCS system is assigned
+      #. Finally the generated image is converted to a FITS file, a WCS is assigned
          and the output is saved to the current working directory.
 
 .. Warning:: The code is still work in progress and new features are being added.
@@ -78,11 +78,12 @@ This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
-In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience1x.fits",
+In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience.fits",
 which is the comparison image without any noise or cosmic rays. To test the functionality,
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties.
+numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
+float64).
 
 
 Benchmarking
@@ -124,7 +125,7 @@ Version and change logs::
     0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
          image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
     0.7: implemented bleeding.
-    0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
+    0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
          Improved the information that is being written to the FITS header.
     0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
          be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
@@ -144,8 +145,8 @@ Future Work
     #. implement CCD offsets (for focal plane simulations)
     #. test that the WCS is correctly implemented and allows CCD offsets
     #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
-    #. implement a Gaussian random draw from the size-magnitude distribution
-    #. centering of an object depends on the centering of the postage stamp (should re calculate the centroid)
+    #. implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
+    #. centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
     #. charge injection line positions are now hardcoded to the code, read from the config file
     #. CTI model values are not included to the FITS header
     #. include rotation in metrology

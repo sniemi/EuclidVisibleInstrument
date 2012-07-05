@@ -1,38 +1,41 @@
-Welcome to Euclid Visible InStrument (VIS) documentation
-========================================================
+Welcome to Euclid Visible InStrument (VIS) Python Package Documentation
+=======================================================================
 
 :Author: Sami-Matias Niemi
 :Contact: smn2@mssl.ucl.ac.uk
 :version: 1.0
 
 
-This Python package provides subpackages and methods related to the visible instrument (VIS) on board
-the Euclid satellite. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+This Python package provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the
+the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
-characteristics such as readout noise and CTI to "pristine" images generated with e.g. GREAT10 photon
-shooting code.
-
+characteristics such as readout noise and CTI to "pristine" images generated with e.g. the GREAT10 photon
+shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
+this package tries to provide an end-to-end simulation chain for the VIS instrument.
 
 
 Installation
 ============
 
-This package contains a mixture of classes and scripts. There is no official or preferred installation
-instructions yet. To get most scripts working you should place the path to the root directory of the package
-to your PYTHONPATH environment variable. In addition, it is useful to compile the Fortran code available
-in the fortran subdirectory with the following command::
+The VIS Python package is held in a GIT repository. You can download or fork the repository
+`here <https://bitbucket.org/niemi/vissim-python/overview>`_. The package contains a mixture of classes
+and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
+installation instructions yet. To get most scripts working you should place
+the path to the root directory of the package to your PYTHONPATH environment variable. In addition, it is
+useful to compile the Fortran code available in the fortran subdirectory with the following command::
 
     f2py -c -m cdm03 cdm03.f90
 
 and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
-but you still need for example gFortran compiler.
+but you still need for example gFortran compiler to actually compile the Fortran source.
 
 
 Dependencies
 ------------
 
 The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
-Thus it is recommended that on installs a Python distribution like `Enthought Python <http://www.enthought.com/>`_,
+Thus it is recommended that one installs a Python distribution like `Enthought Python <http://www.enthought.com/>`_,
 which installs all dependencies at once.
 
 
@@ -45,14 +48,6 @@ based on observations. As the number of stars depends on the galactic latitude, 
 the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
 (see the example plot below).
 
-.. figure:: figs/Distributions.*
-     :width: 800 px
-     :align: center
-     :figclass: align-center
-
-     An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
-     The solid lines show observations while the histograms show the distributions in the output catalogues.
-
 For the Python code documentation, please see:
 
 .. toctree::
@@ -61,8 +56,23 @@ For the Python code documentation, please see:
    sources
 
 
-Generating Simulated Images
-===========================
+.. figure:: figs/Distributions.*
+     :width: 800 px
+     :align: center
+     :figclass: align-center
+
+     An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+     The solid lines show observations while the histograms show the distributions in the output catalogues.
+
+
+Another way of creating a source catalog is to use *generateGalaxies* script in the *simulator* subpackage.
+This script depends on IRAF and uses the makeart IRAF package. There are many more options in this script,
+which basically just calls the makeart's gallist and starlist. For options, see IRAF's documentation.
+
+
+
+Creating Simulated Mock Images
+==============================
 
 The *simulator* subpackage contains scripts to generate simulated VIS images. Two different methods
 of generating mock images is provided. One which takes observed images (say from HST) as an input and
@@ -141,7 +151,7 @@ Fortran code for CTI
 
 The *fortran* folder contains a CDM03 CTI model Fortran code. For speed the CDM03 model has been written in Fortran
 because it contains several nested loops. One can use f2py to compile the code to a format that can be imported
-from Python.
+directly to Python.
 
 
 Supporting methods and files
@@ -164,9 +174,13 @@ data.
 Photometric Accuracy
 ====================
 
-The reference simulator code has been tested against photometric accuracy (without aperture correction). A
-simulated image was generated with the reference simulator, sources were identified and photometry performed
-using SExtractor, and finally the extracted magnitudes were compared against the input catalog. The following
+The reference image simulator has been tested against photometric accuracy (without aperture correction). A
+simulated image was generated with the reference simulator (using three times over sampled PSF) after
+which the different quadrants were combiled to form a single CCD. These data were then reduced using the
+reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
+using SExtractor, after which the extracted magnitudes were compared against the input catalog.
+
+The following
 figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
 about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore

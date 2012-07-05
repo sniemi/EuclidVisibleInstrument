@@ -170,7 +170,7 @@ scaling (first step), and finally overlay onto the detector according to its pos
 </li>
 <li><p class="first">Add a given bias level and discretise the counts (16bit).</p>
 </li>
-<li><p class="first">Finally the generated image is converted to a FITS file, a WCS system is assigned
+<li><p class="first">Finally the generated image is converted to a FITS file, a WCS is assigned
 and the output is saved to the current working directory.</p>
 </li>
 </ol>
@@ -216,11 +216,12 @@ please run the SCIENCE section from the test.config as follows:</p>
 <p>This will produce an image representing VIS lower left (0th) quadrant. Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.</p>
-<p>In the data subdirectory there is a file called &#8220;nonoisenocrQ0_00_00testscience1x.fits&#8221;,
+<p>In the data subdirectory there is a file called &#8220;nonoisenocrQ0_00_00testscience.fits&#8221;,
 which is the comparison image without any noise or cosmic rays. To test the functionality,
 please divide your nonoise and no cosmic ray track output image with the on in the data
 folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties.</p>
+numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
+float64).</p>
 </div>
 <div class="section" id="benchmarking">
 <h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
@@ -228,9 +229,9 @@ numerical rounding uncertainties.</p>
 <div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        1m48.757s
-user        1m44.433s
-sys         0m1.425s</pre>
+real        2m53.360s
+user        2m46.551s
+sys         0m1.614s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
@@ -256,7 +257,7 @@ as follows:</p>
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
      image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
 0.7: implemented bleeding.
-0.8: cleaned up the code and improved documentation. Fix a bug related to checking if object falls on the CCD.
+0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
      Improved the information that is being written to the FITS header.
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
@@ -270,13 +271,14 @@ as follows:</p>
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
 <li>check that the size distribution of galaxies is suitable (now the scaling is before convolution!)</li>
+<li>objects.dat is now hard coded into the code, this should be read from the config file</li>
 <li>implement spatially variable PSF</li>
 <li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
 <li>test that the WCS is correctly implemented and allows CCD offsets</li>
 <li>implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)</li>
-<li>implement a Gaussian random draw from the size-magnitude distribution</li>
-<li>centering of an object depends on the centering of the postage stamp (should re calculate the centroid)</li>
+<li>implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit</li>
+<li>centering of an object depends on the centering of the postage stamp (should recalculate the centroid)</li>
 <li>charge injection line positions are now hardcoded to the code, read from the config file</li>
 <li>CTI model values are not included to the FITS header</li>
 <li>include rotation in metrology</li>

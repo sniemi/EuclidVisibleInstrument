@@ -1551,6 +1551,9 @@ class VISsimulator():
 
         #write booleans
         for key, value in self.booleans.iteritems():
+            #flat key is too long to show multiplicative and additive separately without modification
+            if 'FLAT' in  key.upper():
+                key = 'FLATF' + key[-1]
             #truncate long keys
             if len(key) > 8:
                 key = key[:7]

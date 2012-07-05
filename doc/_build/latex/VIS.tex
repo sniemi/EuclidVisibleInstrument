@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{July 04, 2012}
+\date{July 05, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -358,7 +358,8 @@ Convert from electrons to ADUs using the given gain factor.
 Add a given bias level and discretise the counts (16bit).
 
 \item {} 
-Finally the generated image is converted to a FITS file and saved to the working directory.
+Finally the generated image is converted to a FITS file, a WCS system is assigned
+and the output is saved to the current working directory.
 
 \end{enumerate}
 
@@ -876,11 +877,32 @@ Stores the information to a dictionary called cr.
 Reads object list using numpy.loadtxt, determines the number of object types,
 and finds the file that corresponds to a given object type.
 
+The input catalog is assumed to contain the following columns:
+\begin{enumerate}
+\item {} 
+x coordinate
+
+\item {} 
+y coordinate
+
+\item {} 
+apparent magnitude of the object
+
+\item {} 
+type of the object {[}0=star, number=type defined in the objects.dat{]}
+
+\item {} 
+rotation {[}0 for stars, {[}0, 360{]} for galaxies{]}
+
+\end{enumerate}
+
 This method also displaces the object coordinates based on the quadrant and the
 CCD to be simulated.
 
+\begin{notice}{note}{Note:}
 If even a single object type does not have a corresponding input then this method
 forces the program to exit.
+\end{notice}
 
 \end{fulllineitems}
 
@@ -1441,7 +1463,11 @@ FITS extension from which the imaging data are being read.
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
-Does not deal properly with multiple WCSs coming in the different quadrants
+Does not deal properly with multiple WCSs coming in the different quadrants (should recalculate the
+centre of the CCD and modify the WCS accordingly).
+
+\item {} 
+Improve the history section.
 
 \end{enumerate}
 \end{notice}

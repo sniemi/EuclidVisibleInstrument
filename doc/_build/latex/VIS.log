@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  4 JUL 2012 21:54
+This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.4.27)  5 JUL 2012 10:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1003,104 +1003,104 @@ LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
 [7
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 369--370
+Underfull \hbox (badness 10000) in paragraph at lines 370--371
 
  []
 
 [8] [9]
-Underfull \hbox (badness 10000) in paragraph at lines 527--527
+Underfull \hbox (badness 10000) in paragraph at lines 528--528
 []\T1/ptm/m/it/12 configfile\T1/ptm/m/n/12 , \T1/ptm/m/it/12 de-bug\T1/ptm/m/n/
 12 , \T1/ptm/m/it/12 sec-
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 625--626
+Underfull \hbox (badness 10000) in paragraph at lines 626--627
 
  []
 
 [11] [12]
-Underfull \hbox (badness 10000) in paragraph at lines 760--761
+Underfull \hbox (badness 10000) in paragraph at lines 761--762
 
  []
 
 [13] [14]
-Underfull \hbox (badness 6542) in paragraph at lines 927--928
+Underfull \hbox (badness 6542) in paragraph at lines 949--950
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[15] <simu.pdf, id=328, 2478.25874pt x 1097.09875pt>
+[15] <simu.pdf, id=332, 2304.61pt x 1050.92625pt>
 File: simu.pdf Graphic file (type pdf)
  <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1072.
-(pdftex.def)             Requested size: 2478.25272pt x 1097.09608pt.
+Package pdftex.def Info: simu.pdf used on input line 1094.
+(pdftex.def)             Requested size: 2304.6044pt x 1050.9237pt.
 File: simu.pdf Graphic file (type pdf)
 
 <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 1072.
-(pdftex.def)             Requested size: 452.96788pt x 200.51599pt.
- [16 <./simu.pdf>]
-Chapter 4.
-[17
+Package pdftex.def Info: simu.pdf used on input line 1094.
+(pdftex.def)             Requested size: 452.96788pt x 206.55743pt.
+ [16] [17 <./simu.pdf>] [18
 
 ]
-Overfull \hbox (128.90356pt too wide) in paragraph at lines 1167--1169
+Chapter 4.
+[19]
+Overfull \hbox (128.90356pt too wide) in paragraph at lines 1189--1191
 []\T1/ptm/m/n/12 sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[
 xdim,ydim,zdim]) 
  []
 
-[18] [19]
-Underfull \hbox (badness 6542) in paragraph at lines 1393--1394
+[20] [21]
+Underfull \hbox (badness 6542) in paragraph at lines 1415--1416
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[20]
-Underfull \hbox (badness 6542) in paragraph at lines 1511--1512
+[22]
+Underfull \hbox (badness 6542) in paragraph at lines 1537--1538
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[21] [22
+[23] [24
 
 ]
 Chapter 5.
-[23] [24]
+[25] [26]
 Chapter 6.
-[25
+[27
 
-] [26] [27] [28] [29] [30
+] [28] [29] [30] [31] [32
 
 ]
 Chapter 7.
-[31] [32
-
-]
-Chapter 8.
 [33] [34
 
 ]
+Chapter 8.
+[35] [36
+
+]
 Chapter 9.
-<Magnitudes15.pdf, id=478, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=492, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2093.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2119.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2093.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2119.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [35] [36 <./Magnitudes15.pdf>]
+ [37] [38 <./Magnitudes15.pdf>]
 Chapter 10.
-[37
+[39
 
-] [38
+] [40
 
-] [39
+] [41
 
 
-] (./VIS.ind [40
+] (./VIS.ind [42
 
 
 ]
@@ -1333,7 +1333,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 35--36
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
-[41
+[43
 
 ]
 Underfull \hbox (badness 10000) in paragraph at lines 40--41
@@ -1560,7 +1560,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 89--90
 []\T1/ptm/m/n/12 PostProcessing (class in post-
  []
 
-[42]
+[44]
 Underfull \hbox (badness 10000) in paragraph at lines 90--91
 []\T1/ptm/m/n/12 processConfigs() (sim-u-la-
  []
@@ -1720,19 +1720,19 @@ Underfull \hbox (badness 10000) in paragraph at lines 139--140
 []\T1/ptm/m/n/12 writeResults() (anal-y-
  []
 
-[43])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2135.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2135.
+[45])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2161.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2161.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2135.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2135.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2161.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2161.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
 (rerunfilecheck)             Checksum: 901A95927F32682265F608A7E435BF8B;1234.
  ) 
 Here is how much of TeX's memory you used:
- 9081 strings out of 493610
- 129396 string characters out of 3142404
+ 9089 strings out of 493610
+ 129452 string characters out of 3142404
  224405 words of memory out of 3000000
  11992 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
@@ -1747,10 +1747,10 @@ type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/u
 rw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/u
 tmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on VIS.pdf (47 pages, 1499963 bytes).
+Output written on VIS.pdf (49 pages, 1363699 bytes).
 PDF statistics:
- 736 PDF objects out of 1000 (max. 8388607)
- 589 compressed objects within 6 object streams
- 207 named destinations out of 1000 (max. 500000)
+ 753 PDF objects out of 1000 (max. 8388607)
+ 603 compressed objects within 7 object streams
+ 215 named destinations out of 1000 (max. 500000)
  184 words of extra memory for PDF output out of 10000 (max. 10000000)
 

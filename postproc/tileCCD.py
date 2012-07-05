@@ -21,7 +21,9 @@ FITS extension from which the imaging data are being read.
 
 .. todo::
 
-    #. Does not deal properly with multiple WCSs coming in the different quadrants
+    #. Does not deal properly with multiple WCSs coming in the different quadrants (should recalculate the
+       centre of the CCD and modify the WCS accordingly).
+    #. Improve the history section.
 
 """
 import pyfits as pf

@@ -170,7 +170,8 @@ scaling (first step), and finally overlay onto the detector according to its pos
 </li>
 <li><p class="first">Add a given bias level and discretise the counts (16bit).</p>
 </li>
-<li><p class="first">Finally the generated image is converted to a FITS file and saved to the working directory.</p>
+<li><p class="first">Finally the generated image is converted to a FITS file, a WCS system is assigned
+and the output is saved to the current working directory.</p>
 </li>
 </ol>
 </div></blockquote>
@@ -591,10 +592,23 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <tt class="descname">readObjectlist</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readObjectlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads object list using numpy.loadtxt, determines the number of object types,
 and finds the file that corresponds to a given object type.</p>
+<p>The input catalog is assumed to contain the following columns:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>x coordinate</li>
+<li>y coordinate</li>
+<li>apparent magnitude of the object</li>
+<li>type of the object [0=star, number=type defined in the objects.dat]</li>
+<li>rotation [0 for stars, [0, 360] for galaxies]</li>
+</ol>
+</div></blockquote>
 <p>This method also displaces the object coordinates based on the quadrant and the
 CCD to be simulated.</p>
-<p>If even a single object type does not have a corresponding input then this method
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If even a single object type does not have a corresponding input then this method
 forces the program to exit.</p>
+</div>
 </dd></dl>
 
 <dl class="method">

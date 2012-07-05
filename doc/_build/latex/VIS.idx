@@ -27,63 +27,63 @@
 \indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{14}
-\indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{14}
-\indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{14}
+\indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{15}
+\indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{15}
 \indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{15}
 \indexentry{simulator.generateGalaxies (module)|hyperpage}{15}
 \indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{15}
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
-\indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{15}
+\indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
 \indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
 \indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{16}
-\indexentry{postproc.postprocessing (module)|hyperpage}{17}
-\indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{17}
-\indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{17}
-\indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{18}
-\indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{18}
-\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{18}
-\indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{19}
-\indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{19}
-\indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{19}
-\indexentry{loadFITS() (postproc.postprocessing.PostProcessing method)|hyperpage}{19}
-\indexentry{radiateFullCCD() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
-\indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
-\indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
-\indexentry{postproc.tileCCD (module)|hyperpage}{20}
-\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{21}
-\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
-\indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
-\indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
-\indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{21}
-\indexentry{reduction.reduceVISdata (module)|hyperpage}{23}
-\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{23}
-\indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{24}
-\indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{24}
-\indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{24}
-\indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{24}
-\indexentry{analysis.analyse (module)|hyperpage}{25}
-\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{25}
-\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{26}
-\indexentry{analysis.shape (module)|hyperpage}{26}
-\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{26}
-\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{27}
-\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{27}
-\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{27}
-\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{27}
-\indexentry{analysis.sourceFinder (module)|hyperpage}{27}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{28}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{28}
+\indexentry{postproc.postprocessing (module)|hyperpage}{19}
+\indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{19}
+\indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{19}
+\indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
+\indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
+\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{20}
+\indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{21}
+\indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{21}
+\indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{21}
+\indexentry{loadFITS() (postproc.postprocessing.PostProcessing method)|hyperpage}{21}
+\indexentry{radiateFullCCD() (postproc.postprocessing.PostProcessing method)|hyperpage}{22}
+\indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{22}
+\indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{22}
+\indexentry{postproc.tileCCD (module)|hyperpage}{22}
+\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{23}
+\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{23}
+\indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{23}
+\indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{23}
+\indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{23}
+\indexentry{reduction.reduceVISdata (module)|hyperpage}{25}
+\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{25}
+\indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{26}
+\indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{26}
+\indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{26}
+\indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{26}
+\indexentry{analysis.analyse (module)|hyperpage}{27}
+\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{27}
+\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{28}
+\indexentry{analysis.shape (module)|hyperpage}{28}
+\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{28}
+\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{29}
+\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{29}
+\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{29}
+\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{29}
+\indexentry{analysis.sourceFinder (module)|hyperpage}{29}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{30}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{30}

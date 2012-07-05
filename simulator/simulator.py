@@ -41,7 +41,8 @@ The approximate sequence of events in the simulator is as follows:
       #. Add readout noise selected from a Gaussian distribution [optional].
       #. Convert from electrons to ADUs using the given gain factor.
       #. Add a given bias level and discretise the counts (16bit).
-      #. Finally the generated image is converted to a FITS file and saved to the working directory.
+      #. Finally the generated image is converted to a FITS file, a WCS system is assigned
+         and the output is saved to the current working directory.
 
 .. Warning:: The code is still work in progress and new features are being added.
              The code has been tested, but nevertheless bugs may be lurking in corners, so
@@ -137,6 +138,7 @@ Future Work
 .. todo::
 
     #. check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
+    #. objects.dat is now hard coded into the code, this should be read from the config file
     #. implement spatially variable PSF
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
@@ -751,11 +753,19 @@ class VISsimulator():
         Reads object list using numpy.loadtxt, determines the number of object types,
         and finds the file that corresponds to a given object type.
 
+        The input catalog is assumed to contain the following columns:
+
+            #. x coordinate
+            #. y coordinate
+            #. apparent magnitude of the object
+            #. type of the object [0=star, number=type defined in the objects.dat]
+            #. rotation [0 for stars, [0, 360] for galaxies]
+
         This method also displaces the object coordinates based on the quadrant and the
         CCD to be simulated.
 
-        If even a single object type does not have a corresponding input then this method
-        forces the program to exit.
+        .. Note:: If even a single object type does not have a corresponding input then this method
+                  forces the program to exit.
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
 

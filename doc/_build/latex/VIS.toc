@@ -13,24 +13,24 @@
 \contentsline {subsubsection}{Future Work}{10}{subsubsection*.11}
 \contentsline {subsubsection}{Contact Information}{10}{subsubsection*.12}
 \contentsline {subsection}{\numberline {3.1.2}Generating Mock Objects with IRAF}{15}{subsection.3.1.2}
-\contentsline {chapter}{\numberline {4}Instrument Characteristics}{17}{chapter.4}
-\contentsline {section}{\numberline {4.1}Postprocessing tools}{17}{section.4.1}
-\contentsline {subsection}{\numberline {4.1.1}Inserting instrument characteristics}{17}{subsection.4.1.1}
-\contentsline {subsection}{\numberline {4.1.2}Generating a mosaic}{20}{subsection.4.1.2}
-\contentsline {chapter}{\numberline {5}Data reduction}{23}{chapter.5}
-\contentsline {section}{\numberline {5.1}Data reduction tools}{23}{section.5.1}
-\contentsline {subsection}{\numberline {5.1.1}VIS Data Reduction and Processing}{23}{subsection.5.1.1}
-\contentsline {chapter}{\numberline {6}Data Analysis}{25}{chapter.6}
-\contentsline {section}{\numberline {6.1}VIS data analysis tools}{25}{section.6.1}
-\contentsline {subsection}{\numberline {6.1.1}Object finding and measuring ellipticity}{25}{subsection.6.1.1}
-\contentsline {subsection}{\numberline {6.1.2}Measuring a shape of an object}{26}{subsection.6.1.2}
-\contentsline {subsection}{\numberline {6.1.3}Object finding}{27}{subsection.6.1.3}
-\contentsline {chapter}{\numberline {7}Charge Transfer Inefficiency}{31}{chapter.7}
-\contentsline {section}{\numberline {7.1}Fortran code for CTI}{31}{section.7.1}
-\contentsline {chapter}{\numberline {8}Supporting methods and files}{33}{chapter.8}
-\contentsline {section}{\numberline {8.1}Objects}{33}{section.8.1}
-\contentsline {section}{\numberline {8.2}Code}{33}{section.8.2}
-\contentsline {chapter}{\numberline {9}Photometric Accuracy}{35}{chapter.9}
-\contentsline {chapter}{\numberline {10}Indices and tables}{37}{chapter.10}
-\contentsline {chapter}{Python Module Index}{39}{section*.94}
-\contentsline {chapter}{Index}{41}{section*.95}
+\contentsline {chapter}{\numberline {4}Instrument Characteristics}{19}{chapter.4}
+\contentsline {section}{\numberline {4.1}Postprocessing tools}{19}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Inserting instrument characteristics}{19}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Generating a mosaic}{22}{subsection.4.1.2}
+\contentsline {chapter}{\numberline {5}Data reduction}{25}{chapter.5}
+\contentsline {section}{\numberline {5.1}Data reduction tools}{25}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}VIS Data Reduction and Processing}{25}{subsection.5.1.1}
+\contentsline {chapter}{\numberline {6}Data Analysis}{27}{chapter.6}
+\contentsline {section}{\numberline {6.1}VIS data analysis tools}{27}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}Object finding and measuring ellipticity}{27}{subsection.6.1.1}
+\contentsline {subsection}{\numberline {6.1.2}Measuring a shape of an object}{28}{subsection.6.1.2}
+\contentsline {subsection}{\numberline {6.1.3}Object finding}{29}{subsection.6.1.3}
+\contentsline {chapter}{\numberline {7}Charge Transfer Inefficiency}{33}{chapter.7}
+\contentsline {section}{\numberline {7.1}Fortran code for CTI}{33}{section.7.1}
+\contentsline {chapter}{\numberline {8}Supporting methods and files}{35}{chapter.8}
+\contentsline {section}{\numberline {8.1}Objects}{35}{section.8.1}
+\contentsline {section}{\numberline {8.2}Code}{35}{section.8.2}
+\contentsline {chapter}{\numberline {9}Photometric Accuracy}{37}{chapter.9}
+\contentsline {chapter}{\numberline {10}Indices and tables}{39}{chapter.10}
+\contentsline {chapter}{Python Module Index}{41}{section*.94}
+\contentsline {chapter}{Index}{43}{section*.95}

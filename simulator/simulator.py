@@ -93,9 +93,9 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
     Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
     6798 objects were place on the detector
 
-    real	1m48.757s
-    user	1m44.433s
-    sys	        0m1.425s
+    real	2m53.360s
+    user	2m46.551s
+    sys	        0m1.614s
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module

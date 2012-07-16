@@ -2,6 +2,13 @@
 This simple script can be used to study the number of bias frames required for a given
 PSF ellipticity knowledge level.
 
+:requires: PyFITS
+:requires: NumPy
+:requires: matplotlib
+:requires: VISsim-Python
+
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -11,13 +18,13 @@ from mpl_toolkits.axes_grid.inset_locator import inset_axes
 from mpl_toolkits.axes_grid.inset_locator import mark_inset
 import pyfits as pf
 import numpy as np
-import math, pprint, datetime
+import math, pprint, datetime, cPickle
 from analysis import shape
 from support import logger as lg
 
 
 
-def bias(number, shape, level=1000, readnoise=4.5):
+def bias(number, shape, readnoise=4.5, level=0):
     """
     Generates a VIS super bias by median comibining the number of bias frames genereated.
 
@@ -25,17 +32,16 @@ def bias(number, shape, level=1000, readnoise=4.5):
     :type number: int
     :param shape: shape of the image array in (y, x)
     :type shape: tuple or list
-    :param level: bias level to add (default = 1000)
-    :type level: int
     :param readnoise: readout electronics noise in electrons
     :type readnoise: float
+    :param level: bias level to add (default = 0)
+    :type level: int
 
     :return: median combined bias frame
     :rtype: ndarray
     """
-    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(shape[0], shape[1], number)) # + level
+    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(shape[0], shape[1], number)) + level
     bias = np.median(biases.astype(np.int), axis=2, overwrite_input=True)
-    print np.mean(bias)
     return bias.astype(np.int)
 
 
@@ -43,31 +49,43 @@ def generateplots(ref, values, limit=3):
     """
     Create a simple plot to show the results.
     """
-    x = np.arange(len(values)) + 1
-    y = np.abs((np.asarray(values) - ref) / ref) * 1e5
-    compliant = x[ y < limit]
+    x = np.arange(len(values[0])) + 1
+    y1 = np.abs((np.asarray(values[0]) - ref[0])) * 1e5
+    y2 = np.abs((np.asarray(values[1]) - ref[1])) * 1e5
+    compliant = x[(y1 < limit) & (y2 < limit)]
     pprint.pprint(compliant)
 
     fig = plt.figure()
     plt.title('VIS Bias Calibration (%s)' % datetime.datetime.isoformat(datetime.datetime.now()))
-    ax = fig.add_subplot(111)
-    ax.plot(x, y, 'bo-')
-    ax.plot(x, [limit,]*len(x), 'g:')
-    ax.set_ylim(-1e-7, 1e3)
 
+    #part one
+    ax = fig.add_subplot(111)
+    l1, = ax.plot(x, y1, 'bo-')
+    l2, = ax.plot(x, y2, 'rs-')
+    ax.fill_between(x, np.ones(len(x))*limit, 100, facecolor='red', alpha=0.08)
+    r, = ax.plot(x, [limit,]*len(x), 'g--')
+    ax.set_ylim(-1e-7, 50.0)
+    ax.set_xlim(1, np.max(x))
+
+    plt.legend((l1, l2, r), (r'$e_{1}$', r'$e_{2}$', 'requirement'),
+               shadow=True, fancybox=True, loc='upper left')
+
+    #inset
     #ax2 = zoomed_inset_axes(ax, 2.0, loc=1)
     ax2 = inset_axes(ax , width='50%', height=1.1, loc=1)
-    ax2.plot(x, y, 'bo-')
-    ax2.plot(x, [limit,]*len(x), 'g:')
+    ax2.plot(x, y1, 'bo-')
+    ax2.plot(x, y2, 'rs-')
+    ax2.fill_between(x, np.ones(len(x))*limit, 100, facecolor='red', alpha=0.08)
+    ax2.plot(x, [limit,]*len(x), 'g--')
     ax2.set_xlim(x[-10], x[-1])
-    ax2.set_ylim(-1e-7, 50.0)
+    ax2.set_ylim(-0.1, 10.0)
     #mark_inset(ax, ax2, loc1=1, loc2=2, fc='none', ec='0.5')
     #plt.xticks(visible=False)
     #plt.yticks(visible=False)
 
     try:
         plt.text(0.5, 0.4,
-                 r'At least %i bias frames required for $\Delta e < 3 \times 10^{-5}$' % np.min(compliant),
+                 r'At least %i bias frames required for $\Delta e_{1,2}  < 3 \times 10^{-5}$' % np.min(compliant),
                  ha='center',
                  va='center',
                  transform=ax.transAxes)
@@ -76,45 +94,71 @@ def generateplots(ref, values, limit=3):
 
     #ax2.set_ylabel(r'$\Delta e \ [10^{-5}]$')
     ax.set_xlabel('Number of Bias Frames Median Combined')
-    ax.set_ylabel(r'$\Delta e \ [10^{-5}]$')
+    ax.set_ylabel(r'$\Delta e_{i}\ , \ \ \ i \in [1,2] \ \ \ \ [10^{-5}]$')
+
     plt.savefig('BiasCalibration.pdf')
 
 
-if __name__ == '__main__':
-    number = 100    #number of frames to combine
-    sigma = 0.75
-    times = 100     #number of samples for a given number of frames to averega
-    #sigma = 1.0
+def cPickleDumpDictionary(dictionary, output):
+    """
+    Dumps a dictionary of data to a cPickled file.
 
+    :param dictionary: a Python data container does not have to be a dictionary
+    :param output: name of the output file
+
+    :return: None
+    """
+    out = open(output, 'wb')
+    cPickle.dump(dictionary, out)
+    out.close()
+
+
+if __name__ == '__main__':
+    #variables to be changed
+    numbers = 50            #number of frames to combine
+    sigma = 0.75            #size of the Gaussian weighting function [default = 0.75]
+    times = 200              #number of samples for a given number of frames to average
+    file = 'psf1x.fits'     #input file to use for the PSF
+
+    #start the script
     log = lg.setUpLogger('biasCalibration.log')
     log.info('Testing bias level calibration...')
-    log.info('Testing with %i bias frames...' % number)
-
-    file = 'psf1x.fits'
+    log.info('Testing with %i bias frames...' % numbers)
     log.info('Processing file %s' % file)
 
-    #download data without noise or bias and scale it to 30k
+    #read in data without noise or bias level and scale it to 10k ADUs (35k electrons)
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= 4.0e4
+    data *= 3.5e4
 
-    #derive the reference value
+    #derive the reference value from the scaled data
     settings = dict(sigma=sigma)
     sh = shape.shapeMeasurement(data, log, **settings)
     results = sh.measureRefinedEllipticity()
     sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
-    reference = results['ellipticity']
+    reference1 = results['e1']
+    reference2 = results['e2']
 
     #loop over the number of bias frames and derive ellipticity
-    es = []
-    for number in xrange(number):
-        tmp = []
+    e1s = []
+    e2s = []
+    for number in xrange(numbers):
+        print '%i / %i' % (number+1, numbers)
+        tmp1 = []
+        tmp2 = []
         for x in xrange(times):
             biased = data.copy() + bias(number+1, data.shape)
             sh = shape.shapeMeasurement(biased, log, **settings)
             results = sh.measureRefinedEllipticity()
-            tmp.append(results['ellipticity'])
-        es.append(np.mean(np.asarray(tmp)))
-    generateplots(reference, es)
+            tmp1.append(results['e1'])
+            tmp2.append(results['e2'])
+        e1s.append(np.mean(np.asarray(tmp1)))
+        e2s.append(np.mean(np.asarray(tmp2)))
 
+    #save output
+    out = dict(reference=[reference1, reference2], ellipticities=[e1s, e2s])
+    cPickleDumpDictionary(out, 'data.pk')
+
+    #generate a plot
+    generateplots([reference1, reference2], [e1s, e2s])
 

@@ -1,4 +1,15 @@
+"""
+Helper functions related to surface fitting and a few examples to demonstrate.
+
+:requires: NumPy
+:requires: SciPy
+:requires: matplotlib
+
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
+"""
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import numpy as np
@@ -6,9 +17,63 @@ import math, itertools
 import scipy, scipy.signal
 
 
+def polyfit2d(x, y, z, order=3):
+    """
+    Fits a given order polynomial to 2D data.
+
+    .. Note:: x and y arrays have to be of the same length. This function does not support non-square
+              grids.
+
+    :param x: x-data [in 1D formal]
+    :type x: numpy array
+    :param y: y-data [in 1D formal]
+    :type y: numpy array
+    :param z: the dependent data [in 1D formal]
+    :type z: numpy array
+    :param order: order of the polynomial to be fit
+    :type order: int
+
+    :return: coefficients defining a polynomial surface
+    :rtype: ndarray
+    """
+    ncols = (order + 1)**2
+    G = np.zeros((x.size, ncols))
+    ij = itertools.product(range(order+1), range(order+1))
+    for k, (i, j) in enumerate(ij):
+        G[:, k] = x**i * y**j
+    coeffs, _, _, _ = np.linalg.lstsq(G, z)
+    return coeffs
+
+
+def polyval2d(x, y, coeffs):
+    """
+    Evaluates polynomial surface of a given coefficients on a given grid.
+
+    .. Note:: x and y arrays have to be of the same length. This function does not support non-square
+              grids.
+
+
+    :param x: x-coordinates at which to evaluate [meshgrid]
+    :type x: ndarray
+    :param y: y-coordinates at which to evaluate [meshgrid]
+    :type y: ndarray
+    :param coeffs: coefficients of the polynomial surface, results of e.g. polyfit2d function
+    :type coeffs: ndarray
+
+    :return: evaluated values
+    :rtype: ndarray
+    """
+    order = int(np.sqrt(len(coeffs))) - 1
+    ij = itertools.product(range(order+1), range(order+1))
+    z = np.zeros_like(x)
+    for a, (i,j) in zip(coeffs, ij):
+        z += a * x**i * y**j
+    return z
+
+
 def polyfit2DSMN(x, y, z, order=3):
     """
-    .. Warning: DO NOT USE!
+    .. Warning:: DO NOT USE!
     """
     #Exponents of the polynomial
     exps = [(k-n, n) for k in range(order+1) for n in range(k+1)]
@@ -20,7 +85,6 @@ def polyfit2DSMN(x, y, z, order=3):
 
     #Compute the (Moore-Penrose) pseudo-inverse of a matrix
     Ainv = np.linalg.pinv(A)
-    print Ainv[0]
     out = Ainv[1].reshape((2066, 2066)) * z
     return out
 
@@ -103,7 +167,7 @@ def sgolay2d(z, window_size, order, derivative=None):
         return scipy.signal.fftconvolve(Z, -r, mode='valid'), scipy.signal.fftconvolve(Z, -c, mode='valid')
 
 
-def example2():
+def exampleUsingFiltering():
     #generate bias surface and noise it
     X, Y, Z = generateBias()
     biased = addReadoutNoise(Z.copy())
@@ -280,23 +344,35 @@ def example(numdata=2066, floor=995, xsize=2048, ysize=2066):
     plt.close()
 
 
-def polyfit2d(x, y, z, order=3):
-    ncols = (order + 1)**2
-    G = np.zeros((x.size, ncols))
-    ij = itertools.product(range(order+1), range(order+1))
-    for k, (i, j) in enumerate(ij):
-        G[:, k] = x**i * y**j
-    m, _, _, _ = np.linalg.lstsq(G, z)
-    return m
+def exampleAnimation(numdata=2066, floor=995, xsize=2048, ysize=2066, biases=25):
+    # generate random data
+    x = np.random.random(numdata)
+    y = np.random.random(numdata)
+    xx, yy = np.meshgrid(np.linspace(x.min(), x.max(), xsize),
+                         np.linspace(y.min(), y.max(), ysize))
+    zclean = yy - xx + 0.78*xx**2 + 15.0*yy**2 - 1.75*xx*yy + 10.0*xx**3 + 0.3*yy**3 + floor
 
+    fig = plt.figure()
+    ax = Axes3D(fig)
 
-def polyval2d(x, y, m):
-    order = int(np.sqrt(len(m))) - 1
-    ij = itertools.product(range(order+1), range(order+1))
-    z = np.zeros_like(x)
-    for a, (i,j) in zip(m, ij):
-        z += a * x**i * y**j
-    return z
+    ims = []
+    for num in xrange(biases):
+        z = addReadoutNoise(zclean.copy(), number=num+1)
+        m = polyfit2d(xx.ravel(), yy.ravel(), z.ravel())
+        zz = polyval2d(xx, yy, m)
+
+        #append surface for animation
+        ims.append((ax.plot_surface(xx*xsize, yy*ysize, zclean-zz, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet),))
+
+    ax.set_title('Bias Surface Fitting')
+
+    ax.set_xlabel('X [pixels]')
+    ax.set_ylabel('Y [pixels]')
+    ax.set_zlabel(r'$\Delta$BIAS [ADUs]')
+
+    im_ani = animation.ArtistAnimation(fig, ims, interval=3000, repeat_delay=3000, blit=True)
+    im_ani.save('Bias.mp4')
+
 
 
 def generateBias(xsize=2066, ysize=2066, spread=30.0, min=990):
@@ -357,6 +433,7 @@ def generate3Dplot(X, Y, Z, output):
 
 
 if __name__ == '__main__':
-    exampleNoNoiseNoInt()
-    example()
-    example2()
+    #exampleNoNoiseNoInt()
+    #example()
+    #exampleUsingFiltering()
+    exampleAnimation()

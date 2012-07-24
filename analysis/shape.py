@@ -100,12 +100,12 @@ class shapeMeasurement():
         #integrand
         Qyyint = Ypos2 * image
         Qxxint = Xpos2 * image
-        Qlxint = XYpos * image
+        Qxyint = XYpos * image
 
-        #summ over and normalize to get the quadrupole moments
+        #sum over and normalize to get the quadrupole moments
         Qyy = np.sum(Qyyint) / imsum
         Qxx = np.sum(Qxxint) / imsum
-        Qxy = np.sum(Qlxint) / imsum
+        Qxy = np.sum(Qxyint) / imsum
 
         self.log.info('(Qxx, Qyy, Qxy) = (%f, %f, %f)' % (Qxx, Qyy, Qxy))
 
@@ -235,11 +235,29 @@ class shapeMeasurement():
         self.log.info('Wrote %s' % output)
 
 
+def measureGaussianR2():
+    from support import logger as lg
+    log = lg.setUpLogger('shape.log')
+
+    #gaussian
+    sigma = 2. / (2. * math.sqrt(2.*math.log(2)))
+    Gaussian = shapeMeasurement(np.zeros((100, 100)), log).circular2DGaussian(50, 50, sigma)['Gaussian']
+
+    settings = dict(sigma=sigma, weighted=False)
+    sh = shapeMeasurement(Gaussian, log, **settings)
+    results = sh.measureRefinedEllipticity()
+    print results['R2']
+
+    sh.writeFITS(Gaussian, 'Gaussian.fits')
+
 if __name__ == '__main__':
     #testing part, looks for blob?.fits and psf.fits to derive centroids and ellipticity
     import pyfits as pf
     import glob as g
     from support import logger as lg
+    import sys
+
+    measureGaussianR2()
 
     files = g.glob('blob?.fits')
 

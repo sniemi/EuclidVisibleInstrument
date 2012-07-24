@@ -268,19 +268,40 @@ def example(numdata=2066, floor=995, xsize=2048, ysize=2066):
     y = np.random.random(numdata)
     xx, yy = np.meshgrid(np.linspace(x.min(), x.max(), xsize),
                          np.linspace(y.min(), y.max(), ysize))
-    zclean = (yy - xx + 0.78*xx**2 + 15.0*yy**2 - 1.75*xx*yy + 10.0*xx**3 + 0.3*yy**3 + floor)#.astype(np.int)
+    #zclean = (yy - xx + 0.78*xx**2 + 15.0*yy**2 - 1.75*xx*yy + 10.0*xx**3 + 0.3*yy**3 + floor)#.astype(np.int)
+    zclean = 2.85*yy - 1.4*xx +1.1*xx*yy + floor
 
     z = addReadoutNoise(zclean)
     print z.max(), z.min(), z.mean()
 
     # Fit a 3rd order, 2d polynomial
-    m = polyfit2d(xx.ravel(), yy.ravel(), z.ravel())
+    m = polyfit2d(xx.ravel(), yy.ravel(), z.ravel(), order=1)
     print 'Example Coefficients'
     print m
     print
 
     # Evaluate it on a rectangular grid
     zz = polyval2d(xx, yy, m)
+
+    # generate 2D plot
+    im = plt.imshow(zclean, extent=(0, ysize, xsize, 0))
+    c1 = plt.colorbar(im)
+    c1.set_label('BIAS [ADUs]')
+    plt.xlim(0, ysize)
+    plt.ylim(0, xsize)
+    plt.xlabel('Y [pixels]')
+    plt.ylabel('X [pixels]')
+    plt.savefig('exampleNoNoise2D.png')
+    plt.close()
+    #and 3D
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.plot_surface(xx*xsize, yy*ysize, zclean, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
+    ax.set_xlabel('X [pixels]')
+    ax.set_ylabel('Y [pixels]')
+    ax.set_zlabel('BIAS [ADUs]')
+    plt.savefig('exampleNoNoise.png')
+    plt.close()
 
     # generate 2D plot
     im = plt.imshow(z, extent=(0, ysize, xsize, 0))
@@ -434,6 +455,6 @@ def generate3Dplot(X, Y, Z, output):
 
 if __name__ == '__main__':
     #exampleNoNoiseNoInt()
-    #example()
+    example()
     #exampleUsingFiltering()
-    exampleAnimation()
+    #exampleAnimation()

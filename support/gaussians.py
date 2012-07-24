@@ -150,6 +150,26 @@ def ellipticityFromSigmas(sigmax, sigmay):
     return np.abs(e)
 
 
+def size():
+    """
+    :requires: sympy
+    """
+    from sympy import Symbol
+    from sympy import integrate, exp, pi
+
+    x = Symbol('x')
+    y = Symbol('y')
+    mu = Symbol('mu')
+    sigma = Symbol('sigma')
+
+    tmpx = (x - mu)
+    tmpy = (y - mu)
+    integrand = (1/(2*pi*sigma**2)) * exp(-((tmpx**2 + tmpy**2) / (2*sigma**2) ))
+
+    res = integrate(integrand, x)
+    pprint.pprint(res)
+
+
 if __name__ == '__main__':
     log = lg.setUpLogger('gaussians.log')
     log.info('Testing gaussians...')

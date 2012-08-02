@@ -85,6 +85,7 @@ def generatePlots(filedata, interactive=False):
         e1.append(value['values']['e1'])
         e2.append(value['values']['e2'])
         R2.append(value['values']['R2'])
+        print key, value['values']['ellipticity'], value['values']['e1'], value['values']['e2'], value['values']['R2']
 
     x = np.asarray(x)
     y = np.asarray(y)

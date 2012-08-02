@@ -1,42 +1,173 @@
+import datetime
 import numpy as np
+import statsmodels.api as sm
+from statsmodels.nonparametric.kde import KDE
 import matplotlib.pyplot as plt
+from scipy.stats import gaussian_kde
+from analysis import ETC
+from sources import createObjectCatalogue as cr
 
-galaxies = np.loadtxt('data/cdf_galaxies.dat')
-gmodel = np.loadtxt('data/galaxy_model.dat')
-cdfstars = np.loadtxt('data/cdf_stars.dat')
-stars = np.loadtxt('data/stars.dat')
-besancon = np.loadtxt('data/besanc.dat')
-metcalfe = np.loadtxt('data/metcalfe.dat')
-shao = np.loadtxt('data/shao.dat')
 
-UDF = np.loadtxt('catalog0.dat', usecols=(2,3))
-st = UDF[:,0][UDF[:,1] < 1]
-gal = UDF[:,0][UDF[:,1] > 7]
-print '%i stars and %i galaxies in the catalog' % (len(st), len(gal))
-weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) #how many square degrees one CCD is on sky
+def plotDist():
+    galaxies = np.loadtxt('data/cdf_galaxies.dat')
+    gmodel = np.loadtxt('data/galaxy_model.dat')
+    cdfstars = np.loadtxt('data/cdf_stars.dat')
+    stars = np.loadtxt('data/stars.dat')
+    besancon = np.loadtxt('data/besanc.dat')
+    metcalfe = np.loadtxt('data/metcalfe.dat')
+    shao = np.loadtxt('data/shao.dat')
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
+    UDF = np.loadtxt('catalog0.dat', usecols=(2,3))
+    st = UDF[:,0][UDF[:,1] < 1]
+    gal = UDF[:,0][UDF[:,1] > 7]
+    print '%i stars and %i galaxies in the catalog' % (len(st), len(gal))
+    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) #how many square degrees one CCD is on sky
 
-ax.hist(gal, bins=18, log=True, alpha=0.4, weights=[weight,]*len(gal), label='Catalog: galaxies')
-ax.hist(st, bins=18, log=True, alpha=0.3, weights=[weight,]*len(st), label='Catalog: stars')
-ax.semilogy(galaxies[:,0], galaxies[:,1], label='cdf_galaxies.dat')
-#ax.semilogy(gmodel[:,0], gmodel[:,1], ls='--', label='Galaxy model from Excel spreadsheet')
-ax.semilogy(shao[:,0], shao[:,4]*3600, ls=':', label='Shao et al. 2009')
-ax.semilogy(cdfstars[:,0], cdfstars[:,1], label='cdf_stars.dat')
-ax.semilogy(stars[:,0], stars[:,1], label='Star Dist (30deg)')
-ax.semilogy(stars[:,0], stars[:,2], label='Star Dist (60deg)')
-ax.semilogy(stars[:,0], stars[:,3], label='Star Dist (90deg)')
-#ax.semilogy(besancon[:,0], besancon[:,1], ls='--', label='Besancon')
-ax.semilogy(metcalfe[:,0], metcalfe[:,4], ls = '-.', label='Metcalfe')
-ax.set_xlabel('AB?')
-ax.set_ylabel('N [sq deg]')
-ax.set_xlim(3, 30)
-ax.set_ylim(1e-2, 1e7)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
 
-plt.legend(shadow=True, fancybox=True, loc='upper left')
-leg = plt.gca().get_legend()
-ltext  = leg.get_texts() 
-plt.setp(ltext, fontsize='xx-small')
+    ax.hist(gal, bins=18, log=True, alpha=0.4, weights=[weight,]*len(gal), label='Catalog: galaxies')
+    ax.hist(st, bins=18, log=True, alpha=0.3, weights=[weight,]*len(st), label='Catalog: stars')
+    ax.semilogy(galaxies[:,0], galaxies[:,1], label='cdf_galaxies.dat')
+    #ax.semilogy(gmodel[:,0], gmodel[:,1], ls='--', label='Galaxy model from Excel spreadsheet')
+    ax.semilogy(shao[:,0], shao[:,4]*3600, ls=':', label='Shao et al. 2009')
+    ax.semilogy(cdfstars[:,0], cdfstars[:,1], label='cdf_stars.dat')
+    ax.semilogy(stars[:,0], stars[:,1], label='Star Dist (30deg)')
+    ax.semilogy(stars[:,0], stars[:,2], label='Star Dist (60deg)')
+    ax.semilogy(stars[:,0], stars[:,3], label='Star Dist (90deg)')
+    #ax.semilogy(besancon[:,0], besancon[:,1], ls='--', label='Besancon')
+    ax.semilogy(metcalfe[:,0], metcalfe[:,4], ls = '-.', label='Metcalfe')
+    ax.set_xlabel('AB')
+    ax.set_ylabel('N [sq deg]')
+    ax.set_xlim(3, 30)
+    ax.set_ylim(1e-2, 1e7)
 
-plt.savefig('Distributions.pdf')
+    plt.legend(shadow=True, fancybox=True, loc='upper left')
+    leg = plt.gca().get_legend()
+    ltext  = leg.get_texts()
+    plt.setp(ltext, fontsize='xx-small')
+
+    plt.savefig('Distributions.pdf')
+
+
+def plotSNR(deg=60, kdes=True):
+    CCDs = 1000
+    bins = np.arange(0, 2000, 20)
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
+    #cumulative distribution of stars
+    if deg == 30:
+        sfudge = 0.82
+        tmp = 1
+    elif deg == 60:
+        sfudge = 0.78
+        tmp = 2
+    else:
+        #90 deg
+        sfudge = 0.74
+        tmp = 3
+
+    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8 * CCDs) #how many square degrees on sky
+
+    #stars
+    d = np.loadtxt('data/stars.dat', usecols=(0, tmp))
+    stmags = d[:, 0]
+    stcounts = d[:, 1]
+
+    #fit a function and generate finer sample
+    z = np.polyfit(stmags, np.log10(stcounts), 4)
+    p = np.poly1d(z)
+    starmags = np.arange(1, 30.2, 0.2)
+    starcounts = 10**p(starmags)
+
+    cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
+    starcounts /=  3600. #convert to square arcseconds
+    nstars = int(np.max(starcounts) * 110 * sfudge) * CCDs
+    magStars = cr.drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
+    SNRsStars = ETC.SNR(ETC.VISinformation(), magnitude=magStars, exposures=1)
+
+    #calculate Gaussian KDE with statsmodels package (for speed)
+    if kdes:
+        kdeStars = KDE(SNRsStars)
+        kdeStars.fit(clip=(-10, 2100), adjust=6)
+
+    #galaxies
+    #cumulative distribution of galaxies
+    d = np.loadtxt('data/cdf_galaxies.dat', usecols=(0, 1))
+    gmags = d[:, 0]
+    gcounts = d[:, 1]
+    nums = int(np.max(gcounts) / 3600. * 110 * CCDs)
+    z = np.polyfit(gmags, np.log10(gcounts), 4)
+    p = np.poly1d(z)
+    galaxymags = np.arange(10.0, 30.2, 0.2)
+    galaxycounts = 10**p(galaxymags)
+    cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
+    mag = cr.drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
+    SNRsGalaxies = ETC.SNR(ETC.VISinformation(), magnitude=mag, exposures=1)
+
+    #calculate Gaussian KDE, this tmie with scipy to save memory, and evaluate it
+    if kdes:
+        gals = []
+        kde = gaussian_kde(SNRsGalaxies)
+        #for x in np.logspace(0.5, 4, num=50):
+        for x in np.linspace(1, 2010, num=200):
+            y = kde.evaluate(x)[0]
+            gals.append([x, y])
+        gals = np.asarray(gals)
+
+    #make a plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.title('Euclid Visible Instrument')
+    hist1 = ax.hist(SNRsStars, bins=bins, alpha=0.2, log=True, weights=[weight,]*len(magStars),
+                    label='Stars [60 deg]', color='r')
+    hist2 = ax.hist(SNRsGalaxies, bins=bins, alpha=0.2, log=True, weights=[weight,]*len(mag),
+                    label='Galaxies', color='blue')
+
+    if kdes:
+        ax.plot(kdeStars.support, kdeStars.density*nstars*1.5, 'r-', label='Gaussian KDE (stars)')
+        ax.plot(gals[:, 0], gals[:, 1]*nums*1.5, 'b-', label='Gaussian KDE (galaxies)')
+
+    ax.set_ylim(1,1e6)
+    ax.set_xlim(0, 2000)
+    ax.set_xlabel('Signal-to-Noise Ratio [assuming 565s exposure]')
+    ax.set_ylabel('Number of Objects [deg$^{-2}$]')
+
+    plt.text(0.8, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    plt.legend(shadow=True, fancybox=True)
+    plt.savefig('SNRtheoretical.pdf')
+
+    #output to file
+    fh = open('SNRsSTARS.txt', 'w')
+    fh.write('#These values are for stars at 60deg (%s)\n' % txt)
+    fh.write('#SNR number_of_stars\n')
+    fh.write('#bin_centre per_square_degree\n')
+    for a, b in zip(hist1[0], hist1[1]):
+        fh.write('%i %f\n' %(b+10, a))
+    fh.close()
+    fh = open('SNRsGALAXIES.txt', 'w')
+    fh.write('#These values are for galaxies (%s)\n' % txt)
+    fh.write('#SNR number_of_galaxies\n')
+    fh.write('#bin_centre per_square_degree\n')
+    for a, b in zip(hist2[0], hist2[1]):
+        fh.write('%i %f\n' %(b+10, a))
+    fh.close()
+
+
+def plotSNRfromCatalog():
+    #read in data
+    catalog = np.loadtxt('catalog0.dat', usecols=(2,3))
+    st = catalog[:,0][catalog[:,1] < 1] #stars, magnitudes
+    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) #how many square degrees one CCD is on sky
+    SNRs = ETC.SNR(ETC.VISinformation(), magnitude=st)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hist(SNRs, bins=18, alpha=0.5, log=True, weights=[weight,]*len(st))
+    ax.set_xlabel('SNR [assuming 3*565 seconds]')
+    ax.set_ylabel('N [sq deg]')
+    plt.savefig('SNRs.pdf')
+
+
+if __name__ == '__main__':
+    #plotDist()
+    plotSNR()

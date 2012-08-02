@@ -4,6 +4,9 @@ Measuring a shape of an object
 
 Simple class to measure quadrupole moments and ellipticity of an object.
 
+.. Note:: Double check that the e1 component is not flipped in sense that Qxx and Qyy would be reversed
+          because NumPy arrays are column major.
+
 :requires: NumPy
 :requres: PyFITS
 
@@ -249,6 +252,7 @@ def measureGaussianR2():
     print results['R2']
 
     sh.writeFITS(Gaussian, 'Gaussian.fits')
+
 
 if __name__ == '__main__':
     #testing part, looks for blob?.fits and psf.fits to derive centroids and ellipticity

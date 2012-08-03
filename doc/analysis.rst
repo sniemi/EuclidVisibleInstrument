@@ -9,18 +9,22 @@ VIS data analysis tools
 .. autoclass:: analyseVISdata
     :members:
 
-
 .. automodule:: analysis.shape
 
 .. autoclass:: shapeMeasurement
     :members:
 
-
 .. automodule:: analysis.sourceFinder
+    :members:
 
 .. autoclass:: sourceFinder
     :members:
 
+.. automodule:: analysis.ETC
+    :members:
 
+.. automodule:: analysis.PSFproperties
+    :members:
 
-
+.. automodule:: analysis.biasCalibration
+    :members:

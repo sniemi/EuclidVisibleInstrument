@@ -25,12 +25,15 @@
 \contentsline {subsection}{\numberline {6.1.1}Object finding and measuring ellipticity}{29}{subsection.6.1.1}
 \contentsline {subsection}{\numberline {6.1.2}Measuring a shape of an object}{30}{subsection.6.1.2}
 \contentsline {subsection}{\numberline {6.1.3}Object finding}{31}{subsection.6.1.3}
-\contentsline {chapter}{\numberline {7}Charge Transfer Inefficiency}{35}{chapter.7}
-\contentsline {section}{\numberline {7.1}Fortran code for CTI}{35}{section.7.1}
-\contentsline {chapter}{\numberline {8}Supporting methods and files}{37}{chapter.8}
-\contentsline {section}{\numberline {8.1}Objects}{37}{section.8.1}
-\contentsline {section}{\numberline {8.2}Code}{37}{section.8.2}
-\contentsline {chapter}{\numberline {9}Photometric Accuracy}{39}{chapter.9}
-\contentsline {chapter}{\numberline {10}Indices and tables}{41}{chapter.10}
-\contentsline {chapter}{Python Module Index}{43}{section*.94}
-\contentsline {chapter}{Index}{45}{section*.95}
+\contentsline {subsection}{\numberline {6.1.4}Exposure Times}{34}{subsection.6.1.4}
+\contentsline {subsection}{\numberline {6.1.5}Properties of the Point Spread Function}{35}{subsection.6.1.5}
+\contentsline {subsection}{\numberline {6.1.6}Bias Calibration}{36}{subsection.6.1.6}
+\contentsline {chapter}{\numberline {7}Charge Transfer Inefficiency}{41}{chapter.7}
+\contentsline {section}{\numberline {7.1}Fortran code for CTI}{41}{section.7.1}
+\contentsline {chapter}{\numberline {8}Supporting methods and files}{43}{chapter.8}
+\contentsline {section}{\numberline {8.1}Objects}{43}{section.8.1}
+\contentsline {section}{\numberline {8.2}Code}{43}{section.8.2}
+\contentsline {chapter}{\numberline {9}Photometric Accuracy}{45}{chapter.9}
+\contentsline {chapter}{\numberline {10}Indices and tables}{47}{chapter.10}
+\contentsline {chapter}{Python Module Index}{49}{section*.115}
+\contentsline {chapter}{Index}{51}{section*.116}

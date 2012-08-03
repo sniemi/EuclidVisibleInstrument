@@ -19,8 +19,9 @@ def VISinformation():
     """
     Returns a dictionary describing VIS.
     """
-    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, diameter=1.3, fraction=0.836,
-               zeropoint=25.58, zodiacal=22.942, gain=3.5)
+    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
+               diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243,
+               zeropoint=25.58, gain=3.5)
 
     apsize = calculateAperture(out)
     out.update(dict(aperture_size = apsize))
@@ -36,7 +37,7 @@ def calculateAperture(info):
     return out
 
 
-def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7):
+def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True):
     """
     Returns the exposure time for a given magnitude.
 
@@ -50,6 +51,9 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7):
     :type exposures: int
     :param fudge: the fudge parameter to which to use to scale the snr to SExtractor required [default=0.7]
     :type fudge: float
+    :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
+                   If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+    :type galaxy: boolean
 
     :return: exposure time (of an individual exposure) [seconds]
     :rtype: float
@@ -57,7 +61,10 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7):
     snr /= fudge
 
     sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
-    flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['fraction']
+    if galaxy:
+        flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['galaxy_fraction']
+    else:
+        flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction']
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
 
@@ -70,9 +77,30 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7):
     return (first + root)/div
 
 
-def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7):
+def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=True):
     """
-    Calculates the limiting magnitude for a given exposure time
+    Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
+    level to be reached.
+
+    :param info: instrumental information such as zeropoint and background
+    :type info: dict
+    :param exp: exposure time [seconds]
+    :type exp: float or ndarray
+    :param snr: the minimum signal-to-noise ratio to be reached.
+                .. Note:: This is couple to the fudge parameter: snr_use = snr / fudge
+    :type snr: float or ndarray
+    :param exposures: number of exposures [default = 3]
+    :type exposures: int
+    :param fudge: a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
+                  This is mostly due to the fact that SExtractor may require a higher snr than what calculated
+                  otherwise.
+    :type fudge: float
+    :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
+                   If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+    :type galaxy: boolean
+
+    :return: limiting magnitude given the input information
+    :rtype: float or ndarray
     """
     snr /= fudge
     totalexp = exposures*exp
@@ -83,13 +111,17 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7):
 
     tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * info['readnoise']**2 * info['aperture_size'])
     root = np.sqrt(snr**2 + tmp)
-    lg = 2.5*np.log10(((0.5*(snr**2 + snr*root))/totalexp)/info['fraction'])
+    if galaxy:
+        lg = 2.5*np.log10(((0.5*(snr**2 + snr*root))/totalexp)/info['galaxy_fraction'])
+    else:
+        lg = 2.5*np.log10(((0.5*(snr**2 + snr*root))/totalexp)/info['star_fraction'])
+
     out = info['zeropoint'] - lg
 
     return out
 
 
-def SNR(info, magnitude=24.5, exptime=565.0, exposures=3):
+def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True):
     """
     Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
     number of exposures.
@@ -102,12 +134,18 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3):
     :type exptime: float
     :param exposures: number of exposures [default = 3]
     :type exposures: int
+    :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
+                   If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+    :type galaxy: boolean
 
     :return: signal-to-noise ratio
     :rtype: float or ndarray
     """
     sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
-    flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['fraction']
+    if galaxy:
+        flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['galaxy_fraction']
+    else:
+        flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction']
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
 

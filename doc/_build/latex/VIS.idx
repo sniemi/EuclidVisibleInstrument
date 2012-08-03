@@ -86,4 +86,35 @@
 \indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
 \indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
 \indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{33}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{34}
+\indexentry{analysis.ETC (module)|hyperpage}{34}
+\indexentry{SNR() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{35}
+\indexentry{analysis.PSFproperties (module)|hyperpage}{35}
+\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{analysis.biasCalibration (module)|hyperpage}{36}
+\indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{38}

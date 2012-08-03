@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.3-1.40.12 (TeX Live 2011) (format=pdflatex 2012.7.5)  5 JUL 2012 16:16
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.8.1)  3 AUG 2012 11:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -6,21 +6,21 @@ entering extended mode
 (./VIS.tex
 LaTeX2e <2011/06/27>
 Babel <v3.8m> and hyphenation patterns for english, dumylang, nohyphenation, ge
-rman-x-2011-07-01, ngerman-x-2011-07-01, afrikaans, ancientgreek, ibycus, arabi
+rman-x-2012-05-30, ngerman-x-2012-05-30, afrikaans, ancientgreek, ibycus, arabi
 c, armenian, basque, bulgarian, catalan, pinyin, coptic, croatian, czech, danis
 h, dutch, ukenglish, usenglishmax, esperanto, estonian, ethiopic, farsi, finnis
 h, french, friulan, galician, german, ngerman, swissgerman, monogreek, greek, h
 ungarian, icelandic, assamese, bengali, gujarati, hindi, kannada, malayalam, ma
 rathi, oriya, panjabi, tamil, telugu, indonesian, interlingua, irish, italian, 
-kurmanji, lao, latin, latvian, lithuanian, mongolian, mongolianlmc, bokmal, nyn
-orsk, polish, portuguese, romanian, romansh, russian, sanskrit, serbian, serbia
-nc, slovak, slovenian, spanish, swedish, turkish, turkmen, ukrainian, uppersorb
-ian, welsh, loaded.
+kurmanji, latin, latvian, lithuanian, mongolian, mongolianlmc, bokmal, nynorsk,
+ polish, portuguese, romanian, romansh, russian, sanskrit, serbian, serbianc, s
+lovak, slovenian, spanish, swedish, turkish, turkmen, ukrainian, uppersorbian, 
+welsh, loaded.
 (./sphinxmanual.cls
 Document Class: sphinxmanual 2009/06/02 Document class (Sphinx manual)
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/report.cls
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/report.cls
 Document Class: report 2007/10/19 v1.4h Standard LaTeX document class
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/size12.clo
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/size12.clo
 File: size12.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -36,19 +36,19 @@ File: size12.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 ))
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/inputenc.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2008/03/30 v1.1d Input encoding file
 \inpenc@prehook=\toks14
 \inpenc@posthook=\toks15
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/utf8.def
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/utf8.def
 File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
 ... processing UTF-8 mapping file for font encoding T1
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/t1enc.dfu
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/t1enc.dfu
 File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
@@ -198,7 +198,7 @@ File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OT1 ...
 ... processing UTF-8 mapping file for font encoding OT1
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/ot1enc.dfu
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/ot1enc.dfu
 File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
@@ -229,7 +229,7 @@ File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OMS ...
 ... processing UTF-8 mapping file for font encoding OMS
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/omsenc.dfu
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/omsenc.dfu
 File: omsenc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
@@ -255,20 +255,20 @@ Now handling font encoding U ...
 ))
    defining Unicode char U+00A0 (decimal 160)
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/fontenc.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/t1enc.def
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/t1enc.def
 File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
 ))
-(/usr/local/texlive/2011/texmf-dist/tex/generic/babel/babel.sty
+(/usr/local/texlive/2012/texmf-dist/tex/generic/babel/babel.sty
 Package: babel 2008/07/08 v3.8m The Babel package
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/babel/english.ldf
+(/usr/local/texlive/2012/texmf-dist/tex/generic/babel/english.ldf
 Language: english 2005/03/30 v3.3o English support from the babel system
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/babel/babel.def
+(/usr/local/texlive/2012/texmf-dist/tex/generic/babel/babel.def
 File: babel.def 2008/07/08 v3.8m Babel common definitions
 \babel@savecnt=\count88
 \U@D=\dimen103
@@ -277,7 +277,7 @@ File: babel.def 2008/07/08 v3.8m Babel common definitions
 \l@australian = a dialect from \language\l@british 
 \l@newzealand = a dialect from \language\l@british 
 ))
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/times.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/times.sty
 Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
 ) (./fncychap.sty
 Package: fncychap 2007/07/30 v1.34 LaTeX package (Revised chapters)
@@ -290,7 +290,7 @@ Package: fncychap 2007/07/30 v1.34 LaTeX package (Revised chapters)
 \pxx=\skip49
 \c@AlphaCnt=\count89
 \c@AlphaDecCnt=\count90
-) (/usr/local/texlive/2011/texmf-dist/tex/latex/tools/longtable.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
 \LTleft=\skip50
 \LTright=\skip51
@@ -310,7 +310,7 @@ Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
 )
 (./sphinx.sty
 Package: sphinx 2010/01/15 LaTeX package (Sphinx markup)
- (/usr/local/texlive/2011/texmf-dist/tex/latex/base/textcomp.sty
+ (/usr/local/texlive/2012/texmf-dist/tex/latex/base/textcomp.sty
 Package: textcomp 2005/09/27 v1.99g Standard LaTeX package
 Package textcomp Info: Sub-encoding information:
 (textcomp)               5 = only ISO-Adobe without \textcurrency
@@ -325,12 +325,12 @@ Package textcomp Info: Sub-encoding information:
 (textcomp)             See the documentation for details.
 Package textcomp Info: Setting ? sub-encoding to TS1/1 on input line 71.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/ts1enc.def
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 Now handling font encoding TS1 ...
 ... processing UTF-8 mapping file for font encoding TS1
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/ts1enc.dfu
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/ts1enc.dfu
 File: ts1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A2 (decimal 162)
    defining Unicode char U+00A3 (decimal 163)
@@ -465,7 +465,7 @@ Package textcomp Info: Setting pplj sub-encoding to TS1/3 on input line 338.
 Package textcomp Info: Setting ptmx sub-encoding to TS1/4 on input line 339.
 Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 340.
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 \fancy@headwidth=\skip54
 \f@ncyO@elh=\skip55
 \f@ncyO@erh=\skip56
@@ -476,7 +476,7 @@ Package textcomp Info: Setting ptmj sub-encoding to TS1/4 on input line 340.
 \f@ncyO@olf=\skip61
 \f@ncyO@orf=\skip62
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/fancybox/fancybox.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/fancybox/fancybox.sty
 Package: fancybox 2010/05/15 1.4
 
 Style option: `fancybox' v1.4 <2010/05/15> (tvz)
@@ -489,7 +489,7 @@ Style option: `fancybox' v1.4 <2010/05/15> (tvz)
 \EndVerbatimTokens=\toks20
 \Verbatim@Outfile=\write3
 \Verbatim@Infile=\read1
-) (/usr/local/texlive/2011/texmf-dist/tex/latex/titlesec/titlesec.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
 \ttl@box=\box32
 \beforetitleunit=\skip63
@@ -503,7 +503,7 @@ Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
 )
 (./tabulary.sty
 Package: tabulary 2007/10/02 v0.9 tabulary package (DPC)
- (/usr/local/texlive/2011/texmf-dist/tex/latex/tools/array.sty
+ (/usr/local/texlive/2012/texmf-dist/tex/latex/tools/array.sty
 Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \col@sep=\dimen111
 \extrarowheight=\dimen112
@@ -516,24 +516,24 @@ Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \tymin=\dimen114
 \tymax=\dimen115
 \TY@tablewidth=\dimen116
-) (/usr/local/texlive/2011/texmf-dist/tex/latex/amsmath/amsmath.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2000/07/18 v2.13 AMS math features
 \@mathmargin=\skip67
 
 For additional information on amsmath, use the `?' option.
-(/usr/local/texlive/2011/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2000/06/29 v2.01
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/amsmath/amsgen.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0
 \@emptytoks=\toks23
 \ex@=\dimen117
 ))
-(/usr/local/texlive/2011/texmf-dist/tex/latex/amsmath/amsbsy.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d
 \pmbraise@=\dimen118
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/amsmath/amsopn.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
 \inf@bad=\count97
@@ -574,44 +574,45 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
 LaTeX Info: Redefining \[ on input line 2666.
 LaTeX Info: Redefining \] on input line 2667.
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/makeidx.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/makeidx.sty
 Package: makeidx 2000/03/29 v1.0m Standard LaTeX package
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/framed/framed.sty
-Package: framed 2007/10/04 v 0.95: framed or shaded text with page breaks
+(/usr/local/texlive/2012/texmf-dist/tex/latex/framed/framed.sty
+Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
+\OuterFrameSep=\skip70
 \fb@frw=\dimen126
 \fb@frh=\dimen127
 \FrameRule=\dimen128
 \FrameSep=\dimen129
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/base/ifthen.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/base/ifthen.sty
 Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/graphics/color.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/color.sty
 Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/latexconfig/color.cfg
+(/usr/local/texlive/2012/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: pdftex.def on input line 130.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/pdftex-def/pdftex.def
+(/usr/local/texlive/2012/texmf-dist/tex/latex/pdftex-def/pdftex.def
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+(/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/infwarerr.sty
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 )
-(/usr/local/texlive/2011/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+(/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
 \Gread@gobject=\count109
 ))
-(/usr/local/texlive/2011/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2008/02/07
 
 Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix 
 <2008/02/07> (tvz)
-(/usr/local/texlive/2011/texmf-dist/tex/latex/graphics/keyval.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks28
 )
@@ -622,15 +623,15 @@ Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \FV@StepNumber=\count112
 \FV@OutFile=\write4
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/threeparttable/threeparttable.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/threeparttable/threeparttable.sty
 Package: threeparttable 2003/06/13  v 3.0
 \@tempboxb=\box36
-) (/usr/local/texlive/2011/texmf-dist/tex/latex/mdwtools/footnote.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/mdwtools/footnote.sty
 Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 \fn@notes=\box37
 \fn@width=\dimen130
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/wrapfig/wrapfig.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/wrapfig/wrapfig.sty
 \wrapoverhang=\dimen131
 \WF@size=\dimen132
 \c@WF@wrappedlines=\count113
@@ -638,19 +639,19 @@ Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 \WF@everypar=\toks29
 Package: wrapfig 2003/01/31  v 3.6
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/parskip/parskip.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/parskip/parskip.sty
 Package: parskip 2001/04/09 non-zero parskip adjustments
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/graphics/trig.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/latexconfig/graphics.cfg
+(/usr/local/texlive/2012/texmf-dist/tex/latex/latexconfig/graphics.cfg
 File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
 Package graphics Info: Driver file: pdftex.def on input line 91.
@@ -658,24 +659,24 @@ Package graphics Info: Driver file: pdftex.def on input line 91.
 \Gin@req@height=\dimen133
 \Gin@req@width=\dimen134
 )
-(/usr/local/texlive/2011/texmf-dist/tex/plain/misc/pdfcolor.tex)
-\distancetoright=\skip70
-\py@argswidth=\skip71
-\py@noticelength=\skip72
-\lineblockindentation=\skip73
+(/usr/local/texlive/2012/texmf-dist/tex/plain/misc/pdfcolor.tex)
+\distancetoright=\skip71
+\py@argswidth=\skip72
+\py@noticelength=\skip73
+\lineblockindentation=\skip74
 \image@box=\box39
 \image@width=\dimen135
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/hyperref/hyperref.sty
-Package: hyperref 2012/02/28 v6.82p Hypertext links for LaTeX
+(/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2012/07/29 v6.82v Hypertext links for LaTeX
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
-Package: hobsub-hyperref 2012/04/25 v1.12 Bundle oberdiek, subset hyperref (HO)
+(/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
 
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
-Package: hobsub-generic 2012/04/25 v1.12 Bundle oberdiek, subset generic (HO)
-Package: hobsub 2012/04/25 v1.12 Construct package bundles (HO)
+(/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
+Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
 Package hobsub Info: Skipping package `infwarerr' (already loaded).
 Package hobsub Info: Skipping package `ltxcmds' (already loaded).
 Package: ifluatex 2010/03/01 v1.3 Provides the ifluatex switch (HO)
@@ -706,7 +707,7 @@ Package: uniquecounter 2011/01/30 v1.2 Provide unlimited unique counter (HO)
 )
 Package hobsub Info: Skipping package `hobsub' (already loaded).
 Package: letltxmacro 2010/09/02 v1.4 Let assignment for LaTeX macros (HO)
-Package: hopatch 2011/06/24 v1.1 Wrapper for package hooks (HO)
+Package: hopatch 2012/05/28 v1.2 Wrapper for package hooks (HO)
 Package: xcolor-patch 2011/01/30 xcolor patch
 Package: atveryend 2011/06/30 v1.8 Hooks at the very end of document (HO)
 Package atveryend Info: \enddocument detected (standard20110627).
@@ -714,54 +715,57 @@ Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
 Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
 Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
 )
-(/usr/local/texlive/2011/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+(/usr/local/texlive/2012/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/auxhook.sty
+Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
+)
+(/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/kvoptions.sty
 Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
 \@linkdim=\dimen136
 \Hy@linkcounter=\count114
 \Hy@pagecounter=\count115
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/hyperref/pd1enc.def
-File: pd1enc.def 2012/02/28 v6.82p Hyperref: PDFDocEncoding definition (HO)
+(/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2012/07/29 v6.82v Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 )
 \Hy@SavedSpaceFactor=\count116
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/latexconfig/hyperref.cfg
+(/usr/local/texlive/2012/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
-Package hyperref Info: Option `colorlinks' set `true' on input line 3941.
-Package hyperref Info: Option `breaklinks' set `true' on input line 3941.
-Package hyperref Info: Hyper figures OFF on input line 4062.
-Package hyperref Info: Link nesting OFF on input line 4067.
-Package hyperref Info: Hyper index ON on input line 4070.
-Package hyperref Info: Plain pages OFF on input line 4077.
-Package hyperref Info: Backreferencing OFF on input line 4082.
+Package hyperref Info: Option `colorlinks' set `true' on input line 4064.
+Package hyperref Info: Option `breaklinks' set `true' on input line 4064.
+Package hyperref Info: Hyper figures OFF on input line 4187.
+Package hyperref Info: Link nesting OFF on input line 4192.
+Package hyperref Info: Hyper index ON on input line 4195.
+Package hyperref Info: Plain pages OFF on input line 4202.
+Package hyperref Info: Backreferencing OFF on input line 4207.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
-Package hyperref Info: Bookmarks ON on input line 4300.
+Package hyperref Info: Bookmarks ON on input line 4425.
 \c@Hy@tempcnt=\count117
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/url/url.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip11
 Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
 )
-LaTeX Info: Redefining \url on input line 4653.
+LaTeX Info: Redefining \url on input line 4778.
 \Fld@menulength=\count118
 \Field@Width=\dimen137
 \Fld@charsize=\dimen138
-Package hyperref Info: Hyper figures OFF on input line 5773.
-Package hyperref Info: Link nesting OFF on input line 5778.
-Package hyperref Info: Hyper index ON on input line 5781.
-Package hyperref Info: backreferencing OFF on input line 5788.
-Package hyperref Info: Link coloring ON on input line 5791.
-Package hyperref Info: Link coloring with OCG OFF on input line 5798.
-Package hyperref Info: PDF/A mode OFF on input line 5803.
-LaTeX Info: Redefining \ref on input line 5843.
-LaTeX Info: Redefining \pageref on input line 5847.
+Package hyperref Info: Hyper figures OFF on input line 5968.
+Package hyperref Info: Link nesting OFF on input line 5973.
+Package hyperref Info: Hyper index ON on input line 5976.
+Package hyperref Info: backreferencing OFF on input line 5983.
+Package hyperref Info: Link coloring ON on input line 5986.
+Package hyperref Info: Link coloring with OCG OFF on input line 5993.
+Package hyperref Info: PDF/A mode OFF on input line 5998.
+LaTeX Info: Redefining \ref on input line 6038.
+LaTeX Info: Redefining \pageref on input line 6042.
 \Hy@abspage=\count119
 \c@Item=\count120
 \c@Hfootnote=\count121
@@ -769,24 +773,24 @@ LaTeX Info: Redefining \pageref on input line 5847.
 
 Package hyperref Message: Driver (autodetected): hpdftex.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/hyperref/hpdftex.def
-File: hpdftex.def 2012/02/28 v6.82p Hyperref driver for pdfTeX
+(/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2012/07/29 v6.82v Hyperref driver for pdfTeX
 \Fld@listcount=\count122
 \c@bookmark@seq@number=\count123
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 82.
 )
-\Hy@SectionHShift=\skip74
+\Hy@SectionHShift=\skip75
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/oberdiek/hypcap.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/hypcap.sty
 Package: hypcap 2011/02/16 v1.11 Adjusting the anchors of captions (HO)
 )
-\DUlineblockindent=\skip75
+\DUlineblockindent=\skip76
 )
-(/usr/local/texlive/2011/texmf-dist/tex/latex/multirow/multirow.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/multirow/multirow.sty
 \bigstrutjot=\dimen139
 )
 \@indexfile=\write5
@@ -812,7 +816,7 @@ LaTeX Font Info:    ... okay on input line 110.
 LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 110.
 LaTeX Font Info:    Try loading font information for TS1+cmr on input line 110.
 
- (/usr/local/texlive/2011/texmf-dist/tex/latex/base/ts1cmr.fd
+ (/usr/local/texlive/2012/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    ... okay on input line 110.
@@ -820,10 +824,10 @@ LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 110.
 LaTeX Font Info:    ... okay on input line 110.
 LaTeX Font Info:    Try loading font information for T1+ptm on input line 110.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1ptm.fd
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
-(/usr/local/texlive/2011/texmf-dist/tex/context/base/supp-pdf.mkii
+(/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count124
 \scratchdimen=\dimen140
@@ -836,10 +840,10 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 \MPnumerator=\count128
 \makeMPintoPDFobject=\count129
 \everyMPtoPDFconversion=\toks31
-) (/usr/local/texlive/2011/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+) (/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/oberdiek/grfext.sty
+(/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/grfext.sty
 Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
 )
 Package grfext Info: Graphics extension search list:
@@ -847,17 +851,17 @@ Package grfext Info: Graphics extension search list:
 G,.JBIG2,.JB2,.eps]
 (grfext)             \AppendGraphicsExtensions on input line 452.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+(/usr/local/texlive/2012/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box41
 Package hyperref Info: Link coloring ON on input line 110.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/hyperref/nameref.sty
-Package: nameref 2010/04/30 v2.40 Cross-referencing by name of section
+(/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2012/07/28 v2.41 Cross-referencing by name of section
 
-(/usr/local/texlive/2011/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+(/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count130
@@ -876,7 +880,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 113--113
  []
 
 LaTeX Font Info:    Try loading font information for T1+phv on input line 113.
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1phv.fd
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2001/06/04 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <24.88> not available
@@ -891,7 +895,7 @@ LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <20.74> not available
 (Font)              Font shape `T1/phv/b/n' tried instead on input line 113.
  [1
 
-{/usr/local/texlive/2011/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2
+{/usr/local/texlive/2012/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2
 
 ] (./VIS.toc
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <12> not available
@@ -932,7 +936,7 @@ Chapter 1.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <17.28> not available
 (Font)              Font shape `T1/phv/b/n' tried instead on input line 137.
 LaTeX Font Info:    Try loading font information for T1+pcr on input line 146.
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/t1pcr.fd
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [3] [4
 
@@ -962,7 +966,7 @@ Overfull \hbox (96.67838pt too wide) in paragraph at lines 205--205
 
 LaTeX Font Info:    Try loading font information for TS1+ptm on input line 209.
 
-(/usr/local/texlive/2011/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+(/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [5]
 Overfull \hbox (2.07045pt too wide) in paragraph at lines 247--247
@@ -1072,38 +1076,238 @@ Chapter 5.
 Chapter 6.
 [29
 
-] [30] [31] [32] [33] [34
+] [30] [31] [32] [33]
+Underfull \hbox (badness 10000) in paragraph at lines 2239--2239
+[]\T1/ptm/m/it/12 info\T1/ptm/m/n/12 , \T1/ptm/m/it/12 mag-ni-tude=24.5\T1/ptm/
+m/n/12 , \T1/ptm/m/it/12 ex-p-time=565.0\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ex-po-
+sures=3\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2291--2291
+[]\T1/ptm/m/it/12 info\T1/ptm/m/n/12 , \T1/ptm/m/it/12 mag-ni-tude\T1/ptm/m/n/1
+2 , \T1/ptm/m/it/12 snr=10.0\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ex-po-sures=3\T1/p
+tm/m/n/12 ,
+ []
+
+[34] [35]
+Underfull \hbox (badness 10000) in paragraph at lines 2438--2438
+[]\T1/ptm/m/it/12 radius\T1/ptm/m/n/12 , \T1/ptm/m/it/12 en-ergy\T1/ptm/m/n/12 
+,
+ []
+
+[36]
+Underfull \hbox (badness 10000) in paragraph at lines 2544--2544
+[]\T1/ptm/m/it/12 results\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2544--2544
+\T1/ptm/m/it/12 reqe=3e-05\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2544--2544
+\T1/ptm/m/it/12 reqr2=0.0001\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+[]\T1/ptm/m/it/12 log\T1/ptm/m/n/12 , \T1/ptm/m/it/12 num-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 data=2066\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 floor=995\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 xsize=2048\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 ysize=2066\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 ases=15\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 sur-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 faces=100\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (12.4978pt too wide) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 file='psf1x.fits'\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 psfs=500\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 ps-f-s-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 de-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 bug=False\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (0.80994pt too wide) in paragraph at lines 2569--2569
+\T1/ptm/m/it/12 plots=False\T1/pcr/m/n/12 ) 
+ []
+
+[37]
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+[]\T1/ptm/m/it/12 log\T1/ptm/m/n/12 , \T1/ptm/m/it/12 num-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 data=2066\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 floor=1000\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 xsize=2048\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 ysize=2066\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 ases=15\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 sur-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 faces=100\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (12.4978pt too wide) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 file='psf1x.fits'\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 psfs=500\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 ps-f-s-
+ []
+
+
+Overfull \hbox (18.49821pt too wide) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 calemin=1000.0\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 ps-f-s-cale-
+ []
+
+
+Overfull \hbox (12.49854pt too wide) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 max=100000.0\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 gain=3.5\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 de-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2599--2599
+\T1/ptm/m/it/12 bug=False\T1/ptm/m/n/12 ,
+ []
+
+[38] [39] [40
 
 ]
 Chapter 7.
-[35] [36
+[41] [42
 
 ]
 Chapter 8.
-[37] [38
+[43] [44
 
 ]
 Chapter 9.
-<Magnitudes15.pdf, id=502, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=561, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2135.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2675.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2135.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2675.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [39] [40 <./Magnitudes15.pdf>]
+ [45] [46 <./Magnitudes15.pdf>]
 Chapter 10.
-[41
+[47
 
-] [42
+] [48
 
-] [43
+] [49
 
 
-] (./VIS.ind [44
+] (./VIS.ind [50
 
 
 ]
@@ -1157,48 +1361,13 @@ Underfull \hbox (badness 7151) in paragraph at lines 9--10
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 14--15
-[]\T1/ptm/m/n/12 applyBias() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 14--15
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 15--16
-[]\T1/ptm/m/n/12 applyBleeding() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 15--16
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 16--17
-[]\T1/ptm/m/n/12 applyCosmetics() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 16--17
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 17--18
-[]\T1/ptm/m/n/12 applyCTICorrection() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 17--18
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+Underfull \hbox (badness 10000) in paragraph at lines 10--11
+[]\T1/ptm/m/n/12 addReadoutNoise() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 18--19
-[]\T1/ptm/m/n/12 applyFlatfield() (sim-u-la-
+[]\T1/ptm/m/n/12 applyBias() (sim-u-la-
  []
 
 
@@ -1208,17 +1377,17 @@ Underfull \hbox (badness 7151) in paragraph at lines 18--19
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 19--20
-[]\T1/ptm/m/n/12 applyLinearCorrection() (post-
+[]\T1/ptm/m/n/12 applyBleeding() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 19--20
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+Underfull \hbox (badness 7151) in paragraph at lines 19--20
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 20--21
-[]\T1/ptm/m/n/12 applyNoise() (sim-u-la-
+[]\T1/ptm/m/n/12 applyCosmetics() (sim-u-la-
  []
 
 
@@ -1228,17 +1397,17 @@ Underfull \hbox (badness 7151) in paragraph at lines 20--21
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 21--22
-[]\T1/ptm/m/n/12 applyRadiationDamage() (post-
+[]\T1/ptm/m/n/12 applyCTICorrection() (re-duc-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 21--22
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 22--23
-[]\T1/ptm/m/n/12 applyRadiationDamage() (sim-u-la-
+[]\T1/ptm/m/n/12 applyFlatfield() (sim-u-la-
  []
 
 
@@ -1248,7 +1417,7 @@ Underfull \hbox (badness 7151) in paragraph at lines 22--23
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 23--24
-[]\T1/ptm/m/n/12 applyReadoutNoise() (post-
+[]\T1/ptm/m/n/12 applyLinearCorrection() (post-
  []
 
 
@@ -1258,7 +1427,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 23--24
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 24--25
-[]\T1/ptm/m/n/12 applyReadoutNoise() (sim-u-la-
+[]\T1/ptm/m/n/12 applyNoise() (sim-u-la-
  []
 
 
@@ -1267,305 +1436,330 @@ Underfull \hbox (badness 7151) in paragraph at lines 24--25
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
-[]\T1/ptm/m/n/12 circular2DGaussian() (anal-y-
+Underfull \hbox (badness 10000) in paragraph at lines 25--26
+[]\T1/ptm/m/n/12 applyRadiationDamage() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
-\T1/ptm/m/n/12 sis.shape.shapeMeasurement
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 29--30
-[]\T1/ptm/m/n/12 cleanSample() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 29--30
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 30--31
-[]\T1/ptm/m/n/12 compressAndRemoveFile() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 30--31
+Underfull \hbox (badness 10000) in paragraph at lines 25--26
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 32--33
-[]\T1/ptm/m/n/12 cosmicRayIntercepts() (sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 26--27
+[]\T1/ptm/m/n/12 applyRadiationDamage() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 32--33
+Underfull \hbox (badness 7151) in paragraph at lines 26--27
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 27--28
+[]\T1/ptm/m/n/12 applyReadoutNoise() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 27--28
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 28--29
+[]\T1/ptm/m/n/12 applyReadoutNoise() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 28--29
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 33--34
-[]\T1/ptm/m/n/12 createGalaxylist() (sim-u-la-
+[]\T1/ptm/m/n/12 circular2DGaussian() (anal-y-
  []
 
 
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 33--34
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 34--35
-[]\T1/ptm/m/n/12 createStarlist() (sim-u-la-
- []
-
-
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 34--35
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 35--36
-[]\T1/ptm/m/n/12 cutoutRegion() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 35--36
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
- []
-
-[45
-
-]
-Underfull \hbox (badness 10000) in paragraph at lines 40--41
-[]\T1/ptm/m/n/12 discretisetoADUs() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 40--41
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 41--42
-[]\T1/ptm/m/n/12 doAll() (anal-y-sis.analyse.analyseVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 42--44
-[]\T1/ptm/m/n/12 drawFromCumulativeDistributionFunction()
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 42--44
-\T1/ptm/m/n/12 (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 42--44
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 47--48
-[]\T1/ptm/m/n/12 electrons2ADU() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 47--48
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 51--52
-[]\T1/ptm/m/n/12 find() (anal-y-sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 52--53
-[]\T1/ptm/m/n/12 findSources() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 53--54
-[]\T1/ptm/m/n/12 flatfield() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 53--54
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 57--58
-[]\T1/ptm/m/n/12 generateCatalog() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 57--58
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 58--59
-[]\T1/ptm/m/n/12 generateCTImap() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 58--59
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 59--60
-[]\T1/ptm/m/n/12 generateFakeData (class in sim-u-la-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 60--61
-[]\T1/ptm/m/n/12 generateFinemaps() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 60--61
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 61--62
-[]\T1/ptm/m/n/12 generateOutput() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 61--62
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 62--63
-[]\T1/ptm/m/n/12 getCenterOfMass() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 62--63
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 63--64
-[]\T1/ptm/m/n/12 getContours() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 63--64
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 64--65
-[]\T1/ptm/m/n/12 getFluxes() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 64--65
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 65--66
-[]\T1/ptm/m/n/12 getSizes() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 65--66
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 69--70
-[]\T1/ptm/m/n/12 loadFITS() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 69--70
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 73--74
-[]\T1/ptm/m/n/12 maskCrazyValues() (sim-u-la-
- []
-
-
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 73--74
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 74--75
-[]\T1/ptm/m/n/12 measureEllipticity() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 75--76
-[]\T1/ptm/m/n/12 measureRefinedEllipticity() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 75--76
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
 \T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 79--80
-[]\T1/ptm/m/n/12 objectOnDetector() (sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 34--35
+[]\T1/ptm/m/n/12 cleanSample() (anal-y-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 79--80
+Underfull \hbox (badness 10000) in paragraph at lines 34--35
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 35--36
+[]\T1/ptm/m/n/12 compressAndRemoveFile() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 35--36
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 37--38
+[]\T1/ptm/m/n/12 cosmicRayIntercepts() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 37--38
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 80--81
-[]\T1/ptm/m/n/12 overlayToCCD() (sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 38--39
+[]\T1/ptm/m/n/12 createGalaxylist() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 80--81
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 38--39
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
+ []
+
+[51
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 39--40
+[]\T1/ptm/m/n/12 createStarlist() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 84--85
-[]\T1/ptm/m/n/12 plot() (anal-y-sis.sourceFinder.sourceFinder
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 39--40
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 85--86
-[]\T1/ptm/m/n/12 plotDistributionFunction() (in mod-ule
+Underfull \hbox (badness 10000) in paragraph at lines 40--41
+[]\T1/ptm/m/n/12 cutoutRegion() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 85--86
+Underfull \hbox (badness 10000) in paragraph at lines 40--41
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--46
+[]\T1/ptm/m/n/12 discretisetoADUs() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--46
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+[]\T1/ptm/m/n/12 doAll() (anal-y-sis.analyse.analyseVISdata
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--49
+[]\T1/ptm/m/n/12 drawFromCumulativeDistributionFunction()
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--49
+\T1/ptm/m/n/12 (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--49
 \T1/ptm/m/n/12 sources.createObjectCatalogue),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 86--87
-[]\T1/ptm/m/n/12 plotEllipticityDistribution() (anal-y-
+Underfull \hbox (badness 10000) in paragraph at lines 52--53
+[]\T1/ptm/m/n/12 electrons2ADU() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 52--53
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 53--54
+[]\T1/ptm/m/n/12 encircledEnergy() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--59
+[]\T1/ptm/m/n/12 find() (anal-y-sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--60
+[]\T1/ptm/m/n/12 findSources() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--61
+[]\T1/ptm/m/n/12 flatfield() (re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--61
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 64--65
+[]\T1/ptm/m/n/12 generateCatalog() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 64--65
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 65--66
+[]\T1/ptm/m/n/12 generateCTImap() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 65--66
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 66--67
+[]\T1/ptm/m/n/12 generateFakeData (class in sim-u-la-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 67--68
+[]\T1/ptm/m/n/12 generateFinemaps() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 67--68
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+[]\T1/ptm/m/n/12 generateOutput() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 68--69
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 69--70
+[]\T1/ptm/m/n/12 generatePlots() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
+[]\T1/ptm/m/n/12 getCenterOfMass() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 71--72
+[]\T1/ptm/m/n/12 getContours() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 71--72
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 72--73
+[]\T1/ptm/m/n/12 getFluxes() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 72--73
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 73--74
+[]\T1/ptm/m/n/12 getSizes() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 73--74
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 77--78
+[]\T1/ptm/m/n/12 limitingMagnitude() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 78--79
+[]\T1/ptm/m/n/12 loadFITS() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 78--79
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 82--83
+[]\T1/ptm/m/n/12 maskCrazyValues() (sim-u-la-
+ []
+
+
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 82--83
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 83--84
+[]\T1/ptm/m/n/12 measureChars() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 84--85
+[]\T1/ptm/m/n/12 measureEllipticity() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
+[]\T1/ptm/m/n/12 measureRefinedEllipticity() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
+\T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 89--90
-[]\T1/ptm/m/n/12 PostProcessing (class in post-
+[]\T1/ptm/m/n/12 objectOnDetector() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 89--90
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 90--91
-[]\T1/ptm/m/n/12 processConfigs() (sim-u-la-
+[]\T1/ptm/m/n/12 overlayToCCD() (sim-u-la-
  []
 
 
@@ -1573,188 +1767,250 @@ Underfull \hbox (badness 7151) in paragraph at lines 90--91
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
-[46]
+[52]
 Underfull \hbox (badness 10000) in paragraph at lines 94--95
-[]\T1/ptm/m/n/12 quadrupoles() (anal-y-
+[]\T1/ptm/m/n/12 parseName() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 94--95
-\T1/ptm/m/n/12 sis.shape.shapeMeasurement
+Underfull \hbox (badness 10000) in paragraph at lines 95--96
+[]\T1/ptm/m/n/12 plot() (anal-y-sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 96--97
+[]\T1/ptm/m/n/12 plotDeltaEs() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--98
+[]\T1/ptm/m/n/12 plotDistributionFunction() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--98
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 98--99
-[]\T1/ptm/m/n/12 radiateFullCCD() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 98--99
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+[]\T1/ptm/m/n/12 plotEllipticityDistribution() (anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 99--100
-[]\T1/ptm/m/n/12 readConfigs() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 99--100
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
-[]\T1/ptm/m/n/12 readCosmicRayInformation() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 100--101
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 101--102
-[]\T1/ptm/m/n/12 readData() (post-proc.tileCCD.tileCCD
+[]\T1/ptm/m/n/12 plotEncircledEnergy() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 102--103
-[]\T1/ptm/m/n/12 readObjectlist() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 102--103
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 104--105
-[]\T1/ptm/m/n/12 readSources() (anal-y-
+[]\T1/ptm/m/n/12 plotNumberOfFramesSigma() (in mod-ule
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 105--106
-[]\T1/ptm/m/n/12 reduceVISdata (class in re-duc-
+[]\T1/ptm/m/n/12 PostProcessing (class in post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 106--107
+[]\T1/ptm/m/n/12 processConfigs() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 106--107
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 110--111
-[]\T1/ptm/m/n/12 runAll() (sim-u-la-
+[]\T1/ptm/m/n/12 quadrupoles() (anal-y-
  []
 
 
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 110--111
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 120--121
-[]\T1/ptm/m/n/12 subtractBias() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 120--121
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 125--126
-[]\T1/ptm/m/n/12 tileCCD() (post-proc.tileCCD.tileCCD
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 133--134
-[]\T1/ptm/m/n/12 writeFITS() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 133--134
+Underfull \hbox (badness 10000) in paragraph at lines 110--111
 \T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 134--135
-[]\T1/ptm/m/n/12 writeFITSfile() (post-
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+[]\T1/ptm/m/n/12 radiateFullCCD() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 134--135
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 135--136
-[]\T1/ptm/m/n/12 writeFITSfile() (post-proc.tileCCD.tileCCD
+Underfull \hbox (badness 10000) in paragraph at lines 115--116
+[]\T1/ptm/m/n/12 readConfigs() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 136--137
-[]\T1/ptm/m/n/12 writeFITSfile() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 136--137
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
-[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 137--138
+Underfull \hbox (badness 7151) in paragraph at lines 115--116
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 116--117
+[]\T1/ptm/m/n/12 readCosmicRayInformation() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 116--117
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+[]\T1/ptm/m/n/12 readData() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
+[]\T1/ptm/m/n/12 readData() (post-proc.tileCCD.tileCCD
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 119--120
+[]\T1/ptm/m/n/12 readObjectlist() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 119--120
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
+[]\T1/ptm/m/n/12 readSources() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 122--123
+[]\T1/ptm/m/n/12 reduceVISdata (class in re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 127--128
+[]\T1/ptm/m/n/12 runAll() (sim-u-la-
+ []
+
+
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 127--128
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 138--139
-[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+[]\T1/ptm/m/n/12 subtractBias() (re-duc-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 138--139
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 145--146
+[]\T1/ptm/m/n/12 tileCCD() (post-proc.tileCCD.tileCCD
+ []
+
+[53]
+Underfull \hbox (badness 10000) in paragraph at lines 154--155
+[]\T1/ptm/m/n/12 writeFITS() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--155
+\T1/ptm/m/n/12 sis.shape.shapeMeasurement
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 155--156
+[]\T1/ptm/m/n/12 writeFITSfile() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 155--156
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 156--157
+[]\T1/ptm/m/n/12 writeFITSfile() (post-proc.tileCCD.tileCCD
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
+[]\T1/ptm/m/n/12 writeFITSfile() (re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 158--159
+[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 158--159
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 139--140
+Underfull \hbox (badness 10000) in paragraph at lines 159--160
+[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 159--160
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 160--161
 []\T1/ptm/m/n/12 writeResults() (anal-y-
  []
 
-[47])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2177.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2177.
+[54
+
+])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2720.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2720.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2177.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2177.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2720.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2720.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: B8E5BC52290E2F321B0F3E84CA4712EC;1237.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2177.
+(rerunfilecheck)             Checksum: 2F00B155AD0A384EF5A42E710162264F;1239.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2720.
  ) 
 Here is how much of TeX's memory you used:
- 9141 strings out of 493610
- 130374 string characters out of 3142405
- 226785 words of memory out of 3000000
- 12041 multiletter control sequences out of 15000+200000
+ 9290 strings out of 493488
+ 133156 string characters out of 3141327
+ 224470 words of memory out of 3000000
+ 12148 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
- 832 hyphenation exceptions out of 8191
- 36i,12n,45p,322b,561s stack positions out of 5000i,500n,10000p,200000b,50000s
-{/usr/local/texlive/2011/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
-exlive/2011/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2
-011/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2011/texm
-f-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2011/texmf-dist/
-fonts/type1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/
-type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/u
-rw/times/utmb8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/u
-tmr8a.pfb></usr/local/texlive/2011/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
+ 958 hyphenation exceptions out of 8191
+ 36i,12n,45p,518b,563s stack positions out of 5000i,500n,10000p,200000b,50000s
+{/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
+exlive/2012/texmf-dist/fonts/type1/urw/courier/ucrb8a.pfb></usr/local/texlive/2
+012/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/local/texlive/2012/texm
+f-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2012/texmf-dist/
+fonts/type1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/
+type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/u
+rw/times/utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/u
+tmr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb
 >
-Output written on VIS.pdf (51 pages, 1366033 bytes).
+Output written on VIS.pdf (58 pages, 1381249 bytes).
 PDF statistics:
- 767 PDF objects out of 1000 (max. 8388607)
- 615 compressed objects within 7 object streams
- 218 named destinations out of 1000 (max. 500000)
+ 871 PDF objects out of 1000 (max. 8388607)
+ 711 compressed objects within 8 object streams
+ 255 named destinations out of 1000 (max. 500000)
  184 words of extra memory for PDF output out of 10000 (max. 10000000)
 

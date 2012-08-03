@@ -59,6 +59,9 @@
 <li><a class="reference internal" href="#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
 <li><a class="reference internal" href="#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
 <li><a class="reference internal" href="#object-finding">Object finding</a></li>
+<li><a class="reference internal" href="#exposure-times">Exposure Times</a></li>
+<li><a class="reference internal" href="#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
+<li><a class="reference internal" href="#bias-calibration">Bias Calibration</a></li>
 </ul>
 </li>
 </ul>
@@ -196,6 +199,11 @@ is in SExtractor format and contains the following columns:</p>
 <span class="target" id="module-analysis.shape"></span><div class="section" id="measuring-a-shape-of-an-object">
 <h2>Measuring a shape of an object<a class="headerlink" href="#measuring-a-shape-of-an-object" title="Permalink to this headline">¶</a></h2>
 <p>Simple class to measure quadrupole moments and ellipticity of an object.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Double check that the e1 component is not flipped in sense that Qxx and Qyy would be reversed
+because NumPy arrays are column major.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -329,7 +337,6 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 </tr>
 </tbody>
 </table>
-</div>
 <dl class="class">
 <dt id="analysis.sourceFinder.sourceFinder">
 <em class="property">class </em><tt class="descclassname">analysis.sourceFinder.</tt><tt class="descname">sourceFinder</tt><big>(</big><em>image</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder" title="Permalink to this definition">¶</a></dt>
@@ -447,6 +454,447 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 
 </dd></dl>
 
+</div>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">analysis.sourceFinder.</tt><tt class="descname">sourceFinder</tt><big>(</big><em>image</em>, <em>log</em>, <em>**kwargs</em><big>)</big></dt>
+<dd><p>This class provides methods for source finding.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>image</strong> (<em>numpy.ndarray</em>) &#8211; 2D image array</li>
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger</li>
+<li><strong>kwargs</strong> (<em>dictionary</em>) &#8211; additional keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt>
+<tt class="descname">cleanSample</tt><big>(</big><big>)</big></dt>
+<dd><p>Cleans up small connected components and large structures.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">find</tt><big>(</big><big>)</big></dt>
+<dd><p>Find all pixels above the median pixel after smoothing with a Gaussian filter.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">maybe one should use mode instead of median?</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">generateOutput</tt><big>(</big><big>)</big></dt>
+<dd><p>Outputs the found positions to an ascii and a DS9 reg file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">getCenterOfMass</tt><big>(</big><big>)</big></dt>
+<dd><p>Finds the center-of-mass for all objects using numpy.ndimage.center_of_mass method.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">these positions are zero indexed!</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">xposition, yposition, center-of-masses</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">getContours</tt><big>(</big><big>)</big></dt>
+<dd><p>Derive contours using the diskStructure function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">getFluxes</tt><big>(</big><big>)</big></dt>
+<dd><p>Derive fluxes or counts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">getSizes</tt><big>(</big><big>)</big></dt>
+<dd><p>Derives sizes for each object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">plot</tt><big>(</big><big>)</big></dt>
+<dd><p>Generates a diagnostic plot.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">runAll</tt><big>(</big><big>)</big></dt>
+<dd><p>Performs all steps of source finding at one go.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">source finding results such as positions, sizes, fluxes, etc.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dictionary</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-analysis.ETC"></span><div class="section" id="exposure-times">
+<h2>Exposure Times<a class="headerlink" href="#exposure-times" title="Permalink to this headline">¶</a></h2>
+<p>This file provides a simple functions to calculate exposure times or limiting magnitudes.
+The file also provides a function that returns VIS related information such as pixel
+size, dark current, gain, and zeropoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.ETC.SNR">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
+number of exposures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
+<li><strong>magnitude</strong> (<em>float or ndarray</em>) &#8211; input magnitude of an object(s)</li>
+<li><strong>exptime</strong> (<em>float</em>) &#8211; exposure time [seconds]</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 3]</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">signal-to-noise ratio</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.VISinformation">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">VISinformation</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.ETC.VISinformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary describing VIS.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.calculateAperture">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">calculateAperture</tt><big>(</big><em>info</em><big>)</big><a class="headerlink" href="#analysis.ETC.calculateAperture" title="Permalink to this definition">¶</a></dt>
+<dd><p>pi * (diameter / pixel_size)**2 / 4</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.exposureTime">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the exposure time for a given magnitude.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; information describing the instrument</li>
+<li><strong>magnitude</strong> (<em>float</em>) &#8211; the magnitude of the objct</li>
+<li><strong>snr</strong> (<em>float</em>) &#8211; signal-to-noise ratio required [default=10].</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures that the object is present in</li>
+<li><strong>fudge</strong> (<em>float</em>) &#8211; the fudge parameter to which to use to scale the snr to SExtractor required [default=0.7]</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">exposure time (of an individual exposure) [seconds]</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.limitingMagnitude">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
+level to be reached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
+<li><strong>exp</strong> (<em>float or ndarray</em>) &#8211; exposure time [seconds]</li>
+<li><strong>snr</strong> (<em>float or ndarray</em>) &#8211; the minimum signal-to-noise ratio to be reached.
+.. Note:: This is couple to the fudge parameter: snr_use = snr / fudge</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 3]</li>
+<li><strong>fudge</strong> (<em>float</em>) &#8211; a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
+This is mostly due to the fact that SExtractor may require a higher snr than what calculated
+otherwise.</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">limiting magnitude given the input information</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.PSFproperties"></span><div class="section" id="properties-of-the-point-spread-function">
+<h2>Properties of the Point Spread Function<a class="headerlink" href="#properties-of-the-point-spread-function" title="Permalink to this headline">¶</a></h2>
+<p>This script can be used to plot some PSF properties such as ellipticity and size as a function of the focal plane position.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.PSFproperties.encircledEnergy">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">encircledEnergy</tt><big>(</big><em>file='data/psf12x.fits'</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.encircledEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the encircled energy from a PSF.
+The default input PSF is 12 times over-sampled with 1 micron pixel.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFproperties.generatePlots">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">generatePlots</tt><big>(</big><em>filedata</em>, <em>interactive=False</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.generatePlots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a simple plot showing some results.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFproperties.measureChars">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">measureChars</tt><big>(</big><em>data</em>, <em>info</em>, <em>log</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.measureChars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Measure ellipticity, R2, FWHM etc.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFproperties.parseName">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">parseName</tt><big>(</big><em>file</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.parseName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse information from the input file name.</p>
+<p>Example name:</p>
+<div class="highlight-python"><pre>detector_jitter-1_TOL05_MC_T0074_50arcmin2_grid_Nim=16384x16384_pixsize=1.000um_lbda=800nm_fieldX=-0.306_fieldY=1.042.fits</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFproperties.plotEncircledEnergy">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">plotEncircledEnergy</tt><big>(</big><em>radius</em>, <em>energy</em>, <em>scale=12</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.plotEncircledEnergy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFproperties.readData">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">readData</tt><big>(</big><em>file</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.readData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in the data from a given FITS file.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.biasCalibration"></span><div class="section" id="bias-calibration">
+<h2>Bias Calibration<a class="headerlink" href="#bias-calibration" title="Permalink to this headline">¶</a></h2>
+<p>This simple script can be used to study the number of bias frames required for a given PSF ellipticity knowledge level.</p>
+<p>The following requirements related to the bias calibration has been taken from GDPRD.</p>
+<p>R-GDP-CAL-052:
+The contribution of the residuals of VIS bias subtraction to the <em>error on the determination of each ellipticity
+component</em> of the local PSF shall not exceed 3x10-5 (one sigma).</p>
+<p>R-GDP-CAL-062:
+The contribution of the residuals of VIS bias subtraction to the <em>relative error</em> sigma(R2)/R2 on the determination of
+the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.biasCalibration.addReadoutNoise">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">addReadoutNoise</tt><big>(</big><em>data</em>, <em>readnoise=4.5</em>, <em>number=1</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.addReadoutNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add readout noise to the input data. The readout noise is the median of the number of frames.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; input data to which the readout noise will be added to</li>
+<li><strong>readnoise</strong> (<em>float</em>) &#8211; standard deviation of the read out noise [electrons]</li>
+<li><strong>number</strong> (<em>int</em>) &#8211; number of read outs to median combine before adding to the data [default = 1]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">data + read out noise</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray [same as input data]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.plotDeltaEs">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">plotDeltaEs</tt><big>(</big><em>deltae1</em>, <em>deltae2</em>, <em>deltae</em>, <em>output</em>, <em>title=''</em>, <em>ymax=8</em>, <em>req=3</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.plotDeltaEs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a simple plot showing the errors in the ellipticity components.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.plotEs">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">plotEs</tt><big>(</big><em>deltae1</em>, <em>deltae2</em>, <em>deltae</em>, <em>output</em>, <em>title=''</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.plotEs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a simple plot showing the ellipticity components.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.plotNumberOfFramesDelta">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">plotNumberOfFramesDelta</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.plotNumberOfFramesDelta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results for errors (delta).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> (<em>dict</em>) &#8211; results to be plotted</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.plotNumberOfFramesSigma">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">plotNumberOfFramesSigma</tt><big>(</big><em>results</em>, <em>reqe=3e-05</em>, <em>reqr2=0.0001</em>, <em>shift=0.1</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.plotNumberOfFramesSigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>results</strong> (<em>dict</em>) &#8211; results to be plotted</li>
+<li><strong>req</strong> (<em>float</em>) &#8211; the requirement</li>
+<li><strong>ymax</strong> (<em>int or float</em>) &#8211; maximum value to show on the y-axis</li>
+<li><strong>shift</strong> (<em>float</em>) &#8211; the amount to shift the e2 results on the abscissa (for clarity)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.testBiasCalibrationDelta">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationDelta</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=995</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=1000.0</em>, <em>sigma=0.75</em>, <em>debug=False</em>, <em>plots=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationDelta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
+and a given number of biases median combined and compare to the nominal PSF ellipticity.</p>
+<p>This function can be used to derive the error (delta) in determining ellipticity and size given
+a reference PSF.</p>
+<p>Choices that need to be made and effect the results:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>bias surface that is assumed (amplitude, complexity, etc.)</li>
+<li>whether the order of the polynomial surface to be fitted is known or not</li>
+<li>size of the Gaussian weighting function when calculating the ellipticity components</li>
+</ol>
+</div></blockquote>
+<p>There are also other choices such as the number of PSFs and scaling and the random numbers generated for
+the surface that also affect the results, however, to a lesser degree.</p>
+<p>Generates a set of plots that can be used to inspect the simulation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.testBiasCalibrationSigma">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=1000</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscalemin=1000.0</em>, <em>psfscalemax=100000.0</em>, <em>sigma=0.75</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
+and a given number of biases median combined.</p>
+<p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>
+<p>Choices that need to be made and effect the results:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>bias surface that is assumed (amplitude, complexity, etc.)</li>
+<li>whether the order of the polynomial surface to be fitted is known or not</li>
+<li>size of the Gaussian weighting function when calculating the ellipticity components</li>
+</ol>
+</div></blockquote>
+<p>There are also other choices such as the number of PSFs and scaling and the random numbers generated for
+the surface that also affect the results, however, to a lesser degree.</p>
+<p>Generates a set of plots that can be used to inspect the simulation.</p>
+</dd></dl>
+
+</div>
 </div>
 
 

@@ -7,8 +7,12 @@
   \item addObjects() (simulator.generateGalaxies.generateFakeData method), \hyperpage{17}
   \item addObjects() (simulator.simulator.VISsimulator method), \hyperpage{13}
   \item addPreOverScans() (simulator.simulator.VISsimulator method), \hyperpage{13}
+  \item addReadoutNoise() (in module analysis.biasCalibration), \hyperpage{37}
   \item analyseVISdata (class in analysis.analyse), \hyperpage{29}
   \item analysis.analyse (module), \hyperpage{29}
+  \item analysis.biasCalibration (module), \hyperpage{36}
+  \item analysis.ETC (module), \hyperpage{34}
+  \item analysis.PSFproperties (module), \hyperpage{35}
   \item analysis.shape (module), \hyperpage{30}
   \item analysis.sourceFinder (module), \hyperpage{31}
   \item applyBias() (simulator.simulator.VISsimulator method), \hyperpage{13}
@@ -25,8 +29,9 @@
 
   \indexspace
   \bigletter C
+  \item calculateAperture() (in module analysis.ETC), \hyperpage{34}
   \item circular2DGaussian() (analysis.shape.shapeMeasurement method), \hyperpage{31}
-  \item cleanSample() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
+  \item cleanSample() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
   \item compressAndRemoveFile() (postproc.postprocessing.PostProcessing method), \hyperpage{22}
   \item configure() (simulator.simulator.VISsimulator method), \hyperpage{14}
   \item cosmicRayIntercepts() (simulator.simulator.VISsimulator method), \hyperpage{14}
@@ -45,10 +50,12 @@
   \indexspace
   \bigletter E
   \item electrons2ADU() (simulator.simulator.VISsimulator method), \hyperpage{15}
+  \item encircledEnergy() (in module analysis.PSFproperties), \hyperpage{36}
+  \item exposureTime() (in module analysis.ETC), \hyperpage{34}
 
   \indexspace
   \bigletter F
-  \item find() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
+  \item find() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
   \item findSources() (analysis.analyse.analyseVISdata method), \hyperpage{30}
   \item flatfield() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{28}
 
@@ -58,19 +65,22 @@
   \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{23}
   \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{17}
   \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{15}
-  \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
-  \item getCenterOfMass() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
-  \item getContours() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
-  \item getFluxes() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
-  \item getSizes() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
+  \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
+  \item generatePlots() (in module analysis.PSFproperties), \hyperpage{36}
+  \item getCenterOfMass() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
+  \item getContours() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
+  \item getFluxes() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
+  \item getSizes() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
 
   \indexspace
   \bigletter L
+  \item limitingMagnitude() (in module analysis.ETC), \hyperpage{35}
   \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{23}
 
   \indexspace
   \bigletter M
   \item maskCrazyValues() (simulator.generateGalaxies.generateFakeData method), \hyperpage{18}
+  \item measureChars() (in module analysis.PSFproperties), \hyperpage{36}
   \item measureEllipticity() (analysis.analyse.analyseVISdata method), \hyperpage{30}
   \item measureRefinedEllipticity() (analysis.shape.shapeMeasurement method), \hyperpage{31}
 
@@ -81,9 +91,15 @@
 
   \indexspace
   \bigletter P
-  \item plot() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
+  \item parseName() (in module analysis.PSFproperties), \hyperpage{36}
+  \item plot() (analysis.sourceFinder.sourceFinder method), \hyperpage{32, 33}
+  \item plotDeltaEs() (in module analysis.biasCalibration), \hyperpage{37}
   \item plotDistributionFunction() (in module sources.createObjectCatalogue), \hyperpage{6}
   \item plotEllipticityDistribution() (analysis.analyse.analyseVISdata method), \hyperpage{30}
+  \item plotEncircledEnergy() (in module analysis.PSFproperties), \hyperpage{36}
+  \item plotEs() (in module analysis.biasCalibration), \hyperpage{37}
+  \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{37}
+  \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{37}
   \item postproc.postprocessing (module), \hyperpage{21}
   \item postproc.tileCCD (module), \hyperpage{24}
   \item PostProcessing (class in postproc.postprocessing), \hyperpage{21}
@@ -98,6 +114,7 @@
   \item radiateFullCCD() (postproc.postprocessing.PostProcessing method), \hyperpage{24}
   \item readConfigs() (simulator.simulator.VISsimulator method), \hyperpage{16}
   \item readCosmicRayInformation() (simulator.simulator.VISsimulator method), \hyperpage{16}
+  \item readData() (in module analysis.PSFproperties), \hyperpage{36}
   \item readData() (postproc.tileCCD.tileCCD method), \hyperpage{25}
   \item readObjectlist() (simulator.simulator.VISsimulator method), \hyperpage{16}
   \item readPSFs() (simulator.simulator.VISsimulator method), \hyperpage{17}
@@ -105,7 +122,7 @@
   \item reduceVISdata (class in reduction.reduceVISdata), \hyperpage{27}
   \item reduction.reduceVISdata (module), \hyperpage{27}
   \item run() (postproc.postprocessing.PostProcessing method), \hyperpage{24}
-  \item runAll() (analysis.sourceFinder.sourceFinder method), \hyperpage{32}
+  \item runAll() (analysis.sourceFinder.sourceFinder method), \hyperpage{33, 34}
   \item runAll() (postproc.tileCCD.tileCCD method), \hyperpage{25}
   \item runAll() (simulator.generateGalaxies.generateFakeData method), \hyperpage{18}
 
@@ -115,17 +132,21 @@
   \item simulate() (simulator.simulator.VISsimulator method), \hyperpage{17}
   \item simulator.generateGalaxies (module), \hyperpage{17}
   \item simulator.simulator (module), \hyperpage{9}
-  \item sourceFinder (class in analysis.sourceFinder), \hyperpage{32}
+  \item SNR() (in module analysis.ETC), \hyperpage{34}
+  \item sourceFinder (class in analysis.sourceFinder), \hyperpage{32, 33}
   \item sources.createObjectCatalogue (module), \hyperpage{5}
   \item subtractBias() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{28}
 
   \indexspace
   \bigletter T
+  \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{37}
+  \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{38}
   \item tileCCD (class in postproc.tileCCD), \hyperpage{25}
   \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{25}
 
   \indexspace
   \bigletter V
+  \item VISinformation() (in module analysis.ETC), \hyperpage{34}
   \item VISsimulator (class in simulator.simulator), \hyperpage{13}
 
   \indexspace

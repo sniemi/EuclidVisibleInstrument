@@ -1,8 +1,12 @@
 """
+Properties of the Point Spread Function
+=======================================
+
 This script can be used to plot some PSF properties such as ellipticity and size as a function of the focal plane position.
 
 :requires: PyFITS
 :requires: NumPy
+:requires: SciPy
 :requires: matplotlib
 :requires: VISsim-Python
 
@@ -25,6 +29,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import pyfits as pf
 import numpy as np
 import math, datetime, cPickle, itertools, re, glob
+from scipy import ndimage
+from scipy import interpolate
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
@@ -165,13 +171,9 @@ def generatePlots(filedata, interactive=False):
         plt.close()
 
 
-if __name__ == '__main__':
-    run = False
-    outfile = 'PSFdata.pk'
-
+def FoVanalysis(run=True, outfile='PSFdata.pk'):
     #start the script
     log = lg.setUpLogger('PSFproperties.log')
-
 
     #derive results for each file
     if run:
@@ -203,3 +205,88 @@ if __name__ == '__main__':
     generatePlots(filedata)
 
     log.info('Run finished...\n\n\n')
+
+
+def plotEncircledEnergy(radius, energy, scale=12):
+    """
+
+    """
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.title('VIS Nominal System PSF: Encircled Energy')
+    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+    ax.plot(radius, energy, 'bo-', label='Encircled Energy')
+
+    ax.set_ylabel('Encircled Energy / Total Energy')
+    ax.set_xlabel('Aperture Radius [microns] (12$\mu$m = 1 pixel = 0.1 arcsec)')
+
+    plt.legend(fancybox=True, shadow=True)
+    plt.savefig('EncircledEnergy.pdf')
+    plt.close()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.title('VIS Nominal System PSF: Encircled Energy')
+    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+    #interpolata
+    rd = (12*10*1.3/2.)
+    f = interpolate.interp1d(radius, energy, kind='cubic')
+    val = f(rd)
+    rds = np.linspace(np.min(radius), np.max(radius), 100)
+    vals = f(rds)
+    ax.plot(rds/scale/10., vals, 'r--', label='Cubic Spline Interpolation')
+    txt = 'Energy within r=0.65 arcsec aperture = %f' % val
+    plt.text(0.5, 0.2, txt, ha='left', va='top', fontsize=10, transform=ax.transAxes, alpha=0.8)
+
+    ax.plot(radius/scale/10., energy, 'bo', label='Encircled Energy')
+    ax.axvline(x=0.65, ls=':', c='k')
+
+    ax.set_ylabel('Encircled Energy / Total Energy')
+    ax.set_xlabel('Aperture Radius [arcseconds on the sky]')
+
+    plt.legend(fancybox=True, shadow=True, loc='lower right', numpoints=1)
+    plt.savefig('EncircledEnergy2.pdf')
+    plt.close()
+
+
+def encircledEnergy(file='data/psf12x.fits'):
+    """
+    Calculates the encircled energy from a PSF.
+    The default input PSF is 12 times over-sampled with 1 micron pixel.
+    """
+    #start the script
+    log = lg.setUpLogger('PSFencircledEnergy.log')
+    log.info('Reading data from %s' % file)
+
+    data = readData(file)
+    total = np.sum(data)
+
+    #assume that centre is the same as the peak pixel (zero indexed)
+    y, x = np.indices(data.shape)
+    ycen, xcen = ndimage.measurements.maximum_position(data)
+    log.info('Centre assumed to be (x, y) = (%i, %i)' % (xcen, ycen))
+
+    #change the peak to be 0, 0 and calculate radius
+    x -= xcen
+    y -= ycen
+    radius = np.sqrt(x**2 + y**2)
+
+    #calculate flux in different apertures
+    rads = np.arange(12, 600, 12)
+    energy = []
+    for radlimit in rads:
+        mask = radius < radlimit
+        energy.append(data[np.where(mask)].sum() / total)
+    energy = np.asarray(energy)
+
+    plotEncircledEnergy(rads, energy)
+    log.info('Run finished...\n\n\n')
+
+
+if __name__ == '__main__':
+    #FoVanalysis()
+    encircledEnergy()

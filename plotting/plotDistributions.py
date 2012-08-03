@@ -21,13 +21,16 @@ def plotDist():
     st = UDF[:,0][UDF[:,1] < 1]
     gal = UDF[:,0][UDF[:,1] > 7]
     print '%i stars and %i galaxies in the catalog' % (len(st), len(gal))
+
+    bins = np.arange(5.0, 31.5, 0.7)
+    df = bins[1] - bins[0]
     weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) #how many square degrees one CCD is on sky
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    ax.hist(gal, bins=18, log=True, alpha=0.4, weights=[weight,]*len(gal), label='Catalog: galaxies')
-    ax.hist(st, bins=18, log=True, alpha=0.3, weights=[weight,]*len(st), label='Catalog: stars')
+    ax.hist(gal, bins=bins, log=True, alpha=0.4, weights=np.ones(gal.size)*weight/df, label='Catalog: galaxies')
+    ax.hist(st, bins=bins, log=True, alpha=0.3, weights=np.ones(st.size)*weight/df, label='Catalog: stars')
     ax.semilogy(galaxies[:,0], galaxies[:,1], label='cdf_galaxies.dat')
     #ax.semilogy(gmodel[:,0], gmodel[:,1], ls='--', label='Galaxy model from Excel spreadsheet')
     ax.semilogy(shao[:,0], shao[:,4]*3600, ls=':', label='Shao et al. 2009')
@@ -52,9 +55,13 @@ def plotDist():
 
 def plotSNR(deg=60, kdes=True):
     CCDs = 1000
-    bins = np.arange(0, 2000, 20)
-    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
-    #cumulative distribution of stars
+
+    #bins = np.linspace(0, 1500, 301)
+    bins = np.linspace(0, 1500, 70)
+    df = bins[1] - bins[0]
+    weight = 1. / (2048 * 2 * 2066 * 2 * 0.1 * 0.1 * 7.71604938e-8 * CCDs) / df #how many square degrees on sky
+
+    #cumulative distribution of stars for different galactic latitudes
     if deg == 30:
         sfudge = 0.82
         tmp = 1
@@ -65,8 +72,6 @@ def plotSNR(deg=60, kdes=True):
         #90 deg
         sfudge = 0.74
         tmp = 3
-
-    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8 * CCDs) #how many square degrees on sky
 
     #stars
     d = np.loadtxt('data/stars.dat', usecols=(0, tmp))
@@ -83,12 +88,14 @@ def plotSNR(deg=60, kdes=True):
     starcounts /=  3600. #convert to square arcseconds
     nstars = int(np.max(starcounts) * 110 * sfudge) * CCDs
     magStars = cr.drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
-    SNRsStars = ETC.SNR(ETC.VISinformation(), magnitude=magStars, exposures=1)
+    SNRsStars = ETC.SNR(ETC.VISinformation(), magnitude=magStars, exposures=1, galaxy=False)
 
     #calculate Gaussian KDE with statsmodels package (for speed)
     if kdes:
-        kdeStars = KDE(SNRsStars)
-        kdeStars.fit(clip=(-10, 2100), adjust=6)
+        kn = SNRsStars[SNRsStars < 1600]
+        kdeStars = KDE(kn)
+        kdeStars.fit(adjust=10)
+        nst = kn.size / 10. / 1.34
 
     #galaxies
     #cumulative distribution of galaxies
@@ -104,17 +111,16 @@ def plotSNR(deg=60, kdes=True):
     mag = cr.drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
     SNRsGalaxies = ETC.SNR(ETC.VISinformation(), magnitude=mag, exposures=1)
 
-    #calculate Gaussian KDE, this tmie with scipy to save memory, and evaluate it
+    #calculate Gaussian KDE, this time with scipy to save memory, and evaluate it
     if kdes:
-        gals = []
-        kde = gaussian_kde(SNRsGalaxies)
-        #for x in np.logspace(0.5, 4, num=50):
-        for x in np.linspace(1, 2010, num=200):
-            y = kde.evaluate(x)[0]
-            gals.append([x, y])
-        gals = np.asarray(gals)
+        pos = np.linspace(1, 1610, num=300)
+        kn = SNRsGalaxies[SNRsGalaxies < 1600]
+        kdegal = gaussian_kde(kn)
+        gals = kdegal(pos)
+        ngl = kn.size / 10. / 1.34
 
     #make a plot
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.title('Euclid Visible Instrument')
@@ -124,12 +130,12 @@ def plotSNR(deg=60, kdes=True):
                     label='Galaxies', color='blue')
 
     if kdes:
-        ax.plot(kdeStars.support, kdeStars.density*nstars*1.5, 'r-', label='Gaussian KDE (stars)')
-        ax.plot(gals[:, 0], gals[:, 1]*nums*1.5, 'b-', label='Gaussian KDE (galaxies)')
+        ax.plot(kdeStars.support, kdeStars.density*nst, 'r-', label='Gaussian KDE (stars)')
+        ax.plot(pos, gals*ngl, 'b-', label='Gaussian KDE (galaxies)')
 
     ax.set_ylim(1,1e6)
-    ax.set_xlim(0, 2000)
-    ax.set_xlabel('Signal-to-Noise Ratio [assuming 565s exposure]')
+    ax.set_xlim(0, 1500)
+    ax.set_xlabel('Signal-to-Noise Ratio [assuming a single 565s exposure]')
     ax.set_ylabel('Number of Objects [deg$^{-2}$]')
 
     plt.text(0.8, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
@@ -142,14 +148,14 @@ def plotSNR(deg=60, kdes=True):
     fh.write('#SNR number_of_stars\n')
     fh.write('#bin_centre per_square_degree\n')
     for a, b in zip(hist1[0], hist1[1]):
-        fh.write('%i %f\n' %(b+10, a))
+        fh.write('%i %f\n' %(b+df/2., a))
     fh.close()
     fh = open('SNRsGALAXIES.txt', 'w')
     fh.write('#These values are for galaxies (%s)\n' % txt)
     fh.write('#SNR number_of_galaxies\n')
     fh.write('#bin_centre per_square_degree\n')
     for a, b in zip(hist2[0], hist2[1]):
-        fh.write('%i %f\n' %(b+10, a))
+        fh.write('%i %f\n' %(b+df/2., a))
     fh.close()
 
 

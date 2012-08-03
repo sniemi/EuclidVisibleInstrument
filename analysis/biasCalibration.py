@@ -45,7 +45,7 @@ from support import files as fileIO
 
 
 def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                        file='psf1x.fits', psfs=500, psfscale=2.e2, sigma=0.75, debug=False, plots=False):
+                        file='psf1x.fits', psfs=500, psfscale=1.e3, sigma=0.75, debug=False, plots=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of biases median combined and compare to the nominal PSF ellipticity.
@@ -241,7 +241,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
 
 def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                             file='psf1x.fits', psfs=500, psfscalemin=2.e2, psfscalemax=1.e3, sigma=0.75, gain=3.5,
+                             file='psf1x.fits', psfs=500, psfscalemin=1.e3, psfscalemax=1.e5, sigma=0.75, gain=3.5,
                              debug=False, plots=True):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
@@ -749,10 +749,10 @@ if __name__ == '__main__':
 
     if run:
         print '\nDelta run:'
-        resultsDelta = testBiasCalibrationDelta(log, biases=6, psfs=500, surfaces=50, plots=False, file='psf1xsamees.fits')
+        resultsDelta = testBiasCalibrationDelta(log, biases=10, psfs=500, surfaces=100, plots=False, file='psf1xsamees.fits')
         fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
         print '\nSigma run:'
-        resultsSigma = testBiasCalibrationSigma(log, biases=6, psfs=500, surfaces=50, plots=False, file='psf1xhighe.fits')
+        resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
     else:
         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))

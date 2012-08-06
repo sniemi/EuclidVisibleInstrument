@@ -24,14 +24,14 @@ def plotDist():
 
     bins = np.arange(5.0, 31.5, 0.7)
     df = bins[1] - bins[0]
-    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) #how many square degrees one CCD is on sky
+    weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) / df #how many square degrees one CCD is on sky
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
 
-    ax.hist(gal, bins=bins, log=True, alpha=0.4, weights=np.ones(gal.size)*weight/df, label='Catalog: galaxies')
-    ax.hist(st, bins=bins, log=True, alpha=0.3, weights=np.ones(st.size)*weight/df, label='Catalog: stars')
-    ax.semilogy(galaxies[:,0], galaxies[:,1], label='cdf_galaxies.dat')
+    ax.hist(gal, bins=bins, log=True, alpha=0.4, weights=np.ones(gal.size)*weight, label='Catalog: galaxies')
+    ax.hist(st, bins=bins, log=True, alpha=0.3, weights=np.ones(st.size)*weight, label='Catalog: stars')
+    ax.semilogy(galaxies[:,0], galaxies[:,1], label=r'cdfgalaxies.dat')
     #ax.semilogy(gmodel[:,0], gmodel[:,1], ls='--', label='Galaxy model from Excel spreadsheet')
     ax.semilogy(shao[:,0], shao[:,4]*3600, ls=':', label='Shao et al. 2009')
     ax.semilogy(cdfstars[:,0], cdfstars[:,1], label='cdf_stars.dat')
@@ -40,8 +40,8 @@ def plotDist():
     ax.semilogy(stars[:,0], stars[:,3], label='Star Dist (90deg)')
     #ax.semilogy(besancon[:,0], besancon[:,1], ls='--', label='Besancon')
     ax.semilogy(metcalfe[:,0], metcalfe[:,4], ls = '-.', label='Metcalfe')
-    ax.set_xlabel('AB')
-    ax.set_ylabel('N [sq deg]')
+    ax.set_xlabel(r'$M_{AB}$')
+    ax.set_ylabel(r'N [deg$^{-2}$]')
     ax.set_xlim(3, 30)
     ax.set_ylim(1e-2, 1e7)
 
@@ -170,10 +170,14 @@ def plotSNRfromCatalog():
     ax = fig.add_subplot(111)
     ax.hist(SNRs, bins=18, alpha=0.5, log=True, weights=[weight,]*len(st))
     ax.set_xlabel('SNR [assuming 3*565 seconds]')
-    ax.set_ylabel('N [sq deg]')
+    ax.set_ylabel(r'N [deg${-2}$]')
     plt.savefig('SNRs.pdf')
 
 
 if __name__ == '__main__':
-    #plotDist()
-    plotSNR()
+    #plot from a generated catalog assumed to be named "catalog0.dat"
+    plotDist()
+    plotSNRfromCatalog()
+
+    #generates a new catalog on fly and plots SNRs
+    #plotSNR()

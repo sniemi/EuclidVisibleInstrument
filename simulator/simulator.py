@@ -115,7 +115,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.0
+:version: 1.05dev
 
 Version and change logs::
 
@@ -131,6 +131,9 @@ Version and change logs::
          be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
     1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
          to the header.
+    1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
+          Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
+          of cosmic ray tracks.
 
 
 Future Work
@@ -227,6 +230,7 @@ class VISsimulator():
                                 exptime=565.0,
                                 ra=123.0,
                                 dec=45.0,
+                                flatflux='data/VIScalibrationUnitflux.fits',
                                 cosmicraylengths='data/cdf_cr_length.dat',
                                 cosmicraydistance='data/cdf_cr_total.dat',
                                 flatfieldfile='data/VISFlatField2percent.fits',
@@ -324,10 +328,17 @@ class VISsimulator():
         self.bleeding = self.config.getboolean(self.section, 'bleeding')
         self.overscans = self.config.getboolean(self.section, 'overscans')
 
+        #
+        try:
+            self.lampFlux = self.config.getboolean(self.section, 'lampFlux')
+        except:
+            self.lampFlux = False
+
         self.information['variablePSF'] = False
 
         self.booleans = dict(flatfieldM=self.flatfieldM,
                              flatfieldA=self.flatfieldA,
+                             lampFlux=self.lampFlux,
                              chargeInjectionx=self.chargeInjectionx,
                              chargeInjectiony=self.chargeInjectiony,
                              cosmicRays=self.cosmicRays,
@@ -1104,7 +1115,7 @@ class VISsimulator():
 
                 stype = obj[3]
 
-                if self.objectOnDetector(obj):
+                if intscales[j] > 1. and self.objectOnDetector(obj):
                     visible += 1
                     if stype == 0:
                         #point source, apply PSF
@@ -1188,6 +1199,15 @@ class VISsimulator():
         print '%i objects were place on the detector' % visible
 
 
+    def addLampFlux(self):
+        """
+        Include flux from the calibration source.
+        """
+        calunit = pf.getdata(self.information['flatflux'])
+        self.image +=  calunit
+        self.log.info('Flux from the calibration unit included (%s)' % self.information['flatflux'])
+
+
     def applyFlatfield(self):
         """
         Applies multiplicative and/or additive flat field.
@@ -1233,6 +1253,8 @@ class VISsimulator():
 
         #estimate the number of cosmics
         cr_n = self.information['xsize'] * self.information['ysize'] * 0.014 / 43.263316
+        #scale with exposure time, the above numbers are for the nominal 565s exposure
+        cr_n *= (self.information['exptime'] / 565.0)
 
         #assume a power-law intensity distribution for tracks
         fit = dict(cr_lo=1.0e3, cr_hi=1.0e5, cr_q=2.0e0)
@@ -1299,14 +1321,11 @@ class VISsimulator():
         #add dark and background
         noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
         self.image += noise
+        self.log.info('Added dark noise and cosmic background = %f' % noise)
+
         if self.cosmicRays:
             self.imagenoCR += noise
 
-        self.log.info('Added dark noise and cosmic background = %f' % noise)
-
-        #for a in xrange(self.information['xsize']):
-        #    for b in xrange(self.information['ysize']):
-        #        self.image[b, a] = self._slowPoissonNoise(self.image[b, a])
         self.image[self.image < 0.0] = 0.0
         self.image = np.random.poisson(self.image)
         self.image[self.image < 0.0] = 0.0
@@ -1494,6 +1513,9 @@ class VISsimulator():
             self.imagenoCR[self.imagenoCR > max] = max
             self.writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
 
+        #avoid negative numbers in case bias level was not added
+        self.image[self.image < 0.0] = 0
+
         self.image = self.image.astype(np.int)
         self.image[self.image > max] = max
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(self.image),
@@ -1586,6 +1608,9 @@ class VISsimulator():
         if self.addsources:
             self.addObjects()
 
+        if self.lampFlux:
+            self.addLampFlux()
+
         if self.flatfieldA or self.flatfieldM:
             self.applyFlatfield()
 
@@ -1614,7 +1639,12 @@ class VISsimulator():
             self.applyReadoutNoise()
 
         self.electrons2ADU()
-        self.applyBias()
+
+        if self.information['bias'] <= 0.0:
+            self.log.info('Bias level less or equal to zero, will not add bias!')
+        else:
+            self.applyBias()
+
         self.discretise()
         self.writeOutputs()
 

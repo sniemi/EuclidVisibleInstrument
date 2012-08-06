@@ -56,8 +56,8 @@ def plotDist():
 def plotSNR(deg=60, kdes=True):
     CCDs = 1000
 
-    #bins = np.linspace(0, 1500, 301)
-    bins = np.linspace(0, 1500, 70)
+    bins = np.linspace(0, 1500, 301)
+    #bins = np.linspace(0, 1500, 70)
     df = bins[1] - bins[0]
     weight = 1. / (2048 * 2 * 2066 * 2 * 0.1 * 0.1 * 7.71604938e-8 * CCDs) / df #how many square degrees on sky
 

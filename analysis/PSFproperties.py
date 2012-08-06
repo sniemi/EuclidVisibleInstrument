@@ -287,6 +287,45 @@ def encircledEnergy(file='data/psf12x.fits'):
     log.info('Run finished...\n\n\n')
 
 
+def peakFraction(file='data/psf12x.fits', radius=0.65, oversample=12):
+    """
+    Calculates the fraction of energy in the peak pixel for a given PSF compared
+    to an aperture of a given radius.
+    """
+    #start the script
+    log = lg.setUpLogger('PSFpeakFraction.log')
+    log.info('Reading data from %s' % file)
+
+    #read data
+    data = readData(file)
+
+    #assume that centre is the same as the peak pixel (zero indexed)
+    y, x = np.indices(data.shape)
+    ycen, xcen = ndimage.measurements.maximum_position(data)
+    log.info('Centre assumed to be (x, y) = (%i, %i)' % (xcen, ycen))
+
+    #change the peak to be 0, 0 and calculate radius
+    x -= xcen
+    y -= ycen
+    rad = np.sqrt(x**2 + y**2)
+
+    #calculate flux in the apertures
+    mask = rad < (radius * oversample  * 10)
+    energy = data[np.where(mask)].sum()
+
+    #calculat the flux in the peak pixel
+    if oversample > 1:
+        shift = oversample / 2
+        peak = data[ycen-shift:ycen+shift+1, xcen-shift:xcen+shift+1].sum()
+    else:
+        peak = data[ycen, xcen]
+
+    print peak / energy
+
+    log.info('Run finished...\n\n\n')
+
+
 if __name__ == '__main__':
     #FoVanalysis()
-    encircledEnergy()
+    #encircledEnergy()
+    peakFraction()

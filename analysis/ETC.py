@@ -7,12 +7,25 @@ The file also provides a function that returns VIS related information such as p
 size, dark current, gain, and zeropoint.
 
 :requires: NumPy
+:requires: SciPy
+:requires: matplotlib
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 """
+import matplotlib
+matplotlib.rc('text', usetex=True)
+matplotlib.rcParams['font.size'] = 17
+matplotlib.rc('xtick', labelsize=14)
+matplotlib.rc('axes', linewidth=1.1)
+matplotlib.rcParams['legend.fontsize'] = 11
+matplotlib.rcParams['legend.handlelength'] = 3
+matplotlib.rcParams['xtick.major.size'] = 5
+matplotlib.rcParams['ytick.major.size'] = 5
+import matplotlib.pyplot as plt
 import numpy as np
-import math
+from scipy import interpolate
+import math, datetime
 
 
 def VISinformation():
@@ -20,7 +33,7 @@ def VISinformation():
     Returns a dictionary describing VIS.
     """
     out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
-               diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243,
+               diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
                zeropoint=25.58, gain=3.5)
 
     apsize = calculateAperture(out)
@@ -60,11 +73,12 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
     """
     snr /= fudge
 
-    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
     if galaxy:
         flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['galaxy_fraction']
     else:
         flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction']
+
+    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
 
@@ -111,6 +125,7 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
 
     tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * info['readnoise']**2 * info['aperture_size'])
     root = np.sqrt(snr**2 + tmp)
+
     if galaxy:
         lg = 2.5*np.log10(((0.5*(snr**2 + snr*root))/totalexp)/info['galaxy_fraction'])
     else:
@@ -141,32 +156,94 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True):
     :return: signal-to-noise ratio
     :rtype: float or ndarray
     """
-    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
     if galaxy:
         flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['galaxy_fraction']
     else:
         flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction']
+
+    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
+    bgr = (sky + instrument + info['dark']) * info['aperture_size'] * exptime
 
     nom = flux_in_aperture * exptime
-    denom = np.sqrt(nom + (sky + instrument + info['dark']) * exptime * info['aperture_size'] +
-                    info['readnoise']**2 * info['aperture_size'])
+    denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
 
     return nom / denom * np.sqrt(exposures)
 
 
+def SNRproptoPeak(info, exptime=565.0, exposures=1):
+    """
+    Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
+
+    :param info: instrumental information such as zeropoint and background
+    :type info: dict
+
+    :return: signal-to-noise ratio
+    :rtype: float or ndarray
+    """
+    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
+    zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
+    instrument = 0.2 * zodiacal  #20% of zodiacal background
+    bgr = (sky + instrument + info['dark']) * info['aperture_size'] * exptime
+
+    snr = []
+    peak = []
+    for magnitude in np.arange(10, 27, 1)[::-1]:
+        nom = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction'] * exptime
+        peak_pixel = nom * info['peak_fraction']
+
+        denom = np.sqrt(nom + bgr + (info['readnoise']**2 * info['aperture_size']))
+
+        result = nom / denom * np.sqrt(exposures)
+        snr.append(result)
+        peak.append(peak_pixel)
+
+    peak = np.asarray(peak)
+    snr = np.asanyarray(snr)
+
+    f = interpolate.interp1d(snr, peak, kind='cubic')
+    sn = np.asarray([5, 10, 50, 100, 200, 500, 1000])
+    vals = f(sn)
+
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.title('VIS Nominal System PSF: Peak Pixel')
+    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+    ax.loglog(peak, snr, 'bo-', label=r'SNR $\propto$ counts')
+
+    ax.axvline(x=220000, c='r', ls='--', label=r'Saturation $> 220000 e^{-}$')
+    ax.fill_between(np.linspace(220000, np.max(peak), 3), 1e5, 1.0, facecolor='red', alpha=0.08, label=r'Saturation $> 220000 e^{-}$')
+
+    i = 0
+    for val, s in zip(vals, sn):
+        plt.text(0.05, 0.9-i, r'snr = %i, peak = %.1f $e^{-}$' % (s, val), fontsize=10, transform=ax.transAxes)
+        i += 0.03
+
+    ax.set_ylabel('Signal-to-Noise Ratio [nominal 565s]')
+    ax.set_xlabel(r'Counts in the Peak Pixel $[e^{-}]$')
+
+    ax.set_xlim(xmax=np.max(peak))
+
+    plt.legend(shadow=True, fancybox=True, loc='lower right')
+    plt.savefig('Peak.pdf')
+    plt.close()
+
+
 if __name__ == '__main__':
-    magnitude = 24.5
+    magnitude = 18.0
     exptime = 565.0
 
     info = VISinformation()
 
     exp = exposureTime(info, magnitude)
     limit = limitingMagnitude(info, exp=exptime)
-    snr = SNR(info, magnitude=magnitude, exptime=exp)
-
+    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False)
 
     print 'Exposure time required to reach SNR=10 (or 14.29) for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
-    print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exp)
+    print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exptime)
     print 'Limiting magnitude for %.2f second exposure is %.2f' % (exptime, limit)
+
+    #SNRproptoPeak(info)

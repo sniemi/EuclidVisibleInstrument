@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 03, 2012}
+\date{August 08, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -453,7 +453,7 @@ and then analysing the results with e.g. RunSnakeRun.
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.0
+1.05dev
 
 \end{description}\end{quote}
 
@@ -472,6 +472,9 @@ Version and change logs:
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
 1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
      to the header.
+1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
+      Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
+      of cosmic ray tracks.
 \end{Verbatim}
 
 
@@ -574,6 +577,14 @@ Add either horizontal or vertical charge injection line to the image.
 Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
 
 Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
+
+\end{fulllineitems}
+
+\index{addLampFlux() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addLampFlux}\pysiglinewithargsret{\bfcode{addLampFlux}}{}{}
+Include flux from the calibration source.
 
 \end{fulllineitems}
 
@@ -2226,6 +2237,12 @@ size, dark current, gain, and zeropoint.
 \item[{requires}] \leavevmode
 NumPy
 
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
 \item[{author}] \leavevmode
 Sami-Matias Niemi
 
@@ -2258,6 +2275,25 @@ number of exposures.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
 
 \end{itemize}
+
+\item[{Returns}] \leavevmode
+signal-to-noise ratio
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{SNRproptoPeak() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
+Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
 
 \item[{Returns}] \leavevmode
 signal-to-noise ratio
@@ -2432,6 +2468,15 @@ detector\_jitter-1\_TOL05\_MC\_T0074\_50arcmin2\_grid\_Nim=16384x16384\_pixsize=
 
 \end{fulllineitems}
 
+\index{peakFraction() (in module analysis.PSFproperties)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFproperties.peakFraction}\pysiglinewithargsret{\code{analysis.PSFproperties.}\bfcode{peakFraction}}{\emph{file='data/psf12x.fits'}, \emph{radius=0.65}, \emph{oversample=12}}{}
+Calculates the fraction of energy in the peak pixel for a given PSF compared
+to an aperture of a given radius.
+
+\end{fulllineitems}
+
 \index{plotEncircledEnergy() (in module analysis.PSFproperties)}
 
 \begin{fulllineitems}
@@ -2450,7 +2495,7 @@ Reads in the data from a given FITS file.
 
 \subsection{Bias Calibration}
 \label{analysis:bias-calibration}
-This simple script can be used to study the number of bias frames required for a given PSF ellipticity knowledge level.
+This simple script can be used to study the number of bias frames required to meet the VIS calibration requirements.
 
 The following requirements related to the bias calibration has been taken from GDPRD.
 
@@ -2596,7 +2641,7 @@ Generates a set of plots that can be used to inspect the simulation.
 \index{testBiasCalibrationSigma() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=1000.0}, \emph{psfscalemax=100000.0}, \emph{sigma=0.75}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
+\phantomsection\label{analysis:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=200.0}, \emph{psfscalemax=100000.0}, \emph{sigma=0.75}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.
 

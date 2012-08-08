@@ -2,7 +2,7 @@
 Bias Calibration
 ================
 
-This simple script can be used to study the number of bias frames required for a given PSF ellipticity knowledge level.
+This simple script can be used to study the number of bias frames required to meet the VIS calibration requirements.
 
 The following requirements related to the bias calibration has been taken from GDPRD.
 
@@ -241,7 +241,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
 
 def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                             file='psf1x.fits', psfs=500, psfscalemin=1.e3, psfscalemax=1.e5, sigma=0.75, gain=3.5,
+                             file='psf1x.fits', psfs=500, psfscalemin=2.e2, psfscalemax=1.e5, sigma=0.75, gain=3.5,
                              debug=False, plots=True):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions

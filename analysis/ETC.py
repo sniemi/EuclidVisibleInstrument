@@ -233,7 +233,7 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
 
 
 if __name__ == '__main__':
-    magnitude = 18.0
+    magnitude = 17.6
     exptime = 565.0
 
     info = VISinformation()
@@ -244,6 +244,6 @@ if __name__ == '__main__':
 
     print 'Exposure time required to reach SNR=10 (or 14.29) for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
     print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exptime)
-    print 'Limiting magnitude for %.2f second exposure is %.2f' % (exptime, limit)
+    print 'Limiting magnitude of a galaxy for %.2f second exposure is %.2f' % (exptime, limit)
 
     #SNRproptoPeak(info)

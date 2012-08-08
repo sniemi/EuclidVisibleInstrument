@@ -176,7 +176,7 @@ from CTI import CTI
 from support import logger as lg
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.0
+__version__ = 1.05
 
 
 class VISsimulator():

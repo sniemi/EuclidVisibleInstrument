@@ -16,6 +16,39 @@ def cPickleDumpDictionary(dictionary, output):
     out.close()
 
 
+def readFITSDataExcludeScanRegions(files, ext=1):
+    """
+    Reads in data from all the input files.
+
+    Subtracts the pre- and overscan regions if these were simulated. Takes into account
+    which quadrant is being processed so that the extra regions are subtracted correctly.
+    """
+    data = []
+    for i, file in enumerate(files):
+        fh = pf.open(file, memmap=True)
+        hdu = fh[ext].header
+
+        try:
+            overscan = hdu['OVERSCA']
+        except:
+            overscan = 'False'
+
+        if 'True' in overscan:
+            prescanx = hdu['PRESCANX']
+            overscanx = hdu['OVRSCANX']
+            quadrant = hdu['QUADRANT']
+
+            if quadrant in (0, 2):
+                data.append(fh[ext].data[:, prescanx: -overscanx])
+            else:
+                data.append(fh[ext].data[:, overscanx: -prescanx])
+        else:
+            data.append(fh[ext].data)
+        fh.close()
+
+    return data
+
+
 def writeFITS(data, output):
     """
     Write out a FITS file using PyFITS.

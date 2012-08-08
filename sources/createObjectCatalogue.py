@@ -67,7 +67,7 @@ def generateCatalog(**kwargs):
     :param deg: galactic latitude, either 30, 60, 90
     """
     settings = dict(ncatalogs=1, outputprefix='catalog', besancon=True,
-                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=110.0,
+                    nx=4096, ny=4132, sqdeg=1.0, fov=1.0, fudge=40.0,
                     galaxies='data/cdf_galaxies.dat',
                     types=np.asarray([8, 9, 10, 11, 12, 13, 14, 15]),
                     deg=30)
@@ -101,15 +101,15 @@ def generateCatalog(**kwargs):
         if settings['deg'] == 30:
             print 'Selecting stars for 30deg'
             tmp = 1
-            sfudge = 0.82
+            sfudge = 0.79
         elif settings['deg'] == 60:
             print 'Selecting stars for 60deg'
             tmp = 2
-            sfudge = 0.78
+            sfudge = 0.79
         else:
             print 'Selecting stars for 90deg'
             tmp = 3
-            sfudge = 0.74
+            sfudge = 0.78
 
         #read in data
         d = np.loadtxt('data/stars.dat', usecols=(0, tmp))
@@ -162,9 +162,9 @@ def generateCatalog(**kwargs):
 
 
 if __name__ == '__main__':
-    #settings = dict(besancon=False, deg=30)
-    #generateCatalog(**settings)
+    settings = dict(besancon=False, deg=30)
+    generateCatalog(**settings)
 
     #create 100 catalogs at deg=60
-    settings = dict(besancon=False, deg=60, ncatalogs=100)
-    generateCatalog(**settings)
+    #settings = dict(besancon=False, deg=60, ncatalogs=100)
+    #generateCatalog(**settings)

@@ -246,7 +246,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.0</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.05dev</td>
 </tr>
 </tbody>
 </table>
@@ -262,7 +262,10 @@ as follows:</p>
 0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
 1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
-     to the header.</pre>
+     to the header.
+1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
+      Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
+      of cosmic ray tracks.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -333,6 +336,12 @@ as follows:</p>
 <tt class="descname">addCosmicRays</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addCosmicRays" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.</p>
 <p>Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.addLampFlux">
+<tt class="descname">addLampFlux</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addLampFlux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include flux from the calibration source.</p>
 </dd></dl>
 
 <dl class="method">

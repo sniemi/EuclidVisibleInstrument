@@ -11,7 +11,7 @@
 \contentsline {subsubsection}{Benchmarking}{11}{subsubsection*.9}
 \contentsline {subsubsection}{Change Log}{11}{subsubsection*.10}
 \contentsline {subsubsection}{Future Work}{12}{subsubsection*.11}
-\contentsline {subsubsection}{Contact Information}{12}{subsubsection*.12}
+\contentsline {subsubsection}{Contact Information}{13}{subsubsection*.12}
 \contentsline {subsection}{\numberline {3.1.2}Generating Mock Objects with IRAF}{17}{subsection.3.1.2}
 \contentsline {chapter}{\numberline {4}Instrument Characteristics}{21}{chapter.4}
 \contentsline {section}{\numberline {4.1}Postprocessing tools}{21}{section.4.1}
@@ -26,8 +26,8 @@
 \contentsline {subsection}{\numberline {6.1.2}Measuring a shape of an object}{30}{subsection.6.1.2}
 \contentsline {subsection}{\numberline {6.1.3}Object finding}{31}{subsection.6.1.3}
 \contentsline {subsection}{\numberline {6.1.4}Exposure Times}{34}{subsection.6.1.4}
-\contentsline {subsection}{\numberline {6.1.5}Properties of the Point Spread Function}{35}{subsection.6.1.5}
-\contentsline {subsection}{\numberline {6.1.6}Bias Calibration}{36}{subsection.6.1.6}
+\contentsline {subsection}{\numberline {6.1.5}Properties of the Point Spread Function}{36}{subsection.6.1.5}
+\contentsline {subsection}{\numberline {6.1.6}Bias Calibration}{37}{subsection.6.1.6}
 \contentsline {chapter}{\numberline {7}Charge Transfer Inefficiency}{41}{chapter.7}
 \contentsline {section}{\numberline {7.1}Fortran code for CTI}{41}{section.7.1}
 \contentsline {chapter}{\numberline {8}Supporting methods and files}{43}{chapter.8}
@@ -35,5 +35,5 @@
 \contentsline {section}{\numberline {8.2}Code}{43}{section.8.2}
 \contentsline {chapter}{\numberline {9}Photometric Accuracy}{45}{chapter.9}
 \contentsline {chapter}{\numberline {10}Indices and tables}{47}{chapter.10}
-\contentsline {chapter}{Python Module Index}{49}{section*.115}
-\contentsline {chapter}{Index}{51}{section*.116}
+\contentsline {chapter}{Python Module Index}{49}{section*.118}
+\contentsline {chapter}{Index}{51}{section*.119}

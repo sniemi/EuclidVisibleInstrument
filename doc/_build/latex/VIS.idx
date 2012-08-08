@@ -6,18 +6,19 @@
 \indexentry{VISsimulator (class in simulator.simulator)|hyperpage}{13}
 \indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{13}
+\indexentry{addLampFlux() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{13}
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{13}
-\indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{13}
+\indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{applyNoise() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{14}
 \indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{14}
-\indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{14}
+\indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{15}
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{15}
 \indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{15}
 \indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{15}
@@ -31,8 +32,8 @@
 \indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{17}
 \indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{17}
 \indexentry{simulator.generateGalaxies (module)|hyperpage}{17}
-\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{17}
-\indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{17}
+\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{18}
+\indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{18}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{18}
 \indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{18}
 \indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{18}
@@ -99,15 +100,17 @@
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{34}
 \indexentry{analysis.ETC (module)|hyperpage}{34}
 \indexentry{SNR() (in module analysis.ETC)|hyperpage}{34}
-\indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{34}
-\indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{34}
-\indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{34}
+\indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{35}
+\indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{35}
+\indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{35}
 \indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{35}
-\indexentry{analysis.PSFproperties (module)|hyperpage}{35}
+\indexentry{analysis.PSFproperties (module)|hyperpage}{36}
 \indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{36}
+\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{36}
 \indexentry{analysis.biasCalibration (module)|hyperpage}{36}
@@ -116,5 +119,5 @@
 \indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{37}
 \indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{37}
 \indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{37}
+\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{38}
 \indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{38}

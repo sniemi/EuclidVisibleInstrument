@@ -583,6 +583,10 @@ size, dark current, gain, and zeropoint.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
 <tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
@@ -613,6 +617,24 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.SNRproptoPeak">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">signal-to-noise ratio</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray</td>
 </tr>
 </tbody>
 </table>
@@ -745,6 +767,13 @@ The default input PSF is 12 times over-sampled with 1 micron pixel.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="analysis.PSFproperties.peakFraction">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">peakFraction</tt><big>(</big><em>file='data/psf12x.fits'</em>, <em>radius=0.65</em>, <em>oversample=12</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.peakFraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the fraction of energy in the peak pixel for a given PSF compared
+to an aperture of a given radius.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="analysis.PSFproperties.plotEncircledEnergy">
 <tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">plotEncircledEnergy</tt><big>(</big><em>radius</em>, <em>energy</em>, <em>scale=12</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.plotEncircledEnergy" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -758,7 +787,7 @@ The default input PSF is 12 times over-sampled with 1 micron pixel.</p>
 </div>
 <span class="target" id="module-analysis.biasCalibration"></span><div class="section" id="bias-calibration">
 <h2>Bias Calibration<a class="headerlink" href="#bias-calibration" title="Permalink to this headline">¶</a></h2>
-<p>This simple script can be used to study the number of bias frames required for a given PSF ellipticity knowledge level.</p>
+<p>This simple script can be used to study the number of bias frames required to meet the VIS calibration requirements.</p>
 <p>The following requirements related to the bias calibration has been taken from GDPRD.</p>
 <p>R-GDP-CAL-052:
 The contribution of the residuals of VIS bias subtraction to the <em>error on the determination of each ellipticity
@@ -877,7 +906,7 @@ the surface that also affect the results, however, to a lesser degree.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.testBiasCalibrationSigma">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=1000</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscalemin=1000.0</em>, <em>psfscalemax=100000.0</em>, <em>sigma=0.75</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=1000</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscalemin=200.0</em>, <em>psfscalemax=100000.0</em>, <em>sigma=0.75</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>

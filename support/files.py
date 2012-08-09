@@ -1,5 +1,9 @@
+"""
+IO related functions.
+"""
 import datetime, cPickle, os
 import pyfits as pf
+import numpy as np
 
 
 def cPickleDumpDictionary(dictionary, output):
@@ -22,6 +26,8 @@ def readFITSDataExcludeScanRegions(files, ext=1):
 
     Subtracts the pre- and overscan regions if these were simulated. Takes into account
     which quadrant is being processed so that the extra regions are subtracted correctly.
+
+    :rtype: ndarray
     """
     data = []
     for i, file in enumerate(files):
@@ -46,7 +52,7 @@ def readFITSDataExcludeScanRegions(files, ext=1):
             data.append(fh[ext].data)
         fh.close()
 
-    return data
+    return np.asarray(data)
 
 
 def writeFITS(data, output):

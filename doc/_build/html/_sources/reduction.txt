@@ -8,3 +8,16 @@ Data reduction tools
 
 .. autoclass:: reduceVISdata
     :members:
+
+
+
+VIS data reduction studies
+==========================
+
+.. currentmodule:: analysis
+
+.. automodule:: analysis.biasCalibration
+    :members:
+
+.. automodule:: analysis.FlatfieldCalibration
+    :members:

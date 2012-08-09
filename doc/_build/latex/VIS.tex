@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 08, 2012}
+\date{August 09, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -1680,6 +1680,258 @@ Write out FITS files using PyFITS.
 
 
 
+\section{VIS data reduction studies}
+\label{reduction:vis-data-reduction-studies}\label{reduction:module-analysis.biasCalibration}\index{analysis.biasCalibration (module)}
+
+\subsection{Bias Calibration}
+\label{reduction:bias-calibration}
+This simple script can be used to study the number of bias frames required to meet the VIS calibration requirements.
+
+The following requirements related to the bias calibration has been taken from GDPRD.
+
+R-GDP-CAL-052:
+The contribution of the residuals of VIS bias subtraction to the \emph{error on the determination of each ellipticity
+component} of the local PSF shall not exceed 3x10-5 (one sigma).
+
+R-GDP-CAL-062:
+The contribution of the residuals of VIS bias subtraction to the \emph{relative error} sigma(R2)/R2 on the determination of
+the local PSF R2 shall not exceed 1x10-4 (one sigma).
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{requires}] \leavevmode
+VISsim-Python
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{addReadoutNoise() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.addReadoutNoise}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{addReadoutNoise}}{\emph{data}, \emph{readnoise=4.5}, \emph{number=1}}{}
+Add readout noise to the input data. The readout noise is the median of the number of frames.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- input data to which the readout noise will be added to
+
+\item {} 
+\textbf{readnoise} (\emph{float}) -- standard deviation of the read out noise {[}electrons{]}
+
+\item {} 
+\textbf{number} (\emph{int}) -- number of read outs to median combine before adding to the data {[}default = 1{]}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+data + read out noise
+
+\item[{Return type}] \leavevmode
+ndarray {[}same as input data{]}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{plotDeltaEs() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.plotDeltaEs}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotDeltaEs}}{\emph{deltae1}, \emph{deltae2}, \emph{deltae}, \emph{output}, \emph{title='`}, \emph{ymax=8}, \emph{req=3}}{}
+Generates a simple plot showing the errors in the ellipticity components.
+
+\end{fulllineitems}
+
+\index{plotEs() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.plotEs}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotEs}}{\emph{deltae1}, \emph{deltae2}, \emph{deltae}, \emph{output}, \emph{title='`}}{}
+Generates a simple plot showing the ellipticity components.
+
+\end{fulllineitems}
+
+\index{plotNumberOfFramesDelta() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesDelta}}{\emph{results}}{}
+Creates a simple plot to combine and show the results for errors (delta).
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{results} (\emph{dict}) -- results to be plotted
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{plotNumberOfFramesSigma() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}}{}
+Creates a simple plot to combine and show the results.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{results} (\emph{dict}) -- results to be plotted
+
+\item {} 
+\textbf{req} (\emph{float}) -- the requirement
+
+\item {} 
+\textbf{ymax} (\emph{int or float}) -- maximum value to show on the y-axis
+
+\item {} 
+\textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testBiasCalibrationDelta() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationDelta}}{\emph{log}, \emph{numdata=2066}, \emph{floor=995}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=1000.0}, \emph{sigma=0.75}, \emph{debug=False}, \emph{plots=False}}{}
+Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
+and a given number of biases median combined and compare to the nominal PSF ellipticity.
+
+This function can be used to derive the error (delta) in determining ellipticity and size given
+a reference PSF.
+
+Choices that need to be made and effect the results:
+\begin{enumerate}
+\item {} 
+bias surface that is assumed (amplitude, complexity, etc.)
+
+\item {} 
+whether the order of the polynomial surface to be fitted is known or not
+
+\item {} 
+size of the Gaussian weighting function when calculating the ellipticity components
+
+\end{enumerate}
+
+There are also other choices such as the number of PSFs and scaling and the random numbers generated for
+the surface that also affect the results, however, to a lesser degree.
+
+Generates a set of plots that can be used to inspect the simulation.
+
+\end{fulllineitems}
+
+\index{testBiasCalibrationSigma() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=200.0}, \emph{psfscalemax=100000.0}, \emph{sigma=0.75}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
+Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
+and a given number of biases median combined.
+
+This function is to derive the the actual values so that the knowledge (variance) can be studied.
+
+Choices that need to be made and effect the results:
+\begin{enumerate}
+\item {} 
+bias surface that is assumed (amplitude, complexity, etc.)
+
+\item {} 
+whether the order of the polynomial surface to be fitted is known or not
+
+\item {} 
+size of the Gaussian weighting function when calculating the ellipticity components
+
+\end{enumerate}
+
+There are also other choices such as the number of PSFs and scaling and the random numbers generated for
+the surface that also affect the results, however, to a lesser degree.
+
+Generates a set of plots that can be used to inspect the simulation.
+
+\end{fulllineitems}
+
+\phantomsection\label{reduction:module-analysis.FlatfieldCalibration}\index{analysis.FlatfieldCalibration (module)}
+
+\subsection{Flat Field Calibration}
+\label{reduction:flat-field-calibration}
+This simple script can be used to study the number of flat fields required to meet the VIS calibration requirements.
+
+The following requirements related to the bias calibration has been taken from GDPRD.
+
+R-GDP-CAL-0:
+
+R-GDP-CAL-0:
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{requires}] \leavevmode
+VISsim-Python
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{generateResidualFlatField() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.generateResidualFlatField}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{generateResidualFlatField}}{\emph{files='Q0*flatfield*.fits'}, \emph{combine=77}, \emph{lampfile='data/VIScalibrationUnitflux.fits'}, \emph{reference='data/VISFlatField2percent.fits'}, \emph{plots=False}, \emph{debug=False}}{}
+\end{fulllineitems}
+
+\index{plotNumberOfFramesSigma() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}}{}
+Creates a simple plot to combine and show the results.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{results} (\emph{dict}) -- results to be plotted
+
+\item {} 
+\textbf{req} (\emph{float}) -- the requirement
+
+\item {} 
+\textbf{ymax} (\emph{int or float}) -- maximum value to show on the y-axis
+
+\item {} 
+\textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testFlatCalibrationSigma() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibrationSigma}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibrationSigma}}{\emph{log}, \emph{flats=100}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=100.0}, \emph{psfscalemax=1000.0}, \emph{sigma=0.75}, \emph{plot=False}, \emph{debug=False}}{}
+Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
+and a given number of flat fields median combined.
+
+This function is to derive the the actual values so that the knowledge (variance) can be studied.
+
+\end{fulllineitems}
+
+
+
 \chapter{Data Analysis}
 \label{index:data-analysis}
 The \emph{analysis} subpackage contains classes and scripts related to data analysis. A simple source finder and shape
@@ -2491,182 +2743,6 @@ Reads in the data from a given FITS file.
 
 \end{fulllineitems}
 
-\phantomsection\label{analysis:module-analysis.biasCalibration}\index{analysis.biasCalibration (module)}
-
-\subsection{Bias Calibration}
-\label{analysis:bias-calibration}
-This simple script can be used to study the number of bias frames required to meet the VIS calibration requirements.
-
-The following requirements related to the bias calibration has been taken from GDPRD.
-
-R-GDP-CAL-052:
-The contribution of the residuals of VIS bias subtraction to the \emph{error on the determination of each ellipticity
-component} of the local PSF shall not exceed 3x10-5 (one sigma).
-
-R-GDP-CAL-062:
-The contribution of the residuals of VIS bias subtraction to the \emph{relative error} sigma(R2)/R2 on the determination of
-the local PSF R2 shall not exceed 1x10-4 (one sigma).
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-PyFITS
-
-\item[{requires}] \leavevmode
-NumPy
-
-\item[{requires}] \leavevmode
-matplotlib
-
-\item[{requires}] \leavevmode
-VISsim-Python
-
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{addReadoutNoise() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.addReadoutNoise}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{addReadoutNoise}}{\emph{data}, \emph{readnoise=4.5}, \emph{number=1}}{}
-Add readout noise to the input data. The readout noise is the median of the number of frames.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{data} (\emph{ndarray}) -- input data to which the readout noise will be added to
-
-\item {} 
-\textbf{readnoise} (\emph{float}) -- standard deviation of the read out noise {[}electrons{]}
-
-\item {} 
-\textbf{number} (\emph{int}) -- number of read outs to median combine before adding to the data {[}default = 1{]}
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-data + read out noise
-
-\item[{Return type}] \leavevmode
-ndarray {[}same as input data{]}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{plotDeltaEs() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.plotDeltaEs}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotDeltaEs}}{\emph{deltae1}, \emph{deltae2}, \emph{deltae}, \emph{output}, \emph{title='`}, \emph{ymax=8}, \emph{req=3}}{}
-Generates a simple plot showing the errors in the ellipticity components.
-
-\end{fulllineitems}
-
-\index{plotEs() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.plotEs}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotEs}}{\emph{deltae1}, \emph{deltae2}, \emph{deltae}, \emph{output}, \emph{title='`}}{}
-Generates a simple plot showing the ellipticity components.
-
-\end{fulllineitems}
-
-\index{plotNumberOfFramesDelta() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.plotNumberOfFramesDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesDelta}}{\emph{results}}{}
-Creates a simple plot to combine and show the results for errors (delta).
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{results} (\emph{dict}) -- results to be plotted
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{plotNumberOfFramesSigma() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}}{}
-Creates a simple plot to combine and show the results.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{results} (\emph{dict}) -- results to be plotted
-
-\item {} 
-\textbf{req} (\emph{float}) -- the requirement
-
-\item {} 
-\textbf{ymax} (\emph{int or float}) -- maximum value to show on the y-axis
-
-\item {} 
-\textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{testBiasCalibrationDelta() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.testBiasCalibrationDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationDelta}}{\emph{log}, \emph{numdata=2066}, \emph{floor=995}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=1000.0}, \emph{sigma=0.75}, \emph{debug=False}, \emph{plots=False}}{}
-Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
-and a given number of biases median combined and compare to the nominal PSF ellipticity.
-
-This function can be used to derive the error (delta) in determining ellipticity and size given
-a reference PSF.
-
-Choices that need to be made and effect the results:
-\begin{enumerate}
-\item {} 
-bias surface that is assumed (amplitude, complexity, etc.)
-
-\item {} 
-whether the order of the polynomial surface to be fitted is known or not
-
-\item {} 
-size of the Gaussian weighting function when calculating the ellipticity components
-
-\end{enumerate}
-
-There are also other choices such as the number of PSFs and scaling and the random numbers generated for
-the surface that also affect the results, however, to a lesser degree.
-
-Generates a set of plots that can be used to inspect the simulation.
-
-\end{fulllineitems}
-
-\index{testBiasCalibrationSigma() (in module analysis.biasCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=200.0}, \emph{psfscalemax=100000.0}, \emph{sigma=0.75}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
-Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
-and a given number of biases median combined.
-
-This function is to derive the the actual values so that the knowledge (variance) can be studied.
-
-Choices that need to be made and effect the results:
-\begin{enumerate}
-\item {} 
-bias surface that is assumed (amplitude, complexity, etc.)
-
-\item {} 
-whether the order of the polynomial surface to be fitted is known or not
-
-\item {} 
-size of the Gaussian weighting function when calculating the ellipticity components
-
-\end{enumerate}
-
-There are also other choices such as the number of PSFs and scaling and the random numbers generated for
-the surface that also affect the results, however, to a lesser degree.
-
-Generates a set of plots that can be used to inspect the simulation.
-
-\end{fulllineitems}
-
 
 The \emph{data} subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
 flat fielding files, PSFs, and an example configuration file.
@@ -2741,8 +2817,9 @@ and end-of-life radiation damage, but without aperture correction. The offset is
 \def\bigletter#1{{\Large\sffamily#1}\nopagebreak\vspace{1mm}}
 \bigletter{a}
 \item {\texttt{analysis.analyse}}, \pageref{analysis:module-analysis.analyse}
-\item {\texttt{analysis.biasCalibration}}, \pageref{analysis:module-analysis.biasCalibration}
+\item {\texttt{analysis.biasCalibration}}, \pageref{reduction:module-analysis.biasCalibration}
 \item {\texttt{analysis.ETC}}, \pageref{analysis:module-analysis.ETC}
+\item {\texttt{analysis.FlatfieldCalibration}}, \pageref{reduction:module-analysis.FlatfieldCalibration}
 \item {\texttt{analysis.PSFproperties}}, \pageref{analysis:module-analysis.PSFproperties}
 \item {\texttt{analysis.shape}}, \pageref{analysis:module-analysis.shape}
 \item {\texttt{analysis.sourceFinder}}, \pageref{analysis:module-analysis.sourceFinder}

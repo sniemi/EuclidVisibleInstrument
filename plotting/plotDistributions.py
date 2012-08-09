@@ -3,6 +3,8 @@ import numpy as np
 import statsmodels.api as sm
 from statsmodels.nonparametric.kde import KDE
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import host_subplot
+import mpl_toolkits.axisartist as AA
 from scipy.stats import gaussian_kde
 from analysis import ETC
 from sources import createObjectCatalogue as cr
@@ -60,14 +62,9 @@ def plotDist():
     plt.savefig('Distributions.pdf')
 
 
-def plotSNR(deg=60, kdes=True):
+def plotSNR(deg=60, kdes=True, log=False):
     CCDs = 1000
     fudge = 47.0
-
-    bins = np.linspace(0, 800, 161)
-    #bins = np.linspace(0, 800, 81)
-    df = bins[1] - bins[0]
-    weight = 1. / (2048 * 2 * 2066 * 2 * 0.1 * 0.1 * 7.71604938e-8 * CCDs) / df #how many square degrees on sky
 
     #cumulative distribution of stars for different galactic latitudes
     if deg == 30:
@@ -113,26 +110,11 @@ def plotSNR(deg=60, kdes=True):
     print 'Number of stars within a pointing (36CCDs) with 21 < mag < 23 (single 565s exposure):', \
             int((SNRsStars[(magStars > 21) & (magStars < 23)]).size * 36. / CCDs)
 
-    #simple magnitude distribution plot for stars
-    stars = np.loadtxt('data/stars.dat')
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.hist(magStars, bins=25, cumulative=True, log=True, alpha=0.3, weights=np.ones(magStars.size)*weight*df,
-           label='Random Draws')
-    ax.semilogy(stars[:,0], stars[:,1], label='Stars (30deg)')
-    ax.semilogy(stars[:,0], stars[:,2], label='Stars (60deg)')
-    ax.semilogy(stars[:,0], stars[:,3], label='Stars (90deg)')
-    ax.set_xlabel(r'$M_{AB}$')
-    ax.set_ylabel(r'Cumulative Number of Objects [deg$^{-2}$]')
-    plt.legend(shadow=True, fancybox=True, loc='upper left')
-    plt.savefig('stars%ideg.pdf' % deg)
-    plt.close()
-
     #calculate Gaussian KDE with statsmodels package (for speed)
     if kdes:
-        kn = SNRsStars[SNRsStars < 800]
+        kn = SNRsStars[SNRsStars < 1000]
         kdeStars = KDE(kn)
-        kdeStars.fit(adjust=5)
+        kdeStars.fit(adjust=2)
         nst = kn.size / 10. / 1.38
 
     #galaxies
@@ -146,28 +128,49 @@ def plotSNR(deg=60, kdes=True):
     galaxymags = np.arange(10.0, 30.2, 0.2)
     galaxycounts = 10**p(galaxymags)
     cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
-    mag = cr.drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
-    SNRsGalaxies = ETC.SNR(ETC.VISinformation(), magnitude=mag, exposures=1)
+    magGalaxies = cr.drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
+    SNRsGalaxies = ETC.SNR(ETC.VISinformation(), magnitude=magGalaxies, exposures=1)
 
     #calculate Gaussian KDE, this time with scipy to save memory, and evaluate it
     if kdes:
-        kn = SNRsGalaxies[SNRsGalaxies < 800]
+        kn = SNRsGalaxies[SNRsGalaxies < 1000]
         #pos = np.linspace(1, 810, num=70)
         #kdegal = gaussian_kde(kn)
         #gals = kdegal(pos)
         #ngl = kn.size #/ df
         kdeGalaxy = KDE(kn)
-        kdeGalaxy.fit(adjust=50)
+        kdeGalaxy.fit(adjust=10)
         ngl = kn.size / 10. / 1.38
+
+    #histogram binning and weighting
+    bins = np.linspace(0., 1000., 101)
+    df = bins[1] - bins[0]
+    weight = 1. / (2048 * 2 * 2066 * 2 * 0.1 * 0.1 * 7.71604938e-8 * CCDs) / df
+    weightsS = np.ones(magStars.size)*weight
+    weightsG = np.ones(magGalaxies.size)*weight
+
+    #simple magnitude distribution plot for stars
+    stars = np.loadtxt('data/stars.dat')
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hist(magStars, bins=30, cumulative=True, log=True, alpha=0.3, weights=weightsS*df,
+           label='Random Draws')
+    ax.semilogy(stars[:,0], stars[:,1], label='Stars (30deg)')
+    ax.semilogy(stars[:,0], stars[:,2], label='Stars (60deg)')
+    ax.semilogy(stars[:,0], stars[:,3], label='Stars (90deg)')
+    ax.set_xlabel(r'$M_{AB}$')
+    ax.set_ylabel(r'Cumulative Number of Objects [deg$^{-2}$]')
+    plt.legend(shadow=True, fancybox=True, loc='upper left')
+    plt.savefig('stars%ideg.pdf' % deg)
+    plt.close()
 
     #make a plot
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.title('Euclid Visible Instrument')
-    hist1 = ax.hist(SNRsStars, bins=bins, alpha=0.2, log=True, weights=[weight,]*len(magStars),
+    ax = host_subplot(111, axes_class=AA.Axes)
+
+    hist1 = ax.hist(SNRsStars, bins=bins, alpha=0.2, log=True, weights=weightsS,
                     label='Stars [%i deg]' %deg, color='r')
-    hist2 = ax.hist(SNRsGalaxies, bins=bins, alpha=0.2, log=True, weights=[weight,]*len(mag),
+    hist2 = ax.hist(SNRsGalaxies, bins=bins, alpha=0.2, log=True, weights=weightsG,
                     label='Galaxies', color='blue')
 
     if kdes:
@@ -175,31 +178,55 @@ def plotSNR(deg=60, kdes=True):
         #ax.plot(pos, gals*ngl, 'b-', label='Gaussian KDE (galaxies)')
         ax.plot(kdeGalaxy.support, kdeGalaxy.density*ngl, 'b-', label='Gaussian KDE (galaxies)')
 
-    ax.set_ylim(1,1e5)
-    ax.set_xlim(0, 800)
-    ax.set_xlabel('Signal-to-Noise Ratio [assuming a single 565s exposure]')
+    #calculate magnitude scale, top-axis
+    if log:
+        mags = np.asarray([17, 18, 19, 20, 21, 22, 23, 24])
+        SNRs = ETC.SNR(ETC.VISinformation(), magnitude=mags, exposures=1, galaxy=False)
+    else:
+        mags = np.asarray([17, 17.5, 18, 18.5, 19, 20, 21, 22.5])
+        SNRs = ETC.SNR(ETC.VISinformation(), magnitude=mags, exposures=1, galaxy=False)
+
+    ax2 = ax.twin() # ax2 is responsible for "top" axis and "right" axis
+    ax2.set_xticks(SNRs)
+    ax2.set_xticklabels([str(tmp) for tmp in mags])
+    ax2.set_xlabel('$M(R+I)_{AB}$ [mag]')
+    ax2.axis['right'].major_ticklabels.set_visible(False)
+
+    ax.set_ylim(1e-1, 1e5)
+
     ax.set_ylabel('Number of Objects [deg$^{-2}$ dex$^{-1}$]')
+    ax.set_xlabel('Signal-to-Noise Ratio [assuming a single 565s exposure]')
 
     plt.text(0.8, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
     plt.legend(shadow=True, fancybox=True)
-    plt.savefig('SNRtheoretical%ideg.pdf' % deg)
 
-    mid = df / 2.
-    #output to file
-    fh = open('SNRsSTARS%ideg.txt' % deg, 'w')
-    fh.write('#These values are for stars at %ideg (%s)\n' % (deg, txt))
-    fh.write('#SNR number_of_stars  N\n')
-    fh.write('#bin_centre per_square_degree per_pointing\n')
-    for a, b in zip(hist1[0], hist1[1]):
-        fh.write('%i %f %f\n' %(b+mid, a*df, a*df*0.496))
-    fh.close()
-    fh = open('SNRsGALAXIES.txt', 'w')
-    fh.write('#These values are for galaxies (%s)\n' % txt)
-    fh.write('#SNR number_of_galaxies   N\n')
-    fh.write('#bin_centre per_square_degree per_pointing\n')
-    for a, b in zip(hist2[0], hist2[1]):
-        fh.write('%i %f %f\n' %(b+mid, a*df, a*df*0.496))
-    fh.close()
+    if log:
+        ax.set_xscale('log')
+        plt.savefig('SNRtheoretical%ideglog.pdf' % deg)
+    else:
+        ax.set_xlim(1, 1e3)
+        plt.savefig('SNRtheoretical%ideglin.pdf' % deg)
+
+    plt.close()
+
+    #write output
+    if not log:
+        mid = df / 2.
+        #output to file
+        fh = open('SNRsSTARS%ideg.txt' % deg, 'w')
+        fh.write('#These values are for stars at %ideg (%s)\n' % (deg, txt))
+        fh.write('#SNR number_of_stars  N\n')
+        fh.write('#bin_centre per_square_degree per_pointing\n')
+        for a, b in zip(hist1[0], hist1[1]):
+            fh.write('%i %f %f\n' %(b+mid, a*df, a*df*0.496))
+        fh.close()
+        fh = open('SNRsGALAXIES.txt', 'w')
+        fh.write('#These values are for galaxies (%s)\n' % txt)
+        fh.write('#SNR number_of_galaxies   N\n')
+        fh.write('#bin_centre per_square_degree per_pointing\n')
+        for a, b in zip(hist2[0], hist2[1]):
+            fh.write('%i %f %f\n' %(b+mid, a*df, a*df*0.496))
+        fh.close()
 
 
 def plotSNRfromCatalog():
@@ -228,10 +255,14 @@ def plotSNRfromCatalog():
 
 if __name__ == '__main__':
     #plot from a generated catalog assumed to be named "catalog0.dat"
-    plotDist()
-    plotSNRfromCatalog()
+    #plotDist()
+    #plotSNRfromCatalog()
 
     #generates a new catalog on fly and plots SNRs
-    #plotSNR(deg=30)
-    #plotSNR(deg=60)
-    #plotSNR(deg=90)
+    plotSNR(deg=30, kdes=False)
+    plotSNR(deg=60, kdes=False)
+    plotSNR(deg=90, kdes=False)
+
+    plotSNR(deg=30, kdes=False, log=True)
+    plotSNR(deg=60, kdes=False, log=True)
+    plotSNR(deg=90, kdes=False, log=True)

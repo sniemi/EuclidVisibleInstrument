@@ -26,5 +26,5 @@ VIS data analysis tools
 .. automodule:: analysis.PSFproperties
     :members:
 
-.. automodule:: analysis.biasCalibration
-    :members:
+
+

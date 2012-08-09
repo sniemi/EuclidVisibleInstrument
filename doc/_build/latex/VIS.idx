@@ -63,61 +63,65 @@
 \indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{28}
 \indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{28}
 \indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{28}
-\indexentry{analysis.analyse (module)|hyperpage}{29}
-\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{29}
-\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{30}
-\indexentry{analysis.shape (module)|hyperpage}{30}
-\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{30}
-\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{31}
-\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{31}
-\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{31}
-\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{31}
-\indexentry{analysis.sourceFinder (module)|hyperpage}{31}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{32}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{32}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{33}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{33}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{34}
-\indexentry{analysis.ETC (module)|hyperpage}{34}
-\indexentry{SNR() (in module analysis.ETC)|hyperpage}{34}
-\indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{34}
-\indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{35}
-\indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{35}
-\indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{35}
-\indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{35}
-\indexentry{analysis.PSFproperties (module)|hyperpage}{36}
-\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{36}
-\indexentry{analysis.biasCalibration (module)|hyperpage}{36}
-\indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{37}
-\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{38}
-\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{38}
+\indexentry{analysis.biasCalibration (module)|hyperpage}{28}
+\indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{28}
+\indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{29}
+\indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{29}
+\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{29}
+\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{29}
+\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{29}
+\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{30}
+\indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{31}
+\indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{32}
+\indexentry{plotNumberOfFramesSigma() (in module analysis.FlatfieldCalibration)|hyperpage}{32}
+\indexentry{testFlatCalibrationSigma() (in module analysis.FlatfieldCalibration)|hyperpage}{32}
+\indexentry{analysis.analyse (module)|hyperpage}{35}
+\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{35}
+\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
+\indexentry{analysis.shape (module)|hyperpage}{36}
+\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{36}
+\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
+\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
+\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
+\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
+\indexentry{analysis.sourceFinder (module)|hyperpage}{37}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{38}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{39}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
+\indexentry{analysis.ETC (module)|hyperpage}{40}
+\indexentry{SNR() (in module analysis.ETC)|hyperpage}{40}
+\indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{40}
+\indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{41}
+\indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{41}
+\indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{41}
+\indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{41}
+\indexentry{analysis.PSFproperties (module)|hyperpage}{42}
+\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{42}

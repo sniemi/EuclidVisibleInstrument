@@ -102,9 +102,9 @@
   \item plotEllipticityDistribution() (analysis.analyse.analyseVISdata method), \hyperpage{36}
   \item plotEncircledEnergy() (in module analysis.PSFproperties), \hyperpage{42}
   \item plotEs() (in module analysis.biasCalibration), \hyperpage{29}
+  \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{32}
   \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{29}
   \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{29}
-  \item plotNumberOfFramesSigma() (in module analysis.FlatfieldCalibration), \hyperpage{32}
   \item postproc.postprocessing (module), \hyperpage{21}
   \item postproc.tileCCD (module), \hyperpage{24}
   \item PostProcessing (class in postproc.postprocessing), \hyperpage{21}
@@ -147,7 +147,7 @@
   \bigletter T
   \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{29}
   \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{30}
-  \item testFlatCalibrationSigma() (in module analysis.FlatfieldCalibration), \hyperpage{32}
+  \item testFlatCalibration() (in module analysis.FlatfieldCalibration), \hyperpage{33}
   \item tileCCD (class in postproc.tileCCD), \hyperpage{25}
   \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{25}
 

@@ -255,14 +255,14 @@ def plotSNRfromCatalog():
 
 if __name__ == '__main__':
     #plot from a generated catalog assumed to be named "catalog0.dat"
-    #plotDist()
-    #plotSNRfromCatalog()
+    plotDist()
+    plotSNRfromCatalog()
 
     #generates a new catalog on fly and plots SNRs
-    plotSNR(deg=30, kdes=False)
-    plotSNR(deg=60, kdes=False)
-    plotSNR(deg=90, kdes=False)
+    #plotSNR(deg=30, kdes=False)
+    #plotSNR(deg=60, kdes=False)
+    #plotSNR(deg=90, kdes=False)
 
-    plotSNR(deg=30, kdes=False, log=True)
-    plotSNR(deg=60, kdes=False, log=True)
-    plotSNR(deg=90, kdes=False, log=True)
+    #plotSNR(deg=30, kdes=False, log=True)
+    #plotSNR(deg=60, kdes=False, log=True)
+    #plotSNR(deg=90, kdes=False, log=True)

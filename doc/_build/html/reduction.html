@@ -322,9 +322,13 @@ the surface that also affect the results, however, to a lesser degree.</p>
 <span class="target" id="module-analysis.FlatfieldCalibration"></span><div class="section" id="flat-field-calibration">
 <h2>Flat Field Calibration<a class="headerlink" href="#flat-field-calibration" title="Permalink to this headline">¶</a></h2>
 <p>This simple script can be used to study the number of flat fields required to meet the VIS calibration requirements.</p>
-<p>The following requirements related to the bias calibration has been taken from GDPRD.</p>
-<p>R-GDP-CAL-0:</p>
-<p>R-GDP-CAL-0:</p>
+<p>The following requirements related to the flat field calibration has been taken from GDPRD.</p>
+<p>R-GDP-CAL-054:
+The contribution of the residuals of VIS flat-field correction to the error on the determination of each
+ellipticity component of the local PSF shall not exceed 3x10-5 (one sigma).</p>
+<p>R-GDP-CAL-064:
+The contribution of the residuals of VIS flat-field correction to the relative error on the determination
+of the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -346,22 +350,30 @@ the surface that also affect the results, however, to a lesser degree.</p>
 <dl class="function">
 <dt id="analysis.FlatfieldCalibration.generateResidualFlatField">
 <tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">generateResidualFlatField</tt><big>(</big><em>files='Q0*flatfield*.fits'</em>, <em>combine=77</em>, <em>lampfile='data/VIScalibrationUnitflux.fits'</em>, <em>reference='data/VISFlatField2percent.fits'</em>, <em>plots=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.generateResidualFlatField" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="analysis.FlatfieldCalibration.plotNumberOfFramesSigma">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">plotNumberOfFramesSigma</tt><big>(</big><em>results</em>, <em>reqe=3e-05</em>, <em>reqr2=0.0001</em>, <em>shift=0.1</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.plotNumberOfFramesSigma" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a simple plot to combine and show the results.</p>
+<dd><p>Generate a median combined flat field residual from given input files.</p>
+<p>Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+Median combine all files before the lamp profile given by lampfile kw is being divided out. This
+will produce a derived flat field. This flat can be compared against the reference that was used
+to produce the initial data to derive a residual flat that describes the error in the flat field
+that was derived.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>results</strong> (<em>dict</em>) &#8211; results to be plotted</li>
-<li><strong>req</strong> (<em>float</em>) &#8211; the requirement</li>
-<li><strong>ymax</strong> (<em>int or float</em>) &#8211; maximum value to show on the y-axis</li>
-<li><strong>shift</strong> (<em>float</em>) &#8211; the amount to shift the e2 results on the abscissa (for clarity)</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>files</strong> (<em>str</em>) &#8211; wildcard flagged name identifier for the FITS files to be used for generating a flat</li>
+<li><strong>combine</strong> (<em>int</em>) &#8211; number of files to median combine</li>
+<li><strong>lampfile</strong> (<em>str</em>) &#8211; name of the calibration unit flux profile FITS file</li>
+<li><strong>reference</strong> (<em>str</em>) &#8211; name of the reference pixel-to-pixel flat field FITS file</li>
+<li><strong>plots</strong> (<em>boolean</em>) &#8211; whether or not to generate plots</li>
+<li><strong>debug</strong> (<em>boolean</em>) &#8211; whether or not to produce output FITS files</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">residual flat field (difference between the generated flat and the reference)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
 </td>
 </tr>
 </tbody>
@@ -369,8 +381,32 @@ the surface that also affect the results, however, to a lesser degree.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="analysis.FlatfieldCalibration.testFlatCalibrationSigma">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibrationSigma</tt><big>(</big><em>log</em>, <em>flats=100</em>, <em>surfaces=100</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscalemin=100.0</em>, <em>psfscalemax=1000.0</em>, <em>sigma=0.75</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibrationSigma" title="Permalink to this definition">¶</a></dt>
+<dt id="analysis.FlatfieldCalibration.plotNumberOfFrames">
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">plotNumberOfFrames</tt><big>(</big><em>results</em>, <em>reqe=3e-05</em>, <em>reqr2=0.0001</em>, <em>shift=0.1</em>, <em>outdir='results'</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.plotNumberOfFrames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [results dictionary, reference values]</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for R2</li>
+<li><strong>shift</strong> (<em>float</em>) &#8211; the amount to shift the e2 results on the abscissa (for clarity)</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.FlatfieldCalibration.testFlatCalibration">
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibration</tt><big>(</big><em>log</em>, <em>flats</em>, <em>surfaces=100</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=500</em>, <em>sigma=0.75</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>

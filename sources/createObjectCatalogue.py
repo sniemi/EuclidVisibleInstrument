@@ -165,6 +165,6 @@ if __name__ == '__main__':
     #settings = dict(besancon=False, deg=30)
     #generateCatalog(**settings)
 
-    #create 100 catalogs at deg=60
-    settings = dict(besancon=False, deg=60, ncatalogs=500)
+    #create 100 catalogs at deg=30
+    settings = dict(besancon=False, deg=30, ncatalogs=500)
     generateCatalog(**settings)

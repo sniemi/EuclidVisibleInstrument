@@ -1,5 +1,11 @@
 """
 IO related functions.
+
+:requires: PyFITS
+:requires: NumPy
+
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
 """
 import datetime, cPickle, os
 import pyfits as pf
@@ -22,11 +28,16 @@ def cPickleDumpDictionary(dictionary, output):
 
 def readFITSDataExcludeScanRegions(files, ext=1):
     """
-    Reads in data from all the input files.
+    Reads in data from all the input files and subtracts the pre- and overscan regions if these were simulated.
+    Takes into account which quadrant is being processed so that the extra regions are subtracted correctly.
+    All information is taken from the FITS header.
 
-    Subtracts the pre- and overscan regions if these were simulated. Takes into account
-    which quadrant is being processed so that the extra regions are subtracted correctly.
+    :param files: a list of files to open
+    :type files: list or tuple
+    :param ext: FITS extension
+    :type ext: int
 
+    :return: an array containing all data from all the files given
     :rtype: ndarray
     """
     data = []
@@ -55,18 +66,20 @@ def readFITSDataExcludeScanRegions(files, ext=1):
     return np.asarray(data)
 
 
-def writeFITS(data, output):
+def writeFITS(data, output, overwrite=True):
     """
-    Write out a FITS file using PyFITS.
+    Write out a FITS file using PyFITS. Will remove an existing file if overwrite=True.
 
     :param data: data to write to a FITS file
     :type data: ndarray
     :param output: name of the output file
     :type output: string
+    :param overwrite: removes an existing file if present before writing a new one
+    :type overwrite: boolean
 
     :return: None
     """
-    if os.path.isfile(output):
+    if overwrite and os.path.isfile(output):
         os.remove(output)
 
     #create a new FITS file, using HDUList instance

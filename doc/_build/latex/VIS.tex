@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 09, 2012}
+\date{August 10, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -1863,11 +1863,15 @@ Generates a set of plots that can be used to inspect the simulation.
 \label{reduction:flat-field-calibration}
 This simple script can be used to study the number of flat fields required to meet the VIS calibration requirements.
 
-The following requirements related to the bias calibration has been taken from GDPRD.
+The following requirements related to the flat field calibration has been taken from GDPRD.
 
-R-GDP-CAL-0:
+R-GDP-CAL-054:
+The contribution of the residuals of VIS flat-field correction to the error on the determination of each
+ellipticity component of the local PSF shall not exceed 3x10-5 (one sigma).
 
-R-GDP-CAL-0:
+R-GDP-CAL-064:
+The contribution of the residuals of VIS flat-field correction to the relative error on the determination
+of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
 PyFITS
@@ -1892,37 +1896,80 @@ Sami-Matias Niemi
 
 \begin{fulllineitems}
 \phantomsection\label{reduction:analysis.FlatfieldCalibration.generateResidualFlatField}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{generateResidualFlatField}}{\emph{files='Q0*flatfield*.fits'}, \emph{combine=77}, \emph{lampfile='data/VIScalibrationUnitflux.fits'}, \emph{reference='data/VISFlatField2percent.fits'}, \emph{plots=False}, \emph{debug=False}}{}
-\end{fulllineitems}
+Generate a median combined flat field residual from given input files.
 
-\index{plotNumberOfFramesSigma() (in module analysis.FlatfieldCalibration)}
-
-\begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}}{}
-Creates a simple plot to combine and show the results.
+Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+Median combine all files before the lamp profile given by lampfile kw is being divided out. This
+will produce a derived flat field. This flat can be compared against the reference that was used
+to produce the initial data to derive a residual flat that describes the error in the flat field
+that was derived.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\textbf{results} (\emph{dict}) -- results to be plotted
+\textbf{files} (\emph{str}) -- wildcard flagged name identifier for the FITS files to be used for generating a flat
 
 \item {} 
-\textbf{req} (\emph{float}) -- the requirement
+\textbf{combine} (\emph{int}) -- number of files to median combine
 
 \item {} 
-\textbf{ymax} (\emph{int or float}) -- maximum value to show on the y-axis
+\textbf{lampfile} (\emph{str}) -- name of the calibration unit flux profile FITS file
 
 \item {} 
-\textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
+\textbf{reference} (\emph{str}) -- name of the reference pixel-to-pixel flat field FITS file
+
+\item {} 
+\textbf{plots} (\emph{boolean}) -- whether or not to generate plots
+
+\item {} 
+\textbf{debug} (\emph{boolean}) -- whether or not to produce output FITS files
 
 \end{itemize}
+
+\item[{Returns}] \leavevmode
+residual flat field (difference between the generated flat and the reference)
+
+\item[{Return type}] \leavevmode
+ndarray
 
 \end{description}\end{quote}
 
 \end{fulllineitems}
 
-\index{testFlatCalibrationSigma() (in module analysis.FlatfieldCalibration)}
+\index{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibrationSigma}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibrationSigma}}{\emph{log}, \emph{flats=100}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=100.0}, \emph{psfscalemax=1000.0}, \emph{sigma=0.75}, \emph{plot=False}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.plotNumberOfFrames}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{plotNumberOfFrames}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}, \emph{outdir='results'}}{}
+Creates a simple plot to combine and show the results.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{res} (\emph{list}) -- results to be plotted {[}results dictionary, reference values{]}
+
+\item {} 
+\textbf{reqe} (\emph{float}) -- the requirement for ellipticity
+
+\item {} 
+\textbf{reqr2} (\emph{float}) -- the requirement for R2
+
+\item {} 
+\textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
+
+\item {} 
+\textbf{outdir} (\emph{str}) -- output directory to which the plots will be saved to
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testFlatCalibration() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibration}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibration}}{\emph{log}, \emph{flats}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{sigma=0.75}, \emph{plot=False}, \emph{debug=False}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.
 
@@ -2156,11 +2203,11 @@ The number of iterations is defined in self.settings{[}'iterations'{]}.
 \index{quadrupoles() (analysis.shape.shapeMeasurement method)}
 
 \begin{fulllineitems}
-\phantomsection\label{analysis:analysis.shape.shapeMeasurement.quadrupoles}\pysiglinewithargsret{\bfcode{quadrupoles}}{\emph{image}}{}
+\phantomsection\label{analysis:analysis.shape.shapeMeasurement.quadrupoles}\pysiglinewithargsret{\bfcode{quadrupoles}}{\emph{img}}{}
 Derive quadrupole moments and ellipticity from the input image.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
-\textbf{image} (\emph{ndarray}) -- input image data
+\textbf{img} -- input image data
 
 \item[{Returns}] \leavevmode
 quadrupoles, centroid, and ellipticity (also the projected components e1, e2)

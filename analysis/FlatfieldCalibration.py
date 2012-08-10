@@ -4,13 +4,15 @@ Flat Field Calibration
 
 This simple script can be used to study the number of flat fields required to meet the VIS calibration requirements.
 
-The following requirements related to the bias calibration has been taken from GDPRD.
+The following requirements related to the flat field calibration has been taken from GDPRD.
 
-R-GDP-CAL-0:
+R-GDP-CAL-054:
+The contribution of the residuals of VIS flat-field correction to the error on the determination of each
+ellipticity component of the local PSF shall not exceed 3x10-5 (one sigma).
 
-
-R-GDP-CAL-0:
-
+R-GDP-CAL-064:
+The contribution of the residuals of VIS flat-field correction to the relative error on the determination
+of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 
 :requires: PyFITS
 :requires: NumPy
@@ -34,7 +36,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import pyfits as pf
 import numpy as np
-import math, datetime, cPickle, itertools, glob
+import math, datetime, cPickle, itertools, glob, os, sys
 from analysis import shape
 from support import logger as lg
 from support import surfaceFitting as sf
@@ -44,7 +46,29 @@ from support import files as fileIO
 def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='data/VIScalibrationUnitflux.fits',
                               reference='data/VISFlatField2percent.fits', plots=False, debug=False):
     """
+    Generate a median combined flat field residual from given input files.
 
+    Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+    Median combine all files before the lamp profile given by lampfile kw is being divided out. This
+    will produce a derived flat field. This flat can be compared against the reference that was used
+    to produce the initial data to derive a residual flat that describes the error in the flat field
+    that was derived.
+
+    :param files: wildcard flagged name identifier for the FITS files to be used for generating a flat
+    :type files: str
+    :param combine: number of files to median combine
+    :type combine: int
+    :param lampfile: name of the calibration unit flux profile FITS file
+    :type lampfile: str
+    :param reference: name of the reference pixel-to-pixel flat field FITS file
+    :type reference: str
+    :param plots: whether or not to generate plots
+    :type plots: boolean
+    :param debug: whether or not to produce output FITS files
+    :type debug: boolean
+
+    :return: residual flat field (difference between the generated flat and the reference)
+    :rtype: ndarray
     """
     #find all FITS files
     files = glob.glob(files)
@@ -60,10 +84,9 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #check that the sizes match and median combine
     if len(set(x.shape for x in data))  > 1:
-        print 'ERROR -- files are not the same shape, cannot median combine'
+        sys.exit('ERROR -- files are not the same shape, cannot median combine!')
     else:
-        #median combine
-        median = np.median(data, axis=0)
+        medianCombined = np.median(data, axis=0)
 
     #fit surface to the median and normalize it out
     #m = sf.polyfit2d(xx.ravel(), yy.ravel(), median.ravel(), order=order)
@@ -72,28 +95,37 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load the lamp profile that went in and divide the combined image with the profile
     lamp = pf.getdata(lampfile)
-    pixvar = median / lamp
+    pixvar = medianCombined.astype(np.float64) / lamp
 
     #load the true reference p-flat and divide the derived flat with it
     real = pf.getdata(reference)
-    res = pixvar / real
+    res = pixvar / real.astype(np.float64)
 
     if debug:
-        fileIO.writeFITS(res, 'residualFlat.fits')
         print np.mean(res), np.min(res), np.max(res), np.std(res)
 
+        if not os.path.exists('debug'):
+            os.makedirs('debug')
+
+        fileIO.writeFITS(medianCombined, 'debug/medianFlat.fits')
+        fileIO.writeFITS(pixvar, 'debug/derivedFlat.fits')
+        fileIO.writeFITS(res, 'debug/residualFlat.fits')
+
     if plots:
+        if not os.path.exists('plots'):
+            os.makedirs('plots')
+
         #generate a mesh grid fo plotting
-        ysize, xsize = median.shape
+        ysize, xsize = medianCombined.shape
         xx, yy = np.meshgrid(np.linspace(0, xsize, xsize), np.linspace(0, ysize, ysize))
 
         fig = plt.figure()
         ax = Axes3D(fig)
-        ax.plot_surface(xx, yy, median, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
+        ax.plot_surface(xx, yy, medianCombined, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
         ax.set_zlabel('Flat Field Counts [electrons]')
-        plt.savefig('MedianFlat.png')
+        plt.savefig('plots/MedianFlat.png')
         plt.close()
 
         fig = plt.figure()
@@ -102,23 +134,31 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
         ax.set_zlabel('Flat Field Counts [electrons]')
-        plt.savefig('PixelFlat.png')
+        plt.savefig('plots/PixelFlat.png')
         plt.close()
 
-        im = plt.imshow(res, origin='lower')
+        fig = plt.figure()
+        ax = Axes3D(fig)
+        ax.plot_surface(xx, yy, res, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
+        ax.set_xlabel('X [pixels]')
+        ax.set_ylabel('Y [pixels]')
+        ax.set_zlabel('Residual Flat Field')
+        plt.savefig('plots/ResidualFlatField.png')
+        plt.close()
+
+        im = plt.imshow(res, origin='lower', vmin=0.99, vmax=1.01)
         c1 = plt.colorbar(im)
         c1.set_label('Derived / Input')
         plt.xlabel('Y [pixels]')
         plt.ylabel('X [pixels]')
-        plt.savefig('ResidualFlatField2D.png')
+        plt.savefig('plots/ResidualFlatField2D.png')
         plt.close()
 
     return res
 
 
-def testFlatCalibrationSigma(log, flats=100, surfaces=100,
-                             file='data/psf1x.fits', psfs=500, psfscalemin=1.e2, psfscalemax=1.e3,
-                             sigma=0.75, plot=False, debug=False):
+def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500, sigma=0.75,
+                        plot=False, debug=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of flat fields median combined.
@@ -133,24 +173,29 @@ def testFlatCalibrationSigma(log, flats=100, surfaces=100,
     data = pf.getdata(file)
     data /= np.max(data)
 
+    #derive reference values
+    sh = shape.shapeMeasurement(data.copy(), log, **settings)
+    reference = sh.measureRefinedEllipticity()
+
     #random positions for the PSFs, these positions are the lower corners
     #assume that this is done on quadrant level thus the xmax and ymax are 2065 and 2047, respectively
     xpositions = np.random.random_integers(0, 2047 - data.shape[1], psfs)
     ypositions = np.random.random_integers(0, 2065 - data.shape[0], psfs)
-    #random scalings for the PSFs
-    psfscales = np.random.rand(psfs) * (psfscalemax - psfscalemin) + psfscalemin
 
     out = {}
     #number of biases to median combine
-    for a in np.arange(2, flats, 1):
-        print 'Number of Flats to combine: %i / %i' % (a, flats)
+    for a in flats:
+        print 'Number of Flats to combine: %i / %i' % (a, flats[-1])
 
         #data storage
         de1 = []
         de2 = []
         de = []
         R2 = []
-        R2abs = []
+        dR2 = []
+        e1 = []
+        e2 = []
+        e = []
 
         for b in xrange(surfaces):
             print 'Random Realisations: %i / %i' % (b+1, surfaces)
@@ -171,9 +216,8 @@ def testFlatCalibrationSigma(log, flats=100, surfaces=100,
                 plt.close()
 
             #loop over the PSFs
-            for xpos, ypos, scale in zip(xpositions, ypositions, psfscales):
-                #scale the PSF
-                tmp = data.copy() * scale
+            for xpos, ypos in zip(xpositions, ypositions):
+                tmp = data.copy()
 
                 #get the underlying residual surface ond multiple the PSF with the surface
                 small = residual[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
@@ -184,30 +228,44 @@ def testFlatCalibrationSigma(log, flats=100, surfaces=100,
                 results = sh.measureRefinedEllipticity()
 
                 #save values
-                de1.append(results['e1'])
-                de2.append(results['e2'])
-                de.append(math.sqrt(results['e1']*results['e1'] + results['e2']*results['e2']))
+                e1.append(results['e1'])
+                e2.append(results['e2'])
+                e.append(results['ellipticity'])
                 R2.append(results['R2'])
-                R2abs.append(results['R2'])
+                de1.append(results['e1'] - reference['e1'])
+                de2.append(results['e2'] - reference['e2'])
+                de.append(results['ellipticity'] - reference['ellipticity'])
+                dR2.append(results['R2'] - reference['R2'])
 
-        out[a+1] = [de1, de2, de, R2, R2abs]
+        out[a+1] = [e1, e2, e, R2, de1, de2, de, dR2]
 
-    return out
+    return out, reference
 
 
-def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
+def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='results'):
     """
     Creates a simple plot to combine and show the results.
 
-    :param results: results to be plotted
-    :type results: dict
-    :param req: the requirement
-    :type req: float
-    :param ymax: maximum value to show on the y-axis
-    :type ymax: int or float
+    :param res: results to be plotted [results dictionary, reference values]
+    :type res: list
+    :param reqe: the requirement for ellipticity
+    :type reqe: float
+    :param reqr2: the requirement for R2
+    :type reqr2: float
     :param shift: the amount to shift the e2 results on the abscissa (for clarity)
     :type shift: float
+    :param outdir: output directory to which the plots will be saved to
+    :type outdir: str
+
+    :return: None
     """
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+
+    #rename
+    ref = results[1]
+    res = results[0]
+
     print '\nSigma results:'
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
@@ -215,12 +273,12 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     plt.title(r'VIS Flat Field Calibration: $\sigma^{2}(e)$')
     ax = fig.add_subplot(111)
 
-    x = 1
-    #loop over the number of bias frames combined
-    for key in results:
-        e1 = np.asarray(results[key][0])
-        e2 = np.asarray(results[key][1])
-        e = np.asarray(results[key][2])
+    maxx = 0
+    #loop over the number of frames combined
+    for key in res:
+        e1 = np.asarray(res[key][0])
+        e2 = np.asarray(res[key][1])
+        e = np.asarray(res[key][2])
 
         var1 = np.var(e1)
         var2 = np.var(e2)
@@ -230,8 +288,8 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
         ax.scatter(key, var1, c='b', marker='o')
         ax.scatter(key, var2, c='y', marker='s')
 
-        x += 1
-
+        if key > maxx:
+            maxx = key
         print key, var, var1, var2
 
 
@@ -239,85 +297,144 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     ax.scatter(key, var1, c='b', marker='o', label=r'$\sigma^{2}(e_{1})$')
     ax.scatter(key, var2, c='y', marker='s', label=r'$\sigma^{2}(e_{2})$')
 
-    ax.fill_between(np.arange(x+1), np.ones(x+1)*reqe, 1.0, facecolor='red', alpha=0.08)
+    ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
 
     ax.set_yscale('log')
     ax.set_ylim(1e-10, 1e-4)
-    ax.set_xlim(0, x)
+    ax.set_xlim(0, maxx)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\sigma^{2}(e_{i})\ , \ \ \ i \in [1,2]$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
-    plt.savefig('FlatCalibrationsigmaE.pdf')
+    plt.savefig(outdir+'/FlatCalibrationsigmaE.pdf')
     plt.close()
 
     #same for R2s
-    R4 = 1.44264123086 ** 4
-
     fig = plt.figure()
     plt.title(r'VIS Flat Field Calibration: $\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
     ax = fig.add_subplot(111)
 
     ax.axhline(y=0, c='k', ls=':')
 
-    x = 1
-    #loop over the number of bias frames combined
-    for key in results:
-        dR2 = np.asarray(results[key][4])
+    maxx = 0
+    #loop over the number of frames combined
+    for key in res:
+        dR2 = np.asarray(res[key][3])
 
-        std = np.std(dR2) / (5.06722858929**4) #/ R4
-        var = np.var(dR2) / (5.06722858929**4) #/ R4
+        std = np.std(dR2) / (ref['R2']**4)
+        var = np.var(dR2) / (ref['R2']**4)
 
         print key, var, std
 
-        #ax.scatter(key, std, c='m', marker='*', s=35, zorder=10)
         ax.scatter(key, var, c='b', marker='s', s=35, zorder=10)
 
-        x += 1
+        if key > maxx:
+            maxx = key
 
     #for the legend
-    #ax.scatter(key, std, c='m', marker='*', label=r'$\frac{\sigma(R^{2})}{R_{ref}^{4}}$')
     ax.scatter(key, var, c='b', marker='s', label=r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
 
     #show the requirement
-    ax.fill_between(np.arange(x+1), np.ones(x+1)*reqr2, 1.0, facecolor='red', alpha=0.08)
+    ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqr2, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqr2, c='g', ls='--', label='Requirement')
 
     ax.set_yscale('log')
     ax.set_ylim(1e-10, 1e-3)
-    ax.set_xlim(0, x)
+    ax.set_xlim(0, maxx)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8    )
-    plt.savefig('FlatCalibrationSigmaR2.pdf')
+    plt.savefig(outdir+'/FlatCalibrationSigmaR2.pdf')
     plt.close()
+
+    print '\nDelta results:'
+    #loop over the number of frames combined
+    for key in res:
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        plt.title(r'VIS Flat Field Calibration (%i exposures): $\delta e$' % key)
+
+        de1 = np.asarray(res[key][4])
+        de2 = np.asarray(res[key][5])
+        de = np.asarray(res[key][6])
+
+        avg1 = np.mean(de1)**2
+        avg2 = np.mean(de2)**2
+        avg = np.mean(de)**2
+
+        #write down the values
+        print key, avg, avg1, avg2
+        plt.text(0.08, 0.9, r'$\left< \delta e_{1} \right>^{2} = %e$' %avg1, fontsize=10, transform=ax.transAxes)
+        plt.text(0.08, 0.85, r'$\left< \delta e_{2}\right>^{2} = %e$' %avg2, fontsize=10, transform=ax.transAxes)
+        plt.text(0.08, 0.8, r'$\left< \delta | \bar{e} |\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
+
+        ax.hist(de, bins=15, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True)
+        ax.hist(de1, bins=15, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True)
+        ax.hist(de2, bins=15, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True)
+
+        ax.axvline(x=0, ls=':', c='k')
+
+        ax.set_ylabel('Probability Density')
+        ax.set_xlabel(r'$\delta e_{i}\ , \ \ \ i \in [1,2]$')
+
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
+        plt.savefig(outdir+'/FlatCalibrationEDelta%i.pdf' % key)
+        plt.close()
+
+    #same for R2s
+    for key in res:
+        fig = plt.figure()
+        plt.title(r'VIS Flat Field Calibration (%i exposures): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
+        ax = fig.add_subplot(111)
+
+        dR2 = np.asarray(res[key][7])
+        avg = np.mean(dR2)**2
+
+        ax.hist(dR2, bins=15, color='y', alpha=0.1, label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True)
+
+        print key, avg
+        plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
+
+        ax.axvline(x=0, ls=':', c='k')
+
+        ax.set_ylabel('Probability Density')
+        ax.set_xlabel(r'$\delta \frac{\delta R^{2}}{R_{ref}^{r}}$')
+
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
+        plt.savefig(outdir+'/FlatCalibrationDeltaSize%i.pdf' % key)
+        plt.close()
 
 
 if __name__ == '__main__':
     run = True
     debug = False
+    plots = True
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
     log.info('Testing flat fielding calibration...')
 
     if run:
-        resultsSigma = testFlatCalibrationSigma(log, flats=75, surfaces=100, psfs=1000)
-        fileIO.cPickleDumpDictionary(resultsSigma, 'flatfieldResultsSigma.pk')
-        if debug:
-            residual = generateResidualFlatField()
-            fileIO.cPickleDumpDictionary(residual, 'residual.pk')
+        results = testFlatCalibration(log, flats=np.arange(2, 100, 3), surfaces=100, psfs=1000, file='psf1xhighe.fits')
+        fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
     else:
-        #resultsDelta = cPickle.load(open('flatfieldResultsDelta.pk'))
-        resultsSigma = cPickle.load(open('flatfieldResultsSigma.pk'))
+        results = cPickle.load(open('flatfieldResults.pk'))
 
-    plotNumberOfFramesSigma(resultsSigma)
-    #plotNumberOfFramesDelta(resultsDelta)
+    if debug:
+        residual = generateResidualFlatField(combine=10, plots=True, debug=True)
+
+    if plots:
+        plotNumberOfFrames(results)
 
     log.info('Run finished...\n\n\n')

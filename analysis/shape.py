@@ -45,7 +45,7 @@ class shapeMeasurement():
 
         Settings dictionary contains all parameter values needed.
         """
-        self.data = data
+        self.data = data.copy()
         self.log = log
 
         sizeY, sizeX = self.data.shape
@@ -62,17 +62,18 @@ class shapeMeasurement():
             self.log.info('%s = %s' % (key, value))
 
 
-    def quadrupoles(self, image):
+    def quadrupoles(self, img):
         """
         Derive quadrupole moments and ellipticity from the input image.
 
-        :param image: input image data
-        :type image: ndarray
+        :param img: input image data
+        :type ig: ndarray
 
         :return: quadrupoles, centroid, and ellipticity (also the projected components e1, e2)
         :rtype: dict
         """
         self.log.info('Deriving quadrupole moments')
+        image = img.copy()
 
         #normalization factor
         imsum = float(np.sum(image))
@@ -84,8 +85,8 @@ class shapeMeasurement():
         Xmesh, Ymesh = np.meshgrid(Xvector, Yvector)
 
         # No centroid given, take from data and weighting with input image
-        Xcentre = np.sum(Xmesh.copy() * image) / imsum
-        Ycentre = np.sum(Ymesh.copy() * image) / imsum
+        Xcentre = np.sum(Xmesh.copy() * image.copy()) / imsum
+        Ycentre = np.sum(Ymesh.copy() * image.copy()) / imsum
 
         #coordinate array
         Xarray = Xcentre * np.ones([sizeY, sizeX])
@@ -101,9 +102,9 @@ class shapeMeasurement():
         XYpos = Ypos * Xpos
 
         #integrand
-        Qyyint = Ypos2 * image
-        Qxxint = Xpos2 * image
-        Qxyint = XYpos * image
+        Qyyint = Ypos2 * image.copy()
+        Qxxint = Xpos2 * image.copy()
+        Qxyint = XYpos * image.copy()
 
         #sum over and normalize to get the quadrupole moments
         Qyy = np.sum(Qyyint) / imsum
@@ -181,19 +182,18 @@ class shapeMeasurement():
         self.log.info('Sample sigma used for weighting = %f' % self.settings['sampleSigma'])
 
         self.log.info('The intial estimate for the mean values are taken from the unweighted quadrupole moments.')
-        quad = self.quadrupoles(self.data)
+        quad = self.quadrupoles(self.data.copy())
 
         for x in range(self.settings['iterations']):
             if self.settings['weighted']:
                 self.log.info('Iteration %i with circular symmetric Gaussian weights' % x)
                 gaussian = self.circular2DGaussian(quad['centreX']+1, quad['centreY']+1, self.settings['sampleSigma'])
-                GaussianWeighted = self.data * gaussian['Gaussian']
+                GaussianWeighted = self.data.copy() * gaussian['Gaussian'].copy()
             else:
                 self.log.info('Iteration %i with no weighting' % x)
-                GaussianWeighted = self.data
+                GaussianWeighted = self.data.copy()
 
-            quad = self.quadrupoles(GaussianWeighted)
-
+            quad = self.quadrupoles(GaussianWeighted.copy())
 
         # The squared radius R2 in um2
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2

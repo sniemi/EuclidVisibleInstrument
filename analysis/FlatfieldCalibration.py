@@ -95,11 +95,11 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load the lamp profile that went in and divide the combined image with the profile
     lamp = pf.getdata(lampfile)
-    pixvar = medianCombined.astype(np.float64) / lamp
+    pixvar = medianCombined.astype(np.float64).copy() / lamp
 
     #load the true reference p-flat and divide the derived flat with it
     real = pf.getdata(reference)
-    res = pixvar / real.astype(np.float64)
+    res = pixvar.copy() / real.astype(np.float64)
 
     if debug:
         print np.mean(res), np.min(res), np.max(res), np.std(res)
@@ -157,8 +157,7 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     return res
 
 
-def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500, sigma=0.75,
-                        plot=False, debug=False):
+def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500, plot=False, debug=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of flat fields median combined.
@@ -166,15 +165,12 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     This function is to derive the the actual values so that the knowledge (variance) can be studied.
 
     """
-    #set shape measurement settings
-    settings = dict(sigma=sigma)
-
     #read in PSF and renormalize it
     data = pf.getdata(file)
     data /= np.max(data)
 
     #derive reference values
-    sh = shape.shapeMeasurement(data.copy(), log, **settings)
+    sh = shape.shapeMeasurement(data.copy(), log)
     reference = sh.measureRefinedEllipticity()
 
     #random positions for the PSFs, these positions are the lower corners
@@ -224,7 +220,7 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
                 small *= tmp
 
                 #measure e and R2 from the postage stamp image
-                sh = shape.shapeMeasurement(small.copy(), log, **settings)
+                sh = shape.shapeMeasurement(small.copy(), log)
                 results = sh.measureRefinedEllipticity()
 
                 #save values
@@ -302,7 +298,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
 
     ax.set_yscale('log')
     ax.set_ylim(1e-10, 1e-4)
-    ax.set_xlim(0, maxx)
+    ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\sigma^{2}(e_{i})\ , \ \ \ i \in [1,2]$')
 
@@ -343,7 +339,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
 
     ax.set_yscale('log')
     ax.set_ylim(1e-10, 1e-3)
-    ax.set_xlim(0, maxx)
+    ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
 
@@ -426,13 +422,13 @@ if __name__ == '__main__':
     log.info('Testing flat fielding calibration...')
 
     if run:
-        results = testFlatCalibration(log, flats=np.arange(2, 100, 3), surfaces=100, psfs=1000, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(2, 30, 4), surfaces=200, psfs=500, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
     else:
         results = cPickle.load(open('flatfieldResults.pk'))
 
     if debug:
-        residual = generateResidualFlatField(combine=10, plots=True, debug=True)
+        residual = generateResidualFlatField(combine=3, plots=True, debug=True)
 
     if plots:
         plotNumberOfFrames(results)

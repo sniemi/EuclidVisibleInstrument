@@ -45,7 +45,7 @@ from support import files as fileIO
 
 
 def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                        file='psf1x.fits', psfs=500, psfscale=1.e3, sigma=0.75, debug=False, plots=False):
+                        file='psf1x.fits', psfs=500, psfscale=1.e3, debug=False, plots=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of biases median combined and compare to the nominal PSF ellipticity.
@@ -71,8 +71,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
     data *= psfscale
 
     #derive the reference value from the scaled data
-    settings = dict(sigma=sigma)
-    sh = shape.shapeMeasurement(data.copy(), log, **settings)
+    sh = shape.shapeMeasurement(data.copy(), log)
     results = sh.measureRefinedEllipticity()
     #sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
     #rescale to not loose numerical accuracy
@@ -217,7 +216,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
                 small = fitted[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
                 small += data.copy()
                 #small = small.astype(np.int)
-                sh = shape.shapeMeasurement(small.copy(), log, **settings)
+                sh = shape.shapeMeasurement(small.copy(), log)
                 results = sh.measureRefinedEllipticity()
 
                 #save delta values
@@ -241,7 +240,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
 
 def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                             file='psf1x.fits', psfs=500, psfscalemin=2.e2, psfscalemax=1.e5, sigma=0.75, gain=3.5,
+                             file='psf1x.fits', psfs=500, psfscalemin=2.e2, psfscalemax=1.e5, gain=3.5,
                              debug=False, plots=True):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
@@ -261,7 +260,6 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
     Generates a set of plots that can be used to inspect the simulation.
     """
     log.info('Processing file %s' % file)
-    settings = dict(sigma=sigma)
 
     #read in data without noise or bias level and renormalize it
     data = pf.getdata(file)
@@ -404,7 +402,7 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
                 small = fitted[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
                 small += tmp
                 #small = small.astype(np.int)
-                sh = shape.shapeMeasurement(small.copy(), log, **settings)
+                sh = shape.shapeMeasurement(small.copy(), log)
                 results = sh.measureRefinedEllipticity()
 
                 #save values
@@ -748,11 +746,11 @@ if __name__ == '__main__':
     log.info('Testing bias level calibration...')
 
     if run:
-        print '\nDelta run:'
-        resultsDelta = testBiasCalibrationDelta(log, biases=10, psfs=500, surfaces=100, plots=False, file='psf1xsamees.fits')
-        fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
+        #print '\nDelta run:'
+        #resultsDelta = testBiasCalibrationDelta(log, biases=10, psfs=50, surfaces=5, plots=False, file='psf1xhighe.fits')
+        #fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
         print '\nSigma run:'
-        resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
+        resultsSigma = testBiasCalibrationSigma(log, biases=8, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
     else:
         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))

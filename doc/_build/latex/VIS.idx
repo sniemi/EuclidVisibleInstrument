@@ -85,34 +85,35 @@
 \indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{36}
 \indexentry{analysis.shape (module)|hyperpage}{36}
 \indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{36}
+\indexentry{Gaussian2D() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
 \indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
 \indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
 \indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
-\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{37}
-\indexentry{analysis.sourceFinder (module)|hyperpage}{37}
+\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{38}
+\indexentry{analysis.sourceFinder (module)|hyperpage}{38}
 \indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{38}
 \indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
 \indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
 \indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
 \indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{38}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
 \indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{39}
 \indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
 \indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
 \indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
 \indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{39}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{40}
 \indexentry{analysis.ETC (module)|hyperpage}{40}
 \indexentry{SNR() (in module analysis.ETC)|hyperpage}{40}
-\indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{40}
+\indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{41}
 \indexentry{VISinformation() (in module analysis.ETC)|hyperpage}{41}
 \indexentry{calculateAperture() (in module analysis.ETC)|hyperpage}{41}
 \indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{41}
@@ -122,6 +123,6 @@
 \indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{42}
 \indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{42}
 \indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{42}
-\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{42}
-\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{42}
-\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{42}
+\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{43}
+\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{43}
+\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{43}

@@ -3,7 +3,6 @@ Functions related to 2D gaussian functions and comparing ellipticities
 derived either analytically or using quadrupole moments.
 
 :requires: NumPy
-:requires: PyFITS
 :requires: matplotlib
 
 :author: Sami-Matias Niemi
@@ -17,10 +16,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import numpy as np
-import pyfits as pf
-import math, os, datetime, pprint
+import math, datetime, pprint
 from analysis import shape
 from support import logger as lg
+from support import files
 
 
 def Gaussian2D(x, y, sizex, sizey, sigmax, sigmay):
@@ -85,7 +84,7 @@ def plotEllipticityDependency(data, ellipticity, log):
     """
     x = []
     y = []
-    for sigma in range(1, 30):
+    for sigma in range(1, 50):
         settings = dict(sigma=sigma)
         sh = shape.shapeMeasurement(data, log, **settings)
         results = sh.measureRefinedEllipticity()
@@ -96,42 +95,11 @@ def plotEllipticityDependency(data, ellipticity, log):
     ax = fig.add_subplot(111)
     ax.plot(x, y, 'bo-')
     ax.plot([min(x), max(x)], [ellipticity, ellipticity], 'k--')
-    ax.set_xlabel(r'$\sigma$ [arcseconds]')
-    ax.set_ylabel('Ellipticity')
+    ax.set_xlabel(r'Gaussian Weighting $\sigma$ [arcseconds]')
+    ax.set_ylabel('Measured Ellipticity')
     ax.set_ylim(0, 1.01)
     plt.savefig('EvsSigma.pdf')
     plt.close()
-
-
-def writeFITSfile(data, output):
-    """
-    Write out FITS files using PyFITS.
-
-    :param data: data to write to a FITS file
-    :type data: ndarray
-    :param output: name of the output file
-    :type output: string
-
-    :return: None
-    """
-    if os.path.isfile(output):
-        os.remove(output)
-
-    #create a new FITS file, using HDUList instance
-    ofd = pf.HDUList(pf.PrimaryHDU())
-
-    #new image HDU
-    hdu = pf.ImageHDU(data=data)
-
-    #update and verify the header
-    hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-    hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
-    hdu.verify('fix')
-
-    ofd.append(hdu)
-
-    #write the actual file
-    ofd.writeto(output)
 
 
 def ellipticityFromSigmas(sigmax, sigmay):
@@ -170,6 +138,78 @@ def size():
     pprint.pprint(res)
 
 
+def measureGaussianR2(log):
+    #gaussian
+    sigma = 2. / (2. * math.sqrt(2.*math.log(2)))
+    Gaussian = shape.shapeMeasurement(np.zeros((100, 100)), log).circular2DGaussian(50, 50, sigma)['Gaussian']
+
+    settings = dict(sigma=sigma, weighted=False)
+    sh = shape.shapeMeasurement(Gaussian, log, **settings)
+    results = sh.measureRefinedEllipticity()
+    print
+    print results['R2']
+    print
+    #sh.writeFITS(Gaussian, 'GaussianSmall.fits')
+
+
+def testFiles():
+    #testing part, looks for blob?.fits and psf.fits to derive centroids and ellipticity
+    import pyfits as pf
+    import glob as g
+    from support import logger as lg
+    import sys
+
+    files = g.glob('blob?.fits')
+
+    log = lg.setUpLogger('shape.log')
+    log.info('Testing shape measuring class...')
+
+    for file in files:
+        log.info('Processing file %s' % file)
+        data = pf.getdata(file)
+        sh = shape.shapeMeasurement(data, log)
+        results = sh.measureRefinedEllipticity()
+        sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
+
+        print file
+        pprint.pprint(results)
+        print
+
+    file = 'psf1x.fits'
+    log.info('Processing file %s' % file)
+    data = pf.getdata(file)
+    sh = shape.shapeMeasurement(data, log)
+    results = sh.measureRefinedEllipticity()
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
+    print file
+    pprint.pprint(results)
+    print
+
+    file = 'stamp.fits'
+    log.info('Processing file %s' % file)
+    data = pf.getdata(file)
+    settings = dict(sigma=10.0)
+    sh = shape.shapeMeasurement(data, log, **settings)
+    results = sh.measureRefinedEllipticity()
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
+    print file
+    pprint.pprint(results)
+    print
+
+    file = 'gaussian.fits'
+    log.info('Processing file %s' % file)
+    data = pf.getdata(file)
+    settings = dict(sampling=0.2)
+    sh = shape.shapeMeasurement(data, log, **settings)
+    results = sh.measureRefinedEllipticity()
+    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
+    print file
+    pprint.pprint(results)
+    print
+
+    log.info('All done\n\n')
+
+
 if __name__ == '__main__':
     log = lg.setUpLogger('gaussians.log')
     log.info('Testing gaussians...')
@@ -189,7 +229,7 @@ if __name__ == '__main__':
     plot3D(gaussian2d)
 
     #write FITS file
-    writeFITSfile(gaussian2d['Gaussian'], 'gaussian.fits')
+    files.writeFITS(gaussian2d['Gaussian'], 'gaussian.fits')
 
     #calculate shape and printout results
     settings = dict(sigma=15., weighted=False)
@@ -201,5 +241,14 @@ if __name__ == '__main__':
 
     #generate a plot sigma vs ellipticity for a given Gaussian
     plotEllipticityDependency(gaussian2d['Gaussian'], e, log)
+
+    #measureGaussianR2
+    measureGaussianR2(log)
+
+    #derive FWHM - R2 relation... not really working
+    #size()
+
+    #test many files
+    testFiles()
 
     log.info('All done\n\n')

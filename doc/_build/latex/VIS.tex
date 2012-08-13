@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 10, 2012}
+\date{August 13, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -2133,7 +2133,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.2
+0.3
 
 \end{description}\end{quote}
 \index{shapeMeasurement (class in analysis.shape)}
@@ -2157,6 +2157,37 @@ Provides methods to measure the shape of an object.
 \end{description}\end{quote}
 
 Settings dictionary contains all parameter values needed.
+\index{Gaussian2D() (analysis.shape.shapeMeasurement method)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.shape.shapeMeasurement.Gaussian2D}\pysiglinewithargsret{\bfcode{Gaussian2D}}{\emph{x}, \emph{y}, \emph{sigmax}, \emph{sigmay}}{}
+Create a two-dimensional Gaussian centered on x, y.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{x} (\emph{float}) -- x coordinate of the centre
+
+\item {} 
+\textbf{y} (\emph{float}) -- y coordinate of the centre
+
+\item {} 
+\textbf{sigmax} (\emph{float}) -- standard deviation of the Gaussian in x-direction
+
+\item {} 
+\textbf{sigmay} (\emph{float}) -- standard deviation of the Gaussian in y-direction
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+circular Gaussian 2D profile and x and y mesh grid
+
+\item[{Return type}] \leavevmode
+dict
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{circular2DGaussian() (analysis.shape.shapeMeasurement method)}
 
 \begin{fulllineitems}
@@ -2195,7 +2226,7 @@ By default ellipticity is defined in terms of the Gaussian weighted quadrupole m
 If self.settings{[}'weigted'{]} is False then no weighting scheme is used.
 The number of iterations is defined in self.settings{[}'iterations'{]}.
 
-:return centroids, ellipticity (including projected e1 and e2), and R2
+:return centroids {[}indexing stars from 1{]}, ellipticity (including projected e1 and e2), and R2
 :rtype: dict
 
 \end{fulllineitems}

@@ -215,7 +215,7 @@ because NumPy arrays are column major.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
 </tbody>
 </table>
@@ -238,6 +238,32 @@ because NumPy arrays are column major.</p>
 </tbody>
 </table>
 <p>Settings dictionary contains all parameter values needed.</p>
+<dl class="method">
+<dt id="analysis.shape.shapeMeasurement.Gaussian2D">
+<tt class="descname">Gaussian2D</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigmax</em>, <em>sigmay</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.Gaussian2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a two-dimensional Gaussian centered on x, y.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; x coordinate of the centre</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; y coordinate of the centre</li>
+<li><strong>sigmax</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in x-direction</li>
+<li><strong>sigmay</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in y-direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">circular Gaussian 2D profile and x and y mesh grid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="analysis.shape.shapeMeasurement.circular2DGaussian">
 <tt class="descname">circular2DGaussian</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigma</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.circular2DGaussian" title="Permalink to this definition">¶</a></dt>
@@ -270,7 +296,7 @@ because NumPy arrays are column major.</p>
 <p>By default ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
 If self.settings[&#8216;weigted&#8217;] is False then no weighting scheme is used.
 The number of iterations is defined in self.settings[&#8216;iterations&#8217;].</p>
-<p>:return centroids, ellipticity (including projected e1 and e2), and R2
+<p>:return centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
 :rtype: dict</p>
 </dd></dl>
 

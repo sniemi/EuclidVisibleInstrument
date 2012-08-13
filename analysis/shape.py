@@ -13,9 +13,9 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.2
+:version: 0.3
 """
-import math, pprint, os, datetime
+import math, os, datetime, unittest
 import numpy as np
 import pyfits as pf
 
@@ -123,7 +123,8 @@ class shapeMeasurement():
             self.log.error('Ellipticity greater than 1 derived, will set it to unity!')
             ellipticity = 1.0
 
-        self.log.info('Centroiding (x, y) = (%f, %f) and ellipticity = %.4f' % (Ycentre, Xcentre, ellipticity))
+        self.log.info('Centroiding (x, y) = (%f, %f) and ellipticity = %.4f (%.4f, %.4f)' %
+                      (Ycentre+1, Xcentre+1, ellipticity, e1, e2))
 
         out = dict(ellipticity=ellipticity, e1=e1, e2=e2, Qxx=Qxx, Qyy=Qyy, Qxy=Qxy, centreY=Ycentre, centreX=Xcentre)
         return out
@@ -158,7 +159,47 @@ class shapeMeasurement():
 
         #gaussian
         exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
-        Gaussian = np.exp(-exponent) / (2. * math.pi * sigma**2)
+        Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
+
+        output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
+
+        return output
+
+
+    def Gaussian2D(self, x, y, sigmax, sigmay):
+        """
+        Create a two-dimensional Gaussian centered on x, y.
+
+        :param x: x coordinate of the centre
+        :type x: float
+        :param y: y coordinate of the centre
+        :type y: float
+        :param sigmax: standard deviation of the Gaussian in x-direction
+        :type sigmax: float
+        :param sigmay: standard deviation of the Gaussian in y-direction
+        :type sigmay: float
+
+
+        :return: circular Gaussian 2D profile and x and y mesh grid
+        :rtype: dict
+        """
+        self.log.info('Creating a 2D Gaussian with sigmax=%.3f and sigmay=%.3f centered on (x, y) = (%f, %f)' %
+                      (sigmax, sigmay, x, y))
+
+        #x and y coordinate vectors
+        Gyvect = np.arange(1, self.settings['sizeY'] + 1)
+        Gxvect = np.arange(1, self.settings['sizeX'] + 1)
+
+        #meshgrid
+        Gxmesh, Gymesh = np.meshgrid(Gxvect, Gyvect)
+
+        #normalizers
+        sigx = 1. / (2. * sigmax**2)
+        sigy = 1. / (2. * sigmay**2)
+
+        #gaussian
+        exponent = (sigx * (Gxmesh - x)**2 + sigy * (Gymesh - y)**2)
+        Gaussian = np.exp(-exponent) / (2. * math.pi * sigmax*sigmay)
 
         output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
 
@@ -173,7 +214,7 @@ class shapeMeasurement():
         If self.settings['weigted'] is False then no weighting scheme is used.
         The number of iterations is defined in self.settings['iterations'].
 
-        :return centroids, ellipticity (including projected e1 and e2), and R2
+        :return centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
         :rtype: dict
         """
         self.settings['sampleSigma'] = self.settings['sigma'] / self.settings['pixelSize'] * \
@@ -238,78 +279,122 @@ class shapeMeasurement():
         self.log.info('Wrote %s' % output)
 
 
-def measureGaussianR2():
-    from support import logger as lg
-    log = lg.setUpLogger('shape.log')
+class TestShape(unittest.TestCase):
+    """
+    Unit tests for the shape class.
+    """
+    def setUp(self):
+        from support import logger as lg
+        self.log = lg.setUpLogger('shapeTesting.log')
 
-    #gaussian
-    sigma = 2. / (2. * math.sqrt(2.*math.log(2)))
-    Gaussian = shapeMeasurement(np.zeros((100, 100)), log).circular2DGaussian(50, 50, sigma)['Gaussian']
+        self.psffile12x = '../data/psf12x.fits'
+        self.psffile = '../data/psf1x.fits'
+        self.tolerance = 1.e-6
+        self.sigma = 40.0
+        self.sigmax = 27.25
+        self.sigmay = 14.15
+        self.sigmax2 = 37.12343
+        self.sigmay2 = 8.34543
+        self.xcent = 150.
+        self.ycent = 150.
 
-    settings = dict(sigma=sigma, weighted=False)
-    sh = shapeMeasurement(Gaussian, log, **settings)
-    results = sh.measureRefinedEllipticity()
-    print results['R2']
+        #create 2D Gaussians that will be used for testing
+        self.GaussianCirc = shapeMeasurement(np.zeros((300, 300)), self.log).circular2DGaussian(self.xcent,
+                                                                                                self.ycent,
+                                                                                                self.sigma)['Gaussian']
+        self.Gaussian = shapeMeasurement(np.zeros((300, 300)), self.log).Gaussian2D(self.xcent,
+                                                                                    self.ycent,
+                                                                                    self.sigmax,
+                                                                                    self.sigmay)['Gaussian']
+        self.Gaussian2 = shapeMeasurement(np.zeros((300, 300)), self.log).Gaussian2D(self.xcent,
+                                                                                     self.ycent,
+                                                                                     self.sigmax2,
+                                                                                     self.sigmay2)['Gaussian']
 
-    sh.writeFITS(Gaussian, 'Gaussian.fits')
+    def test_ellipticity_noweighting_circular_Gaussian(self):
+        expected = 0.0
+        settings = dict(weighted=False)
+        actual = shapeMeasurement(self.GaussianCirc, self.log, **settings).measureRefinedEllipticity()['ellipticity']
+        self.assertAlmostEqual(expected, actual, msg='exp=%f, got=%f' % (expected, actual), delta=self.tolerance)
+
+
+    def test_noweighting_Gaussian(self):
+        expected = math.fabs((self.sigmax**2 - self.sigmay**2) / (self.sigmax**2 + self.sigmay**2))
+        settings = dict(weighted=False)
+        actual = shapeMeasurement(self.Gaussian, self.log, **settings).measureRefinedEllipticity()
+        ae = actual['ellipticity']
+        ae1 = actual['e1']
+        ae2 = actual['e2']
+        R2 = actual['R2']
+        R2exp = 942.78413888701903
+        self.assertAlmostEqual(expected, ae, msg='exp=%f, got=%f' % (expected, ae), delta=self.tolerance)
+        self.assertAlmostEqual(expected, ae1, msg='exp=%f, got=%f' % (expected, ae1), delta=self.tolerance)
+        self.assertAlmostEqual(0.0, ae2, msg='exp=%f, got=%f' % (expected, ae2), delta=self.tolerance)
+        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=self.tolerance)
+
+
+    def test_noweighting_Gaussian2(self):
+        expected = math.fabs((self.sigmax2**2 - self.sigmay2**2) / (self.sigmax2**2 + self.sigmay2**2))
+        settings = dict(weighted=False, iterations=10)
+        actual = shapeMeasurement(self.Gaussian2, self.log, **settings).measureRefinedEllipticity()
+        ae = actual['ellipticity']
+        ae1 = actual['e1']
+        ae2 = actual['e2']
+        R2 = actual['R2']
+        R2exp = 1446.528033
+        self.assertAlmostEqual(expected, ae, msg='exp=%f, got=%f' % (expected, ae), delta=self.tolerance*100)
+        self.assertAlmostEqual(expected, ae1, msg='exp=%f, got=%f' % (expected, ae1), delta=self.tolerance*100)
+        self.assertAlmostEqual(0.0, ae2, msg='exp=%f, got=%f' % (expected, ae2), delta=self.tolerance)
+        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=self.tolerance)
+
+
+    def test_ellipticity_Gaussian(self):
+        expected = 0.557664 #0.5752531064876935
+        settings = dict(sigma=10.)
+        actual = shapeMeasurement(self.Gaussian, self.log, **settings).measureRefinedEllipticity()['ellipticity']
+        self.assertAlmostEqual(expected, actual, msg='exp=%f, got=%f' % (expected, actual), delta=self.tolerance)
+
+
+    def test_centroiding_weighting_Gaussian(self):
+        expected = self.xcent, self.ycent
+        actual = shapeMeasurement(self.Gaussian, self.log).measureRefinedEllipticity()
+        self.assertAlmostEqual(expected[0], actual['centreX'],
+                               msg='exp=%f, got=%f' % (expected[0], actual['centreX']), delta=self.tolerance)
+        self.assertAlmostEqual(expected[1], actual['centreY'],
+                               msg='exp=%f, got=%f' % (expected[1], actual['centreY']), delta=self.tolerance)
+
+
+    def test_R2_noweighting_circular_Gaussian(self):
+        expected = 3191.531326
+        settings = dict(weighted=False)
+        actual = shapeMeasurement(self.GaussianCirc, self.log, **settings).measureRefinedEllipticity()['R2']
+        self.assertAlmostEqual(expected, actual, msg='exp=%f, got=%f' % (expected, actual), delta=self.tolerance)
+
+
+    def test_PSF12x(self):
+        expected = 0.045536
+        R2exp = 5.010087
+        data = pf.getdata(self.psffile12x)
+        settings = dict(sampling=1/12.0)
+        actual = shapeMeasurement(data, self.log, **settings).measureRefinedEllipticity()
+        self.assertAlmostEqual(expected, actual['ellipticity'],
+                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=self.tolerance)
+        self.assertAlmostEqual(R2exp, actual['R2'],
+                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=self.tolerance)
+
+    def test_PSF(self):
+        expected = 0.045437
+        R2exp = 4.959904
+        data = pf.getdata(self.psffile)
+        actual = shapeMeasurement(data, self.log).measureRefinedEllipticity()
+        self.assertAlmostEqual(expected, actual['ellipticity'],
+                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=self.tolerance)
+        self.assertAlmostEqual(R2exp, actual['R2'],
+                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=self.tolerance)
+
 
 
 if __name__ == '__main__':
-    #testing part, looks for blob?.fits and psf.fits to derive centroids and ellipticity
-    import pyfits as pf
-    import glob as g
-    from support import logger as lg
-    import sys
-
-    measureGaussianR2()
-
-    files = g.glob('blob?.fits')
-
-    log = lg.setUpLogger('shape.log')
-    log.info('Testing shape measuring class...')
-
-    for file in files:
-        log.info('Processing file %s' % file)
-        data = pf.getdata(file)
-        sh = shapeMeasurement(data, log)
-        results = sh.measureRefinedEllipticity()
-        sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
-
-        print file
-        pprint.pprint(results)
-        print
-
-    file = 'psf.fits'
-    log.info('Processing file %s' % file)
-    data = pf.getdata(file)
-    settings = dict(sigma=1.5)
-    sh = shapeMeasurement(data, log, **settings)
-    results = sh.measureRefinedEllipticity()
-    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
-    print file
-    pprint.pprint(results)
-    print
-
-    file = 'stamp.fits'
-    log.info('Processing file %s' % file)
-    data = pf.getdata(file)
-    settings = dict(sigma=3.0)
-    sh = shapeMeasurement(data, log, **settings)
-    results = sh.measureRefinedEllipticity()
-    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
-    print file
-    pprint.pprint(results)
-    print
-
-    file = 'gaussian.fits'
-    log.info('Processing file %s' % file)
-    data = pf.getdata(file)
-    settings = dict(sampling=0.2)
-    sh = shapeMeasurement(data, log, **settings)
-    results = sh.measureRefinedEllipticity()
-    sh.writeFITS(results['GaussianWeighted'], file.replace('.fits', 'Gweighted.fits'))
-    print file
-    pprint.pprint(results)
-    print
-
-    log.info('All done\n\n')
+    #testing section
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestShape)
+    unittest.TextTestRunner(verbosity=3).run(suite)

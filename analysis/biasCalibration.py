@@ -136,7 +136,6 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
             #add readout noise based on a+1 median combined biases
             z = addReadoutNoise(zclean.copy(), number=a+1)
-            z = z.astype(np.int)
 
             if plots:
                 # generate 2D plot
@@ -186,7 +185,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
                 plt.close()
 
             #subtract the no noise surface from the fit
-            fitted -= zclean - 0.5
+            fitted -= zclean #- 0.5
 
             if plots:
                 # generate 2D plot
@@ -215,7 +214,6 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
                 #measure e and R2 from the postage stamp image
                 small = fitted[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
                 small += data.copy()
-                #small = small.astype(np.int)
                 sh = shape.shapeMeasurement(small.copy(), log)
                 results = sh.measureRefinedEllipticity()
 
@@ -240,7 +238,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
 
 def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                             file='psf1x.fits', psfs=500, psfscalemin=2.e2, psfscalemax=1.e5, gain=3.5,
+                             file='psf1x.fits', psfs=500, psfscale=7.e4, gain=3.5,
                              debug=False, plots=True):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
@@ -276,8 +274,9 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
     #random positions for the PSFs, these positions are the lower corners
     xpositions = np.random.random_integers(0, zclean.shape[1] - data.shape[1], psfs)
     ypositions = np.random.random_integers(0, zclean.shape[0] - data.shape[0], psfs)
-    #random scalings for the PSFs
-    psfscales = np.random.rand(psfs) * (psfscalemax - psfscalemin) + psfscalemin
+    #random scalings for the PSFs, cannot be used because then scaling changes e and R2
+    #psfscales = np.random.rand(psfs) * (psfscalemax - psfscalemin) + psfscalemin
+    psfscales = np.ones(psfs) * psfscale
 
     # generate 2D plot
     if plots:
@@ -316,12 +315,11 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
         #number of random readnoised surfaces to loop over
         for b in xrange(surfaces):
 
-            print 'Surface: %i / %i' % (b+1, surfaces)
+            print 'Number of Random Realisations: %i / %i' % (b+1, surfaces)
 
             #add readout noise based on a+1 median combined bias
             #this surface needs to be integer, because it resembles a recorded one
             z = addReadoutNoise(zclean.copy(), number=a+1)
-            z = z.astype(np.int)
 
             if plots:
                 # generate 2D plot
@@ -371,7 +369,7 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
                 plt.close()
 
             #subtract the no noise surface from the fit, adjust for integer conversion done earlier
-            fitted -= zclean - 0.5
+            fitted -= zclean.copy()
 
             if plots:
                 # generate 2D plot
@@ -400,15 +398,15 @@ def testBiasCalibrationSigma(log, numdata=2066, floor=1000, xsize=2048, ysize=20
                 tmp = data.copy() * scale
                 #measure e and R2 from the postage stamp image
                 small = fitted[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
+                #print np.sum(small), np.average(small), np.median(small), small.shape
                 small += tmp
-                #small = small.astype(np.int)
                 sh = shape.shapeMeasurement(small.copy(), log)
                 results = sh.measureRefinedEllipticity()
 
                 #save values
                 de1.append(results['e1'])
                 de2.append(results['e2'])
-                de.append(math.sqrt(results['e1']*results['e1'] + results['e2']*results['e2']))
+                de.append(math.sqrt(results['ellipticity']))
                 R2.append(results['R2'])
                 R2abs.append(results['R2'])
 
@@ -626,7 +624,7 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
     fig = plt.figure()
-    plt.title(r'VIS Bias Calibration: $\sigma^{2}(e)$')
+    plt.title(r'VIS Bias Calibration: $\sigma (e)$')
     ax = fig.add_subplot(111)
 
     x = 1
@@ -636,22 +634,22 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
         e2 = np.asarray(results[key][1])
         e = np.asarray(results[key][2])
 
-        var1 = np.var(e1)
-        var2 = np.var(e2)
-        var = np.var(e)
+        std1 = np.std(e1)
+        std2 = np.std(e2)
+        std = np.std(e)
 
-        ax.scatter(key-shift, var, c='m', marker='*')
-        ax.scatter(key, var1, c='b', marker='o')
-        ax.scatter(key, var2, c='y', marker='s')
+        ax.scatter(key-shift, std, c='m', marker='*')
+        ax.scatter(key, std1, c='b', marker='o')
+        ax.scatter(key, std2, c='y', marker='s')
 
         x += 1
 
-        print key, var, var1, var2
+        print key, std, std1, std2
 
 
-    ax.scatter(key-shift, var, c='m', marker='*', label=r'$\sigma^{2}(e)$')
-    ax.scatter(key, var1, c='b', marker='o', label=r'$\sigma^{2}(e_{1})$')
-    ax.scatter(key, var2, c='y', marker='s', label=r'$\sigma^{2}(e_{2})$')
+    ax.scatter(key-shift, std, c='m', marker='*', label=r'$\sigma (e)$')
+    ax.scatter(key, std1, c='b', marker='o', label=r'$\sigma (e_{1})$')
+    ax.scatter(key, std2, c='y', marker='s', label=r'$\sigma (e_{2})$')
 
     ax.fill_between(np.arange(x+1), np.ones(x+1)*reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
@@ -660,7 +658,7 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     ax.set_ylim(1e-8, 1e-4)
     ax.set_xlim(0, x)
     ax.set_xlabel('Number of Bias Frames Median Combined')
-    ax.set_ylabel(r'$\sigma^{2}(e_{i})\ , \ \ \ i \in [1,2]$')
+    ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
@@ -672,7 +670,7 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     R4 = 1.44264123086 ** 2
 
     fig = plt.figure()
-    plt.title(r'VIS Bias Calibration: $\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    plt.title(r'VIS Bias Calibration: $\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
     ax = fig.add_subplot(111)
 
     ax.axhline(y=0, c='k', ls=':')
@@ -683,18 +681,18 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
         dR2 = np.asarray(results[key][4])
 
         std = np.std(dR2) / (5.06722858929**2) #/ R4
-        var = np.var(dR2) / (5.06722858929**2) #/ R4
+        #var = np.var(dR2) / (5.06722858929**4) #/ R4
 
-        print key, var, std
+        print key, std
 
-        #ax.scatter(key, std, c='m', marker='*', s=35, zorder=10)
-        ax.scatter(key, var, c='b', marker='s', s=35, zorder=10)
+        ax.scatter(key, std, c='m', marker='*', s=35, zorder=10)
+        #ax.scatter(key, var, c='b', marker='s', s=35, zorder=10)
 
         x += 1
 
     #for the legend
-    #ax.scatter(key, std, c='m', marker='*', label=r'$\frac{\sigma(R^{2})}{R_{ref}^{4}}$')
-    ax.scatter(key, var, c='b', marker='s', label=r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    ax.scatter(key, std, c='m', marker='*', label=r'$\frac{\sigma(R^{2})}{R_{ref}^{2}}$')
+    #ax.scatter(key, var, c='b', marker='s', label=r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
 
     #show the requirement
     ax.fill_between(np.arange(x+1), np.ones(x+1)*reqr2, 1.0, facecolor='red', alpha=0.08)
@@ -704,7 +702,7 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     ax.set_ylim(1e-6, 1e-3)
     ax.set_xlim(0, x)
     ax.set_xlabel('Number of Bias Frames Median Combined')
-    ax.set_ylabel(r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
@@ -728,13 +726,13 @@ def addReadoutNoise(data, readnoise=4.5, number=1):
     :rtype: ndarray [same as input data]
     """
     shape = data.shape
-    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(shape[0], shape[1], number))
+    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(number, shape[0], shape[1]))
     if number > 1:
-        bias = np.median(biases.astype(np.int), axis=2, overwrite_input=True)
+        bias = np.median(biases.astype(np.int), axis=0, overwrite_input=True)
     elif number < 1:
         print 'ERROR - number of bias frames to create cannot be less than 1'
     else:
-        bias = biases[:,:,0].astype(np.int)
+        bias = biases[0].astype(np.int)
     return data + bias
 
 
@@ -746,17 +744,17 @@ if __name__ == '__main__':
     log.info('Testing bias level calibration...')
 
     if run:
+        print '\nSigma run:'
+        resultsSigma = testBiasCalibrationSigma(log, biases=15, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
+        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
         #print '\nDelta run:'
         #resultsDelta = testBiasCalibrationDelta(log, biases=10, psfs=50, surfaces=5, plots=False, file='psf1xhighe.fits')
         #fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
-        print '\nSigma run:'
-        resultsSigma = testBiasCalibrationSigma(log, biases=8, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
-        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
     else:
-        resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
+        #resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
 
     plotNumberOfFramesSigma(resultsSigma)
-    plotNumberOfFramesDelta(resultsDelta)
+    #   plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

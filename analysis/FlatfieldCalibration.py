@@ -14,8 +14,14 @@ R-GDP-CAL-064:
 The contribution of the residuals of VIS flat-field correction to the relative error on the determination
 of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 
+.. Note:: The amount of cosmic rays in the simulated input images might be too low, because the exposure was
+          set to 10 seconds and cosmic rays were calculated based on this. However, in reality the readout
+          takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than by assuming a single
+          10 second exposure.
+
 :requires: PyFITS
 :requires: NumPy
+:requires: SciPy
 :requires: matplotlib
 :requires: VISsim-Python
 
@@ -37,6 +43,7 @@ from matplotlib import cm
 import pyfits as pf
 import numpy as np
 import math, datetime, cPickle, itertools, glob, os, sys
+from scipy.ndimage.interpolation import zoom
 from analysis import shape
 from support import logger as lg
 from support import surfaceFitting as sf
@@ -165,9 +172,10 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     This function is to derive the the actual values so that the knowledge (variance) can be studied.
 
     """
-    #read in PSF and renormalize it
+    #read in PSF and rescale it to nicer numbers
     data = pf.getdata(file)
     data /= np.max(data)
+    data *= 1e4
 
     #derive reference values
     sh = shape.shapeMeasurement(data.copy(), log)
@@ -266,7 +274,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
     fig = plt.figure()
-    plt.title(r'VIS Flat Field Calibration: $\sigma^{2}(e)$')
+    plt.title(r'VIS Flat Field Calibration: $\sigma(e)$')
     ax = fig.add_subplot(111)
 
     maxx = 0
@@ -276,31 +284,31 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         e2 = np.asarray(res[key][1])
         e = np.asarray(res[key][2])
 
-        var1 = np.var(e1)
-        var2 = np.var(e2)
-        var = np.var(e)
+        std1 = np.std(e1)
+        std2 = np.std(e2)
+        std = np.std(e)
 
-        ax.scatter(key-shift, var, c='m', marker='*')
-        ax.scatter(key, var1, c='b', marker='o')
-        ax.scatter(key, var2, c='y', marker='s')
+        ax.scatter(key-shift, std, c='m', marker='*')
+        ax.scatter(key, std1, c='b', marker='o')
+        ax.scatter(key, std2, c='y', marker='s')
 
         if key > maxx:
             maxx = key
-        print key, var, var1, var2
+        print key, std, std1, std2
 
 
-    ax.scatter(key-shift, var, c='m', marker='*', label=r'$\sigma^{2}(e)$')
-    ax.scatter(key, var1, c='b', marker='o', label=r'$\sigma^{2}(e_{1})$')
-    ax.scatter(key, var2, c='y', marker='s', label=r'$\sigma^{2}(e_{2})$')
+    ax.scatter(key-shift, std, c='m', marker='*', label=r'$\sigma (e)$')
+    ax.scatter(key, std1, c='b', marker='o', label=r'$\sigma (e_{1})$')
+    ax.scatter(key, std2, c='y', marker='s', label=r'$\sigma (e_{2})$')
 
     ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-10, 1e-4)
+    ax.set_ylim(1e-6, 1e-3)
     ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
-    ax.set_ylabel(r'$\sigma^{2}(e_{i})\ , \ \ \ i \in [1,2]$')
+    ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
@@ -310,7 +318,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
 
     #same for R2s
     fig = plt.figure()
-    plt.title(r'VIS Flat Field Calibration: $\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    plt.title(r'VIS Flat Field Calibration: $\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
     ax = fig.add_subplot(111)
 
     ax.axhline(y=0, c='k', ls=':')
@@ -320,28 +328,28 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     for key in res:
         dR2 = np.asarray(res[key][3])
 
-        std = np.std(dR2) / (ref['R2']**4)
-        var = np.var(dR2) / (ref['R2']**4)
+        std = np.std(dR2) / (ref['R2']**2)
+        #var = np.var(dR2) / (ref['R2']**4)
 
-        print key, var, std
+        print key, std
 
-        ax.scatter(key, var, c='b', marker='s', s=35, zorder=10)
+        ax.scatter(key, std, c='b', marker='s', s=35, zorder=10)
 
         if key > maxx:
             maxx = key
 
     #for the legend
-    ax.scatter(key, var, c='b', marker='s', label=r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    ax.scatter(key, std, c='b', marker='s', label=r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     #show the requirement
     ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqr2, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqr2, c='g', ls='--', label='Requirement')
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-10, 1e-3)
+    ax.set_ylim(1e-6, 1e-3)
     ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
-    ax.set_ylabel(r'$\frac{\sigma^{2}(R^{2})}{R_{ref}^{4}}$')
+    ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
@@ -393,7 +401,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         ax = fig.add_subplot(111)
 
         dR2 = np.asarray(res[key][7])
-        avg = np.mean(dR2)**2
+        avg = np.mean(dR2/ref['R2'])**2
 
         ax.hist(dR2, bins=15, color='y', alpha=0.1, label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True)
 
@@ -403,13 +411,85 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         ax.axvline(x=0, ls=':', c='k')
 
         ax.set_ylabel('Probability Density')
-        ax.set_xlabel(r'$\delta \frac{\delta R^{2}}{R_{ref}^{r}}$')
+        ax.set_xlabel(r'$\frac{\delta R^{2}}{R_{ref}^{2}}$')
 
         plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
         plt.savefig(outdir+'/FlatCalibrationDeltaSize%i.pdf' % key)
         plt.close()
+
+
+def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=500):
+    """
+    Calculate ellipticity and size variance and error in case of no pixel-to-pixel flat field correction.
+    """
+    #read in PSF and renormalize it
+    data = pf.getdata(file)
+    data /= np.max(data)
+    data *= 1e5
+
+    #derive reference values
+    settings = dict(sampling=1.0/oversample)
+    sh = shape.shapeMeasurement(data.copy(), log, **settings)
+    reference = sh.measureRefinedEllipticity()
+    print reference
+
+    #residual
+    residual = pf.getdata('data/VISFlatField2percent.fits')
+
+    if oversample == 4.0:
+        residual = zoom(zoom(residual, 2, order=0), 2, order=0)
+    elif oversample == 1.0:
+        pass
+    else:
+        print 'ERROR--cannot do arbitrary oversampling...'
+
+    #random positions for the PSFs, these positions are the lower corners
+    xpositions = np.random.random_integers(0, residual.shape[1] - data.shape[1], psfs)
+    ypositions = np.random.random_integers(0, residual.shape[0] - data.shape[0], psfs)
+
+    #data storage
+    out = {}
+    de1 = []
+    de2 = []
+    de = []
+    R2 = []
+    dR2 = []
+    e1 = []
+    e2 = []
+    e = []
+    rnd = 1
+    tot = xpositions.size
+    #loop over the PSFs
+    for xpos, ypos in zip(xpositions, ypositions):
+        print'%i / %i' % (rnd, tot)
+        rnd += 1
+
+        #make a copy of the PSF
+        tmp = data.copy()
+
+        #get the underlying residual surface ond multiple the PSF with the surface
+        small = residual[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
+        small *= tmp
+
+        #measure e and R2 from the postage stamp image
+        sh = shape.shapeMeasurement(small.copy(), log, **settings)
+        results = sh.measureRefinedEllipticity()
+
+        #save values
+        e1.append(results['e1'])
+        e2.append(results['e2'])
+        e.append(results['ellipticity'])
+        R2.append(results['R2'])
+        de1.append(results['e1'] - reference['e1'])
+        de2.append(results['e2'] - reference['e2'])
+        de.append(results['ellipticity'] - reference['ellipticity'])
+        dR2.append(results['R2'] - reference['R2'])
+
+    out[1] = [e1, e2, e, R2, de1, de2, de, dR2]
+
+    return out, reference
 
 
 if __name__ == '__main__':
@@ -422,15 +502,17 @@ if __name__ == '__main__':
     log.info('Testing flat fielding calibration...')
 
     if run:
-        results = testFlatCalibration(log, flats=np.arange(2, 30, 4), surfaces=200, psfs=500, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(2, 86, 4), surfaces=100, psfs=500, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
-    else:
-        results = cPickle.load(open('flatfieldResults.pk'))
 
     if debug:
         residual = generateResidualFlatField(combine=3, plots=True, debug=True)
+        results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
+        plotNumberOfFrames(results)
 
     if plots:
+        if not run:
+            results = cPickle.load(open('flatfieldResults.pk'))
         plotNumberOfFrames(results)
 
     log.info('Run finished...\n\n\n')

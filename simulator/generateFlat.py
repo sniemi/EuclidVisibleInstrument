@@ -81,6 +81,10 @@ class flatField():
         #new image HDU
         hdu = pf.ImageHDU(data=data)
 
+        #add info
+        for key, value in self.settings.iteritems():
+            hdu.header.update(key.upper(), value)
+
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
         hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
@@ -94,8 +98,9 @@ class flatField():
 if __name__ == '__main__':
     log = lg.setUpLogger('generateFlat.log')
 
-    flat = flatField(log)
+    settings = dict(sigma=0.01)
+    flat = flatField(log, **settings)
     data = flat.generateFlat()
-    flat.writeFITS(data, 'VISFlatField.fits')
+    flat.writeFITS(data, 'VISFlatField1percent.fits')
 
     log.info('Run finished...\n\n\n')

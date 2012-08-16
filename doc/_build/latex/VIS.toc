@@ -37,5 +37,5 @@
 \contentsline {section}{\numberline {8.2}Code}{47}{section.8.2}
 \contentsline {chapter}{\numberline {9}Photometric Accuracy}{49}{chapter.9}
 \contentsline {chapter}{\numberline {10}Indices and tables}{51}{chapter.10}
-\contentsline {chapter}{Python Module Index}{53}{section*.122}
-\contentsline {chapter}{Index}{55}{section*.123}
+\contentsline {chapter}{Python Module Index}{53}{section*.123}
+\contentsline {chapter}{Index}{55}{section*.124}

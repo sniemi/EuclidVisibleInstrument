@@ -73,8 +73,9 @@
 \indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{30}
 \indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{31}
 \indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{32}
-\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{32}
+\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{33}
 \indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{33}
+\indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{33}
 \indexentry{analysis.analyse (module)|hyperpage}{35}
 \indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{35}
 \indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{36}

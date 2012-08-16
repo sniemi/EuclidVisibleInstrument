@@ -44,6 +44,7 @@ import pyfits as pf
 import numpy as np
 import math, datetime, cPickle, itertools, glob, os, sys
 from scipy.ndimage.interpolation import zoom
+from scipy import interpolate
 from analysis import shape
 from support import logger as lg
 from support import surfaceFitting as sf
@@ -55,7 +56,7 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     """
     Generate a median combined flat field residual from given input files.
 
-    Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+    Randomly draws a given number (kw combine) of files from the file list identified using the files kw.
     Median combine all files before the lamp profile given by lampfile kw is being divided out. This
     will produce a derived flat field. This flat can be compared against the reference that was used
     to produce the initial data to derive a residual flat that describes the error in the flat field
@@ -73,6 +74,9 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     :type plots: boolean
     :param debug: whether or not to produce output FITS files
     :type debug: boolean
+
+    .. Warning:: Remember to use an appropriate lamp and reference files so that the error in the derived
+                 flat field can be correctly calculated.
 
     :return: residual flat field (difference between the generated flat and the reference)
     :rtype: ndarray
@@ -104,9 +108,12 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     lamp = pf.getdata(lampfile)
     pixvar = medianCombined.astype(np.float64).copy() / lamp
 
-    #load the true reference p-flat and divide the derived flat with it
-    real = pf.getdata(reference)
-    res = pixvar.copy() / real.astype(np.float64)
+    #load the true reference p-flat and calculate the error in the derived flat field (i.e. residual)
+    real = pf.getdata(reference).astype(np.float64)
+    #todo: figure out how to calculate the error in the flat field!
+    #res = pixvar.copy() / real.astype(np.float64)
+    #res = np.abs(real - pixvar) / (real*pixvar) + 1.
+    res = np.abs(real - pixvar) + 1.
 
     if debug:
         print np.mean(res), np.min(res), np.max(res), np.std(res)
@@ -131,8 +138,17 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
         ax.plot_surface(xx, yy, medianCombined, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
-        ax.set_zlabel('Flat Field Counts [electrons]')
+        ax.set_zlabel('Counts [electrons]')
+        ax.set_zlim(8.9e4, 1.05e5)
         plt.savefig('plots/MedianFlat.png')
+        plt.close()
+
+        im = plt.imshow(medianCombined, origin='lower', vmin=8.9e4, vmax=1.05e5)
+        c1 = plt.colorbar(im)
+        c1.set_label('Counts [electrons]')
+        plt.xlabel('X [pixels]')
+        plt.ylabel('Y [pixels]')
+        plt.savefig('plots/Mediand2D.png')
         plt.close()
 
         fig = plt.figure()
@@ -140,8 +156,17 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
         ax.plot_surface(xx, yy, pixvar, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
-        ax.set_zlabel('Flat Field Counts [electrons]')
+        ax.set_zlim(0.95, 1.05)
+        ax.set_zlabel('Counts [electrons]')
         plt.savefig('plots/PixelFlat.png')
+        plt.close()
+
+        im = plt.imshow(pixvar, origin='lower', vmin=0.95, vmax=1.05)
+        c1 = plt.colorbar(im)
+        c1.set_label('Counts [electrons]')
+        plt.xlabel('X [pixels]')
+        plt.ylabel('Y [pixels]')
+        plt.savefig('plots/PixelFlat2D.png')
         plt.close()
 
         fig = plt.figure()
@@ -149,15 +174,16 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
         ax.plot_surface(xx, yy, res, rstride=100, cstride=100, alpha=0.6, cmap=cm.jet)
         ax.set_xlabel('X [pixels]')
         ax.set_ylabel('Y [pixels]')
+        ax.set_zlim(0.95, 1.05)
         ax.set_zlabel('Residual Flat Field')
         plt.savefig('plots/ResidualFlatField.png')
         plt.close()
 
-        im = plt.imshow(res, origin='lower', vmin=0.99, vmax=1.01)
+        im = plt.imshow(res, origin='lower', vmin=0.95, vmax=1.05)
         c1 = plt.colorbar(im)
-        c1.set_label('Derived / Input')
-        plt.xlabel('Y [pixels]')
-        plt.ylabel('X [pixels]')
+        c1.set_label('Residual Flat Field')
+        plt.xlabel('X [pixels]')
+        plt.ylabel('Y [pixels]')
         plt.savefig('plots/ResidualFlatField2D.png')
         plt.close()
 
@@ -172,10 +198,10 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     This function is to derive the the actual values so that the knowledge (variance) can be studied.
 
     """
-    #read in PSF and rescale it to nicer numbers
+    #read in PSF and rescale to avoid rounding or truncation errors
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= 1e4
+    data *= 1.e3
 
     #derive reference values
     sh = shape.shapeMeasurement(data.copy(), log)
@@ -223,7 +249,7 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
             for xpos, ypos in zip(xpositions, ypositions):
                 tmp = data.copy()
 
-                #get the underlying residual surface ond multiple the PSF with the surface
+                #get the underlying residual surface and multiple with the PSF
                 small = residual[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
                 small *= tmp
 
@@ -252,9 +278,9 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
 
     :param res: results to be plotted [results dictionary, reference values]
     :type res: list
-    :param reqe: the requirement for ellipticity
+    :param reqe: the requirement for ellipticity [default=3e-5]
     :type reqe: float
-    :param reqr2: the requirement for R2
+    :param reqr2: the requirement for size R2 [default=1e-4]
     :type reqr2: float
     :param shift: the amount to shift the e2 results on the abscissa (for clarity)
     :type shift: float
@@ -278,6 +304,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax = fig.add_subplot(111)
 
     maxx = 0
+    frames = []
+    values = []
     #loop over the number of frames combined
     for key in res:
         e1 = np.asarray(res[key][0])
@@ -288,6 +316,9 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         std2 = np.std(e2)
         std = np.std(e)
 
+        frames.append(key)
+        values.append(std)
+
         ax.scatter(key-shift, std, c='m', marker='*')
         ax.scatter(key, std1, c='b', marker='o')
         ax.scatter(key, std2, c='y', marker='s')
@@ -296,13 +327,27 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
             maxx = key
         print key, std, std1, std2
 
-
+    #label
     ax.scatter(key-shift, std, c='m', marker='*', label=r'$\sigma (e)$')
     ax.scatter(key, std1, c='b', marker='o', label=r'$\sigma (e_{1})$')
     ax.scatter(key, std2, c='y', marker='s', label=r'$\sigma (e_{2})$')
 
-    ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqe, 1.0, facecolor='red', alpha=0.08)
+    #sort and interpolate
+    values = np.asarray(values)
+    frames = np.asarray(frames)
+    srt = np.argsort(frames)
+    x = np.arange(frames.min(), frames.max()+1)
+    f = interpolate.interp1d(frames[srt], values[srt], kind='cubic')
+    vals = f(x)
+    ax.plot(x, vals, ':', c='0.2', zorder=20)
+    msk = vals < reqe
+    minn = np.min(x[msk])
+    plt.text(np.mean(frames), 5e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+             ha='center', va='center', fontsize=11)
+
+    ax.fill_between(np.arange(maxx+10), np.ones(maxx+10)*reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
+    plt.text(1, 0.9*reqe, '%.1e' % reqe, ha='left', va='top', fontsize=11)
 
     ax.set_yscale('log')
     ax.set_ylim(1e-6, 1e-3)
@@ -324,6 +369,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax.axhline(y=0, c='k', ls=':')
 
     maxx = 0
+    frames = []
+    values = []
     #loop over the number of frames combined
     for key in res:
         dR2 = np.asarray(res[key][3])
@@ -331,6 +378,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         std = np.std(dR2) / (ref['R2']**2)
         #var = np.var(dR2) / (ref['R2']**4)
 
+        frames.append(key)
+        values.append(std)
         print key, std
 
         ax.scatter(key, std, c='b', marker='s', s=35, zorder=10)
@@ -341,9 +390,23 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     #for the legend
     ax.scatter(key, std, c='b', marker='s', label=r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
+    #sort and interpolate
+    values = np.asarray(values)
+    frames = np.asarray(frames)
+    srt = np.argsort(frames)
+    x = np.arange(frames.min(), frames.max())
+    f = interpolate.interp1d(frames[srt], values[srt], kind='cubic')
+    vals = f(x)
+    ax.plot(x, vals, ':', c='0.2', zorder=10)
+    msk = vals < reqr2
+    minn = np.min(x[msk])
+    plt.text(np.mean(frames), 5e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+             fontsize=11, ha='center', va='center')
+
     #show the requirement
-    ax.fill_between(np.arange(maxx+1), np.ones(maxx+1)*reqr2, 1.0, facecolor='red', alpha=0.08)
+    ax.fill_between(np.arange(maxx+10), np.ones(maxx+10)*reqr2, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqr2, c='g', ls='--', label='Requirement')
+    plt.text(1, 0.9*reqr2, '%.1e' % reqr2, ha='left', va='top', fontsize=11)
 
     ax.set_yscale('log')
     ax.set_ylim(1e-6, 1e-3)
@@ -494,21 +557,24 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
 
 if __name__ == '__main__':
     run = True
+    #run = False
+    #debug = True
     debug = False
     plots = True
+    #plots = False
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
     log.info('Testing flat fielding calibration...')
 
     if run:
-        results = testFlatCalibration(log, flats=np.arange(2, 86, 4), surfaces=100, psfs=500, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(2, 44, 4), surfaces=100, psfs=500, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
 
     if debug:
-        residual = generateResidualFlatField(combine=3, plots=True, debug=True)
-        results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
-        plotNumberOfFrames(results)
+        residual = generateResidualFlatField(combine=30, plots=True, debug=True)
+        #results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
+        #plotNumberOfFrames(results)
 
     if plots:
         if not run:

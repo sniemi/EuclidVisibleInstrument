@@ -551,60 +551,6 @@ class VISsimulator():
         return True
 
 
-    def _gammln(self, xx):
-        """
-        Logarithm of the gamma function.
-        """
-        gammln_cof = [76.18009173,
-                      -86.50532033,
-                      24.01409822,
-                      -1.231739516e0,
-                      0.120858003e-2,
-                      -0.536382e-5]
-        gammln_stp = 2.50662827465
-        x = xx
-        y = x
-        tmp = x + 5.5
-        tmp = (x + .5) * np.log(tmp) - tmp
-        ser = 1.000000000190015
-        for j in xrange(6):
-            y += 1.
-            ser += gammln_cof[j] / y
-        return tmp + np.log(gammln_stp * ser / x)
-
-
-    def _slowPoissonNoise(self, value):
-        """
-        .. deprecated:: 0.5
-           This feature is obsolete because one can also use numpy.random.poisson.
-        """
-        if value < 12:
-            g = np.exp(-value)
-            em = -1
-            t = 1
-            while t > g:
-                em += 1
-                t *= np.random.unform()
-                return em
-        else:
-            sq = np.sqrt(2.*value)
-            al = np.log(value)
-            g = value * al - self._gammln(value+1.)
-
-            em = -1
-            while em < 0:
-                y = np.tan(math.pi * np.random.uniform())
-                em = int(sq*y + value)
-
-            t = 0.9 * (1. + y**2) * np.exp(em * al - self._gammln(em+1.) - g)
-            while np.random.uniform() > t:
-                t = 0.9 * (1. + y**2) * np.exp(em * al - self._gammln(em+1.) - g)
-                y = np.tan(math.pi * np.random.uniform())
-                em = int(sq * y + value)
-
-            return em
-
-
     def overlayToCCD(self, data, obj):
         """
         Overlay data from a source object onto the self.image.
@@ -1115,7 +1061,7 @@ class VISsimulator():
 
                 stype = obj[3]
 
-                if intscales[j] > 1. and self.objectOnDetector(obj):
+                if self.objectOnDetector(obj):
                     visible += 1
                     if stype == 0:
                         #point source, apply PSF

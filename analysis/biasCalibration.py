@@ -549,7 +549,10 @@ def plotNumberOfFramesDelta(results):
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-        plt.title(r'VIS Bias Calibration (%i exposures): $\delta e$' % key)
+        if key == 1:
+            plt.title(r'VIS Bias Calibration (%i exposure): $\delta e$' % key)
+        else:
+            plt.title(r'VIS Bias Calibration (%i exposures): $\delta e$' % key)
 
         de1 = np.asarray(results[key][0])
         de2 = np.asarray(results[key][1])
@@ -584,7 +587,11 @@ def plotNumberOfFramesDelta(results):
     #same for R2s
     for key in results:
         fig = plt.figure()
-        plt.title(r'VIS Bias Calibration (%i exposures): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
+        if key == 1:
+            plt.title(r'VIS Bias Calibration (%i exposure): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
+        else:
+            plt.title(r'VIS Bias Calibration (%i exposures): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
+
         ax = fig.add_subplot(111)
 
         dR2 = np.asarray(results[key][3])
@@ -598,11 +605,11 @@ def plotNumberOfFramesDelta(results):
         ax.axvline(x=0, ls=':', c='k')
 
         ax.set_ylabel('Probability Density')
-        ax.set_xlabel(r'$\delta \frac{\delta R^{2}}{R_{ref}^{r}}$')
+        ax.set_xlabel(r'$\delta \frac{\delta R^{2}}{R_{ref}^{2}}$')
 
         plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
-        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8    )
+        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
         plt.savefig('BiasCalibrationDeltaSize%i.pdf' % key)
         plt.close()
 
@@ -747,14 +754,14 @@ if __name__ == '__main__':
         print '\nSigma run:'
         resultsSigma = testBiasCalibrationSigma(log, biases=15, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
-        #print '\nDelta run:'
-        #resultsDelta = testBiasCalibrationDelta(log, biases=10, psfs=50, surfaces=5, plots=False, file='psf1xhighe.fits')
-        #fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
+        print '\nDelta run:'
+        resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
+        fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
     else:
-        #resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
+        resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
 
     plotNumberOfFramesSigma(resultsSigma)
-    #   plotNumberOfFramesDelta(resultsDelta)
+    plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

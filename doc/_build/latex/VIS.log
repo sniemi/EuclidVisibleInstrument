@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.8.1)  13 AUG 2012 12:04
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.8.1)  16 AUG 2012 13:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1144,11 +1144,6 @@ Underfull \hbox (badness 10000) in paragraph at lines 1804--1804
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 1804--1804
-\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1804--1804
 \T1/ptm/m/it/12 de-
  []
 
@@ -1218,23 +1213,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 1834--1834
  []
 
 
-Overfull \hbox (12.49821pt too wide) in paragraph at lines 1834--1834
-\T1/ptm/m/it/12 calemin=200.0\T1/ptm/m/n/12 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1834--1834
-\T1/ptm/m/it/12 ps-f-s-cale-
- []
-
-
-Overfull \hbox (12.49854pt too wide) in paragraph at lines 1834--1834
-\T1/ptm/m/it/12 max=100000.0\T1/ptm/m/n/12 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1834--1834
-\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
+Overfull \hbox (6.49838pt too wide) in paragraph at lines 1834--1834
+\T1/ptm/m/it/12 cale=70000.0\T1/ptm/m/n/12 ,
  []
 
 
@@ -1253,113 +1233,138 @@ Underfull \hbox (badness 10000) in paragraph at lines 1834--1834
  []
 
 [30] [31]
-Overfull \hbox (97.69762pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (97.69762pt too wide) in paragraph at lines 1908--1908
 []\T1/ptm/m/it/12 files='Q0*flatfield*.fits'\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (3.59448pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (3.59448pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 com-
  []
 
 
-Overfull \hbox (23.37044pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (23.37044pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 bine=77\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (7.60243pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (7.60243pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 lamp-
  []
 
 
-Overfull \hbox (163.88885pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (163.88885pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 file='data/VIScalibrationUnitflux.fits'\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1898--1898
+Underfull \hbox (badness 10000) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 ref-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1898--1898
+Underfull \hbox (badness 10000) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 er-
  []
 
 
-Overfull \hbox (165.72476pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (165.72476pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 ence='data/VISFlatField2percent.fits'\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (39.80992pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (39.80992pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 plots=False\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1898--1898
+Underfull \hbox (badness 10000) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 de-
  []
 
 
-Overfull \hbox (38.43034pt too wide) in paragraph at lines 1898--1898
+Overfull \hbox (38.43034pt too wide) in paragraph at lines 1908--1908
 \T1/ptm/m/it/12 bug=False\T1/pcr/m/n/12 ) 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 1941--1941
+[32]
+Underfull \hbox (badness 10000) in paragraph at lines 1958--1958
 []\T1/ptm/m/it/12 results\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1941--1941
+Underfull \hbox (badness 10000) in paragraph at lines 1958--1958
 \T1/ptm/m/it/12 reqe=3e-05\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1941--1941
+Underfull \hbox (badness 10000) in paragraph at lines 1958--1958
 \T1/ptm/m/it/12 reqr2=0.0001\T1/ptm/m/n/12 ,
  []
 
-[32]
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\T1/ptm/m/it/12 log\T1/ptm/m/n/12 , \T1/ptm/m/it/12 flats\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 sur-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 faces=100\T1/ptm/m/n/12 ,
  []
 
 
-Overfull \hbox (36.86955pt too wide) in paragraph at lines 1972--1972
+Overfull \hbox (36.86955pt too wide) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 file='data/psf1x.fits'\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 psfs=500\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
-\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 plot=False\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 \T1/ptm/m/it/12 de-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2000--2000
+[]\T1/ptm/m/it/12 log\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (80.06953pt too wide) in paragraph at lines 2000--2000
+\T1/ptm/m/it/12 file='data/psf1x.fits'\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (4.5664pt too wide) in paragraph at lines 2000--2000
+\T1/ptm/m/it/12 over-
+ []
+
+
+Overfull \hbox (2.93443pt too wide) in paragraph at lines 2000--2000
+\T1/ptm/m/it/12 sam-
+ []
+
+
+Overfull \hbox (20.37044pt too wide) in paragraph at lines 2000--2000
+\T1/ptm/m/it/12 ple=1.0\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (31.57826pt too wide) in paragraph at lines 2000--2000
+\T1/ptm/m/it/12 psfs=500\T1/pcr/m/n/12 ) 
  []
 
 [33] [34
@@ -1367,26 +1372,26 @@ Underfull \hbox (badness 10000) in paragraph at lines 1972--1972
 ]
 Chapter 6.
 [35] [36] [37] [38] [39]
-Underfull \hbox (badness 10000) in paragraph at lines 2586--2586
+Underfull \hbox (badness 10000) in paragraph at lines 2611--2611
 []\T1/ptm/m/it/12 info\T1/ptm/m/n/12 , \T1/ptm/m/it/12 mag-ni-tude=24.5\T1/ptm/
 m/n/12 , \T1/ptm/m/it/12 ex-p-time=565.0\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ex-po-
 sures=3\T1/ptm/m/n/12 ,
  []
 
 [40]
-Underfull \hbox (badness 10000) in paragraph at lines 2657--2657
+Underfull \hbox (badness 10000) in paragraph at lines 2682--2682
 []\T1/ptm/m/it/12 info\T1/ptm/m/n/12 , \T1/ptm/m/it/12 mag-ni-tude\T1/ptm/m/n/1
 2 , \T1/ptm/m/it/12 snr=10.0\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ex-po-sures=3\T1/p
 tm/m/n/12 ,
  []
 
 [41] [42]
-Underfull \hbox (badness 10000) in paragraph at lines 2804--2804
+Underfull \hbox (badness 10000) in paragraph at lines 2829--2829
 []\T1/ptm/m/it/12 file='data/psf12x.fits'\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ra-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2813--2813
+Underfull \hbox (badness 10000) in paragraph at lines 2838--2838
 []\T1/ptm/m/it/12 radius\T1/ptm/m/n/12 , \T1/ptm/m/it/12 en-ergy\T1/ptm/m/n/12 
 ,
  []
@@ -1403,15 +1408,15 @@ Chapter 8.
 
 ]
 Chapter 9.
-<Magnitudes15.pdf, id=582, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=583, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2874.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2899.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 2874.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 2899.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
  [49] [50 <./Magnitudes15.pdf>]
 Chapter 10.
@@ -1420,7 +1425,7 @@ Chapter 10.
 ] [52
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2900--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2925--2926
 []\T1/pcr/m/n/12 analysis.FlatfieldCalibration\T1/ptm/m/n/12 ,
  []
 
@@ -2063,58 +2068,48 @@ Underfull \hbox (badness 10000) in paragraph at lines 151--152
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 153--154
+Underfull \hbox (badness 10000) in paragraph at lines 154--155
 []\T1/ptm/m/n/12 tileCCD() (post-proc.tileCCD.tileCCD
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 162--163
+Underfull \hbox (badness 10000) in paragraph at lines 163--164
 []\T1/ptm/m/n/12 writeFITS() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 162--163
+Underfull \hbox (badness 10000) in paragraph at lines 163--164
 \T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 163--164
+Underfull \hbox (badness 10000) in paragraph at lines 164--165
 []\T1/ptm/m/n/12 writeFITSfile() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 163--164
+Underfull \hbox (badness 10000) in paragraph at lines 164--165
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 164--165
+Underfull \hbox (badness 10000) in paragraph at lines 165--166
 []\T1/ptm/m/n/12 writeFITSfile() (post-proc.tileCCD.tileCCD
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 165--166
+Underfull \hbox (badness 10000) in paragraph at lines 166--167
 []\T1/ptm/m/n/12 writeFITSfile() (re-duc-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 165--166
+Underfull \hbox (badness 10000) in paragraph at lines 166--167
 \T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 166--167
-[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 166--167
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 167--168
-[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
  []
 
 
@@ -2124,30 +2119,40 @@ Underfull \hbox (badness 7151) in paragraph at lines 167--168
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 168--169
+[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 168--169
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 169--170
 []\T1/ptm/m/n/12 writeResults() (anal-y-
  []
 
 [58
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2920.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2920.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2945.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2945.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2920.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2920.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 2945.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2945.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: 1CFF044EBAAD379BDC0A1A4F9B3E34AD;1312.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2920.
+(rerunfilecheck)             Checksum: 9A894BC139D34F222BE693931017268A;1312.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2945.
  ) 
 Here is how much of TeX's memory you used:
- 9317 strings out of 493488
- 133879 string characters out of 3141327
- 226127 words of memory out of 3000000
- 12162 multiletter control sequences out of 15000+200000
+ 9319 strings out of 493488
+ 133958 string characters out of 3141327
+ 226180 words of memory out of 3000000
+ 12163 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
  958 hyphenation exceptions out of 8191
- 36i,12n,45p,518b,627s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,12n,45p,469b,627s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/tex
@@ -2162,10 +2167,10 @@ e1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw
 /helvetic/uhvr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/
 utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on VIS.pdf (62 pages, 1603486 bytes).
+Output written on VIS.pdf (62 pages, 1604209 bytes).
 PDF statistics:
- 908 PDF objects out of 1000 (max. 8388607)
- 779 compressed objects within 8 object streams
- 268 named destinations out of 1000 (max. 500000)
+ 910 PDF objects out of 1000 (max. 8388607)
+ 781 compressed objects within 8 object streams
+ 269 named destinations out of 1000 (max. 500000)
  192 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 13, 2012}
+\date{August 16, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -1801,7 +1801,7 @@ Creates a simple plot to combine and show the results.
 \index{testBiasCalibrationDelta() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationDelta}}{\emph{log}, \emph{numdata=2066}, \emph{floor=995}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=1000.0}, \emph{sigma=0.75}, \emph{debug=False}, \emph{plots=False}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationDelta}}{\emph{log}, \emph{numdata=2066}, \emph{floor=995}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=1000.0}, \emph{debug=False}, \emph{plots=False}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined and compare to the nominal PSF ellipticity.
 
@@ -1831,7 +1831,7 @@ Generates a set of plots that can be used to inspect the simulation.
 \index{testBiasCalibrationSigma() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscalemin=200.0}, \emph{psfscalemax=100000.0}, \emph{sigma=0.75}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=70000.0}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.
 
@@ -1872,12 +1872,22 @@ ellipticity component of the local PSF shall not exceed 3x10-5 (one sigma).
 R-GDP-CAL-064:
 The contribution of the residuals of VIS flat-field correction to the relative error on the determination
 of the local PSF R2 shall not exceed 1x10-4 (one sigma).
+
+\begin{notice}{note}{Note:}
+The amount of cosmic rays in the simulated input images might be too low, because the exposure was
+set to 10 seconds and cosmic rays were calculated based on this. However, in reality the readout
+takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than by assuming a single
+10 second exposure.
+\end{notice}
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
 PyFITS
 
 \item[{requires}] \leavevmode
 NumPy
+
+\item[{requires}] \leavevmode
+SciPy
 
 \item[{requires}] \leavevmode
 matplotlib
@@ -1898,7 +1908,7 @@ Sami-Matias Niemi
 \phantomsection\label{reduction:analysis.FlatfieldCalibration.generateResidualFlatField}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{generateResidualFlatField}}{\emph{files='Q0*flatfield*.fits'}, \emph{combine=77}, \emph{lampfile='data/VIScalibrationUnitflux.fits'}, \emph{reference='data/VISFlatField2percent.fits'}, \emph{plots=False}, \emph{debug=False}}{}
 Generate a median combined flat field residual from given input files.
 
-Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+Randomly draws a given number (kw combine) of files from the file list identified using the files kw.
 Median combine all files before the lamp profile given by lampfile kw is being divided out. This
 will produce a derived flat field. This flat can be compared against the reference that was used
 to produce the initial data to derive a residual flat that describes the error in the flat field
@@ -1925,6 +1935,13 @@ that was derived.
 
 \end{itemize}
 
+\end{description}\end{quote}
+
+\begin{notice}{warning}{Warning:}
+Remember to use an appropriate lamp and reference files so that the error in the derived
+flat field can be correctly calculated.
+\end{notice}
+\begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 residual flat field (difference between the generated flat and the reference)
 
@@ -1946,10 +1963,10 @@ Creates a simple plot to combine and show the results.
 \textbf{res} (\emph{list}) -- results to be plotted {[}results dictionary, reference values{]}
 
 \item {} 
-\textbf{reqe} (\emph{float}) -- the requirement for ellipticity
+\textbf{reqe} (\emph{float}) -- the requirement for ellipticity {[}default=3e-5{]}
 
 \item {} 
-\textbf{reqr2} (\emph{float}) -- the requirement for R2
+\textbf{reqr2} (\emph{float}) -- the requirement for size R2 {[}default=1e-4{]}
 
 \item {} 
 \textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
@@ -1969,11 +1986,19 @@ None
 \index{testFlatCalibration() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibration}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibration}}{\emph{log}, \emph{flats}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{sigma=0.75}, \emph{plot=False}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibration}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibration}}{\emph{log}, \emph{flats}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{plot=False}, \emph{debug=False}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.
 
 This function is to derive the the actual values so that the knowledge (variance) can be studied.
+
+\end{fulllineitems}
+
+\index{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.testNoFlatfieldingEffects}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testNoFlatfieldingEffects}}{\emph{log}, \emph{file='data/psf1x.fits'}, \emph{oversample=1.0}, \emph{psfs=500}}{}
+Calculate ellipticity and size variance and error in case of no pixel-to-pixel flat field correction.
 
 \end{fulllineitems}
 

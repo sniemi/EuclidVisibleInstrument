@@ -281,7 +281,7 @@ the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.testBiasCalibrationDelta">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationDelta</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=995</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=1000.0</em>, <em>sigma=0.75</em>, <em>debug=False</em>, <em>plots=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationDelta" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationDelta</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=995</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=1000.0</em>, <em>debug=False</em>, <em>plots=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationDelta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined and compare to the nominal PSF ellipticity.</p>
 <p>This function can be used to derive the error (delta) in determining ellipticity and size given
@@ -301,7 +301,7 @@ the surface that also affect the results, however, to a lesser degree.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.testBiasCalibrationSigma">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=1000</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscalemin=200.0</em>, <em>psfscalemax=100000.0</em>, <em>sigma=0.75</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=1000</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=70000.0</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>
@@ -329,6 +329,13 @@ ellipticity component of the local PSF shall not exceed 3x10-5 (one sigma).</p>
 <p>R-GDP-CAL-064:
 The contribution of the residuals of VIS flat-field correction to the relative error on the determination
 of the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The amount of cosmic rays in the simulated input images might be too low, because the exposure was
+set to 10 seconds and cosmic rays were calculated based on this. However, in reality the readout
+takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than by assuming a single
+10 second exposure.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -337,13 +344,15 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -351,7 +360,7 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 <dt id="analysis.FlatfieldCalibration.generateResidualFlatField">
 <tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">generateResidualFlatField</tt><big>(</big><em>files='Q0*flatfield*.fits'</em>, <em>combine=77</em>, <em>lampfile='data/VIScalibrationUnitflux.fits'</em>, <em>reference='data/VISFlatField2percent.fits'</em>, <em>plots=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.generateResidualFlatField" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a median combined flat field residual from given input files.</p>
-<p>Randomly draws a given number (kw combine) of files from the file list identfied using the files kw.
+<p>Randomly draws a given number (kw combine) of files from the file list identified using the files kw.
 Median combine all files before the lamp profile given by lampfile kw is being divided out. This
 will produce a derived flat field. This flat can be compared against the reference that was used
 to produce the initial data to derive a residual flat that describes the error in the flat field
@@ -360,7 +369,7 @@ that was derived.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>files</strong> (<em>str</em>) &#8211; wildcard flagged name identifier for the FITS files to be used for generating a flat</li>
 <li><strong>combine</strong> (<em>int</em>) &#8211; number of files to median combine</li>
 <li><strong>lampfile</strong> (<em>str</em>) &#8211; name of the calibration unit flux profile FITS file</li>
@@ -370,11 +379,20 @@ that was derived.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">residual flat field (difference between the generated flat and the reference)</p>
-</td>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Remember to use an appropriate lamp and reference files so that the error in the derived
+flat field can be correctly calculated.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">residual flat field (difference between the generated flat and the reference)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
-</td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
 </tr>
 </tbody>
 </table>
@@ -390,8 +408,8 @@ that was derived.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [results dictionary, reference values]</li>
-<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity</li>
-<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for R2</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3e-5]</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=1e-4]</li>
 <li><strong>shift</strong> (<em>float</em>) &#8211; the amount to shift the e2 results on the abscissa (for clarity)</li>
 <li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
 </ul>
@@ -406,10 +424,16 @@ that was derived.</p>
 
 <dl class="function">
 <dt id="analysis.FlatfieldCalibration.testFlatCalibration">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibration</tt><big>(</big><em>log</em>, <em>flats</em>, <em>surfaces=100</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=500</em>, <em>sigma=0.75</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibration" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibration</tt><big>(</big><em>log</em>, <em>flats</em>, <em>surfaces=100</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=500</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.FlatfieldCalibration.testNoFlatfieldingEffects">
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testNoFlatfieldingEffects</tt><big>(</big><em>log</em>, <em>file='data/psf1x.fits'</em>, <em>oversample=1.0</em>, <em>psfs=500</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testNoFlatfieldingEffects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate ellipticity and size variance and error in case of no pixel-to-pixel flat field correction.</p>
 </dd></dl>
 
 </div>

@@ -39,6 +39,21 @@ Thus it is recommended that one installs a Python distribution like `Enthought P
 which installs all dependencies at once.
 
 
+Exposure Times
+==============
+
+The package provides a simple exposure time calculator (ETC) that allows to estimate a signal-to-noise ratio
+of an average galaxy or star with a given number of VIS exposures. The ETC also allows to calculate limiting
+magnitude or an exposure time for a given magnitude.
+
+For the Python documentation, please see:
+
+.. toctree::
+   :maxdepth: 4
+
+   ETC
+
+
 Creating Object Catalogs
 ========================
 
@@ -180,19 +195,26 @@ which the different quadrants were combiled to form a single CCD. These data wer
 reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
 using SExtractor, after which the extracted magnitudes were compared against the input catalog.
 
-The following
-figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
-about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
-single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
-the derived magnitudes are inaccurate.
+The following figures show that the photometric accuracy with realistic noise and the end-of-life radiation damage is
+about 0.08 mag. Please note, however, that the derived magnitudes are based on a
+single 565 second exposure, and therefore the scatter is large in case of fainter objects.
 
 .. figure:: figs/Magnitudes15.*
      :width: 800 px
      :align: center
      :figclass: align-center
 
-     Example showing the recovered photometry from a reference simulator image with realistic noise
+     Example showing the recovered photometry from a reference simulator image with realistic noise, average background,
      and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.
+
+
+.. figure:: figs/magnitudes.*
+     :width: 800 px
+     :align: center
+     :figclass: align-center
+
+     Example showing the recovered photometry for point sources from a reference simulator image with realistic noise
+     and an average background, but without any radiation damage to the CCD.
 
 
 Indices and tables

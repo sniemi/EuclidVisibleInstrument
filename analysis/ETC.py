@@ -1,6 +1,6 @@
 """
-Exposure Times
-==============
+Calculating Exposure Times and Limiting Magnitude
+=================================================
 
 This file provides a simple functions to calculate exposure times or limiting magnitudes.
 The file also provides a function that returns VIS related information such as pixel
@@ -9,6 +9,8 @@ size, dark current, gain, and zeropoint.
 :requires: NumPy
 :requires: SciPy
 :requires: matplotlib
+
+:version: 0.1
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -44,7 +46,7 @@ def VISinformation():
 
 def calculateAperture(info):
     """
-    pi * (diameter / pixel_size)**2 / 4
+    pi * (diameter / 2. / pixel_size)**2
     """
     out = math.pi * (info['diameter']/2./info['pixel_size'])**2
     return out
@@ -57,7 +59,7 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
     :param info: information describing the instrument
     :type info: dict
     :param magnitude: the magnitude of the objct
-    :type magnitude: float
+    :type magnitude: float or ndarray
     :param snr: signal-to-noise ratio required [default=10].
     :type snr: float
     :param exposures: number of exposures that the object is present in
@@ -68,8 +70,8 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
 
-    :return: exposure time (of an individual exposure) [seconds]
-    :rtype: float
+    :return: exposure time [seconds]
+    :rtype: float or ndarray
     """
     snr /= fudge
 
@@ -233,7 +235,7 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
 
 
 if __name__ == '__main__':
-    magnitude = 17.6
+    magnitude = 20.8989
     exptime = 565.0
 
     info = VISinformation()

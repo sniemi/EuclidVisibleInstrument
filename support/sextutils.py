@@ -282,7 +282,7 @@ def parseconfig_se(cfile):
                 entry = []
                 for e in a[1:maxi]:
                     if string.find(e, ','):
-                        entry = entry + string.split(e, ',')
+                        entry += string.split(e, ',')
                     else:
                         entry = entry + [e]
                 cdict[a[0]] = entry
@@ -317,7 +317,7 @@ def initcat(catfile, preserve_case=False):
                         column_name = previous_key + "_%d" % (c - previous_column)
                         hdict[column_name] = c
                         # Update this column in the dictionary
-                if (preserve_case):
+                if preserve_case:
                     column_name = a[2]
                 else:
                     column_name = a[2].lower()
@@ -344,7 +344,7 @@ def initcat(catfile, preserve_case=False):
                 # If so, add keys for the last entry
                     for c in range(previous_column + 1, len(a)):
                         column_name = previous_key + "_%d" % (c - previous_column)
-                        if (preserve_case):
+                        if preserve_case:
                             hdict[column_name] = c
                         else:
                             hdict[column_name] = c.lower()
@@ -386,7 +386,7 @@ type (Int32, Float64) or a list of strings """
     return values
 
 
-def getcolvalues(col, coltype, colentries, colzero=False):
+def getcolvalues(col, coltype, colentries):
     """ Get a column from a SExtractor catalog. Determine the type
 (integer, float, string) and return either an array of that
 type (Int32, Float64) or a list of strings """

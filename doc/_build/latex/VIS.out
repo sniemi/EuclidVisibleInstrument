@@ -1,22 +1,24 @@
 \BOOKMARK [0][-]{chapter.1}{Installation}{}% 1
 \BOOKMARK [1][-]{section.1.1}{Dependencies}{chapter.1}% 2
-\BOOKMARK [0][-]{chapter.2}{Creating Object Catalogs}{}% 3
-\BOOKMARK [1][-]{section.2.1}{Generating Object Catalogue}{chapter.2}% 4
-\BOOKMARK [0][-]{chapter.3}{Creating Simulated Mock Images}{}% 5
-\BOOKMARK [1][-]{section.3.1}{Simulation tools}{chapter.3}% 6
-\BOOKMARK [0][-]{chapter.4}{Instrument Characteristics}{}% 7
-\BOOKMARK [1][-]{section.4.1}{Postprocessing tools}{chapter.4}% 8
-\BOOKMARK [0][-]{chapter.5}{Data reduction}{}% 9
-\BOOKMARK [1][-]{section.5.1}{Data reduction tools}{chapter.5}% 10
-\BOOKMARK [1][-]{section.5.2}{VIS data reduction studies}{chapter.5}% 11
-\BOOKMARK [0][-]{chapter.6}{Data Analysis}{}% 12
-\BOOKMARK [1][-]{section.6.1}{VIS data analysis tools}{chapter.6}% 13
-\BOOKMARK [0][-]{chapter.7}{Charge Transfer Inefficiency}{}% 14
-\BOOKMARK [1][-]{section.7.1}{Fortran code for CTI}{chapter.7}% 15
-\BOOKMARK [0][-]{chapter.8}{Supporting methods and files}{}% 16
-\BOOKMARK [1][-]{section.8.1}{Objects}{chapter.8}% 17
-\BOOKMARK [1][-]{section.8.2}{Code}{chapter.8}% 18
-\BOOKMARK [0][-]{chapter.9}{Photometric Accuracy}{}% 19
-\BOOKMARK [0][-]{chapter.10}{Indices and tables}{}% 20
-\BOOKMARK [0][-]{section*.123}{Python Module Index}{}% 21
-\BOOKMARK [0][-]{section*.124}{Index}{}% 22
+\BOOKMARK [0][-]{chapter.2}{Exposure Times}{}% 3
+\BOOKMARK [1][-]{section.2.1}{Exposure Time Calculator}{chapter.2}% 4
+\BOOKMARK [0][-]{chapter.3}{Creating Object Catalogs}{}% 5
+\BOOKMARK [1][-]{section.3.1}{Generating Object Catalogue}{chapter.3}% 6
+\BOOKMARK [0][-]{chapter.4}{Creating Simulated Mock Images}{}% 7
+\BOOKMARK [1][-]{section.4.1}{Simulation tools}{chapter.4}% 8
+\BOOKMARK [0][-]{chapter.5}{Instrument Characteristics}{}% 9
+\BOOKMARK [1][-]{section.5.1}{Postprocessing tools}{chapter.5}% 10
+\BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 11
+\BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 12
+\BOOKMARK [1][-]{section.6.2}{VIS data reduction studies}{chapter.6}% 13
+\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 14
+\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 15
+\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 16
+\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 17
+\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 18
+\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 19
+\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 20
+\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 21
+\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 22
+\BOOKMARK [0][-]{section*.123}{Python Module Index}{}% 23
+\BOOKMARK [0][-]{section*.124}{Index}{}% 24

@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="#" />
-    <link rel="next" title="Generating Object Catalogue" href="sources.html" /> 
+    <link rel="next" title="Exposure Time Calculator" href="ETC.html" /> 
   </head>
   <body>
 
@@ -43,7 +43,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sources.html" title="Generating Object Catalogue"
+          <a href="ETC.html" title="Exposure Time Calculator"
              accesskey="N">next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -58,6 +58,9 @@
 <li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) Python Package Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a><ul>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exposure-times">Exposure Times</a><ul>
 </ul>
 </li>
 <li><a class="reference internal" href="#creating-object-catalogs">Creating Object Catalogs</a><ul>
@@ -89,8 +92,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="sources.html"
-                        title="next chapter">Generating Object Catalogue</a></p>
+  <p class="topless"><a href="ETC.html"
+                        title="next chapter">Exposure Time Calculator</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -156,6 +159,21 @@ but you still need for example gFortran compiler to actually compile the Fortran
 <p>The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
 Thus it is recommended that one installs a Python distribution like <a class="reference external" href="http://www.enthought.com/">Enthought Python</a>,
 which installs all dependencies at once.</p>
+</div>
+</div>
+<div class="section" id="exposure-times">
+<h1>Exposure Times<a class="headerlink" href="#exposure-times" title="Permalink to this headline">¶</a></h1>
+<p>The package provides a simple exposure time calculator (ETC) that allows to estimate a signal-to-noise ratio
+of an average galaxy or star with a given number of VIS exposures. The ETC also allows to calculate limiting
+magnitude or an exposure time for a given magnitude.</p>
+<p>For the Python documentation, please see:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ETC.html">Exposure Time Calculator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ETC.html#calculating-exposure-times-and-limiting-magnitude">Calculating Exposure Times and Limiting Magnitude</a></li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="creating-object-catalogs">
@@ -257,7 +275,6 @@ documentation of the classes, please see:</p>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#object-finding">Object finding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="analysis.html#exposure-times">Exposure Times</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
 </ul>
 </li>
@@ -297,15 +314,18 @@ simulated image was generated with the reference simulator (using three times ov
 which the different quadrants were combiled to form a single CCD. These data were then reduced using the
 reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
 using SExtractor, after which the extracted magnitudes were compared against the input catalog.</p>
-<p>The following
-figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
-about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
-single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
-the derived magnitudes are inaccurate.</p>
+<p>The following figures show that the photometric accuracy with realistic noise and the end-of-life radiation damage is
+about 0.08 mag. Please note, however, that the derived magnitudes are based on a
+single 565 second exposure, and therefore the scatter is large in case of fainter objects.</p>
 <div class="align-center figure align-center">
 <img alt="_images/Magnitudes15.png" src="_images/Magnitudes15.png" style="width: 800px;" />
-<p class="caption">Example showing the recovered photometry from a reference simulator image with realistic noise
+<p class="caption">Example showing the recovered photometry from a reference simulator image with realistic noise, average background,
 and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.</p>
+</div>
+<div class="align-center figure align-center">
+<img alt="_images/magnitudes.png" src="_images/magnitudes.png" style="width: 800px;" />
+<p class="caption">Example showing the recovered photometry for point sources from a reference simulator image with realistic noise
+and an average background, but without any radiation damage to the CCD.</p>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -333,7 +353,7 @@ and end-of-life radiation damage, but without aperture correction. The offset is
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="sources.html" title="Generating Object Catalogue"
+          <a href="ETC.html" title="Exposure Time Calculator"
              >next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

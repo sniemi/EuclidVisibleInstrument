@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 16, 2012}
+\date{August 17, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -158,6 +158,196 @@ Thus it is recommended that one installs a Python distribution like \href{http:/
 which installs all dependencies at once.
 
 
+\chapter{Exposure Times}
+\label{index:exposure-times}
+The package provides a simple exposure time calculator (ETC) that allows to estimate a signal-to-noise ratio
+of an average galaxy or star with a given number of VIS exposures. The ETC also allows to calculate limiting
+magnitude or an exposure time for a given magnitude.
+
+For the Python documentation, please see:
+
+
+\section{Exposure Time Calculator}
+\label{ETC:module-analysis.ETC}\label{ETC:exposure-time-calculator}\label{ETC::doc}\index{analysis.ETC (module)}
+
+\subsection{Calculating Exposure Times and Limiting Magnitude}
+\label{ETC:calculating-exposure-times-and-limiting-magnitude}
+This file provides a simple functions to calculate exposure times or limiting magnitudes.
+The file also provides a function that returns VIS related information such as pixel
+size, dark current, gain, and zeropoint.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{version}] \leavevmode
+0.1
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{SNR() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}}{}
+Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
+number of exposures.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item {} 
+\textbf{magnitude} (\emph{float or ndarray}) -- input magnitude of an object(s)
+
+\item {} 
+\textbf{exptime} (\emph{float}) -- exposure time {[}seconds{]}
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+signal-to-noise ratio
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{SNRproptoPeak() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
+Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item[{Returns}] \leavevmode
+signal-to-noise ratio
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{VISinformation() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.VISinformation}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{VISinformation}}{}{}
+Returns a dictionary describing VIS.
+
+\end{fulllineitems}
+
+\index{calculateAperture() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.calculateAperture}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{calculateAperture}}{\emph{info}}{}
+pi * (diameter / 2. / pixel\_size)**2
+
+\end{fulllineitems}
+
+\index{exposureTime() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+Returns the exposure time for a given magnitude.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- information describing the instrument
+
+\item {} 
+\textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the objct
+
+\item {} 
+\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default=10{]}.
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in
+
+\item {} 
+\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default=0.7{]}
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+exposure time {[}seconds{]}
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{limitingMagnitude() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
+level to be reached.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item {} 
+\textbf{exp} (\emph{float or ndarray}) -- exposure time {[}seconds{]}
+
+\item {} 
+\textbf{snr} (\emph{float or ndarray}) -- the minimum signal-to-noise ratio to be reached.
+.. Note:: This is couple to the fudge parameter: snr\_use = snr / fudge
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
+
+\item {} 
+\textbf{fudge} (\emph{float}) -- a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
+This is mostly due to the fact that SExtractor may require a higher snr than what calculated
+otherwise.
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+limiting magnitude given the input information
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
 \chapter{Creating Object Catalogs}
 \label{index:creating-object-catalogs}
 The \emph{sources} subpackage contains a script to generate object catalogs with random x and y positions for
@@ -247,6 +437,14 @@ realistic number density functions.
 \phantomsection\label{sources:sources.createObjectCatalogue.plotDistributionFunction}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{plotDistributionFunction}}{\emph{datax}, \emph{datay}, \emph{fitx}, \emph{fity}, \emph{output}}{}
 Generates a simple plot showing the observed data points and the fit
 that was generated based on these data.
+
+\end{fulllineitems}
+
+\index{starCatalog() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.starCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalog}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{magmin=15}, \emph{magmax=25}}{}
+Generate a catalog with stars at random positions.
 
 \end{fulllineitems}
 
@@ -1905,7 +2103,7 @@ Sami-Matias Niemi
 \index{generateResidualFlatField() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.generateResidualFlatField}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{generateResidualFlatField}}{\emph{files='Q0*flatfield*.fits'}, \emph{combine=77}, \emph{lampfile='data/VIScalibrationUnitflux.fits'}, \emph{reference='data/VISFlatField2percent.fits'}, \emph{plots=False}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.generateResidualFlatField}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{generateResidualFlatField}}{\emph{files='Q0*flatfield*.fits'}, \emph{combine=77}, \emph{lampfile='data/VIScalibrationUnitflux.fits'}, \emph{reference='data/VISFlatField1percent.fits'}, \emph{plots=False}, \emph{debug=False}}{}
 Generate a median combined flat field residual from given input files.
 
 Randomly draws a given number (kw combine) of files from the file list identified using the files kw.
@@ -2581,181 +2779,6 @@ dictionary
 
 \end{fulllineitems}
 
-\phantomsection\label{analysis:module-analysis.ETC}\index{analysis.ETC (module)}
-
-\subsection{Exposure Times}
-\label{analysis:exposure-times}
-This file provides a simple functions to calculate exposure times or limiting magnitudes.
-The file also provides a function that returns VIS related information such as pixel
-size, dark current, gain, and zeropoint.
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-NumPy
-
-\item[{requires}] \leavevmode
-SciPy
-
-\item[{requires}] \leavevmode
-matplotlib
-
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{SNR() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}}{}
-Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
-number of exposures.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item {} 
-\textbf{magnitude} (\emph{float or ndarray}) -- input magnitude of an object(s)
-
-\item {} 
-\textbf{exptime} (\emph{float}) -- exposure time {[}seconds{]}
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-signal-to-noise ratio
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{SNRproptoPeak() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
-Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item[{Returns}] \leavevmode
-signal-to-noise ratio
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{VISinformation() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.VISinformation}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{VISinformation}}{}{}
-Returns a dictionary describing VIS.
-
-\end{fulllineitems}
-
-\index{calculateAperture() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.calculateAperture}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{calculateAperture}}{\emph{info}}{}
-pi * (diameter / pixel\_size)**2 / 4
-
-\end{fulllineitems}
-
-\index{exposureTime() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
-Returns the exposure time for a given magnitude.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- information describing the instrument
-
-\item {} 
-\textbf{magnitude} (\emph{float}) -- the magnitude of the objct
-
-\item {} 
-\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default=10{]}.
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in
-
-\item {} 
-\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default=0.7{]}
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-exposure time (of an individual exposure) {[}seconds{]}
-
-\item[{Return type}] \leavevmode
-float
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{limitingMagnitude() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{analysis:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
-Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
-level to be reached.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item {} 
-\textbf{exp} (\emph{float or ndarray}) -- exposure time {[}seconds{]}
-
-\item {} 
-\textbf{snr} (\emph{float or ndarray}) -- the minimum signal-to-noise ratio to be reached.
-.. Note:: This is couple to the fudge parameter: snr\_use = snr / fudge
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
-
-\item {} 
-\textbf{fudge} (\emph{float}) -- a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
-This is mostly due to the fact that SExtractor may require a higher snr than what calculated
-otherwise.
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-limiting magnitude given the input information
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 \phantomsection\label{analysis:module-analysis.PSFproperties}\index{analysis.PSFproperties (module)}
 
 \subsection{Properties of the Point Spread Function}
@@ -2887,18 +2910,23 @@ which the different quadrants were combiled to form a single CCD. These data wer
 reduction script provided in the package. Finally, sources were identified from the reduced data and photometry performed
 using SExtractor, after which the extracted magnitudes were compared against the input catalog.
 
-The following
-figure shows that the photometric accuracy with realistic noise and the end-of-life radiation damage is
-about 0.08 mag without aperture correction. Please note, however, that the derived magnitudes are based on a
-single 565 second exposure. Because of this the faint galaxies have low signal-to-noise ratio and therefore
-the derived magnitudes are inaccurate.
+The following figures show that the photometric accuracy with realistic noise and the end-of-life radiation damage is
+about 0.08 mag. Please note, however, that the derived magnitudes are based on a
+single 565 second exposure, and therefore the scatter is large in case of fainter objects.
 \begin{figure}[htbp]
 \centering
 \capstart
 
 \includegraphics{Magnitudes15.pdf}
-\caption{Example showing the recovered photometry from a reference simulator image with realistic noise
+\caption{Example showing the recovered photometry from a reference simulator image with realistic noise, average background,
 and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.}\end{figure}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{magnitudes.pdf}
+\caption{Example showing the recovered photometry for point sources from a reference simulator image with realistic noise
+and an average background, but without any radiation damage to the CCD.}\end{figure}
 
 
 \chapter{Indices and tables}
@@ -2921,7 +2949,7 @@ and end-of-life radiation damage, but without aperture correction. The offset is
 \bigletter{a}
 \item {\texttt{analysis.analyse}}, \pageref{analysis:module-analysis.analyse}
 \item {\texttt{analysis.biasCalibration}}, \pageref{reduction:module-analysis.biasCalibration}
-\item {\texttt{analysis.ETC}}, \pageref{analysis:module-analysis.ETC}
+\item {\texttt{analysis.ETC}}, \pageref{ETC:module-analysis.ETC}
 \item {\texttt{analysis.FlatfieldCalibration}}, \pageref{reduction:module-analysis.FlatfieldCalibration}
 \item {\texttt{analysis.PSFproperties}}, \pageref{analysis:module-analysis.PSFproperties}
 \item {\texttt{analysis.shape}}, \pageref{analysis:module-analysis.shape}

@@ -52,7 +52,7 @@ from support import files as fileIO
 
 
 def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='data/VIScalibrationUnitflux.fits',
-                              reference='data/VISFlatField2percent.fits', plots=False, debug=False):
+                              reference='data/VISFlatField1percent.fits', plots=False, debug=False):
     """
     Generate a median combined flat field residual from given input files.
 
@@ -110,10 +110,7 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load the true reference p-flat and calculate the error in the derived flat field (i.e. residual)
     real = pf.getdata(reference).astype(np.float64)
-    #todo: figure out how to calculate the error in the flat field!
-    #res = pixvar.copy() / real.astype(np.float64)
-    #res = np.abs(real - pixvar) / (real*pixvar) + 1.
-    res = np.abs(real - pixvar) + 1.
+    res = np.abs(real - pixvar) / (real*pixvar) + 1.
 
     if debug:
         print np.mean(res), np.min(res), np.max(res), np.std(res)

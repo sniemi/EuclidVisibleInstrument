@@ -161,10 +161,27 @@ def generateCatalog(**kwargs):
         fh.close()
 
 
+def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=15, magmax=25):
+    """
+    Generate a catalog with stars at random positions.
+    """
+    xcoords = np.random.random_integers(1, xmax, stars)
+    ycoords = np.random.random_integers(1, ymax, stars)
+    mags = np.linspace(magmin, magmax, stars)
+
+    fh = open('stars.dat', 'w')
+    for x, y, m in zip(xcoords, ycoords, mags):
+        fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
+    fh.close()
+
+
+
 if __name__ == '__main__':
     #settings = dict(besancon=False, deg=30)
     #generateCatalog(**settings)
 
     #create 100 catalogs at deg=30
-    settings = dict(besancon=False, deg=30, ncatalogs=500)
-    generateCatalog(**settings)
+    #settings = dict(besancon=False, deg=30, ncatalogs=500)
+    #generateCatalog(**settings)
+
+    starCatalog()

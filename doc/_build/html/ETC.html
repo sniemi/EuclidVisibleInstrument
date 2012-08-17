@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Exposure Time Calculator &mdash; VIS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Generating Object Catalogue" href="sources.html" />
+    <link rel="prev" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sources.html" title="Generating Object Catalogue"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Exposure Time Calculator</a><ul>
+<li><a class="reference internal" href="#calculating-exposure-times-and-limiting-magnitude">Calculating Exposure Times and Limiting Magnitude</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Euclid Visible InStrument (VIS) Python Package Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="sources.html"
+                        title="next chapter">Generating Object Catalogue</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ETC.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-analysis.ETC">
+<span id="exposure-time-calculator"></span><h1>Exposure Time Calculator<a class="headerlink" href="#module-analysis.ETC" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="calculating-exposure-times-and-limiting-magnitude">
+<h2>Calculating Exposure Times and Limiting Magnitude<a class="headerlink" href="#calculating-exposure-times-and-limiting-magnitude" title="Permalink to this headline">¶</a></h2>
+<p>This file provides a simple functions to calculate exposure times or limiting magnitudes.
+The file also provides a function that returns VIS related information such as pixel
+size, dark current, gain, and zeropoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.ETC.SNR">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
+number of exposures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
+<li><strong>magnitude</strong> (<em>float or ndarray</em>) &#8211; input magnitude of an object(s)</li>
+<li><strong>exptime</strong> (<em>float</em>) &#8211; exposure time [seconds]</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 3]</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">signal-to-noise ratio</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.SNRproptoPeak">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">signal-to-noise ratio</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.VISinformation">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">VISinformation</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.ETC.VISinformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary describing VIS.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.calculateAperture">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">calculateAperture</tt><big>(</big><em>info</em><big>)</big><a class="headerlink" href="#analysis.ETC.calculateAperture" title="Permalink to this definition">¶</a></dt>
+<dd><p>pi * (diameter / 2. / pixel_size)**2</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.exposureTime">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the exposure time for a given magnitude.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; information describing the instrument</li>
+<li><strong>magnitude</strong> (<em>float or ndarray</em>) &#8211; the magnitude of the objct</li>
+<li><strong>snr</strong> (<em>float</em>) &#8211; signal-to-noise ratio required [default=10].</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures that the object is present in</li>
+<li><strong>fudge</strong> (<em>float</em>) &#8211; the fudge parameter to which to use to scale the snr to SExtractor required [default=0.7]</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">exposure time [seconds]</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.ETC.limitingMagnitude">
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
+level to be reached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
+<li><strong>exp</strong> (<em>float or ndarray</em>) &#8211; exposure time [seconds]</li>
+<li><strong>snr</strong> (<em>float or ndarray</em>) &#8211; the minimum signal-to-noise ratio to be reached.
+.. Note:: This is couple to the fudge parameter: snr_use = snr / fudge</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 3]</li>
+<li><strong>fudge</strong> (<em>float</em>) &#8211; a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
+This is mostly due to the fact that SExtractor may require a higher snr than what calculated
+otherwise.</li>
+<li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">limiting magnitude given the input information</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="sources.html" title="Generating Object Catalogue"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

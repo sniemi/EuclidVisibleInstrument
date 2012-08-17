@@ -20,9 +20,6 @@ VIS data analysis tools
 .. autoclass:: sourceFinder
     :members:
 
-.. automodule:: analysis.ETC
-    :members:
-
 .. automodule:: analysis.PSFproperties
     :members:
 

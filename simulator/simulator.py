@@ -1581,6 +1581,10 @@ class VISsimulator():
         if self.radiationDamage:
             self.applyRadiationDamage()
 
+
+        #todo: include non-linearity effect here!!
+
+
         if self.noise:
             self.applyReadoutNoise()
 

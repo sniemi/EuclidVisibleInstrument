@@ -83,7 +83,7 @@ def generateCatalog(**kwargs):
     p = np.poly1d(z)
     galaxymags = np.arange(10.0, 30.2, 0.2)
     galaxycounts = 10**p(galaxymags)
-    plotDistributionFunction(gmags, gcounts, galaxymags, galaxycounts, 'GalaxyDist.pdf')
+    plotDistributionFunction(gmags, gcounts, galaxymags, galaxycounts, settings['outputprefix'] + 'GalaxyDist.pdf')
     cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
 
     #stars
@@ -121,7 +121,7 @@ def generateCatalog(**kwargs):
         p = np.poly1d(z)
         starmags = np.arange(1, 30.2, 0.2)
         starcounts = 10**p(starmags)
-        plotDistributionFunction(stmags, stcounts, starmags, starcounts, 'StarDist.pdf')
+        plotDistributionFunction(stmags, stcounts, starmags, starcounts, settings['outputprefix'] + 'StarDist.pdf')
 
         cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
         starcounts /=  3600. #convert to square arcseconds
@@ -161,7 +161,7 @@ def generateCatalog(**kwargs):
         fh.close()
 
 
-def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=15, magmax=25):
+def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
     """
     Generate a catalog with stars at random positions.
     """
@@ -169,7 +169,7 @@ def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=15, magmax=25):
     ycoords = np.random.random_integers(1, ymax, stars)
     mags = np.linspace(magmin, magmax, stars)
 
-    fh = open('stars.dat', 'w')
+    fh = open('starsFaint.dat', 'w')
     for x, y, m in zip(xcoords, ycoords, mags):
         fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
     fh.close()

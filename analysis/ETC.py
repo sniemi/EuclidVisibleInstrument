@@ -138,7 +138,7 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
     return out
 
 
-def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True):
+def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, background=True):
     """
     Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
     number of exposures.
@@ -154,6 +154,8 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True):
     :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
+    :param background: whether to include background from sky, instrument, and dark current [default=True]
+    :type background: boolean
 
     :return: signal-to-noise ratio
     :rtype: float or ndarray
@@ -167,6 +169,9 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True):
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
     bgr = (sky + instrument + info['dark']) * info['aperture_size'] * exptime
+
+    if not background:
+        bgr = 0.0
 
     nom = flux_in_aperture * exptime
     denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])

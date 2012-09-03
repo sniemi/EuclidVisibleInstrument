@@ -1,3 +1,6 @@
+"""
+A Simple script to plot the distributions of stars and galaxies in a generated catalog.
+"""
 import datetime
 import numpy as np
 import statsmodels.api as sm
@@ -10,21 +13,21 @@ from analysis import ETC
 from sources import createObjectCatalogue as cr
 
 
-def plotDist():
+def plotDist(catalogname):
     galaxies = np.loadtxt('data/cdf_galaxies.dat')
-    gmodel = np.loadtxt('data/galaxy_model.dat')
+    #gmodel = np.loadtxt('data/galaxy_model.dat')
     cdfstars = np.loadtxt('data/cdf_stars.dat')
     stars = np.loadtxt('data/stars.dat')
-    besancon = np.loadtxt('data/besanc.dat')
+    #besancon = np.loadtxt('data/besanc.dat')
     metcalfe = np.loadtxt('data/metcalfe.dat')
     shao = np.loadtxt('data/shao.dat')
 
-    UDF = np.loadtxt('catalog0.dat', usecols=(2,3))
+    UDF = np.loadtxt(catalogname, usecols=(2,3))
     st = UDF[:,0][UDF[:,1] < 1]
     gal = UDF[:,0][UDF[:,1] > 7]
     print '%i stars and %i galaxies in the catalog' % (len(st), len(gal))
 
-    bins = np.arange(5.0, 31.5, 0.7)
+    bins = np.arange(5.0, 31.5, 0.5)
     df = bins[1] - bins[0]
     weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) / df #how many square degrees one CCD is on sky
 
@@ -59,7 +62,7 @@ def plotDist():
     ltext  = leg.get_texts()
     plt.setp(ltext, fontsize='xx-small')
 
-    plt.savefig('Distributions.pdf')
+    plt.savefig(catalogname + 'Distributions.pdf')
 
 
 def plotSNR(deg=60, kdes=True, log=False):
@@ -229,9 +232,9 @@ def plotSNR(deg=60, kdes=True, log=False):
         fh.close()
 
 
-def plotSNRfromCatalog():
+def plotSNRfromCatalog(catalogname):
     #read in data
-    catalog = np.loadtxt('catalog0.dat', usecols=(2,3))
+    catalog = np.loadtxt(catalogname, usecols=(2,3))
     st = catalog[:,0][catalog[:,1] < 1] #stars, magnitudes
     gal = catalog[:,0][catalog[:,1] > 7] #galaxies, mags
 
@@ -249,14 +252,17 @@ def plotSNRfromCatalog():
     ax.set_xlabel('SNR [assuming 565s exposure]')
     ax.set_ylabel(r'N [deg$^{-2}$ dex$^{-1}$]')
     plt.legend(shadow=True, fancybox=True)
-    plt.savefig('SNRs.pdf')
+    plt.savefig(catalogname + 'SNRs.pdf')
     plt.close()
 
 
 if __name__ == '__main__':
-    #plot from a generated catalog assumed to be named "catalog0.dat"
-    plotDist()
-    plotSNRfromCatalog()
+    plotDist('c30deg0.dat')
+    plotSNRfromCatalog('c30deg0.dat')
+    plotDist('c60deg0.dat')
+    plotSNRfromCatalog('c60deg0.dat')
+    plotDist('c90deg0.dat')
+    plotSNRfromCatalog('c90deg0.dat')
 
     #generates a new catalog on fly and plots SNRs
     #plotSNR(deg=30, kdes=False)

@@ -1518,6 +1518,8 @@ class VISsimulator():
                 except:
                     pass
 
+        hdu.header.update('NRPUFILE', self.information['flatfieldfile'])
+
         #write booleans
         for key, value in self.booleans.iteritems():
             #flat key is too long to show multiplicative and additive separately without modification

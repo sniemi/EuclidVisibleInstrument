@@ -131,7 +131,12 @@ def generateCatalog(**kwargs):
     for n in range(settings['ncatalogs']):
         #open output
         fh = open(settings['outputprefix'] + str(n) + '.dat', 'w')
-
+        #write SExtractor type header
+        fh.write('#   1 X                Object position along x                                    [pixel]\n')
+        fh.write('#   2 Y                Object position along y                                    [pixel]\n')
+        fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
+        fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
+        fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
 
         #find random positions for stars
         if nstars > 0:

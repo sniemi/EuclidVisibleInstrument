@@ -18,7 +18,7 @@ from analysis import ETC
 
 def readCatalog(file='mergedNoNoise.dat'):
     """
-
+    Reads in a SExtractor type catalog using the sextutils module.
     """
     catalog = sextutils.sextractor(file)
     return catalog
@@ -26,7 +26,7 @@ def readCatalog(file='mergedNoNoise.dat'):
 
 def compareMagnitudes(catalog, min=22.9, max=26.1):
     """
-
+    A simple plot to compare input and extracted magnitudes.
     """
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
@@ -64,22 +64,24 @@ def compareMagnitudes(catalog, min=22.9, max=26.1):
     ax2.set_yticks(ax2.get_yticks()[::2])
 
     ax1.set_xlim(min, max)
+    ax1.set_ylim(min, max)
     ax2.set_xlim(min, max)
 
     ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
-    plt.savefig('magnitudesNoNoise.pdf')
+    plt.savefig('Magnitudes.pdf')
     plt.close()
 
 
 def compareSNR(catalog, max=40, noNoise=False):
     """
-
+    Compare SExtracted SNR to radiometric model from ETC module.
     """
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
     #calculate input SNRs
     info = ETC.VISinformation()
+    info['sky_background'] = 22.65  #to scale the bacground to 97e that went in to the simu
     if noNoise:
         info.update(dict(sky_background=0.0, dark=0.0, readnoise=0.0, zodiacal=0.0))
         SNRs = ETC.SNR(info, magnitude=catalog.mag_input, exposures=1, galaxy=False, background=False)
@@ -110,24 +112,23 @@ def compareSNR(catalog, max=40, noNoise=False):
 
     ax1.set_xticklabels([])
     ax1.set_yticks(ax1.get_yticks()[1:])
-    #ax2.set_yticks(ax2.get_yticks()[::2])
+    ax2.set_yticks(ax2.get_yticks()[::2])
 
     ax1.set_xlim(0, max)
     ax1.set_ylim(0, max)
     ax2.set_xlim(0, max)
-    ax2.set_ylim(0.31, 0.92)
-
-    #ax1.set_xscale('log')
-    #ax2.set_xscale('log')
+    ax2.set_ylim(0.2, 1.2)
 
     ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
 
-    plt.savefig('SNRsNoNoise.pdf')
+    plt.savefig('SNRs.pdf')
     plt.close()
 
     #for "best" setting
-    Sextr = catalog.flux_best / catalog.fluxerr_best
+    #Sextr = catalog.flux_best / catalog.fluxerr_best
+    #Sextr = 1./(catalog.magerr_auto/1.0857)
+    Sextr = 1./(catalog.magerr_aper/1.0857)
 
     fig = plt.figure(frameon=False)
 
@@ -139,7 +140,7 @@ def compareSNR(catalog, max=40, noNoise=False):
     ax2 = fig.add_axes(rect2)  #left, bottom, width, height
 
     ax1.plot([0, max], [0, max], 'k--')
-    ax1.scatter(SNRs, Sextr, c='b', marker='o', s=10, edgecolor='None', label='Best')
+    ax1.scatter(SNRs, Sextr, c='b', marker='o', s=10, edgecolor='None', label='r=0.65 Aperture')
 
     ax2.plot([0, max], [1, 1], 'k--')
     ax2.plot([0, max], [0.7, 0.7], 'r:')
@@ -151,25 +152,25 @@ def compareSNR(catalog, max=40, noNoise=False):
 
     ax1.set_xticklabels([])
     ax1.set_yticks(ax1.get_yticks()[1:])
-    #ax2.set_yticks(ax2.get_yticks()[::2])
+    ax2.set_yticks(ax2.get_yticks()[::2])
 
     ax1.set_xlim(0, max)
     ax1.set_ylim(0, max)
     ax2.set_xlim(0, max)
-    ax2.set_ylim(0.31, 0.92)
-
-    #ax1.set_xscale('log')
-    #ax2.set_xscale('log')
+    ax2.set_ylim(0.2, 1.2)
 
     ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
 
-    plt.savefig('SNRsBestNoNoise.pdf')
+    plt.savefig('SNRs2.pdf')
     plt.close()
 
 
-
 if __name__ == '__main__':
-    cat = readCatalog()
+    cat = readCatalog(file='mergedNew.dat')
     compareMagnitudes(cat)
     compareSNR(cat)
+
+#    cat = readCatalog(file='merged.dat')
+#    compareMagnitudes(cat, min=14.5)
+#    compareSNR(cat, max=1000)

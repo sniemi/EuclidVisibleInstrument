@@ -36,7 +36,7 @@ def VISinformation():
     """
     out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
                diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
-               zeropoint=25.58, gain=3.5)
+               zeropoint=25.58, gain=3.5, sky_high=21.74, sky_low=22.94)
 
     apsize = calculateAperture(out)
     out.update(dict(aperture_size = apsize))
@@ -87,7 +87,8 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
     tmp = flux_in_aperture + (sky + instrument + info['dark'])*info['aperture_size']
 
     first = snr**2 * tmp * exposures
-    root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*info['readnoise'])**2 * exposures*info['aperture_size'])
+    #root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*info['readnoise'])**2 * exposures*info['aperture_size'])
+    root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*(info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size'])))
     div = 2*flux_in_aperture**2*exposures**2
 
     return (first + root)/div
@@ -125,7 +126,8 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
 
-    tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * info['readnoise']**2 * info['aperture_size'])
+    #tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * info['readnoise']**2 * info['aperture_size'])
+    tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
     root = np.sqrt(snr**2 + tmp)
 
     if galaxy:
@@ -174,7 +176,8 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
         bgr = 0.0
 
     nom = flux_in_aperture * exptime
-    denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
+    #denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
+    denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
 
     return nom / denom * np.sqrt(exposures)
 
@@ -200,7 +203,8 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
         nom = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction'] * exptime
         peak_pixel = nom * info['peak_fraction']
 
-        denom = np.sqrt(nom + bgr + (info['readnoise']**2 * info['aperture_size']))
+        #denom = np.sqrt(nom + bgr + (info['readnoise']**2 * info['aperture_size']))
+        denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
 
         result = nom / denom * np.sqrt(exposures)
         snr.append(result)

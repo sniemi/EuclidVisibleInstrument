@@ -11,7 +11,7 @@ Simple source finder that can be used to find objects from astronomical images.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.2
+:version: 0.3
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -21,6 +21,8 @@ from time import time
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
+from scipy.ndimage import interpolation
+from analysis import shape
 
 
 class sourceFinder():
@@ -48,7 +50,8 @@ class sourceFinder():
         :param kwargs: additional keyword arguments
         :type kwargs: dictionary
         """
-        self.image = image
+        self.image = image.copy()
+        self.origimage = image.copy()
         self.log = log
         #set default parameter values and then update using kwargs
         self.settings = dict(above_background=10.0,
@@ -56,6 +59,9 @@ class sourceFinder():
                              clean_size_max=110,
                              sigma=1.5,
                              disk_struct=3,
+                             aperture=6.5,
+                             oversample=10,
+                             gain=3.5,
                              output='objects.txt')
         self.settings.update(kwargs)
 
@@ -88,7 +94,7 @@ class sourceFinder():
         #find pixels above the median
         msk = self.image > med
         #get background image and calculate statistics
-        backgrd = self.image[~msk]
+        backgrd = self.origimage[~msk].copy()
         #only take values greater than zero
         backgrd = backgrd[backgrd > 0.0]
 
@@ -110,7 +116,10 @@ class sourceFinder():
             filtered = ndimage.median_filter(self.image, self.settings['sigma'])
             self.mask = filtered > rms * self.settings['above_background'] + mean
 
+        #these are very very crude estimates!
         self.log.info('Background: average={0:.4f} and rms={1:.4f}'.format(mean, rms))
+        self.background = mean
+        self.background_std = std
 
         #get labels
         self.label_im, self.nb_labels = ndimage.label(self.mask)
@@ -156,6 +165,101 @@ class sourceFinder():
 
         self.fluxes = np.asarray(ndimage.sum(self.image, self.label_im, range(1, self.nb_labels + 1)))
         return self.fluxes
+
+
+    def doAperturePhotometry(self):
+        """
+        Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
+        This method also calculates refined centroid for each object.
+
+        :return: photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos
+        :return: ndarray, ndarray, ndarray, ndarray, ndarray
+        """
+        if not hasattr(self, 'xcms'):
+            self.getCenterOfMass()
+
+        #box around the source
+        size = np.ceil(self.settings['clean_size_max']/1.5)
+
+        #global background for subtraction, extremely crude
+        area = np.pi * self.settings['aperture']**2
+        #bcg = self.background * area
+        bcg = self.background + 1.5
+        self.background_std *= 2.
+
+        photom = []
+        ell = []
+        refx = []
+        refy = []
+        error = []
+        for x, y in zip(self.xcms, self.ycms):
+            xint = int(x)
+            yint = int(y)
+
+            if x-size < 0 or y-size < 0 or x+size > self.origimage.shape[1] or y+size > self.origimage.shape[0]:
+                #too close to the edge for aperture photometry
+                photom.append(-999)
+                ell.append(-999)
+                refx.append(-999)
+                refy.append(-999)
+                error.append(-999)
+            else:
+                #cut out a small region and subtract the sky
+                small = self.origimage[yint-size:yint+size+1, xint-size:xint+size+1].copy().astype(np.float64) - bcg
+
+                if self.settings['oversample'] < 1.5:
+                    oversampled = small
+                else:
+                    sum = np.sum(small)
+                    oversampled = interpolation.zoom(small, self.settings['oversample'], order=0)
+                    oversampled = oversampled / np.sum(oversampled) * sum
+
+                #indeces of the oversampled image
+                yind, xind = np.indices(oversampled.shape)
+
+                #assume that centre is the same as the peak pixel (zero indexed)
+                #ycen1, xcen1 = ndimage.measurements.maximum_position(oversampled)
+
+                #calculate centre and shape
+                settings = dict(sampling=1./self.settings['oversample'])
+                sh = shape.shapeMeasurement(oversampled.copy(), self.log, **settings)
+                results = sh.measureRefinedEllipticity()
+                xcen = results['centreX'] - 1.
+                ycen = results['centreY'] - 1.
+                ell.append(results['ellipticity'])
+
+                #refined x and y positions
+                refx.append(xint - size + (xcen / self.settings['oversample']))
+                refy.append(yint - size + (ycen / self.settings['oversample']))
+
+                #change the peak to be 0, 0 and calculate radius
+                xind -= xcen
+                yind -= ycen
+                rad = np.sqrt(xind**2 + yind**2)
+
+                #calculate flux in the apertures
+                mask = rad <= (self.settings['oversample'] * self.settings['aperture'])
+                counts = oversampled[np.where(mask)].sum()
+
+                #global background subtraction
+                #counts -= bcg
+
+                #calculate the error in magnitudes
+                err = 1.0857 * np.sqrt(area * self.background_std**2  + (counts / self.settings['gain'])) / counts
+
+                #convert to electrons
+                counts *= self.settings['gain']
+
+                photom.append(counts)
+                error.append(err)
+
+
+        self.photometry = np.asarray(photom)
+        self.ellipticity = np.asarray(ell)
+        self.refx = np.asarray(refx)
+        self.refy = np.asarray(refy)
+        self.error = np.asarray(error)
+        return self.photometry, self.error, self.ellipticity, self.refx, self.refy
 
 
     def cleanSample(self):
@@ -244,11 +348,34 @@ class sourceFinder():
         fh.write('#1 X coordinate in pixels [starts from 1]\n')
         fh.write('#2 Y coordinate in pixels [starts from 1]\n')
         rg.write('#File written on {0:>s}\n'.format(datetime.datetime.isoformat(datetime.datetime.now())))
-        for x, y in zip(self.xcms, self.ycms):
+        for x, y, size in zip(self.xcms, self.ycms, self.sizes):
             fh.write('%10.3f %10.3f\n' % (x + 1, y + 1))
-            rg.write('circle({0:.3f},{1:.3f},5)\n'.format(x + 1, y + 1))
+            rg.write('circle({0:.3f},{1:.3f},{2:.3f})\n'.format(x + 1, y + 1, size))
         fh.close()
         rg.close()
+
+
+    def writePhotometry(self):
+        """
+        Outputs the photometric results to an ascii file.
+
+        :return: None
+        """
+        fh = open(self.settings['output'].split('.')[0]+'.phot', 'w')
+        fh.write('# 1 X coordinate in pixels [starts from 1]\n')
+        fh.write('# 2 XREF refined coordinate in pixels [starts from 1]\n')
+        fh.write('# 3 Y coordinate in pixels [starts from 1]\n')
+        fh.write('# 4 YREF refined coordinate in pixels [starts from 1]\n')
+        fh.write('# 5 COUNTS [electrons]\n')
+        fh.write('# 6 ADUS [ADUs]\n')
+        fh.write('# 7 SNR\n')
+        fh.write('# 8 ELLIPTICITY\n')
+        for x, xref, y, yref, phot, e, err in zip(self.xcms, self.refx, self.ycms, self.refy,
+                                                  self.photometry, self.ellipticity, self.error):
+            txt = '%10.3f %10.3f %10.3f %10.3f %15.2f %15.2f %15.2f %10.6f\n' % \
+                  (x + 1, xref + 1, y + 1, yref + 1, phot, phot/self.settings['gain'], 1./err, e)
+            fh.write(txt)
+        fh.close()
 
 
     def runAll(self):
@@ -266,9 +393,29 @@ class sourceFinder():
         self.getCenterOfMass()
         self.plot()
         self.generateOutput()
+        self.doAperturePhotometry()
+        self.writePhotometry()
 
         results = dict(xcms=self.xcms, ycms=self.ycms, cms=self.cms,
-                       sizes=self.sizes, fluxes=self.fluxes)
+                       sizes=self.sizes, fluxes=self.fluxes,
+                       photometry=self.photometry)
 
         return results
 
+
+if __name__ == '__main__':
+    from support import logger as lg
+    import pyfits as pf
+
+    log = lg.setUpLogger('sourceFinding.log')
+    data = pf.getdata('Q0_00_00starsFaint.fits ')
+    sf = sourceFinder(data, log,
+                      **{'clean_size_min' : 2, 'above_background' : 1.08, 'sigma' : 1.5, 'clean_size_max' : 20,
+                         'oversample' : 10.0})
+    tmp = sf.runAll()
+
+#    log = lg.setUpLogger('analyse.log')
+#    data = pf.getdata('Q0_00_00stars.fits ')
+#    sf = sourceFinder(data, log,
+#                      **{'clean_size_min' : 3, 'above_background' : 10.0, 'sigma' : 3.0, 'clean_size_max' : 100})
+#    tmp = sf.runAll()

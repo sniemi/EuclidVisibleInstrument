@@ -166,11 +166,88 @@ def compareSNR(catalog, max=40, noNoise=False):
     plt.close()
 
 
+def compareCounts(catalog, min=100, max=1800):
+    """
+
+    """
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
+
+    fig = plt.figure(frameon=False)
+
+    left, width = 0.1, 0.8
+    rect1 = [left, 0.3, width, 0.65]
+    rect2 = [left, 0.1, width, 0.2]
+
+    ax1 = fig.add_axes(rect1, title='SExtractor vs. sourceFinder')
+    ax2 = fig.add_axes(rect2)  #left, bottom, width, height
+
+    ax1.plot([min, max], [min, max], 'k-')
+    ax1.errorbar(catalog.adus, catalog.flux_aper, yerr=catalog.fluxerr_aper,
+                 c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
+
+    ax2.plot([min, max], [0, 0], 'k-')
+    ax2.plot(catalog.adus, catalog.adus - catalog.flux_aper, c='b', ls='None', marker='o', ms=3)
+
+    ax2.set_xlabel('sourceFinder counts')
+    ax1.set_ylabel('SExtractor counts')
+    ax2.set_ylabel('Finder - SExtractor')
+
+    ax1.set_xticklabels([])
+    ax1.set_yticks(ax1.get_yticks()[1:])
+    ax2.set_yticks(ax2.get_yticks()[::2])
+
+    ax1.set_xlim(min, max)
+    ax1.set_ylim(min, max)
+    ax2.set_xlim(min, max)
+
+    ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
+    plt.savefig('CompareCounts.pdf')
+    plt.close()
+
+    fig = plt.figure(frameon=False)
+
+    left, width = 0.1, 0.8
+    rect1 = [left, 0.3, width, 0.65]
+    rect2 = [left, 0.1, width, 0.2]
+
+    ax1 = fig.add_axes(rect1, title='SExtractor vs. sourceFinder')
+    ax2 = fig.add_axes(rect2)  #left, bottom, width, height
+
+    sexsnr = catalog.flux_aper/catalog.fluxerr_aper
+    ax1.plot([0, 1000], [0, 1000], 'k-')
+    ax1.plot(catalog.snr, sexsnr,
+             c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
+
+    ax2.plot([0, 1000], [1, 1], 'k-')
+    ax2.plot(catalog.snr, catalog.snr/sexsnr, c='b', ls='None', marker='o', ms=3)
+
+    ax2.set_xlabel('sourceFinder SNRs')
+    ax1.set_ylabel('SExtractor SNRs')
+    ax2.set_ylabel('Finder - SExtractor')
+
+    ax1.set_xticklabels([])
+    #ax1.set_yticks(ax1.get_yticks()[1:])
+    ax2.set_yticks(ax2.get_yticks()[::2])
+
+    ax1.set_xlim(3, 40)
+    ax1.set_ylim(3, 40)
+    ax2.set_xlim(3, 40)
+
+    ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
+    plt.savefig('CompareSNRs.pdf')
+    plt.close()
+
+
+
 if __name__ == '__main__':
     cat = readCatalog(file='mergedNew.dat')
-    compareMagnitudes(cat)
-    compareSNR(cat)
+#    compareMagnitudes(cat)
+#    compareSNR(cat)
 
 #    cat = readCatalog(file='merged.dat')
 #    compareMagnitudes(cat, min=14.5)
 #    compareSNR(cat, max=1000)
+
+    compareCounts(cat)

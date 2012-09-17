@@ -10,6 +10,7 @@
 \indexentry{generateCatalog() (in module sources.createObjectCatalogue)|hyperpage}{10}
 \indexentry{plotDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{10}
 \indexentry{starCatalog() (in module sources.createObjectCatalogue)|hyperpage}{10}
+\indexentry{starCatalogFixedMagnitude() (in module sources.createObjectCatalogue)|hyperpage}{10}
 \indexentry{simulator.simulator (module)|hyperpage}{13}
 \indexentry{VISsimulator (class in simulator.simulator)|hyperpage}{17}
 \indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{17}
@@ -102,28 +103,32 @@
 \indexentry{analysis.sourceFinder (module)|hyperpage}{42}
 \indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{42}
 \indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{42}
+\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{42}
 \indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{42}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{42}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{42}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
+\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
 \indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{43}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{43}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
+\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
 \indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
 \indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
 \indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
 \indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{44}
-\indexentry{analysis.PSFproperties (module)|hyperpage}{44}
-\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{44}
-\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{44}
-\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{44}
+\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{45}
+\indexentry{analysis.PSFproperties (module)|hyperpage}{45}
+\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{45}
+\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{45}
+\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{45}
 \indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{45}
 \indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{45}
 \indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{45}

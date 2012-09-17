@@ -243,11 +243,11 @@ def compareCounts(catalog, min=100, max=1800):
 
 if __name__ == '__main__':
     cat = readCatalog(file='mergedNew.dat')
-#    compareMagnitudes(cat)
-#    compareSNR(cat)
+    compareMagnitudes(cat)
+    compareSNR(cat)
 
-#    cat = readCatalog(file='merged.dat')
-#    compareMagnitudes(cat, min=14.5)
-#    compareSNR(cat, max=1000)
+    #cat = readCatalog(file='merged.dat')
+    #compareMagnitudes(cat, min=14.5)
+    #compareSNR(cat, max=1000)
 
-    compareCounts(cat)
+    #compareCounts(cat)

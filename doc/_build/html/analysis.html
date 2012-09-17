@@ -58,7 +58,7 @@
 <li><a class="reference internal" href="#">VIS data analysis tools</a><ul>
 <li><a class="reference internal" href="#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
 <li><a class="reference internal" href="#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
-<li><a class="reference internal" href="#object-finding">Object finding</a></li>
+<li><a class="reference internal" href="#source-finding">Source finding</a></li>
 <li><a class="reference internal" href="#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
 </ul>
 </li>
@@ -340,8 +340,8 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 
 </dd></dl>
 
-<span class="target" id="module-analysis.sourceFinder"></span><div class="section" id="object-finding">
-<h2>Object finding<a class="headerlink" href="#object-finding" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-analysis.sourceFinder"></span><div class="section" id="source-finding">
+<h2>Source finding<a class="headerlink" href="#source-finding" title="Permalink to this headline">¶</a></h2>
 <p>Simple source finder that can be used to find objects from astronomical images.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -357,7 +357,7 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 </tr>
 <tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
 </tr>
 </tbody>
 </table>
@@ -382,6 +382,29 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 <dt id="analysis.sourceFinder.sourceFinder.cleanSample">
 <tt class="descname">cleanSample</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.cleanSample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cleans up small connected components and large structures.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analysis.sourceFinder.sourceFinder.doAperturePhotometry">
+<tt class="descname">doAperturePhotometry</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.doAperturePhotometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
+This method also calculates refined centroid for each object.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Results are rather sensitive to the background subtraction, while the errors depend
+strongly on the noise estimate from the background. Thus, great care should be exercised
+when applying this method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -476,6 +499,20 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 </table>
 </dd></dl>
 
+<dl class="method">
+<dt id="analysis.sourceFinder.sourceFinder.writePhotometry">
+<tt class="descname">writePhotometry</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.writePhotometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the photometric results to an ascii file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -500,6 +537,29 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 <dt>
 <tt class="descname">cleanSample</tt><big>(</big><big>)</big></dt>
 <dd><p>Cleans up small connected components and large structures.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">doAperturePhotometry</tt><big>(</big><big>)</big></dt>
+<dd><p>Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
+This method also calculates refined centroid for each object.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Results are rather sensitive to the background subtraction, while the errors depend
+strongly on the noise estimate from the background. Thus, great care should be exercised
+when applying this method.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -589,6 +649,20 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">source finding results such as positions, sizes, fluxes, etc.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dictionary</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">writePhotometry</tt><big>(</big><big>)</big></dt>
+<dd><p>Outputs the photometric results to an ascii file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
 </tbody>
 </table>

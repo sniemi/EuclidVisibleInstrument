@@ -170,15 +170,38 @@ def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
     """
     Generate a catalog with stars at random positions.
     """
-    xcoords = np.random.random_integers(1, xmax, stars)
-    ycoords = np.random.random_integers(1, ymax, stars)
+    xcoords = np.random.random(stars) * xmax
+    ycoords = np.random.random(stars) * ymax
     mags = np.linspace(magmin, magmax, stars)
 
     fh = open('starsFaint.dat', 'w')
+    fh.write('#   1 X                Object position along x                                    [pixel]\n')
+    fh.write('#   2 Y                Object position along y                                    [pixel]\n')
+    fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
+    fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
+    fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
+
     for x, y, m in zip(xcoords, ycoords, mags):
         fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
     fh.close()
 
+
+def starCatalogFixedMagnitude(stars=400, xmax=2048, ymax=2066, mag=18):
+    """
+    Generate a catalog with stars at random positions.
+    """
+    xcoords = np.random.random(stars) * xmax
+    ycoords = np.random.random(stars) * ymax
+
+    fh = open('starsSameMag.dat', 'w')
+    fh.write('#   1 X                Object position along x                                    [pixel]\n')
+    fh.write('#   2 Y                Object position along y                                    [pixel]\n')
+    fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
+    fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
+    fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
+    for x, y in zip(xcoords, ycoords):
+        fh.write('%f %f %f %i %f \n' % (x, y, mag, 0, 0.0))
+    fh.close()
 
 
 if __name__ == '__main__':
@@ -189,4 +212,5 @@ if __name__ == '__main__':
     #settings = dict(besancon=False, deg=30, ncatalogs=500)
     #generateCatalog(**settings)
 
-    starCatalog()
+    #starCatalog(stars=100)
+    starCatalog(stars=500)

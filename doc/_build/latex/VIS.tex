@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{August 17, 2012}
+\date{September 17, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -186,7 +186,7 @@ SciPy
 matplotlib
 
 \item[{version}] \leavevmode
-0.1
+0.2
 
 \item[{author}] \leavevmode
 Sami-Matias Niemi
@@ -198,7 +198,7 @@ Sami-Matias Niemi
 \index{SNR() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}}{}
+\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}}{}
 Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
 number of exposures.
 \begin{quote}\begin{description}
@@ -218,6 +218,9 @@ number of exposures.
 \item {} 
 \textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\item {} 
+\textbf{background} (\emph{boolean}) -- whether to include background from sky, instrument, and dark current {[}default=True{]}
 
 \end{itemize}
 
@@ -443,7 +446,15 @@ that was generated based on these data.
 \index{starCatalog() (in module sources.createObjectCatalogue)}
 
 \begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.starCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalog}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{magmin=15}, \emph{magmax=25}}{}
+\phantomsection\label{sources:sources.createObjectCatalogue.starCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalog}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{magmin=23}, \emph{magmax=26}}{}
+Generate a catalog with stars at random positions.
+
+\end{fulllineitems}
+
+\index{starCatalogFixedMagnitude() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.starCatalogFixedMagnitude}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalogFixedMagnitude}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{mag=18}}{}
 Generate a catalog with stars at random positions.
 
 \end{fulllineitems}
@@ -632,9 +643,9 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
 Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        2m53.360s
-user        2m46.551s
-sys         0m1.614s
+real        2m53.005s
+user        2m46.237s
+sys         0m2.151s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -651,7 +662,7 @@ and then analysing the results with e.g. RunSnakeRun.
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.05dev
+1.06dev
 
 \end{description}\end{quote}
 
@@ -673,6 +684,9 @@ Version and change logs:
 1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
       Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
       of cosmic ray tracks.
+1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
+      oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
+      accuracy.
 \end{Verbatim}
 
 
@@ -1013,7 +1027,7 @@ Overlay data from a source object onto the self.image.
 \textbf{data} (\emph{ndarray}) -- ndarray of data to be overlaid on to self.image
 
 \item {} 
-\textbf{obj} (\emph{list}) -- object information such as position
+\textbf{obj} (\emph{list}) -- object information such as x,y position
 
 \end{itemize}
 
@@ -2500,8 +2514,8 @@ None
 
 \phantomsection\label{analysis:module-analysis.sourceFinder}\index{analysis.sourceFinder (module)}
 
-\subsection{Object finding}
-\label{analysis:object-finding}
+\subsection{Source finding}
+\label{analysis:source-finding}
 Simple source finder that can be used to find objects from astronomical images.
 \begin{quote}\begin{description}
 \item[{reqiures}] \leavevmode
@@ -2520,7 +2534,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.2
+0.4
 
 \end{description}\end{quote}
 \index{sourceFinder (class in analysis.sourceFinder)}
@@ -2547,6 +2561,29 @@ This class provides methods for source finding.
 \begin{fulllineitems}
 \phantomsection\label{analysis:analysis.sourceFinder.sourceFinder.cleanSample}\pysiglinewithargsret{\bfcode{cleanSample}}{}{}
 Cleans up small connected components and large structures.
+
+\end{fulllineitems}
+
+\index{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.sourceFinder.sourceFinder.doAperturePhotometry}\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{}{}
+Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
+This method also calculates refined centroid for each object.
+
+\begin{notice}{warning}{Warning:}
+Results are rather sensitive to the background subtraction, while the errors depend
+strongly on the noise estimate from the background. Thus, great care should be exercised
+when applying this method.
+\end{notice}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+photometry, error\_in\_photometry, ellipticity, refined\_x\_pos, refined\_y\_pos
+
+\item[{Returns}] \leavevmode
+ndarray, ndarray, ndarray, ndarray, ndarray
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -2648,6 +2685,19 @@ dictionary
 
 \end{fulllineitems}
 
+\index{writePhotometry() (analysis.sourceFinder.sourceFinder method)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.sourceFinder.sourceFinder.writePhotometry}\pysiglinewithargsret{\bfcode{writePhotometry}}{}{}
+Outputs the photometric results to an ascii file.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 
 \end{fulllineitems}
 
@@ -2675,6 +2725,29 @@ This class provides methods for source finding.
 \begin{fulllineitems}
 \pysiglinewithargsret{\bfcode{cleanSample}}{}{}
 Cleans up small connected components and large structures.
+
+\end{fulllineitems}
+
+\index{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{}{}
+Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
+This method also calculates refined centroid for each object.
+
+\begin{notice}{warning}{Warning:}
+Results are rather sensitive to the background subtraction, while the errors depend
+strongly on the noise estimate from the background. Thus, great care should be exercised
+when applying this method.
+\end{notice}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+photometry, error\_in\_photometry, ellipticity, refined\_x\_pos, refined\_y\_pos
+
+\item[{Returns}] \leavevmode
+ndarray, ndarray, ndarray, ndarray, ndarray
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -2771,6 +2844,19 @@ source finding results such as positions, sizes, fluxes, etc.
 
 \item[{Return type}] \leavevmode
 dictionary
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{writePhotometry() (analysis.sourceFinder.sourceFinder method)}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\bfcode{writePhotometry}}{}{}
+Outputs the photometric results to an ascii file.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
 
 \end{description}\end{quote}
 

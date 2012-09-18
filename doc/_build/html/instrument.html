@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VIS Instrument Model &mdash; VIS 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="next" title="Postprocessing Tools" href="postproc.html" />
+    <link rel="prev" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation" href="index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="postproc.html" title="Postprocessing Tools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Euclid Visible InStrument (VIS) Python Package Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="postproc.html"
+                        title="next chapter">Postprocessing Tools</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/instrument.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <span class="target" id="module-support.VISinstrumentModel"></span><div class="section" id="vis-instrument-model">
+<h1>VIS Instrument Model<a class="headerlink" href="#vis-instrument-model" title="Permalink to this headline">¶</a></h1>
+<p>The file provides a function that returns VIS related information such as pixel
+size, dark current, gain, zeropoint, and sky background.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="support.VISinstrumentModel.CCDnonLinearityModel">
+<tt class="descclassname">support.VISinstrumentModel.</tt><tt class="descname">CCDnonLinearityModel</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#support.VISinstrumentModel.CCDnonLinearityModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides a non-linearity model for a VIS CCD273.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>float, int or ndarray</em>) &#8211; data to which the non-linearity model is being applied to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">input data after conversion with the non-linearity model</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.VISinstrumentModel.VISinformation">
+<tt class="descclassname">support.VISinstrumentModel.</tt><tt class="descname">VISinformation</tt><big>(</big><big>)</big><a class="headerlink" href="#support.VISinstrumentModel.VISinformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary describing VIS. The following information is provided:</p>
+<div class="highlight-python"><pre>'beta': 0.6
+'bias': 1000.0
+'cosmic_bkgd': 0.172
+'dark': 0.001
+'diameter': 1.3
+'dob': 0
+'e_adu': 3.5
+'fullwellcapacity': 200000
+'fwc': 175000
+'gain': 3.5
+'galaxy_fraction': 0.836
+'magzero': 17059000000.0
+'ovrscanx': 20
+'peak_fraction': 0.261179
+'pixel_size': 0.1
+'prescanx': 50
+'rdose': 30000000000.0
+'readnoise': 4.5
+'readout': 4.5
+'readtime': 88.0
+'sfwc': 730000.0
+'sky_background': 22.34
+'sky_high': 21.74
+'sky_low': 22.94
+'st': 5e-06
+'star_fraction': 0.928243
+'svg': 1e-10
+'t': 0.01024
+'trapfile': 'cdm_euclid.dat'
+'vg': 6e-11
+'vth': 11680000.0
+'xsize': 2048
+'ysize': 2066
+'zeropoint': 25.58
+'zodiacal': 22.942</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">instrument model parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.VISinstrumentModel.testNonLinearity">
+<tt class="descclassname">support.VISinstrumentModel.</tt><tt class="descname">testNonLinearity</tt><big>(</big><big>)</big><a class="headerlink" href="#support.VISinstrumentModel.testNonLinearity" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple test to plot the current non-linearity model.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="postproc.html" title="Postprocessing Tools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Euclid Visible InStrument (VIS) Python Package Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

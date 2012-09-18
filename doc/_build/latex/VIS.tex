@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{September 17, 2012}
+\date{September 18, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -158,1066 +158,18 @@ Thus it is recommended that one installs a Python distribution like \href{http:/
 which installs all dependencies at once.
 
 
-\chapter{Exposure Times}
-\label{index:exposure-times}
-The package provides a simple exposure time calculator (ETC) that allows to estimate a signal-to-noise ratio
-of an average galaxy or star with a given number of VIS exposures. The ETC also allows to calculate limiting
-magnitude or an exposure time for a given magnitude.
+\chapter{Instrument Model}
+\label{index:instrument-model}
+The \emph{support} subpackage contains functions that define the VIS instrument model. This model contains information
+about noise, dark, cosmic rays, radiation damage parameters, sky background, and pixel scale. For the Python
+documentation, please see:
+\phantomsection\label{instrument:module-support.VISinstrumentModel}\index{support.VISinstrumentModel (module)}
 
-For the Python documentation, please see:
-
-
-\section{Exposure Time Calculator}
-\label{ETC:module-analysis.ETC}\label{ETC:exposure-time-calculator}\label{ETC::doc}\index{analysis.ETC (module)}
-
-\subsection{Calculating Exposure Times and Limiting Magnitude}
-\label{ETC:calculating-exposure-times-and-limiting-magnitude}
-This file provides a simple functions to calculate exposure times or limiting magnitudes.
-The file also provides a function that returns VIS related information such as pixel
-size, dark current, gain, and zeropoint.
+\section{VIS Instrument Model}
+\label{instrument:vis-instrument-model}\label{instrument::doc}
+The file provides a function that returns VIS related information such as pixel
+size, dark current, gain, zeropoint, and sky background.
 \begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-NumPy
-
-\item[{requires}] \leavevmode
-SciPy
-
-\item[{requires}] \leavevmode
-matplotlib
-
-\item[{version}] \leavevmode
-0.2
-
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{SNR() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}}{}
-Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
-number of exposures.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item {} 
-\textbf{magnitude} (\emph{float or ndarray}) -- input magnitude of an object(s)
-
-\item {} 
-\textbf{exptime} (\emph{float}) -- exposure time {[}seconds{]}
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\item {} 
-\textbf{background} (\emph{boolean}) -- whether to include background from sky, instrument, and dark current {[}default=True{]}
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-signal-to-noise ratio
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{SNRproptoPeak() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
-Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item[{Returns}] \leavevmode
-signal-to-noise ratio
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{VISinformation() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.VISinformation}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{VISinformation}}{}{}
-Returns a dictionary describing VIS.
-
-\end{fulllineitems}
-
-\index{calculateAperture() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.calculateAperture}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{calculateAperture}}{\emph{info}}{}
-pi * (diameter / 2. / pixel\_size)**2
-
-\end{fulllineitems}
-
-\index{exposureTime() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
-Returns the exposure time for a given magnitude.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- information describing the instrument
-
-\item {} 
-\textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the objct
-
-\item {} 
-\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default=10{]}.
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in
-
-\item {} 
-\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default=0.7{]}
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-exposure time {[}seconds{]}
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{limitingMagnitude() (in module analysis.ETC)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
-Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
-level to be reached.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
-
-\item {} 
-\textbf{exp} (\emph{float or ndarray}) -- exposure time {[}seconds{]}
-
-\item {} 
-\textbf{snr} (\emph{float or ndarray}) -- the minimum signal-to-noise ratio to be reached.
-.. Note:: This is couple to the fudge parameter: snr\_use = snr / fudge
-
-\item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
-
-\item {} 
-\textbf{fudge} (\emph{float}) -- a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
-This is mostly due to the fact that SExtractor may require a higher snr than what calculated
-otherwise.
-
-\item {} 
-\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
-If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-limiting magnitude given the input information
-
-\item[{Return type}] \leavevmode
-float or ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-
-
-\chapter{Creating Object Catalogs}
-\label{index:creating-object-catalogs}
-The \emph{sources} subpackage contains a script to generate object catalogs with random x and y positions for
-stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
-based on observations. As the number of stars depends on the galactic latitude, the script allows
-the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
-(see the example plot below).
-
-For the Python code documentation, please see:
-\phantomsection\label{sources:module-sources.createObjectCatalogue}\index{sources.createObjectCatalogue (module)}
-
-\section{Generating Object Catalogue}
-\label{sources::doc}\label{sources:generating-object-catalogue}
-This simple script can be used to generate an object catalogue that can then be used
-as an input for the VIS simulator.
-
-To run:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-python createObjectCatalogue.py
-\end{Verbatim}
-
-Please note that the script requires files from the data folder. Thus, you should
-place the script to an empty directory and either copy or link to the data directory.
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-NumPy
-
-\item[{requires}] \leavevmode
-SciPy
-
-\item[{requires}] \leavevmode
-matplotlib
-
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)}
-
-\begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.drawFromCumulativeDistributionFunction}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{drawFromCumulativeDistributionFunction}}{\emph{cpdf}, \emph{x}, \emph{number}}{}
-Draw a number of random x values from a cumulative distribution function.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{cpdf} (\emph{numpy array}) -- cumulative distribution function
-
-\item {} 
-\textbf{x} (\emph{numpy array}) -- values of the abscissa
-
-\item {} 
-\textbf{number} (\emph{int}) -- number of draws
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-randomly drawn x value
-
-\item[{Return type}] \leavevmode
-ndarray
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{generateCatalog() (in module sources.createObjectCatalogue)}
-
-\begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.generateCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{generateCatalog}}{\emph{**kwargs}}{}
-Generate a catalogue of stars and galaxies that follow
-realistic number density functions.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{deg} -- galactic latitude, either 30, 60, 90
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{plotDistributionFunction() (in module sources.createObjectCatalogue)}
-
-\begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.plotDistributionFunction}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{plotDistributionFunction}}{\emph{datax}, \emph{datay}, \emph{fitx}, \emph{fity}, \emph{output}}{}
-Generates a simple plot showing the observed data points and the fit
-that was generated based on these data.
-
-\end{fulllineitems}
-
-\index{starCatalog() (in module sources.createObjectCatalogue)}
-
-\begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.starCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalog}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{magmin=23}, \emph{magmax=26}}{}
-Generate a catalog with stars at random positions.
-
-\end{fulllineitems}
-
-\index{starCatalogFixedMagnitude() (in module sources.createObjectCatalogue)}
-
-\begin{fulllineitems}
-\phantomsection\label{sources:sources.createObjectCatalogue.starCatalogFixedMagnitude}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalogFixedMagnitude}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{mag=18}}{}
-Generate a catalog with stars at random positions.
-
-\end{fulllineitems}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\includegraphics{Distributions.pdf}
-\caption{An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
-The solid lines show observations while the histograms show the distributions in the output catalogues.}\end{figure}
-
-Another way of creating a source catalog is to use \emph{generateGalaxies} script in the \emph{simulator} subpackage.
-This script depends on IRAF and uses the makeart IRAF package. There are many more options in this script,
-which basically just calls the makeart's gallist and starlist. For options, see IRAF's documentation.
-
-
-\chapter{Creating Simulated Mock Images}
-\label{index:creating-simulated-mock-images}
-The \emph{simulator} subpackage contains scripts to generate simulated VIS images. Two different methods
-of generating mock images is provided. One which takes observed images (say from HST) as an input and
-another in which analytical profiles are used for galaxies. The former code is custom made while the
-latter relies hevily on IRAF's artdata package and mkobjects task.
-
-The VIS reference simulator is the custom made with real observed galaxies as an input. The IRAF
-based simulator can be used, for example, to train algorithms to derive elliptiticy of an object.
-For more detailed documentation, please see:
-
-
-\section{Simulation tools}
-\label{simulator:module-simulator.simulator}\label{simulator::doc}\label{simulator:simulation-tools}\index{simulator.simulator (module)}
-
-\subsection{The Euclid Visible Instrument Image Simulator}
-\label{simulator:the-euclid-visible-instrument-image-simulator}
-This file contains an image simulator for the Euclid VISible instrument.
-
-The approximate sequence of events in the simulator is as follows:
-\begin{enumerate}
-\item {} 
-Read in a configuration file, which defines for example,
-detector characteristics (bias, dark and readout noise, gain,
-plate scale and pixel scale, oversampling factor, exposure time etc.).
-
-\item {} 
-Read in another file containing charge trap definitions (for CTI modelling).
-
-\item {} 
-Read in a file defining the cosmic rays (trail lengths and cumulative distributions).
-
-\item {} 
-Read in CCD offset information, displace the image, and modify
-the output file name to contain the CCD and quadrant information
-(note that VIS has a focal plane of 6 x 6 detectors).
-
-\item {} 
-Read in source list and determine the number of different object types.
-
-\item {} 
-Read in a file which assigns data to a given object index.
-
-\item {} 
-Load the PSF model (a single 2D map with a given over sampling or field dependent maps).
-
-\item {} 
-Generate a finemap (oversampled image) for each object type. If an object
-is a 2D image then calculate the shape tensor to be used for size scaling.
-Each type of an object is then placed onto its own finely sampled finemap.
-
-\item {} 
-Loop over the number of exposures to co-add and for each object in the object catalog:
-\begin{itemize}
-\item {} 
-determine the number of electrons an object should have by scaling the object's magnitude
-with the given zeropoint and exposure time.
-
-\item {} 
-determine whether the object lands on to the detector or not and if it is
-a star or an extended source (i.e. a galaxy).
-
-\item {} 
-if object is extended determine the size (using a size-magnitude relation) and scale counts,
-convolve with the PSF, and finally overlay onto the detector according to its position.
-
-\item {} 
-if object is a star, scale counts according to the derived
-scaling (first step), and finally overlay onto the detector according to its position.
-
-\end{itemize}
-
-\item {} 
-Apply a multiplicative flat-field map {[}optional{]}.
-
-\item {} 
-Add a charge injection line (horizontal and/or vertical) {[}optional{]}.
-
-\item {} 
-Add cosmic ray streaks onto the CCD with random positions but known distribution {[}optional{]}.
-
-\item {} 
-Add photon (Poisson) noise and constant dark current to the pixel grid {[}optional{]}.
-
-\item {} 
-Add cosmetic defects from an input file {[}optional{]}.
-
-\item {} 
-Add pre- and overscan regions in the serial direction {[}optional{]}.
-
-\item {} 
-Apply the CDM03 radiation damage model {[}optional{]}.
-
-\item {} 
-Add readout noise selected from a Gaussian distribution {[}optional{]}.
-
-\item {} 
-Convert from electrons to ADUs using the given gain factor.
-
-\item {} 
-Add a given bias level and discretise the counts (16bit).
-
-\item {} 
-Finally the generated image is converted to a FITS file, a WCS is assigned
-and the output is saved to the current working directory.
-
-\end{enumerate}
-
-\begin{notice}{warning}{Warning:}
-The code is still work in progress and new features are being added.
-The code has been tested, but nevertheless bugs may be lurking in corners, so
-please report any weird or inconsistent simulations to the author.
-\end{notice}
-
-
-\subsubsection{Dependencies}
-\label{simulator:dependencies}
-This script depends on the following packages:
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-PyFITS (tested with 3.0.6)
-
-\item[{requires}] \leavevmode
-NumPy (tested with 1.6.1)
-
-\item[{requires}] \leavevmode
-SciPy (tested with 0.10.1)
-
-\item[{requires}] \leavevmode
-vissim-python package
-
-\end{description}\end{quote}
-
-\begin{notice}{note}{Note:}
-This class is not Python 3 compatible. For example, xrange does not exist
-in Python 3 (but is used here for speed and memory consumption improvements).
-In addition, at least the string formatting should be changed if moved to
-Python 3.x.
-\end{notice}
-
-
-\subsubsection{Testing}
-\label{simulator:testing}
-Before trying to run the code, please make sure that you have compiled the
-cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
-please run the SCIENCE section from the test.config as follows:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -c data/test.config -s TESTSCIENCE1X
-\end{Verbatim}
-
-This will produce an image representing VIS lower left (0th) quadrant. Because
-noise and cosmic rays are randomised one cannot directly compare the science
-outputs but we must rely on the outputs that are free from random effects.
-
-In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience.fits'',
-which is the comparison image without any noise or cosmic rays. To test the functionality,
-please divide your nonoise and no cosmic ray track output image with the on in the data
-folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
-float64).
-
-
-\subsubsection{Benchmarking}
-\label{simulator:benchmarking}
-A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
-6798 objects were place on the detector
-
-real        2m53.005s
-user        2m46.237s
-sys         0m2.151s
-\end{Verbatim}
-
-These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
-as follows:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
-\end{Verbatim}
-
-and then analysing the results with e.g. RunSnakeRun.
-
-
-\subsubsection{Change Log}
-\label{simulator:change-log}\begin{quote}\begin{description}
-\item[{version}] \leavevmode
-1.06dev
-
-\end{description}\end{quote}
-
-Version and change logs:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-0.1: pre-development backbone.
-0.4: first version with most pieces together.
-0.5: this version has all the basic features present, but not fully tested.
-0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
-     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
-0.7: implemented bleeding.
-0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
-     Improved the information that is being written to the FITS header.
-0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
-     be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
-1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
-     to the header.
-1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
-      Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
-      of cosmic ray tracks.
-1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
-      oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
-      accuracy.
-\end{Verbatim}
-
-
-\subsubsection{Future Work}
-\label{simulator:future-work}
-\begin{notice}{note}{Todo}
-\begin{enumerate}
-\item {} 
-check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
-
-\item {} 
-objects.dat is now hard coded into the code, this should be read from the config file
-
-\item {} 
-implement spatially variable PSF
-
-\item {} 
-test that the cosmic rays are correctly implemented
-
-\item {} 
-implement CCD offsets (for focal plane simulations)
-
-\item {} 
-test that the WCS is correctly implemented and allows CCD offsets
-
-\item {} 
-implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
-
-\item {} 
-implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
-
-\item {} 
-centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
-
-\item {} 
-charge injection line positions are now hardcoded to the code, read from the config file
-
-\item {} 
-CTI model values are not included to the FITS header
-
-\item {} 
-include rotation in metrology
-
-\item {} 
-implement optional dithered offsets
-
-\item {} 
-try to further improve the convolution speed (look into fftw package)
-
-\end{enumerate}
-\end{notice}
-
-
-\subsubsection{Contact Information}
-\label{simulator:contact-information}\begin{quote}\begin{description}
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{VISsimulator (class in simulator.simulator)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{configfile}, \emph{debug}, \emph{section='SCIENCE'}}{}
-Euclid Visible Instrument Image Simulator
-
-The image that is being build is in:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{image}
-\end{Verbatim}
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{configfile} (\emph{string}) -- name of the configuration file
-
-\item {} 
-\textbf{debug} (\emph{boolean}) -- debugging mode on/off
-
-\item {} 
-\textbf{section} (\emph{str}) -- name of the section of the configuration file to process
-
-\end{itemize}
-
-\end{description}\end{quote}
-\index{addChargeInjection() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.addChargeInjection}\pysiglinewithargsret{\bfcode{addChargeInjection}}{}{}
-Add either horizontal or vertical charge injection line to the image.
-
-\end{fulllineitems}
-
-\index{addCosmicRays() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.addCosmicRays}\pysiglinewithargsret{\bfcode{addCosmicRays}}{}{}
-Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
-
-Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
-
-\end{fulllineitems}
-
-\index{addLampFlux() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.addLampFlux}\pysiglinewithargsret{\bfcode{addLampFlux}}{}{}
-Include flux from the calibration source.
-
-\end{fulllineitems}
-
-\index{addObjects() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.addObjects}\pysiglinewithargsret{\bfcode{addObjects}}{}{}
-Add objects from the object list to the CCD image (self.image).
-
-Scale the object's brightness in electrons and size using the input catalog magnitude.
-The size scaling is a crude fit to Massey et al. plot.
-
-\end{fulllineitems}
-
-\index{addPreOverScans() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.addPreOverScans}\pysiglinewithargsret{\bfcode{addPreOverScans}}{}{}
-Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
-Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
-orientation, in these images the regions are mirrored.
-
-The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.
-
-\end{fulllineitems}
-
-\index{applyBias() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyBias}\pysiglinewithargsret{\bfcode{applyBias}}{}{}
-Adds a bias level to the image being constructed.
-
-The value of bias is read from the configure file and stored
-in the information dictionary (key bias).
-
-\end{fulllineitems}
-
-\index{applyBleeding() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyBleeding}\pysiglinewithargsret{\bfcode{applyBleeding}}{}{}
-Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.
-
-Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
-serial direction.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{applyCosmetics() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyCosmetics}\pysiglinewithargsret{\bfcode{applyCosmetics}}{}{}
-Apply cosmetic defects described in the input file.
-
-\begin{notice}{warning}{Warning:}
-This method does not work if the input file has exactly one line.
-\end{notice}
-
-\end{fulllineitems}
-
-\index{applyFlatfield() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyFlatfield}\pysiglinewithargsret{\bfcode{applyFlatfield}}{}{}
-Applies multiplicative and/or additive flat field.
-
-Because the pixel-to-pixel non-uniformity effect (i.e. multiplicative) flat fielding takes place
-before CTI and other effects, the flat field file must be the same size as the pixels that see
-the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
-
-\begin{notice}{note}{Note:}
-The additive flat fielding effect has not been included yet.
-\end{notice}
-
-\end{fulllineitems}
-
-\index{applyNoise() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNoise}\pysiglinewithargsret{\bfcode{applyNoise}}{}{}
-Apply dark current, the cosmic background, and Poisson noise.
-Scales dark and background with the exposure time.
-
-Additionally saves the image without noise to a FITS file.
-
-\end{fulllineitems}
-
-\index{applyRadiationDamage() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyRadiationDamage}\pysiglinewithargsret{\bfcode{applyRadiationDamage}}{}{}
-Applies CDM03 radiation model to the image being constructed.
-
-
-\strong{See Also:}
-
-
-Class :\emph{CDM03}
-
-
-
-\end{fulllineitems}
-
-\index{applyReadoutNoise() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyReadoutNoise}\pysiglinewithargsret{\bfcode{applyReadoutNoise}}{}{}
-Applies readout noise to the image being constructed.
-
-The noise is drawn from a Normal (Gaussian) distribution.
-Mean = 0.0, and std = sqrt(readout noise).
-
-\end{fulllineitems}
-
-\index{configure() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.configure}\pysiglinewithargsret{\bfcode{configure}}{}{}
-Configures the simulator with input information and creates and empty array to which the final image will
-be build on.
-
-\end{fulllineitems}
-
-\index{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.cosmicRayIntercepts}\pysiglinewithargsret{\bfcode{cosmicRayIntercepts}}{\emph{lum}, \emph{x0}, \emph{y0}, \emph{l}, \emph{phi}}{}
-Derive cosmic ray streak intercept points.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{lum} -- luminosities of the cosmic ray tracks
-
-\item {} 
-\textbf{x0} -- central positions of the cosmic ray tracks in x-direction
-
-\item {} 
-\textbf{y0} -- central positions of the cosmic ray tracks in y-direction
-
-\item {} 
-\textbf{l} -- lengths of the cosmic ray tracks
-
-\item {} 
-\textbf{phi} -- orientation angles of the cosmic ray tracks
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-map
-
-\item[{Return type}] \leavevmode
-nd-array
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{discretise() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.discretise}\pysiglinewithargsret{\bfcode{discretise}}{\emph{max=65535}}{}
-Converts a floating point image array (self.image) to an integer array with max values
-defined by the argument max.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{max} (\emph{float}) -- maximum value the the integer array may contain {[}default 65k{]}
-
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{electrons2ADU() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.electrons2ADU}\pysiglinewithargsret{\bfcode{electrons2ADU}}{}{}
-Convert from electrons to ADUs using the value read from the configuration file.
-
-\end{fulllineitems}
-
-\index{generateFinemaps() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.generateFinemaps}\pysiglinewithargsret{\bfcode{generateFinemaps}}{}{}
-Generates finely sampled images of the input data.
-
-\begin{notice}{warning}{Warning:}
-This should be rewritten. Now a direct conversion from FORTRAN, and thus
-not probably very effective. Assumes the PSF sampling for other finemaps.
-\end{notice}
-
-\end{fulllineitems}
-
-\index{objectOnDetector() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.objectOnDetector}\pysiglinewithargsret{\bfcode{objectOnDetector}}{\emph{object}}{}
-Tests if the object falls on the detector.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{object} -- object to be placed to the self.image.
-
-\item[{Returns}] \leavevmode
-whether the object falls on the detector or not
-
-\item[{Return type}] \leavevmode
-boolean
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{overlayToCCD() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.overlayToCCD}\pysiglinewithargsret{\bfcode{overlayToCCD}}{\emph{data}, \emph{obj}}{}
-Overlay data from a source object onto the self.image.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{data} (\emph{ndarray}) -- ndarray of data to be overlaid on to self.image
-
-\item {} 
-\textbf{obj} (\emph{list}) -- object information such as x,y position
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{processConfigs() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.processConfigs}\pysiglinewithargsret{\bfcode{processConfigs}}{}{}
-Processes configuration information and save the information to a dictionary self.information.
-
-The configuration file may look as follows:
-
-\begin{Verbatim}[commandchars=\\\{\}]
-\PYG{p}{[}\PYG{n}{TEST}\PYG{p}{]}
-\PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
-\PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
-\PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
-\PYG{n}{ovrscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
-\PYG{n}{fullwellcapacity} \PYG{o}{=} \PYG{l+m+mi}{200000}
-\PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
-\PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
-\PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
-\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.172}
-\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.5}
-\PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
-\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{1.7059e10}
-\PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
-\PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
-\PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
-\PYG{n}{DEC} \PYG{o}{=} \PYG{o}{-}\PYG{l+m+mf}{38.16}
-\PYG{n}{sourcelist} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{source\PYGZus{}test}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{PSFfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{interpolated\PYGZus{}psf}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{trapfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cdm\PYGZus{}euclid}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{cosmeticsFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cosmetics}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{flatfieldfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{output} \PYG{o}{=} \PYG{n}{test}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{addSources} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{noise} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{cosmetics} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{chargeInjectionx} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{chargeInjectiony} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{radiationDamage} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{cosmicRays} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{flatfieldA} \PYG{o}{=} \PYG{n}{no}
-\end{Verbatim}
-
-For explanation of each field, see /data/test.config.
-
-\end{fulllineitems}
-
-\index{readConfigs() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.readConfigs}\pysiglinewithargsret{\bfcode{readConfigs}}{}{}
-Reads the config file information using configParser.
-
-\end{fulllineitems}
-
-\index{readCosmicRayInformation() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.readCosmicRayInformation}\pysiglinewithargsret{\bfcode{readCosmicRayInformation}}{}{}
-Reads in the cosmic ray track information from two input files.
-
-Stores the information to a dictionary called cr.
-
-\end{fulllineitems}
-
-\index{readObjectlist() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.readObjectlist}\pysiglinewithargsret{\bfcode{readObjectlist}}{}{}
-Reads object list using numpy.loadtxt, determines the number of object types,
-and finds the file that corresponds to a given object type.
-
-The input catalog is assumed to contain the following columns:
-\begin{enumerate}
-\item {} 
-x coordinate
-
-\item {} 
-y coordinate
-
-\item {} 
-apparent magnitude of the object
-
-\item {} 
-type of the object {[}0=star, number=type defined in the objects.dat{]}
-
-\item {} 
-rotation {[}0 for stars, {[}0, 360{]} for galaxies{]}
-
-\end{enumerate}
-
-This method also displaces the object coordinates based on the quadrant and the
-CCD to be simulated.
-
-\begin{notice}{note}{Note:}
-If even a single object type does not have a corresponding input then this method
-forces the program to exit.
-\end{notice}
-
-\end{fulllineitems}
-
-\index{readPSFs() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.readPSFs}\pysiglinewithargsret{\bfcode{readPSFs}}{}{}
-Reads in a PSF from a FITS file.
-
-\begin{notice}{note}{Note:}
-at the moment this method supports only a single PSF file.
-\end{notice}
-
-\end{fulllineitems}
-
-\index{simulate() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.simulate}\pysiglinewithargsret{\bfcode{simulate}}{}{}
-Create a single simulated image of a quadrant defined by the configuration file.
-Will do all steps defined in the config file sequentially.
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{writeFITSfile() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.writeFITSfile}\pysiglinewithargsret{\bfcode{writeFITSfile}}{\emph{data}, \emph{filename}, \emph{unsigned16bit=False}}{}
-Writes out a simple FITS file.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{data} (\emph{ndarray}) -- data to be written
-
-\item {} 
-\textbf{filename} (\emph{str}) -- name of the output file
-
-\item {} 
-\textbf{unsigned16bit} (\emph{bool}) -- whether to scale the data using bzero=32768
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{writeOutputs() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.writeOutputs}\pysiglinewithargsret{\bfcode{writeOutputs}}{}{}
-Writes out a FITS file using PyFITS and converts the image array to 16bit unsigned integer as
-appropriate for VIS.
-
-Updates header with the input values and flags used during simulation.
-
-\end{fulllineitems}
-
-
-\end{fulllineitems}
-
-\phantomsection\label{simulator:module-simulator.generateGalaxies}\index{simulator.generateGalaxies (module)}
-
-\subsection{Generating Mock Objects with IRAF}
-\label{simulator:generating-mock-objects-with-iraf}
-This script provides a class that can be used to generate objects such as galaxies using IRAF.
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-PyRAF
-
-\item[{requires}] \leavevmode
-PyFITS
-
 \item[{requires}] \leavevmode
 NumPy
 
@@ -1228,110 +180,93 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.1
+0.4
 
 \end{description}\end{quote}
-\index{generateFakeData (class in simulator.generateGalaxies)}
+\index{CCDnonLinearityModel() (in module support.VISinstrumentModel)}
 
 \begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData}\pysiglinewithargsret{\strong{class }\code{simulator.generateGalaxies.}\bfcode{generateFakeData}}{\emph{log}, \emph{**kwargs}}{}
-Generates an image frame with stars and galaxies using IRAF's artdata.
-\index{addObjects() (simulator.generateGalaxies.generateFakeData method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.addObjects}\pysiglinewithargsret{\bfcode{addObjects}}{\emph{inputlist='galaxies.dat'}}{}
-Add object(s) from inputlist to the output image.
+\phantomsection\label{instrument:support.VISinstrumentModel.CCDnonLinearityModel}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{CCDnonLinearityModel}}{\emph{data}}{}
+This function provides a non-linearity model for a VIS CCD273.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
-\textbf{inputlist} (\emph{str}) -- name of the input list
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.createGalaxylist}\pysiglinewithargsret{\bfcode{createGalaxylist}}{\emph{ngalaxies=150}, \emph{output='galaxies.dat'}}{}
-Generates an ascii file with uniform random x and y positions.
-The magnitudes of galaxies are taken from an isotropic and homogeneous power-law distribution.
-
-The output ascii file contains the following columns: xc yc magnitude model radius ar pa \textless{}save\textgreater{}
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{ngalaxies} (\emph{int}) -- number of galaxies to include
-
-\item {} 
-\textbf{output} (\emph{str}) -- name of the output ascii file
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{createStarlist() (simulator.generateGalaxies.generateFakeData method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.createStarlist}\pysiglinewithargsret{\bfcode{createStarlist}}{\emph{nstars=20}, \emph{output='stars.dat'}}{}
-Generates an ascii file with uniform random x and y positions.
-The magnitudes of stars are taken from an isotropic and homogeneous power-law distribution.
-
-The output ascii file contains the following columns: xc yc magnitude
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{nstars} (\emph{int}) -- number of stars to include
-
-\item {} 
-\textbf{output} (\emph{str}) -- name of the output ascii file
-
-\end{itemize}
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.maskCrazyValues}\pysiglinewithargsret{\bfcode{maskCrazyValues}}{\emph{filename=None}}{}
-For some reason mkobjects sometimes adds crazy values to an image.
-This method tries to remove those values and set them to more reasonable ones.
-The values \textgreater{} 65k are set to the median of the image.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{filename} (\emph{str}) -- name of the input file to modify {[}default = self.settings{[}'output'{]}{]}
+\textbf{data} (\emph{float, int or ndarray}) -- data to which the non-linearity model is being applied to
 
 \item[{Returns}] \leavevmode
-None
+input data after conversion with the non-linearity model
+
+\item[{Return type}] \leavevmode
+float or ndarray
 
 \end{description}\end{quote}
 
 \end{fulllineitems}
 
-\index{runAll() (simulator.generateGalaxies.generateFakeData method)}
+\index{VISinformation() (in module support.VISinstrumentModel)}
 
 \begin{fulllineitems}
-\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.runAll}\pysiglinewithargsret{\bfcode{runAll}}{\emph{nostars=True}}{}
-Run all methods sequentially.
+\phantomsection\label{instrument:support.VISinstrumentModel.VISinformation}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{VISinformation}}{}{}
+Returns a dictionary describing VIS. The following information is provided:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+'beta': 0.6
+'bias': 1000.0
+'cosmic\_bkgd': 0.172
+'dark': 0.001
+'diameter': 1.3
+'dob': 0
+'e\_adu': 3.5
+'fullwellcapacity': 200000
+'fwc': 175000
+'gain': 3.5
+'galaxy\_fraction': 0.836
+'magzero': 17059000000.0
+'ovrscanx': 20
+'peak\_fraction': 0.261179
+'pixel\_size': 0.1
+'prescanx': 50
+'rdose': 30000000000.0
+'readnoise': 4.5
+'readout': 4.5
+'readtime': 88.0
+'sfwc': 730000.0
+'sky\_background': 22.34
+'sky\_high': 21.74
+'sky\_low': 22.94
+'st': 5e-06
+'star\_fraction': 0.928243
+'svg': 1e-10
+'t': 0.01024
+'trapfile': 'cdm\_euclid.dat'
+'vg': 6e-11
+'vth': 11680000.0
+'xsize': 2048
+'ysize': 2066
+'zeropoint': 25.58
+'zodiacal': 22.942
+\end{Verbatim}
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+instrument model parameters
+
+\item[{Return type}] \leavevmode
+dict
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testNonLinearity() (in module support.VISinstrumentModel)}
+
+\begin{fulllineitems}
+\phantomsection\label{instrument:support.VISinstrumentModel.testNonLinearity}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{testNonLinearity}}{}{}
+A simple test to plot the current non-linearity model.
 
 \end{fulllineitems}
 
 
-\end{fulllineitems}
 
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\includegraphics{simu.pdf}
-\caption{An example image generated with the reference simulator. The image shows a part of a single
-CCD.}\end{figure}
-
-
-\chapter{Instrument Characteristics}
+\section{Instrument Characteristics}
 \label{index:instrument-characteristics}
 The \emph{postproc} subpackage contains methods related to either generating a CCD mosaics from simulated data
 that is in quadrants like the VIS reference simulator produces or including instrument characteristics
@@ -1339,12 +274,15 @@ to simulated images that contain only Poisson noise and background. For more det
 of the Python classes, please see:
 
 
-\section{Postprocessing tools}
+\subsection{Postprocessing Tools}
 \label{postproc:postprocessing-tools}\label{postproc::doc}\label{postproc:module-postproc.postprocessing}\index{postproc.postprocessing (module)}
 
-\subsection{Inserting instrument characteristics}
+\subsubsection{Inserting instrument characteristics}
 \label{postproc:inserting-instrument-characteristics}
-This file provides a class to insert instrument specific features to a simulated image. Supports multiprocessing.
+This file provides a class to insert instrument specific features to a simulated image. The VIS instrument
+model is taken from support.VISinstrumentModel.VISinformation function.
+
+The class supports multiprocessing.
 
 \begin{notice}{note}{Note:}
 The output images will be compressed with gzip to save disk space.
@@ -1663,7 +601,7 @@ None
 
 \phantomsection\label{postproc:module-postproc.tileCCD}\index{postproc.tileCCD (module)}
 
-\subsection{Generating a mosaic}
+\subsubsection{Generating a mosaic}
 \label{postproc:generating-a-mosaic}
 This file contains a class to create a single VIS CCD image from separate files one for each quadrant.
 \begin{quote}\begin{description}
@@ -1783,6 +721,1162 @@ None
 
 \end{fulllineitems}
 
+
+
+\chapter{Exposure Times}
+\label{index:exposure-times}
+The package provides a simple exposure time calculator (ETC) that allows to estimate a signal-to-noise ratio
+of an average galaxy or star with a given number of VIS exposures. The ETC also allows to calculate limiting
+magnitude or an exposure time for a given magnitude.
+
+For the Python documentation, please see:
+
+
+\section{Exposure Time Calculator}
+\label{ETC:module-analysis.ETC}\label{ETC:exposure-time-calculator}\label{ETC::doc}\index{analysis.ETC (module)}
+
+\subsection{Calculating Exposure Times and Limiting Magnitude}
+\label{ETC:calculating-exposure-times-and-limiting-magnitude}
+This file provides a simple functions to calculate exposure times or limiting magnitudes.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{version}] \leavevmode
+0.2
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{SNR() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}}{}
+Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
+number of exposures.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item {} 
+\textbf{magnitude} (\emph{float or ndarray}) -- input magnitude of an object(s)
+
+\item {} 
+\textbf{exptime} (\emph{float}) -- exposure time {[}seconds{]}
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\item {} 
+\textbf{background} (\emph{boolean}) -- whether to include background from sky, instrument, and dark current {[}default=True{]}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+signal-to-noise ratio
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{SNRproptoPeak() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
+Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item[{Returns}] \leavevmode
+signal-to-noise ratio
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{exposureTime() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+Returns the exposure time for a given magnitude.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- information describing the instrument
+
+\item {} 
+\textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the objct
+
+\item {} 
+\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default=10{]}.
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in
+
+\item {} 
+\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default=0.7{]}
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+exposure time {[}seconds{]}
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{limitingMagnitude() (in module analysis.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
+level to be reached.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item {} 
+\textbf{exp} (\emph{float or ndarray}) -- exposure time {[}seconds{]}
+
+\item {} 
+\textbf{snr} (\emph{float or ndarray}) -- the minimum signal-to-noise ratio to be reached.
+.. Note:: This is couple to the fudge parameter: snr\_use = snr / fudge
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 3{]}
+
+\item {} 
+\textbf{fudge} (\emph{float}) -- a fudge factor to divide the given signal-to-noise ratio with to reach to the required snr.
+This is mostly due to the fact that SExtractor may require a higher snr than what calculated
+otherwise.
+
+\item {} 
+\textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
+If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+limiting magnitude given the input information
+
+\item[{Return type}] \leavevmode
+float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+
+
+\chapter{Creating Object Catalogs}
+\label{index:creating-object-catalogs}
+The \emph{sources} subpackage contains a script to generate object catalogs with random x and y positions for
+stars and galaxies. The magnitudes of stars and galaxies are drawn from input distributions that are
+based on observations. As the number of stars depends on the galactic latitude, the script allows
+the user to use three different (30, 60, 90 degrees) angles when generating the magnitude distribution for stars
+(see the example plot below).
+
+For the Python code documentation, please see:
+\phantomsection\label{sources:module-sources.createObjectCatalogue}\index{sources.createObjectCatalogue (module)}
+
+\section{Generating Object Catalogue}
+\label{sources::doc}\label{sources:generating-object-catalogue}
+These simple functions can be used to generate different types of object catalogues that can then be used
+as an input for the VIS simulator.
+
+Please note that the script requires files from the data folder. Thus, you should
+place the script to an empty directory and either copy or link to the data directory.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.drawFromCumulativeDistributionFunction}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{drawFromCumulativeDistributionFunction}}{\emph{cpdf}, \emph{x}, \emph{number}}{}
+Draw a number of random x values from a cumulative distribution function.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{cpdf} (\emph{numpy array}) -- cumulative distribution function
+
+\item {} 
+\textbf{x} (\emph{numpy array}) -- values of the abscissa
+
+\item {} 
+\textbf{number} (\emph{int}) -- number of draws
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+randomly drawn x value
+
+\item[{Return type}] \leavevmode
+ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{generateCatalog() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.generateCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{generateCatalog}}{\emph{**kwargs}}{}
+Generate a catalogue of stars and galaxies that follow
+realistic number density functions.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{deg} -- galactic latitude, either 30, 60, 90
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{plotDistributionFunction() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.plotDistributionFunction}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{plotDistributionFunction}}{\emph{datax}, \emph{datay}, \emph{fitx}, \emph{fity}, \emph{output}}{}
+Generates a simple plot showing the observed data points and the fit
+that was generated based on these data.
+
+\end{fulllineitems}
+
+\index{starCatalog() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.starCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalog}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{magmin=23}, \emph{magmax=26}}{}
+Generate a catalog with stars at random positions.
+
+\end{fulllineitems}
+
+\index{starCatalogFixedMagnitude() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.starCatalogFixedMagnitude}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalogFixedMagnitude}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{mag=18}, \emph{random=True}, \emph{pergrid=51}, \emph{out='starsSameMag.dat'}}{}
+Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.
+
+\end{fulllineitems}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{Distributions.pdf}
+\caption{An example showing star and galaxy number counts in a source catalog suitable for VIS simulator.
+The solid lines show observations while the histograms show the distributions in the output catalogues.}\end{figure}
+
+Another way of creating a source catalog is to use \emph{generateGalaxies} script in the \emph{simulator} subpackage.
+This script depends on IRAF and uses the makeart IRAF package. There are many more options in this script,
+which basically just calls the makeart's gallist and starlist. For options, see IRAF's documentation.
+
+
+\chapter{Creating Simulated Mock Images}
+\label{index:creating-simulated-mock-images}
+The \emph{simulator} subpackage contains scripts to generate simulated VIS images. Two different methods
+of generating mock images is provided. One which takes observed images (say from HST) as an input and
+another in which analytical profiles are used for galaxies. The former code is custom made while the
+latter relies hevily on IRAF's artdata package and mkobjects task.
+
+The VIS reference simulator is the custom made with real observed galaxies as an input. The IRAF
+based simulator can be used, for example, to train algorithms to derive elliptiticy of an object.
+For more detailed documentation, please see:
+
+
+\section{Simulation tools}
+\label{simulator:module-simulator.simulator}\label{simulator::doc}\label{simulator:simulation-tools}\index{simulator.simulator (module)}
+
+\subsection{The Euclid Visible Instrument Image Simulator}
+\label{simulator:the-euclid-visible-instrument-image-simulator}
+This file contains an image simulator for the Euclid VISible instrument.
+
+The approximate sequence of events in the simulator is as follows:
+\begin{enumerate}
+\item {} 
+Read in a configuration file, which defines for example,
+detector characteristics (bias, dark and readout noise, gain,
+plate scale and pixel scale, oversampling factor, exposure time etc.).
+
+\item {} 
+Read in another file containing charge trap definitions (for CTI modelling).
+
+\item {} 
+Read in a file defining the cosmic rays (trail lengths and cumulative distributions).
+
+\item {} 
+Read in CCD offset information, displace the image, and modify
+the output file name to contain the CCD and quadrant information
+(note that VIS has a focal plane of 6 x 6 detectors).
+
+\item {} 
+Read in a source list and determine the number of different object types.
+
+\item {} 
+Read in a file which assigns data to a given object index.
+
+\item {} 
+Load the PSF model (a 2D map with a given over sampling or field dependent maps).
+
+\item {} 
+Generate a finemap (oversampled image) for each object type. If an object
+is a 2D image then calculate the shape tensor to be used for size scaling.
+Each type of an object is then placed onto its own finely sampled finemap.
+
+\item {} 
+Loop over the number of exposures to co-add and for each object in the object catalog:
+\begin{itemize}
+\item {} 
+determine the number of electrons an object should have by scaling the object's magnitude
+with the given zeropoint and exposure time.
+
+\item {} 
+determine whether the object lands on to the detector or not and if it is
+a star or an extended source (i.e. a galaxy).
+
+\item {} 
+if object is extended determine the size (using a size-magnitude relation) and scale counts,
+convolve with the PSF, and finally overlay onto the detector according to its position.
+
+\item {} 
+if object is a star, scale counts according to the derived
+scaling (first step), and finally overlay onto the detector according to its position.
+
+\end{itemize}
+
+\item {} 
+Apply calibration unit flux to mimic flat field exposures {[}optional{]}.
+
+\item {} 
+Apply a multiplicative flat-field map to emulate pixel-to-pixel non-uniformity {[}optional{]}.
+
+\item {} 
+Add a charge injection line (horizontal and/or vertical) {[}optional{]}.
+
+\item {} 
+Add cosmic ray tracks onto the CCD with random positions but known distribution {[}optional{]}.
+
+\item {} 
+Apply detector charge bleeding in column direction {[}optional{]}.
+
+\item {} 
+Add photon (Poisson) noise and constant dark current to the pixel grid {[}optional{]}.
+
+\item {} 
+Add cosmetic defects from an input file {[}optional{]}.
+
+\item {} 
+Add pre- and overscan regions in the serial direction {[}optional{]}.
+
+\item {} 
+Apply the CDM03 radiation damage model {[}optional{]}.
+
+\item {} 
+Apply CCD273 non-linearity model to the pixel data {[}optional{]}.
+
+\item {} 
+Add readout noise selected from a Gaussian distribution {[}optional{]}.
+
+\item {} 
+Convert from electrons to ADUs using a given gain factor.
+
+\item {} 
+Add a given bias level and discretise the counts (the output is going to be in 16bit unsigned integers).
+
+\item {} 
+Finally the simulated image is converted to a FITS file, a WCS is assigned
+and the output is saved to the current working directory.
+
+\end{enumerate}
+
+\begin{notice}{warning}{Warning:}
+The code is still work in progress and new features are being added.
+The code has been tested, but nevertheless bugs may be lurking in corners, so
+please report any weird or inconsistent simulations to the author.
+\end{notice}
+
+
+\subsubsection{Dependencies}
+\label{simulator:dependencies}
+This script depends on the following packages:
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+PyFITS (tested with 3.0.6)
+
+\item[{requires}] \leavevmode
+NumPy (tested with 1.6.1)
+
+\item[{requires}] \leavevmode
+SciPy (tested with 0.10.1)
+
+\item[{requires}] \leavevmode
+vissim-python package
+
+\end{description}\end{quote}
+
+\begin{notice}{note}{Note:}
+This class is not Python 3 compatible. For example, xrange does not exist
+in Python 3 (but is used here for speed and memory consumption improvements).
+In addition, at least the string formatting should be changed if moved to
+Python 3.x.
+\end{notice}
+
+
+\subsubsection{Testing}
+\label{simulator:testing}
+Before trying to run the code, please make sure that you have compiled the
+cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
+please run the SCIENCE section from the test.config as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python simulator.py -c data/test.config -s TESTSCIENCE1X
+\end{Verbatim}
+
+This will produce an image representing VIS lower left (0th) quadrant. Because
+noise and cosmic rays are randomised one cannot directly compare the science
+outputs but we must rely on the outputs that are free from random effects.
+
+In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience.fits'',
+which is the comparison image without any noise or cosmic rays. To test the functionality,
+please divide your nonoise and no cosmic ray track output image with the on in the data
+folder. This should lead to a uniformly unity image or at least very close given some
+numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
+float64).
+
+
+\subsubsection{Benchmarking}
+\label{simulator:benchmarking}
+A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+6798 objects were place on the detector
+
+real        2m53.005s
+user        2m46.237s
+sys         0m2.151s
+\end{Verbatim}
+
+These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
+64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
+\end{Verbatim}
+
+and then analysing the results with e.g. RunSnakeRun.
+
+
+\subsubsection{Change Log}
+\label{simulator:change-log}\begin{quote}\begin{description}
+\item[{version}] \leavevmode
+1.07dev
+
+\end{description}\end{quote}
+
+Version and change logs:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+0.1: pre-development backbone.
+0.4: first version with most pieces together.
+0.5: this version has all the basic features present, but not fully tested.
+0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
+     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
+0.7: implemented bleeding.
+0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
+     Improved the information that is being written to the FITS header.
+0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
+     be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
+1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
+     to the header.
+1.05: included an option to add flux from the calibration unit to allow flat field exposures to be generated.
+      Now scaled the number of cosmic rays with the exposure time so that 10s flats have an appropriate number
+      of cosmic ray tracks.
+1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
+      oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
+      accuracy.
+1.07: included an option to apply non-linearity model. Cleaned the documentation.
+\end{Verbatim}
+
+
+\subsubsection{Future Work}
+\label{simulator:future-work}
+\begin{notice}{note}{Todo}
+\begin{enumerate}
+\item {} 
+check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
+
+\item {} 
+objects.dat is now hard coded into the code, this should be read from the config file
+
+\item {} 
+implement spatially variable PSF
+
+\item {} 
+test that the cosmic rays are correctly implemented
+
+\item {} 
+implement CCD offsets (for focal plane simulations)
+
+\item {} 
+test that the WCS is correctly implemented and allows CCD offsets
+
+\item {} 
+implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
+
+\item {} 
+centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
+
+\item {} 
+charge injection line positions are now hardcoded to the code, read from the config file
+
+\item {} 
+include rotation in metrology
+
+\item {} 
+implement optional dithered offsets
+
+\item {} 
+try to further improve the convolution speed (look into fftw package)
+
+\end{enumerate}
+\end{notice}
+
+
+\subsubsection{Contact Information}
+\label{simulator:contact-information}\begin{quote}\begin{description}
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{VISsimulator (class in simulator.simulator)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{configfile}, \emph{debug}, \emph{section='SCIENCE'}}{}
+Euclid Visible Instrument Image Simulator
+
+The image that is being build is in:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{image}
+\end{Verbatim}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{configfile} (\emph{string}) -- name of the configuration file
+
+\item {} 
+\textbf{debug} (\emph{boolean}) -- debugging mode on/off
+
+\item {} 
+\textbf{section} (\emph{str}) -- name of the section of the configuration file to process
+
+\end{itemize}
+
+\end{description}\end{quote}
+\index{addChargeInjection() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addChargeInjection}\pysiglinewithargsret{\bfcode{addChargeInjection}}{}{}
+Add either horizontal or vertical charge injection line to the image.
+
+\end{fulllineitems}
+
+\index{addCosmicRays() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addCosmicRays}\pysiglinewithargsret{\bfcode{addCosmicRays}}{}{}
+Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
+
+Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
+
+\end{fulllineitems}
+
+\index{addLampFlux() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addLampFlux}\pysiglinewithargsret{\bfcode{addLampFlux}}{}{}
+Include flux from the calibration source.
+
+\end{fulllineitems}
+
+\index{addObjects() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addObjects}\pysiglinewithargsret{\bfcode{addObjects}}{}{}
+Add objects from the object list to the CCD image (self.image).
+
+Scale the object's brightness in electrons and size using the input catalog magnitude.
+The size scaling is a crude fit to Massey et al. plot.
+
+\end{fulllineitems}
+
+\index{addPreOverScans() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addPreOverScans}\pysiglinewithargsret{\bfcode{addPreOverScans}}{}{}
+Add pre- and overscan regions to the self.image. These areas are added only in the serial direction.
+Because the 1st and 3rd quadrant are read out in to a different serial direction than the nominal
+orientation, in these images the regions are mirrored.
+
+The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.
+
+\end{fulllineitems}
+
+\index{applyBias() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyBias}\pysiglinewithargsret{\bfcode{applyBias}}{}{}
+Adds a bias level to the image being constructed.
+
+The value of bias is read from the configure file and stored
+in the information dictionary (key bias).
+
+\end{fulllineitems}
+
+\index{applyBleeding() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyBleeding}\pysiglinewithargsret{\bfcode{applyBleeding}}{}{}
+Apply bleeding along the CCD columns if the number of electrons in a pixel exceeds the full-well capacity.
+
+Bleeding is modelled in the parallel direction only, because the CCD273s are assumed not to bleed in
+serial direction.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{applyCosmetics() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyCosmetics}\pysiglinewithargsret{\bfcode{applyCosmetics}}{}{}
+Apply cosmetic defects described in the input file.
+
+\begin{notice}{warning}{Warning:}
+This method does not work if the input file has exactly one line.
+\end{notice}
+
+\end{fulllineitems}
+
+\index{applyFlatfield() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyFlatfield}\pysiglinewithargsret{\bfcode{applyFlatfield}}{}{}
+Applies multiplicative flat field to emulate pixel-to-pixel non-uniformity.
+
+Because the pixel-to-pixel non-uniformity effect (i.e. multiplicative) flat fielding takes place
+before CTI and other effects, the flat field file must be the same size as the pixels that see
+the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
+
+\end{fulllineitems}
+
+\index{applyNoise() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNoise}\pysiglinewithargsret{\bfcode{applyNoise}}{}{}
+Apply dark current, the cosmic background, and Poisson noise.
+Scales dark and background with the exposure time.
+
+Additionally saves the image without noise to a FITS file.
+
+\end{fulllineitems}
+
+\index{applyNonlinearity() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNonlinearity}\pysiglinewithargsret{\bfcode{applyNonlinearity}}{}{}
+Applies CCD273 non-linearity model to the image being constructed.
+
+\end{fulllineitems}
+
+\index{applyRadiationDamage() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyRadiationDamage}\pysiglinewithargsret{\bfcode{applyRadiationDamage}}{}{}
+Applies CDM03 radiation model to the image being constructed.
+
+
+\strong{See Also:}
+
+
+Class :\emph{CDM03}
+
+
+
+\end{fulllineitems}
+
+\index{applyReadoutNoise() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyReadoutNoise}\pysiglinewithargsret{\bfcode{applyReadoutNoise}}{}{}
+Applies readout noise to the image being constructed.
+
+The noise is drawn from a Normal (Gaussian) distribution.
+Mean = 0.0, and std = sqrt(readout noise).
+
+\end{fulllineitems}
+
+\index{configure() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.configure}\pysiglinewithargsret{\bfcode{configure}}{}{}
+Configures the simulator with input information and creates and empty array to which the final image will
+be build on.
+
+\end{fulllineitems}
+
+\index{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.cosmicRayIntercepts}\pysiglinewithargsret{\bfcode{cosmicRayIntercepts}}{\emph{lum}, \emph{x0}, \emph{y0}, \emph{l}, \emph{phi}}{}
+Derive cosmic ray streak intercept points.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{lum} -- luminosities of the cosmic ray tracks
+
+\item {} 
+\textbf{x0} -- central positions of the cosmic ray tracks in x-direction
+
+\item {} 
+\textbf{y0} -- central positions of the cosmic ray tracks in y-direction
+
+\item {} 
+\textbf{l} -- lengths of the cosmic ray tracks
+
+\item {} 
+\textbf{phi} -- orientation angles of the cosmic ray tracks
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+map
+
+\item[{Return type}] \leavevmode
+nd-array
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{discretise() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.discretise}\pysiglinewithargsret{\bfcode{discretise}}{\emph{max=65535}}{}
+Converts a floating point image array (self.image) to an integer array with max values
+defined by the argument max.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{max} (\emph{float}) -- maximum value the the integer array may contain {[}default 65k{]}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{electrons2ADU() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.electrons2ADU}\pysiglinewithargsret{\bfcode{electrons2ADU}}{}{}
+Convert from electrons to ADUs using the value read from the configuration file.
+
+\end{fulllineitems}
+
+\index{generateFinemaps() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.generateFinemaps}\pysiglinewithargsret{\bfcode{generateFinemaps}}{}{}
+Generates finely sampled images of the input data.
+
+\begin{notice}{warning}{Warning:}
+This should be rewritten. Now a direct conversion from FORTRAN, and thus
+not probably very effective. Assumes the PSF sampling for other finemaps.
+\end{notice}
+
+\end{fulllineitems}
+
+\index{objectOnDetector() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.objectOnDetector}\pysiglinewithargsret{\bfcode{objectOnDetector}}{\emph{object}}{}
+Tests if the object falls on the detector.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{object} -- object to be placed to the self.image.
+
+\item[{Returns}] \leavevmode
+whether the object falls on the detector or not
+
+\item[{Return type}] \leavevmode
+boolean
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{overlayToCCD() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.overlayToCCD}\pysiglinewithargsret{\bfcode{overlayToCCD}}{\emph{data}, \emph{obj}}{}
+Overlay data from a source object onto the self.image.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- ndarray of data to be overlaid on to self.image
+
+\item {} 
+\textbf{obj} (\emph{list}) -- object information such as x,y position
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{processConfigs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.processConfigs}\pysiglinewithargsret{\bfcode{processConfigs}}{}{}
+Processes configuration information and save the information to a dictionary self.information.
+
+The configuration file may look as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{p}{[}\PYG{n}{TEST}\PYG{p}{]}
+\PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
+\PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
+\PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
+\PYG{n}{ovrscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
+\PYG{n}{fullwellcapacity} \PYG{o}{=} \PYG{l+m+mi}{200000}
+\PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
+\PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
+\PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
+\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.172}
+\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.5}
+\PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
+\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{1.7059e10}
+\PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
+\PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
+\PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
+\PYG{n}{DEC} \PYG{o}{=} \PYG{o}{-}\PYG{l+m+mf}{38.16}
+\PYG{n}{sourcelist} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{source\PYGZus{}test}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{PSFfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{interpolated\PYGZus{}psf}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{trapfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cdm\PYGZus{}euclid}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{cosmeticsFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cosmetics}\PYG{o}{.}\PYG{n}{dat}
+\PYG{n}{flatfieldfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{output} \PYG{o}{=} \PYG{n}{test}\PYG{o}{.}\PYG{n}{fits}
+\PYG{n}{addSources} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{noise} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{cosmetics} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{chargeInjectionx} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{chargeInjectiony} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{radiationDamage} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{cosmicRays} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
+\end{Verbatim}
+
+For explanation of each field, see /data/test.config.
+
+\end{fulllineitems}
+
+\index{readConfigs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readConfigs}\pysiglinewithargsret{\bfcode{readConfigs}}{}{}
+Reads the config file information using configParser.
+
+\end{fulllineitems}
+
+\index{readCosmicRayInformation() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readCosmicRayInformation}\pysiglinewithargsret{\bfcode{readCosmicRayInformation}}{}{}
+Reads in the cosmic ray track information from two input files.
+
+Stores the information to a dictionary called cr.
+
+\end{fulllineitems}
+
+\index{readObjectlist() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readObjectlist}\pysiglinewithargsret{\bfcode{readObjectlist}}{}{}
+Reads object list using numpy.loadtxt, determines the number of object types,
+and finds the file that corresponds to a given object type.
+
+The input catalog is assumed to contain the following columns:
+\begin{enumerate}
+\item {} 
+x coordinate
+
+\item {} 
+y coordinate
+
+\item {} 
+apparent magnitude of the object
+
+\item {} 
+type of the object {[}0=star, number=type defined in the objects.dat{]}
+
+\item {} 
+rotation {[}0 for stars, {[}0, 360{]} for galaxies{]}
+
+\end{enumerate}
+
+This method also displaces the object coordinates based on the quadrant and the
+CCD to be simulated.
+
+\begin{notice}{note}{Note:}
+If even a single object type does not have a corresponding input then this method
+forces the program to exit.
+\end{notice}
+
+\end{fulllineitems}
+
+\index{readPSFs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.readPSFs}\pysiglinewithargsret{\bfcode{readPSFs}}{}{}
+Reads in a PSF from a FITS file.
+
+\begin{notice}{note}{Note:}
+at the moment this method supports only a single PSF file.
+\end{notice}
+
+\end{fulllineitems}
+
+\index{simulate() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.simulate}\pysiglinewithargsret{\bfcode{simulate}}{}{}
+Create a single simulated image of a quadrant defined by the configuration file.
+Will do all steps defined in the config file sequentially.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{writeFITSfile() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.writeFITSfile}\pysiglinewithargsret{\bfcode{writeFITSfile}}{\emph{data}, \emph{filename}, \emph{unsigned16bit=False}}{}
+Writes out a simple FITS file.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- data to be written
+
+\item {} 
+\textbf{filename} (\emph{str}) -- name of the output file
+
+\item {} 
+\textbf{unsigned16bit} (\emph{bool}) -- whether to scale the data using bzero=32768
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{writeOutputs() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.writeOutputs}\pysiglinewithargsret{\bfcode{writeOutputs}}{}{}
+Writes out a FITS file using PyFITS and converts the image array to 16bit unsigned integer as
+appropriate for VIS.
+
+Updates header with the input values and flags used during simulation.
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\phantomsection\label{simulator:module-simulator.generateGalaxies}\index{simulator.generateGalaxies (module)}
+
+\subsection{Generating Mock Objects with IRAF}
+\label{simulator:generating-mock-objects-with-iraf}
+This script provides a class that can be used to generate objects such as galaxies using IRAF.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+PyRAF
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\item[{version}] \leavevmode
+0.1
+
+\end{description}\end{quote}
+\index{generateFakeData (class in simulator.generateGalaxies)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData}\pysiglinewithargsret{\strong{class }\code{simulator.generateGalaxies.}\bfcode{generateFakeData}}{\emph{log}, \emph{**kwargs}}{}
+Generates an image frame with stars and galaxies using IRAF's artdata.
+\index{addObjects() (simulator.generateGalaxies.generateFakeData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.addObjects}\pysiglinewithargsret{\bfcode{addObjects}}{\emph{inputlist='galaxies.dat'}}{}
+Add object(s) from inputlist to the output image.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{inputlist} (\emph{str}) -- name of the input list
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.createGalaxylist}\pysiglinewithargsret{\bfcode{createGalaxylist}}{\emph{ngalaxies=150}, \emph{output='galaxies.dat'}}{}
+Generates an ascii file with uniform random x and y positions.
+The magnitudes of galaxies are taken from an isotropic and homogeneous power-law distribution.
+
+The output ascii file contains the following columns: xc yc magnitude model radius ar pa \textless{}save\textgreater{}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{ngalaxies} (\emph{int}) -- number of galaxies to include
+
+\item {} 
+\textbf{output} (\emph{str}) -- name of the output ascii file
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{createStarlist() (simulator.generateGalaxies.generateFakeData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.createStarlist}\pysiglinewithargsret{\bfcode{createStarlist}}{\emph{nstars=20}, \emph{output='stars.dat'}}{}
+Generates an ascii file with uniform random x and y positions.
+The magnitudes of stars are taken from an isotropic and homogeneous power-law distribution.
+
+The output ascii file contains the following columns: xc yc magnitude
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{nstars} (\emph{int}) -- number of stars to include
+
+\item {} 
+\textbf{output} (\emph{str}) -- name of the output ascii file
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.maskCrazyValues}\pysiglinewithargsret{\bfcode{maskCrazyValues}}{\emph{filename=None}}{}
+For some reason mkobjects sometimes adds crazy values to an image.
+This method tries to remove those values and set them to more reasonable ones.
+The values \textgreater{} 65k are set to the median of the image.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{filename} (\emph{str}) -- name of the input file to modify {[}default = self.settings{[}'output'{]}{]}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{runAll() (simulator.generateGalaxies.generateFakeData method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.generateGalaxies.generateFakeData.runAll}\pysiglinewithargsret{\bfcode{runAll}}{\emph{nostars=True}}{}
+Run all methods sequentially.
+
+\end{fulllineitems}
+
+
+\end{fulllineitems}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{simu.pdf}
+\caption{An example image generated with the reference simulator. The image shows a part of a single
+CCD.}\end{figure}
 
 
 \chapter{Data reduction}
@@ -2534,7 +2628,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.4
+0.5
 
 \end{description}\end{quote}
 \index{sourceFinder (class in analysis.sourceFinder)}
@@ -2567,7 +2661,7 @@ Cleans up small connected components and large structures.
 \index{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)}
 
 \begin{fulllineitems}
-\phantomsection\label{analysis:analysis.sourceFinder.sourceFinder.doAperturePhotometry}\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{}{}
+\phantomsection\label{analysis:analysis.sourceFinder.sourceFinder.doAperturePhotometry}\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{\emph{pixel\_based=True}}{}
 Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
 This method also calculates refined centroid for each object.
 
@@ -2577,6 +2671,9 @@ strongly on the noise estimate from the background. Thus, great care should be e
 when applying this method.
 \end{notice}
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pixel\_based} (\emph{boolean}) -- whether to do a global or pixel based background subtraction
+
 \item[{Returns}] \leavevmode
 photometry, error\_in\_photometry, ellipticity, refined\_x\_pos, refined\_y\_pos
 
@@ -2731,7 +2828,7 @@ Cleans up small connected components and large structures.
 \index{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)}
 
 \begin{fulllineitems}
-\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{}{}
+\pysiglinewithargsret{\bfcode{doAperturePhotometry}}{\emph{pixel\_based=True}}{}
 Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
 This method also calculates refined centroid for each object.
 
@@ -2741,6 +2838,9 @@ strongly on the noise estimate from the background. Thus, great care should be e
 when applying this method.
 \end{notice}
 \begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{pixel\_based} (\emph{boolean}) -- whether to do a global or pixel based background subtraction
+
 \item[{Returns}] \leavevmode
 photometry, error\_in\_photometry, ellipticity, refined\_x\_pos, refined\_y\_pos
 
@@ -3052,6 +3152,7 @@ and an average background, but without any radiation damage to the CCD.}\end{fig
 \item {\texttt{simulator.generateGalaxies}}, \pageref{simulator:module-simulator.generateGalaxies}
 \item {\texttt{simulator.simulator}}, \pageref{simulator:module-simulator.simulator}
 \item {\texttt{sources.createObjectCatalogue}}, \pageref{sources:module-sources.createObjectCatalogue}
+\item {\texttt{support.VISinstrumentModel}}, \pageref{instrument:module-support.VISinstrumentModel}
 \end{theindex}
 
 \renewcommand{\indexname}{Index}

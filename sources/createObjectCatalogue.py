@@ -2,12 +2,8 @@
 Generating Object Catalogue
 ===========================
 
-This simple script can be used to generate an object catalogue that can then be used
+These simple functions can be used to generate different types of object catalogues that can then be used
 as an input for the VIS simulator.
-
-To run::
-
-    python createObjectCatalogue.py
 
 Please note that the script requires files from the data folder. Thus, you should
 place the script to an empty directory and either copy or link to the data directory.
@@ -186,21 +182,32 @@ def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
     fh.close()
 
 
-def starCatalogFixedMagnitude(stars=400, xmax=2048, ymax=2066, mag=18):
+def starCatalogFixedMagnitude(stars=400, xmax=2048, ymax=2066, mag=18, random=True, pergrid=51, out='starsSameMag.dat'):
     """
-    Generate a catalog with stars at random positions.
+    Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.
     """
-    xcoords = np.random.random(stars) * xmax
-    ycoords = np.random.random(stars) * ymax
-
-    fh = open('starsSameMag.dat', 'w')
+    fh = open(out, 'w')
     fh.write('#   1 X                Object position along x                                    [pixel]\n')
     fh.write('#   2 Y                Object position along y                                    [pixel]\n')
     fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
     fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
     fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
-    for x, y in zip(xcoords, ycoords):
-        fh.write('%f %f %f %i %f \n' % (x, y, mag, 0, 0.0))
+
+    if random:
+        #random positions
+        xcoords = np.random.random(stars) * xmax
+        ycoords = np.random.random(stars) * ymax
+
+        for x, y in zip(xcoords, ycoords):
+            fh.write('%f %f %f %i %f \n' % (x, y, mag, 0, 0.0))
+    else:
+        #grid
+        xcoords = np.linspace(30, xmax-30, pergrid)
+        ycoords = np.linspace(30, ymax-30, pergrid)
+        for x in xcoords:
+            for y in ycoords:
+                fh.write('%f %f %f %i %f \n' % (x, y, mag, 0, 0.0))
+
     fh.close()
 
 
@@ -213,4 +220,5 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
 
     #starCatalog(stars=100)
-    starCatalog(stars=500)
+    #starCatalog(stars=500)
+    starCatalogFixedMagnitude(mag=24.5, random=False, out='stars24.5.dat')

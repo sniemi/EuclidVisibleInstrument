@@ -11,6 +11,7 @@ import mpl_toolkits.axisartist as AA
 from scipy.stats import gaussian_kde
 from analysis import ETC
 from sources import createObjectCatalogue as cr
+from support.VISinstrumentModel import VISinformation
 
 
 def plotDist(catalogname):
@@ -132,7 +133,7 @@ def plotSNR(deg=60, kdes=True, log=False):
     galaxycounts = 10**p(galaxymags)
     cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
     magGalaxies = cr.drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
-    SNRsGalaxies = ETC.SNR(ETC.VISinformation(), magnitude=magGalaxies, exposures=1)
+    SNRsGalaxies = ETC.SNR(VISinformation(), magnitude=magGalaxies, exposures=1)
 
     #calculate Gaussian KDE, this time with scipy to save memory, and evaluate it
     if kdes:
@@ -184,10 +185,10 @@ def plotSNR(deg=60, kdes=True, log=False):
     #calculate magnitude scale, top-axis
     if log:
         mags = np.asarray([17, 18, 19, 20, 21, 22, 23, 24])
-        SNRs = ETC.SNR(ETC.VISinformation(), magnitude=mags, exposures=1, galaxy=False)
+        SNRs = ETC.SNR(VISinformation(), magnitude=mags, exposures=1, galaxy=False)
     else:
         mags = np.asarray([17, 17.5, 18, 18.5, 19, 20, 21, 22.5])
-        SNRs = ETC.SNR(ETC.VISinformation(), magnitude=mags, exposures=1, galaxy=False)
+        SNRs = ETC.SNR(VISinformation(), magnitude=mags, exposures=1, galaxy=False)
 
     ax2 = ax.twin() # ax2 is responsible for "top" axis and "right" axis
     ax2.set_xticks(SNRs)
@@ -242,8 +243,8 @@ def plotSNRfromCatalog(catalogname):
     df = bins[1] - bins[0]
 
     weight = 1./(2048*2*2066*2.*0.1*0.1 * 7.71604938e-8) / df #how many square degrees one CCD is on sky
-    SNRs = ETC.SNR(ETC.VISinformation(), magnitude=st, exposures=1, galaxy=False)
-    SNRg = ETC.SNR(ETC.VISinformation(), magnitude=gal, exposures=1)
+    SNRs = ETC.SNR(VISinformation(), magnitude=st, exposures=1, galaxy=False)
+    SNRg = ETC.SNR(VISinformation(), magnitude=gal, exposures=1)
 
     fig = plt.figure()
     ax = fig.add_subplot(111)

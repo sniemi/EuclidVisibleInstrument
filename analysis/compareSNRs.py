@@ -2,6 +2,8 @@
 This script can be used to compare SNRs of SExtracted pointed sources to the radiometric calculations.
 """
 import matplotlib
+from support.VISinstrumentModel import VISinformation
+
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams['font.size'] = 17
 matplotlib.rc('xtick', labelsize=14)
@@ -80,7 +82,7 @@ def compareSNR(catalog, max=40, noNoise=False):
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
     #calculate input SNRs
-    info = ETC.VISinformation()
+    info = VISinformation()
     info['sky_background'] = 22.65  #to scale the bacground to 97e that went in to the simu
     if noNoise:
         info.update(dict(sky_background=0.0, dark=0.0, readnoise=0.0, zodiacal=0.0))
@@ -243,11 +245,15 @@ def compareCounts(catalog, min=100, max=1800):
 
 if __name__ == '__main__':
     cat = readCatalog(file='mergedNew.dat')
-    compareMagnitudes(cat)
-    compareSNR(cat)
-
-    #cat = readCatalog(file='merged.dat')
-    #compareMagnitudes(cat, min=14.5)
-    #compareSNR(cat, max=1000)
-
-    #compareCounts(cat)
+    try:
+        compareMagnitudes(cat)
+    except:
+        pass
+    try:
+        compareSNR(cat)
+    except:
+        pass
+    try:
+        compareCounts(cat)
+    except:
+        pass

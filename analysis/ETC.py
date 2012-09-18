@@ -3,8 +3,6 @@ Calculating Exposure Times and Limiting Magnitude
 =================================================
 
 This file provides a simple functions to calculate exposure times or limiting magnitudes.
-The file also provides a function that returns VIS related information such as pixel
-size, dark current, gain, and zeropoint.
 
 :requires: NumPy
 :requires: SciPy
@@ -28,28 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import interpolate
 import math, datetime
-
-
-def VISinformation():
-    """
-    Returns a dictionary describing VIS.
-    """
-    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
-               diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
-               zeropoint=25.58, gain=3.5, sky_high=21.74, sky_low=22.94, magzero=1.7059e10)
-
-    apsize = calculateAperture(out)
-    out.update(dict(aperture_size = apsize))
-
-    return out
-
-
-def calculateAperture(info):
-    """
-    pi * (diameter / 2. / pixel_size)**2
-    """
-    out = math.pi * (info['diameter']/2./info['pixel_size'])**2
-    return out
+from support.VISinstrumentModel import VISinformation
 
 
 def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True):
@@ -244,7 +221,7 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
 
 
 if __name__ == '__main__':
-    magnitude = 20.8989
+    magnitude = 18.0 #20.8989
     exptime = 565.0
 
     info = VISinformation()

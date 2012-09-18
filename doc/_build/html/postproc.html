@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Postprocessing tools &mdash; VIS 0.1 documentation</title>
+    <title>Postprocessing Tools &mdash; VIS 0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="index.html" />
-    <link rel="next" title="Data reduction tools" href="reduction.html" />
-    <link rel="prev" title="Simulation tools" href="simulator.html" /> 
+    <link rel="next" title="Exposure Time Calculator" href="ETC.html" />
+    <link rel="prev" title="VIS Instrument Model" href="instrument.html" /> 
   </head>
   <body>
 
@@ -44,10 +44,10 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="reduction.html" title="Data reduction tools"
+          <a href="ETC.html" title="Exposure Time Calculator"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="simulator.html" title="Simulation tools"
+          <a href="instrument.html" title="VIS Instrument Model"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -59,7 +59,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Postprocessing tools</a><ul>
+<li><a class="reference internal" href="#">Postprocessing Tools</a><ul>
 <li><a class="reference internal" href="#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
 <li><a class="reference internal" href="#generating-a-mosaic">Generating a mosaic</a></li>
 </ul>
@@ -67,11 +67,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="simulator.html"
-                        title="previous chapter">Simulation tools</a></p>
+  <p class="topless"><a href="instrument.html"
+                        title="previous chapter">VIS Instrument Model</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="reduction.html"
-                        title="next chapter">Data reduction tools</a></p>
+  <p class="topless"><a href="ETC.html"
+                        title="next chapter">Exposure Time Calculator</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/postproc.txt"
@@ -99,10 +99,12 @@
           <div class="body">
             
   <div class="section" id="module-postproc.postprocessing">
-<span id="postprocessing-tools"></span><h1>Postprocessing tools<a class="headerlink" href="#module-postproc.postprocessing" title="Permalink to this headline">¶</a></h1>
+<span id="postprocessing-tools"></span><h1>Postprocessing Tools<a class="headerlink" href="#module-postproc.postprocessing" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="inserting-instrument-characteristics">
 <h2>Inserting instrument characteristics<a class="headerlink" href="#inserting-instrument-characteristics" title="Permalink to this headline">¶</a></h2>
-<p>This file provides a class to insert instrument specific features to a simulated image. Supports multiprocessing.</p>
+<p>This file provides a class to insert instrument specific features to a simulated image. The VIS instrument
+model is taken from support.VISinstrumentModel.VISinformation function.</p>
+<p>The class supports multiprocessing.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">The output images will be compressed with gzip to save disk space.</p>
@@ -524,10 +526,10 @@ which quadrant is being processed so that the extra regions are subtracted corre
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="reduction.html" title="Data reduction tools"
+          <a href="ETC.html" title="Exposure Time Calculator"
              >next</a> |</li>
         <li class="right" >
-          <a href="simulator.html" title="Simulation tools"
+          <a href="instrument.html" title="VIS Instrument Model"
              >previous</a> |</li>
         <li><a href="index.html">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

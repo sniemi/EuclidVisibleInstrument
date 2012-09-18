@@ -2,7 +2,10 @@
 Inserting instrument characteristics
 ====================================
 
-This file provides a class to insert instrument specific features to a simulated image. Supports multiprocessing.
+This file provides a class to insert instrument specific features to a simulated image. The VIS instrument
+model is taken from support.VISinstrumentModel.VISinformation function.
+
+The class supports multiprocessing.
 
 .. Note:: The output images will be compressed with gzip to save disk space.
 
@@ -25,7 +28,7 @@ import glob as g
 from support import logger as lg
 import pyfits as pf
 import numpy as np
-#from CTI import CTI
+from support.VISinstrumentModel import VISinformation
 try:
     import cdm03
 except:
@@ -191,7 +194,7 @@ class PostProcessing(multiprocessing.Process):
         :rtype: ndarray
         """
         #convert to ADUs
-        data /= self.values['eADU']
+        data /= self.values['e_adu']
         #add bias
         data += self.values['bias']
 
@@ -316,7 +319,7 @@ class PostProcessing(multiprocessing.Process):
         :return: updated data, noise image
         :rtype: dict
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['rnoise']), size=data.shape)
+        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['readnoise']), size=data.shape)
 
         self.log.info('Adding readout noise to %s...' % self.filename)
         self.log.info('Sum of readnoise in %s = %f' % (self.filename, np.sum(noise)))
@@ -426,10 +429,8 @@ if __name__ == '__main__':
     num_processes = 12
 
     #input values that are used in processing and save to the FITS headers
-    values = {'rnoise' : 4.5, 'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat', 'eADU' : 3.5,
-              'bias' : 1000.0, 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11 ,
-              'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10, 'ystart' : 560, 'xstart' : 560, 'ystop' : 4692,
-              'xstop' : 4656, 'cutoff' : 1e11, 'ceil' : 1e11}
+    values = VISinformation()
+    values.update({'ystart' : 560, 'xstart' : 560, 'ystop' : 4692, 'xstop' : 4656, 'cutoff' : 1e11, 'ceil' : 1e11})
 
     #find all files to be processed
     inputs = g.glob('*.fits')

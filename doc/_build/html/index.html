@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 0.1 documentation" href="#" />
-    <link rel="next" title="Exposure Time Calculator" href="ETC.html" /> 
+    <link rel="next" title="VIS Instrument Model" href="instrument.html" /> 
   </head>
   <body>
 
@@ -43,7 +43,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ETC.html" title="Exposure Time Calculator"
+          <a href="instrument.html" title="VIS Instrument Model"
              accesskey="N">next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>
@@ -60,6 +60,12 @@
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#instrument-model">Instrument Model</a><ul>
+<li><a class="reference internal" href="#instrument-characteristics">Instrument Characteristics</a><ul>
+</ul>
+</li>
+</ul>
+</li>
 <li><a class="reference internal" href="#exposure-times">Exposure Times</a><ul>
 </ul>
 </li>
@@ -67,9 +73,6 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#creating-simulated-mock-images">Creating Simulated Mock Images</a><ul>
-</ul>
-</li>
-<li><a class="reference internal" href="#instrument-characteristics">Instrument Characteristics</a><ul>
 </ul>
 </li>
 <li><a class="reference internal" href="#data-reduction">Data reduction</a><ul>
@@ -92,8 +95,8 @@
 </ul>
 
   <h4>Next topic</h4>
-  <p class="topless"><a href="ETC.html"
-                        title="next chapter">Exposure Time Calculator</a></p>
+  <p class="topless"><a href="instrument.html"
+                        title="next chapter">VIS Instrument Model</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -159,6 +162,33 @@ but you still need for example gFortran compiler to actually compile the Fortran
 <p>The VIS Python package depends heavily on other Python packages such as NumPy, SciPy, PyFITS, and matplotlib.
 Thus it is recommended that one installs a Python distribution like <a class="reference external" href="http://www.enthought.com/">Enthought Python</a>,
 which installs all dependencies at once.</p>
+</div>
+</div>
+<div class="section" id="instrument-model">
+<h1>Instrument Model<a class="headerlink" href="#instrument-model" title="Permalink to this headline">¶</a></h1>
+<p>The <em>support</em> subpackage contains functions that define the VIS instrument model. This model contains information
+about noise, dark, cosmic rays, radiation damage parameters, sky background, and pixel scale. For the Python
+documentation, please see:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="instrument.html">VIS Instrument Model</a></li>
+</ul>
+</div>
+<div class="section" id="instrument-characteristics">
+<h2>Instrument Characteristics<a class="headerlink" href="#instrument-characteristics" title="Permalink to this headline">¶</a></h2>
+<p>The <em>postproc</em> subpackage contains methods related to either generating a CCD mosaics from simulated data
+that is in quadrants like the VIS reference simulator produces or including instrument characteristics
+to simulated images that contain only Poisson noise and background. For more detailed documentation
+of the Python classes, please see:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#generating-a-mosaic">Generating a mosaic</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="section" id="exposure-times">
@@ -228,22 +258,6 @@ For more detailed documentation, please see:</p>
 <img alt="_images/simu.png" src="_images/simu.png" style="width: 800px;" />
 <p class="caption">An example image generated with the reference simulator. The image shows a part of a single
 CCD.</p>
-</div>
-</div>
-<div class="section" id="instrument-characteristics">
-<h1>Instrument Characteristics<a class="headerlink" href="#instrument-characteristics" title="Permalink to this headline">¶</a></h1>
-<p>The <em>postproc</em> subpackage contains methods related to either generating a CCD mosaics from simulated data
-that is in quadrants like the VIS reference simulator produces or including instrument characteristics
-to simulated images that contain only Poisson noise and background. For more detailed documentation
-of the Python classes, please see:</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing tools</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="postproc.html#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="postproc.html#generating-a-mosaic">Generating a mosaic</a></li>
-</ul>
-</li>
-</ul>
 </div>
 </div>
 <div class="section" id="data-reduction">
@@ -353,7 +367,7 @@ and an average background, but without any radiation damage to the CCD.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ETC.html" title="Exposure Time Calculator"
+          <a href="instrument.html" title="VIS Instrument Model"
              >next</a> |</li>
         <li><a href="#">home</a>|&nbsp;</li>
         <li><a href="search.html">search</a>|&nbsp;</li>

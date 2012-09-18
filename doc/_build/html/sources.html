@@ -91,11 +91,8 @@
             
   <span class="target" id="module-sources.createObjectCatalogue"></span><div class="section" id="generating-object-catalogue">
 <h1>Generating Object Catalogue<a class="headerlink" href="#generating-object-catalogue" title="Permalink to this headline">¶</a></h1>
-<p>This simple script can be used to generate an object catalogue that can then be used
+<p>These simple functions can be used to generate different types of object catalogues that can then be used
 as an input for the VIS simulator.</p>
-<p>To run:</p>
-<div class="highlight-python"><pre>python createObjectCatalogue.py</pre>
-</div>
 <p>Please note that the script requires files from the data folder. Thus, you should
 place the script to an empty directory and either copy or link to the data directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -169,8 +166,8 @@ that was generated based on these data.</p>
 
 <dl class="function">
 <dt id="sources.createObjectCatalogue.starCatalogFixedMagnitude">
-<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">starCatalogFixedMagnitude</tt><big>(</big><em>stars=400</em>, <em>xmax=2048</em>, <em>ymax=2066</em>, <em>mag=18</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.starCatalogFixedMagnitude" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a catalog with stars at random positions.</p>
+<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">starCatalogFixedMagnitude</tt><big>(</big><em>stars=400</em>, <em>xmax=2048</em>, <em>ymax=2066</em>, <em>mag=18</em>, <em>random=True</em>, <em>pergrid=51</em>, <em>out='starsSameMag.dat'</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.starCatalogFixedMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.</p>
 </dd></dl>
 
 </div>

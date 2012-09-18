@@ -39,6 +39,34 @@ Thus it is recommended that one installs a Python distribution like `Enthought P
 which installs all dependencies at once.
 
 
+Instrument Model
+================
+
+The *support* subpackage contains functions that define the VIS instrument model. This model contains information
+about noise, dark, cosmic rays, radiation damage parameters, sky background, and pixel scale. For the Python
+documentation, please see:
+
+.. toctree::
+   :maxdepth: 4
+
+   instrument
+
+
+Instrument Characteristics
+--------------------------
+
+The *postproc* subpackage contains methods related to either generating a CCD mosaics from simulated data
+that is in quadrants like the VIS reference simulator produces or including instrument characteristics
+to simulated images that contain only Poisson noise and background. For more detailed documentation
+of the Python classes, please see:
+
+.. toctree::
+   :maxdepth: 4
+
+   postproc
+
+
+
 Exposure Times
 ==============
 
@@ -111,19 +139,6 @@ For more detailed documentation, please see:
      An example image generated with the reference simulator. The image shows a part of a single
      CCD.
 
-
-Instrument Characteristics
-==========================
-
-The *postproc* subpackage contains methods related to either generating a CCD mosaics from simulated data
-that is in quadrants like the VIS reference simulator produces or including instrument characteristics
-to simulated images that contain only Poisson noise and background. For more detailed documentation
-of the Python classes, please see:
-
-.. toctree::
-   :maxdepth: 4
-
-   postproc
 
 
 Data reduction

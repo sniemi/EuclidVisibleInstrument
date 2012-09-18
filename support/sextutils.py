@@ -76,8 +76,7 @@ class se_catalog(object):
     """
 
     def __init__(self, cfile, readfile=True, preserve_case=False):
-        (self._d, self._l, self._ncolumns, self._header) = initcat(cfile,
-                                                                   preserve_case=preserve_case)
+        (self._d, self._l, self._ncolumns, self._header) = initcat(cfile, preserve_case=preserve_case)
         self._fname = cfile
         if readfile:
             self._colentries = range(len(self._l))
@@ -322,6 +321,7 @@ def initcat(catfile, preserve_case=False):
                 else:
                     column_name = a[2].lower()
                     hdict[column_name] = col
+
                 firstdata = i + 1
                 previous_column = col
                 previous_key = column_name
@@ -347,6 +347,7 @@ def initcat(catfile, preserve_case=False):
                         if preserve_case:
                             hdict[column_name] = c
                         else:
+                            print c
                             hdict[column_name] = c.lower()
                 ncolumns = len(a)
         i = i + 1

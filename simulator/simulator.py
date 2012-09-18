@@ -14,9 +14,9 @@ The approximate sequence of events in the simulator is as follows:
       #. Read in CCD offset information, displace the image, and modify
          the output file name to contain the CCD and quadrant information
          (note that VIS has a focal plane of 6 x 6 detectors).
-      #. Read in source list and determine the number of different object types.
+      #. Read in a source list and determine the number of different object types.
       #. Read in a file which assigns data to a given object index.
-      #. Load the PSF model (a single 2D map with a given over sampling or field dependent maps).
+      #. Load the PSF model (a 2D map with a given over sampling or field dependent maps).
       #. Generate a finemap (oversampled image) for each object type. If an object
          is a 2D image then calculate the shape tensor to be used for size scaling.
          Each type of an object is then placed onto its own finely sampled finemap.
@@ -31,17 +31,20 @@ The approximate sequence of events in the simulator is as follows:
             * if object is a star, scale counts according to the derived
               scaling (first step), and finally overlay onto the detector according to its position.
 
-      #. Apply a multiplicative flat-field map [optional].
+      #. Apply calibration unit flux to mimic flat field exposures [optional].
+      #. Apply a multiplicative flat-field map to emulate pixel-to-pixel non-uniformity [optional].
       #. Add a charge injection line (horizontal and/or vertical) [optional].
-      #. Add cosmic ray streaks onto the CCD with random positions but known distribution [optional].
+      #. Add cosmic ray tracks onto the CCD with random positions but known distribution [optional].
+      #. Apply detector charge bleeding in column direction [optional].
       #. Add photon (Poisson) noise and constant dark current to the pixel grid [optional].
       #. Add cosmetic defects from an input file [optional].
       #. Add pre- and overscan regions in the serial direction [optional].
       #. Apply the CDM03 radiation damage model [optional].
+      #. Apply CCD273 non-linearity model to the pixel data [optional].
       #. Add readout noise selected from a Gaussian distribution [optional].
-      #. Convert from electrons to ADUs using the given gain factor.
-      #. Add a given bias level and discretise the counts (16bit).
-      #. Finally the generated image is converted to a FITS file, a WCS is assigned
+      #. Convert from electrons to ADUs using a given gain factor.
+      #. Add a given bias level and discretise the counts (the output is going to be in 16bit unsigned integers).
+      #. Finally the simulated image is converted to a FITS file, a WCS is assigned
          and the output is saved to the current working directory.
 
 .. Warning:: The code is still work in progress and new features are being added.
@@ -115,7 +118,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.06dev
+:version: 1.07dev
 
 Version and change logs::
 
@@ -137,6 +140,7 @@ Version and change logs::
     1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
           oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
           accuracy.
+    1.07: included an option to apply non-linearity model. Cleaned the documentation.
 
 
 Future Work
@@ -150,11 +154,9 @@ Future Work
     #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
     #. test that the WCS is correctly implemented and allows CCD offsets
-    #. implement additive flat fielding (now only multiplicative pixel non-uniform effect is being simulated)
     #. implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
     #. centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
     #. charge injection line positions are now hardcoded to the code, read from the config file
-    #. CTI model values are not included to the FITS header
     #. include rotation in metrology
     #. implement optional dithered offsets
     #. try to further improve the convolution speed (look into fftw package)
@@ -177,9 +179,10 @@ import pyfits as pf
 import numpy as np
 from CTI import CTI
 from support import logger as lg
+from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.06
+__version__ = 1.07
 
 
 class VISsimulator():
@@ -213,31 +216,34 @@ class VISsimulator():
         self.section = section
         self.debug = debug
 
-        #default settings are placed to the information dictionary
-        self.information = dict(psfoversampling=1.0,
-                                quadrant=0,
-                                ccdx=0,
-                                ccdy=0,
-                                xsize=2048,
-                                ysize=2066,
-                                prescanx=50,
-                                ovrscanx=20,
-                                fullwellcapacity=200000,
-                                dark=0.001,
-                                readout=4.5,
-                                bias=1000.0,
-                                cosmic_bkgd=0.172,
-                                e_adu=3.5,
-                                magzero=1.7059e10,
-                                exposures=1,
-                                exptime=565.0,
-                                ra=123.0,
-                                dec=45.0,
-                                flatflux='data/VIScalibrationUnitflux.fits',
-                                cosmicraylengths='data/cdf_cr_length.dat',
-                                cosmicraydistance='data/cdf_cr_total.dat',
-                                flatfieldfile='data/VISFlatField2percent.fits',
-                                trapfile='data/cdm_euclid.dat')
+        #load instrument model
+        self.information = VISinstrumentModel.VISinformation()
+
+        #update settings with defaults
+        self.information.update(dict(psfoversampling=1.0,
+                                     quadrant=0,
+                                     ccdx=0,
+                                     ccdy=0,
+                                     xsize=2048,
+                                     ysize=2066,
+                                     prescanx=50,
+                                     ovrscanx=20,
+                                     fullwellcapacity=200000,
+                                     dark=0.001,
+                                     readout=4.5,
+                                     bias=1000.0,
+                                     cosmic_bkgd=0.172,
+                                     e_adu=3.5,
+                                     magzero=1.7059e10,
+                                     exposures=1,
+                                     exptime=565.0,
+                                     ra=123.0,
+                                     dec=45.0,
+                                     flatflux='data/VIScalibrationUnitflux.fits',
+                                     cosmicraylengths='data/cdf_cr_length.dat',
+                                     cosmicraydistance='data/cdf_cr_total.dat',
+                                     flatfieldfile='data/VISFlatField2percent.fits',
+                                     trapfile='data/cdm_euclid.dat'))
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -293,7 +299,6 @@ class VISsimulator():
             overscans = yes
             bleeding = yes
             flatfieldM = yes
-            flatfieldA = no
 
         For explanation of each field, see /data/test.config.
 
@@ -320,7 +325,6 @@ class VISsimulator():
 
         #booleans to control the flow
         self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
-        self.flatfieldA = self.config.getboolean(self.section, 'flatfieldA')
         self.chargeInjectionx = self.config.getboolean(self.section, 'chargeInjectionx')
         self.chargeInjectiony = self.config.getboolean(self.section, 'chargeInjectiony')
         self.cosmicRays = self.config.getboolean(self.section, 'cosmicRays')
@@ -331,16 +335,20 @@ class VISsimulator():
         self.bleeding = self.config.getboolean(self.section, 'bleeding')
         self.overscans = self.config.getboolean(self.section, 'overscans')
 
-        #
+        #these don't need to be in the config file
         try:
             self.lampFlux = self.config.getboolean(self.section, 'lampFlux')
         except:
             self.lampFlux = False
+        try:
+            self.nonlinearity = self.config.getboolean(self.section, 'nonlinearity')
+        except:
+            self.nonlinearity = False
 
         self.information['variablePSF'] = False
 
-        self.booleans = dict(flatfieldM=self.flatfieldM,
-                             flatfieldA=self.flatfieldA,
+        self.booleans = dict(nonlinearity=self.nonlinearity,
+                             flatfieldM=self.flatfieldM,
                              lampFlux=self.lampFlux,
                              chargeInjectionx=self.chargeInjectionx,
                              chargeInjectiony=self.chargeInjectiony,
@@ -1046,22 +1054,15 @@ class VISsimulator():
 
     def applyFlatfield(self):
         """
-        Applies multiplicative and/or additive flat field.
+        Applies multiplicative flat field to emulate pixel-to-pixel non-uniformity.
 
         Because the pixel-to-pixel non-uniformity effect (i.e. multiplicative) flat fielding takes place
         before CTI and other effects, the flat field file must be the same size as the pixels that see
         the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
-
-        .. Note:: The additive flat fielding effect has not been included yet.
         """
-        if self.flatfieldM:
-            flatM = pf.getdata(self.information['flatfieldfile'])
-            self.image *= flatM
-            self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldfile'])
-
-        if self.flatfieldA:
-            print 'ERROR - Additive flat fielding not implemented yet!'
-            #self.log.info('Applied additive flat... ')
+        flatM = pf.getdata(self.information['flatfieldfile'])
+        self.image *= flatM
+        self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldfile'])
 
 
     def addChargeInjection(self):
@@ -1211,6 +1212,22 @@ class VISsimulator():
             self.log.info('Adding radiation damage to the no cosmic rays image...')
             self.imagenoCR = cti.applyRadiationDamage(self.imagenoCR,
                                                       iquadrant=self.information['quadrant'])
+
+
+    def applyNonlinearity(self):
+        """
+        Applies CCD273 non-linearity model to the image being constructed.
+        """
+        #save fully linear image
+        self.writeFITSfile(self.image, 'nononlinearity' + self.information['output'])
+
+        self.log.debug('Starting to apply non-linearity model...')
+        self.image = VISinstrumentModel.CCDnonLinearityModel(self.image.copy())
+
+        self.log.info('Non-linearity effects included.')
+
+        if self.cosmicRays:
+            self.imagenoCR = VISinstrumentModel.CCDnonLinearityModel(self.imagenoCR.copy())
 
 
     def applyReadoutNoise(self):
@@ -1412,9 +1429,6 @@ class VISsimulator():
 
         #write booleans
         for key, value in self.booleans.iteritems():
-            #flat key is too long to show multiplicative and additive separately without modification
-            if 'FLAT' in  key.upper():
-                key = 'FLATF' + key[-1]
             #truncate long keys
             if len(key) > 8:
                 key = key[:7]
@@ -1449,7 +1463,7 @@ class VISsimulator():
         if self.lampFlux:
             self.addLampFlux()
 
-        if self.flatfieldA or self.flatfieldM:
+        if self.flatfieldM:
             self.applyFlatfield()
 
         if self.chargeInjectionx or self.chargeInjectiony:
@@ -1473,9 +1487,8 @@ class VISsimulator():
         if self.radiationDamage:
             self.applyRadiationDamage()
 
-
-        #todo: include non-linearity effect here!!
-
+        if self.nonlinearity:
+            self.applyNonlinearity()
 
         if self.noise:
             self.applyReadoutNoise()

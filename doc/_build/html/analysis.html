@@ -357,7 +357,7 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 </tr>
 <tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.5</td>
 </tr>
 </tbody>
 </table>
@@ -386,7 +386,7 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 
 <dl class="method">
 <dt id="analysis.sourceFinder.sourceFinder.doAperturePhotometry">
-<tt class="descname">doAperturePhotometry</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.doAperturePhotometry" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">doAperturePhotometry</tt><big>(</big><em>pixel_based=True</em><big>)</big><a class="headerlink" href="#analysis.sourceFinder.sourceFinder.doAperturePhotometry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
 This method also calculates refined centroid for each object.</p>
 <div class="admonition warning">
@@ -399,9 +399,11 @@ when applying this method.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixel_based</strong> (<em>boolean</em>) &#8211; whether to do a global or pixel based background subtraction</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
 </tr>
 </tbody>
 </table>
@@ -541,7 +543,7 @@ when applying this method.</p>
 
 <dl class="method">
 <dt>
-<tt class="descname">doAperturePhotometry</tt><big>(</big><big>)</big></dt>
+<tt class="descname">doAperturePhotometry</tt><big>(</big><em>pixel_based=True</em><big>)</big></dt>
 <dd><p>Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
 This method also calculates refined centroid for each object.</p>
 <div class="admonition warning">
@@ -554,9 +556,11 @@ when applying this method.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixel_based</strong> (<em>boolean</em>) &#8211; whether to do a global or pixel based background subtraction</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">ndarray, ndarray, ndarray, ndarray, ndarray</td>
 </tr>
 </tbody>
 </table>

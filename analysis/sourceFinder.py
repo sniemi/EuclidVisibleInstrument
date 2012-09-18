@@ -11,11 +11,12 @@ Simple source finder that can be used to find objects from astronomical images.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.4
+:version: 0.5
 """
 import matplotlib
 matplotlib.use('PDF')
 import datetime, sys
+from optparse import OptionParser
 from itertools import groupby, izip, count
 from time import time
 import numpy as np
@@ -54,8 +55,8 @@ class sourceFinder():
         self.origimage = image.copy()
         self.log = log
         #set default parameter values and then update using kwargs
-        self.settings = dict(above_background=10.0,
-                             clean_size_min=9,
+        self.settings = dict(above_background=4.0,
+                             clean_size_min=2,
                              clean_size_max=110,
                              sigma=1.5,
                              disk_struct=3,
@@ -63,7 +64,8 @@ class sourceFinder():
                              oversample=10,
                              gain=3.5,
                              exptime=565.,
-                             aperture_correction=0.928243,
+                             #aperture_correction=0.928243,
+                             aperture_correction=0.925969,
                              magzero=1.7059e10,
                              output='objects.txt')
         self.settings.update(kwargs)
@@ -94,40 +96,41 @@ class sourceFinder():
         med = np.median(img)
         self.log.info('Median of the gaussian filtered image = %f' % med)
 
-        #find pixels above the median
-        msk = self.image > med
+        #find pixels above 2.*median, these are most likely from sources so assume that the rest is background
+        msk = self.image > 2.*med
         #get background image and calculate statistics
         backgrd = self.origimage[~msk].copy()
         #only take values greater than zero
         backgrd = backgrd[backgrd > 0.0]
 
         if len(backgrd) < 1:
-            #no real background in the image, a special case, a bit of a hack for now
-            mean = 0.0
+            #could not find background...
             std = 1.0
             #find objects above the background
-            self.mask = self.image -mean > std * self.settings['above_background']
+            self.mask = self.image > std * self.settings['above_background']
             self.settings['clean_size_min'] = 1.0
             self.settings['clean_size_max'] = min(self.image.shape) / 1.5
             self.log.warning('Trouble finding background, will modify cleaning sizes...')
         else:
             std = np.std(backgrd).item() #items required if image was memmap'ed by pyfits
-            mean = np.mean(backgrd).item() #items required if image was memmap'ed by pyfits
+            #mean = np.mean(backgrd).item() #items required if image was memmap'ed by pyfits
 
             #find objects above the background
             filtered = ndimage.median_filter(self.image, self.settings['sigma'])
-            #self.mask = filtered > rms * self.settings['above_background'] + mean
+            #self.mask = filtered - mean > std * self.settings['above_background']
             self.mask = filtered - med > std * self.settings['above_background']
 
         #these are very very crude estimates!
-        self.log.info('Background: average={0:.4f} and std={1:.4f}'.format(mean, std))
-        self.background = mean
+        self.log.info('Background: median={0:.4f} and std={1:.4f}'.format(med, std))
+        self.background = med
         self.background_std = std
+        print 'Background: median={0:.4f} and std={1:.4f}'.format(med, std)
 
         #get labels
         self.label_im, self.nb_labels = ndimage.label(self.mask)
 
         self.log.info('Finished the initial run and found {0:d} objects...'.format(self.nb_labels))
+        print 'Finished the initial run and found {0:d} objects...'.format(self.nb_labels)
 
         if self.nb_labels < 1:
             self.log.error('Cannot find any objects, will abort')
@@ -170,7 +173,7 @@ class sourceFinder():
         return self.fluxes
 
 
-    def doAperturePhotometry(self):
+    def doAperturePhotometry(self, pixel_based=True):
         """
         Perform aperture photometry and calculate the shape of the object based on quadrupole moments.
         This method also calculates refined centroid for each object.
@@ -179,19 +182,28 @@ class sourceFinder():
                      strongly on the noise estimate from the background. Thus, great care should be exercised
                      when applying this method.
 
+        :param pixel_based: whether to do a global or pixel based background subtraction
+        :type pixel_based: boolean
+
         :return: photometry, error_in_photometry, ellipticity, refined_x_pos, refined_y_pos
         :return: ndarray, ndarray, ndarray, ndarray, ndarray
         """
         if not hasattr(self, 'xcms'):
             self.getCenterOfMass()
 
-        #box around the source, make it 4 * aperture on side to allow some recentering
-        size = np.ceil(self.settings['aperture']*2.)
+        #box around the source, make it larger than the aperture to allow recentroiding
+        size = np.ceil(self.settings['aperture']*1.5)
 
-        #global background for subtraction, extremely crude
+        #area that the aperture covers
         area = np.pi * self.settings['aperture']**2
-        #bcg = self.background * area
-        bcg = self.background #+ 1.5
+
+        #background
+        if pixel_based:
+            bcg = self.background
+        else:
+            bcg = self.background * area
+
+        #fudge the errors...
         self.background_std *= 2.
 
         photom = []
@@ -212,7 +224,10 @@ class sourceFinder():
                 error.append(-999)
             else:
                 #cut out a small region and subtract the sky
-                small = self.origimage[yint-size:yint+size+1, xint-size:xint+size+1].copy().astype(np.float64) - bcg
+                if pixel_based:
+                    small = self.origimage[yint-size:yint+size+1, xint-size:xint+size+1].copy().astype(np.float64) - bcg
+                else:
+                    small = self.origimage[yint-size:yint+size+1, xint-size:xint+size+1].copy().astype(np.float64)
 
                 if self.settings['oversample'] < 1.5:
                     oversampled = small
@@ -249,7 +264,8 @@ class sourceFinder():
                 counts = oversampled[np.where(mask)].sum()
 
                 #global background subtraction
-                #counts -= bcg
+                if ~pixel_based:
+                    counts -= bcg
 
                 #calculate the error in magnitudes
                 err = 1.0857 * np.sqrt(area * self.background_std**2  + (counts / self.settings['gain'])) / counts
@@ -302,6 +318,7 @@ class sourceFinder():
         self.ycms = [c[0] for c in self.cms][1:]
 
         self.log.info('After cleaning found {0:d} objects'.format(len(self.xcms)))
+        print 'After cleaning found {0:d} objects'.format(len(self.xcms))
 
         return self.xcms, self.ycms, self.cms
 
@@ -433,16 +450,44 @@ if __name__ == '__main__':
     from support import logger as lg
     import pyfits as pf
 
+    def processArgs(printHelp=False):
+        """
+        Processes command line arguments.
+        """
+        parser = OptionParser()
+
+        parser.add_option('-f', '--file', dest='file',
+                          help="Input file e.g. 'Q0_00_00stars245ver2.fits'", metavar='string')
+        parser.add_option('-s', '--sigma', dest='sigma',
+                          help="Size of the Gaussian smoothing kernel", metavar='float')
+        parser.add_option('-l', '--largest', dest='large',
+                          help="The maximum number of pixels a largest object can cover", metavar='float')
+        if printHelp:
+            parser.print_help()
+        else:
+            return parser.parse_args()
+
     log = lg.setUpLogger('sourceFinding.log')
-    data = pf.getdata('Q0_00_00starsSameMag.fits')
-    sf = sourceFinder(data, log,
-                      **{'clean_size_min' : 30, 'above_background' : 4.0, 'sigma' : 1.2, 'clean_size_max' : 500,
-                         'oversample' : 10.0})
+
+    opts, args = processArgs()
+
+    if opts.file is None:
+        processArgs(True)
+        sys.exit(8)
+
+    settings = {'clean_size_max' : 20}
+    if opts.sigma is not None:
+        settings.update({'sigma' : float(opts.sigma)})
+    if opts.large is not None:
+        settings.update({'clean_size_max' : float(opts.large)})
+
+    sf = sourceFinder(pf.getdata(opts.file), log, **settings)
     tmp = sf.runAll()
 
 
-    #data = pf.getdata('Q0_00_00starsFaint.fits ')
+    #for stars that all are 18th magnitude
+    #data = pf.getdata('Q0_00_00starsSameMag.fits')
     #sf = sourceFinder(data, log,
-    #                  **{'clean_size_min' : 2, 'above_background' : 1.08, 'sigma' : 1.5, 'clean_size_max' : 20,
+    #                  **{'clean_size_min' : 30, 'above_background' : 4.0, 'sigma' : 1.2, 'clean_size_max' : 500,
     #                     'oversample' : 10.0})
     #tmp = sf.runAll()

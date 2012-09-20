@@ -8,7 +8,7 @@ This file provides a simple functions to calculate exposure times or limiting ma
 :requires: SciPy
 :requires: matplotlib
 
-:version: 0.2
+:version: 0.3
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -29,7 +29,7 @@ import math, datetime
 from support.VISinstrumentModel import VISinformation
 
 
-def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True):
+def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True, diginoise=True):
     """
     Returns the exposure time for a given magnitude.
 
@@ -37,15 +37,18 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
     :type info: dict
     :param magnitude: the magnitude of the objct
     :type magnitude: float or ndarray
-    :param snr: signal-to-noise ratio required [default=10].
+    :param snr: signal-to-noise ratio required [default = 10.0].
     :type snr: float
-    :param exposures: number of exposures that the object is present in
+    :param exposures: number of exposures that the object is present in [default = 3]
     :type exposures: int
-    :param fudge: the fudge parameter to which to use to scale the snr to SExtractor required [default=0.7]
+    :param fudge: the fudge parameter to which to use to scale the snr to SExtractor required [default = 0.7]
     :type fudge: float
     :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
+    :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
+                      should be used [default = True]
+    :type diginoise: boolean
 
     :return: exposure time [seconds]
     :rtype: float or ndarray
@@ -64,14 +67,20 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True)
     tmp = flux_in_aperture + (sky + instrument + info['dark'])*info['aperture_size']
 
     first = snr**2 * tmp * exposures
-    #root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*info['readnoise'])**2 * exposures*info['aperture_size'])
-    root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*(info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size'])))
+
+    if diginoise:
+        root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*(info['readnoise']**2 +
+                                                                     (info['gain']/2.)**2 * info['aperture_size'])))
+    else:
+        root = np.sqrt(first**2 + (2*flux_in_aperture*exposures*snr*info['readnoise'])**2 *
+                                  exposures*info['aperture_size'])
+
     div = 2*flux_in_aperture**2*exposures**2
 
     return (first + root)/div
 
 
-def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=True):
+def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=True, diginoise=True):
     """
     Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
     level to be reached.
@@ -92,6 +101,9 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
     :param galaxy: whether the exposure time should be calculated for an average galaxy or a star.
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
+    :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
+                      should be used [default = True]
+    :type diginoise: boolean
 
     :return: limiting magnitude given the input information
     :rtype: float or ndarray
@@ -103,8 +115,13 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
     zodiacal = 10**(-0.4*(info['zodiacal'] - info['zeropoint'])) * (info['pixel_size']**2)
     instrument = 0.2 * zodiacal  #20% of zodiacal background
 
-    #tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * info['readnoise']**2 * info['aperture_size'])
-    tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures * (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+    if diginoise:
+        tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures *
+                 (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+    else:
+        tmp = 4*((sky+instrument+info['dark']) * info['aperture_size'] * totalexp + exposures *
+                  info['readnoise']**2 * info['aperture_size'])
+
     root = np.sqrt(snr**2 + tmp)
 
     if galaxy:
@@ -117,7 +134,7 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
     return out
 
 
-def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, background=True):
+def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, background=True, diginoise=True):
     """
     Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
     number of exposures.
@@ -135,6 +152,9 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
     :type galaxy: boolean
     :param background: whether to include background from sky, instrument, and dark current [default=True]
     :type background: boolean
+    :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
+                      should be used [default = True]
+    :type diginoise: boolean
 
     :return: signal-to-noise ratio
     :rtype: float or ndarray
@@ -153,18 +173,27 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
         bgr = 0.0
 
     nom = flux_in_aperture * exptime
-    #denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
-    denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+    if diginoise:
+        denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+    else:
+        denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
 
     return nom / denom * np.sqrt(exposures)
 
 
-def SNRproptoPeak(info, exptime=565.0, exposures=1):
+def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=True):
     """
     Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
 
     :param info: instrumental information such as zeropoint and background
     :type info: dict
+    :param exptime: exposure time [seconds]
+    :type exptime: float
+    :param exposures: number of exposures [default = 1]
+    :type exposures: int
+    :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
+                      should be used [default = True]
+    :type diginoise: boolean
 
     :return: signal-to-noise ratio
     :rtype: float or ndarray
@@ -180,8 +209,10 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
         nom = 10**(-0.4*(magnitude - info['zeropoint'])) * info['star_fraction'] * exptime
         peak_pixel = nom * info['peak_fraction']
 
-        #denom = np.sqrt(nom + bgr + (info['readnoise']**2 * info['aperture_size']))
-        denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+        if diginoise:
+            denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+        else:
+            denom = np.sqrt(nom + bgr + (info['readnoise']**2 * info['aperture_size']))
 
         result = nom / denom * np.sqrt(exposures)
         snr.append(result)
@@ -221,14 +252,14 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1):
 
 
 if __name__ == '__main__':
-    magnitude = 18.0 #20.8989
+    magnitude = 18.0 #24.5
     exptime = 565.0
 
     info = VISinformation()
 
-    exp = exposureTime(info, magnitude)
+    exp = exposureTime(info, magnitude, exposures=1, diginoise=False)
     limit = limitingMagnitude(info, exp=exptime)
-    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False)
+    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False, diginoise=False)
 
     print 'Exposure time required to reach SNR=10 (or 14.29) for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
     print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exptime)

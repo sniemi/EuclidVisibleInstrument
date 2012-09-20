@@ -112,7 +112,7 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -122,7 +122,7 @@
 </table>
 <dl class="function">
 <dt id="analysis.ETC.SNR">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em>, <em>background=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNR" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em>, <em>background=True</em>, <em>diginoise=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
 number of exposures.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -137,6 +137,8 @@ number of exposures.</p>
 <li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
 <li><strong>background</strong> (<em>boolean</em>) &#8211; whether to include background from sky, instrument, and dark current [default=True]</li>
+<li><strong>diginoise</strong> (<em>boolean</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used [default = True]</li>
 </ul>
 </td>
 </tr>
@@ -152,17 +154,26 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 <dl class="function">
 <dt id="analysis.ETC.SNRproptoPeak">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em>, <em>diginoise=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
+<li><strong>exptime</strong> (<em>float</em>) &#8211; exposure time [seconds]</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 1]</li>
+<li><strong>diginoise</strong> (<em>boolean</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used [default = True]</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">signal-to-noise ratio</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">signal-to-noise ratio</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -170,7 +181,7 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 <dl class="function">
 <dt id="analysis.ETC.exposureTime">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the exposure time for a given magnitude.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -179,11 +190,13 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>info</strong> (<em>dict</em>) &#8211; information describing the instrument</li>
 <li><strong>magnitude</strong> (<em>float or ndarray</em>) &#8211; the magnitude of the objct</li>
-<li><strong>snr</strong> (<em>float</em>) &#8211; signal-to-noise ratio required [default=10].</li>
-<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures that the object is present in</li>
-<li><strong>fudge</strong> (<em>float</em>) &#8211; the fudge parameter to which to use to scale the snr to SExtractor required [default=0.7]</li>
+<li><strong>snr</strong> (<em>float</em>) &#8211; signal-to-noise ratio required [default = 10.0].</li>
+<li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures that the object is present in [default = 3]</li>
+<li><strong>fudge</strong> (<em>float</em>) &#8211; the fudge parameter to which to use to scale the snr to SExtractor required [default = 0.7]</li>
 <li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+<li><strong>diginoise</strong> (<em>boolean</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used [default = True]</li>
 </ul>
 </td>
 </tr>
@@ -199,7 +212,7 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 <dl class="function">
 <dt id="analysis.ETC.limitingMagnitude">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=True</em><big>)</big><a class="headerlink" href="#analysis.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
 level to be reached.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -217,6 +230,8 @@ This is mostly due to the fact that SExtractor may require a higher snr than wha
 otherwise.</li>
 <li><strong>galaxy</strong> (<em>boolean</em>) &#8211; whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.</li>
+<li><strong>diginoise</strong> (<em>boolean</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used [default = True]</li>
 </ul>
 </td>
 </tr>

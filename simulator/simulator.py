@@ -59,6 +59,7 @@ This script depends on the following packages:
 
 :requires: PyFITS (tested with 3.0.6)
 :requires: NumPy (tested with 1.6.1)
+:requires: numexpr (tested with 2.0.1)
 :requires: SciPy (tested with 0.10.1)
 :requires: vissim-python package
 
@@ -97,9 +98,11 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
     Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
     6798 objects were place on the detector
 
-    real	2m53.005s
-    user	2m46.237s
-    sys	        0m2.151s
+    real	4m14.008s
+    user	3m59.609s
+    sys	        0m4.728s
+
+
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
@@ -118,7 +121,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.07dev
+:version: 1.08dev
 
 Version and change logs::
 
@@ -141,6 +144,7 @@ Version and change logs::
           oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
           accuracy.
     1.07: included an option to apply non-linearity model. Cleaned the documentation.
+    1.08: optimised some of the operations with numexpr (only a minor improvement).
 
 
 Future Work
@@ -177,12 +181,13 @@ from scipy import ndimage
 from scipy import signal
 import pyfits as pf
 import numpy as np
+import numexpr as ne
 from CTI import CTI
 from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.07
+__version__ = 1.08
 
 
 class VISsimulator():
@@ -198,7 +203,7 @@ class VISsimulator():
     :param debug: debugging mode on/off
     :type debug: boolean
     :param section: name of the section of the configuration file to process
-    :type section: str
+    :type section: string
     """
 
     def __init__(self, configfile, debug, section='SCIENCE'):
@@ -965,7 +970,8 @@ class VISsimulator():
                         #suppress negative numbers, renormalise and scale with the intscale
                         data[data < 0.0] = 0.0
                         sum = np.sum(data)
-                        data *= intscales[j] / sum
+                        sca = intscales[j] / sum
+                        data = ne.evaluate("data * sca")
 
                         self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
@@ -1018,7 +1024,8 @@ class VISsimulator():
 
                         #renormalise and scale to the right magnitude
                         sum = np.sum(conv)
-                        conv *= intscales[j] / sum
+                        sca = intscales[j] / sum
+                        conv = ne.evaluate("conv * sca")
 
                         #tiny galaxies sometimes end up with completely zero array
                         #checking this costs time, so perhaps this could be removed
@@ -1047,8 +1054,7 @@ class VISsimulator():
         """
         Include flux from the calibration source.
         """
-        calunit = pf.getdata(self.information['flatflux'])
-        self.image +=  calunit
+        self.image += pf.getdata(self.information['flatflux'])
         self.log.info('Flux from the calibration unit included (%s)' % self.information['flatflux'])
 
 
@@ -1060,9 +1066,10 @@ class VISsimulator():
         before CTI and other effects, the flat field file must be the same size as the pixels that see
         the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
         """
-        flatM = pf.getdata(self.information['flatfieldfile'])
-        self.image *= flatM
-        self.log.info('Applied multiplicative flat from %s...' % self.information['flatfieldfile'])
+        flat = pf.getdata(self.information['flatfieldfile'])
+        self.image *= flat
+        self.log.info('Applied multiplicative flat (pixel-to-pixel non-uniformity) from %s...' %
+                      self.information['flatfieldfile'])
 
 
     def addChargeInjection(self):

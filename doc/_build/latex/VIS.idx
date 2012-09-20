@@ -25,7 +25,7 @@
 \indexentry{SNR() (in module analysis.ETC)|hyperpage}{13}
 \indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{14}
 \indexentry{exposureTime() (in module analysis.ETC)|hyperpage}{14}
-\indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{14}
+\indexentry{limitingMagnitude() (in module analysis.ETC)|hyperpage}{15}
 \indexentry{sources.createObjectCatalogue (module)|hyperpage}{17}
 \indexentry{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{17}
 \indexentry{generateCatalog() (in module sources.createObjectCatalogue)|hyperpage}{18}
@@ -63,7 +63,7 @@
 \indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{simulator.generateGalaxies (module)|hyperpage}{29}
-\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{29}
+\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{30}
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}

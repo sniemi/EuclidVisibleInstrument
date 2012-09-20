@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{September 18, 2012}
+\date{September 20, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -749,7 +749,7 @@ SciPy
 matplotlib
 
 \item[{version}] \leavevmode
-0.2
+0.3
 
 \item[{author}] \leavevmode
 Sami-Matias Niemi
@@ -761,7 +761,7 @@ Sami-Matias Niemi
 \index{SNR() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}}{}
+\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}, \emph{diginoise=True}}{}
 Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
 number of exposures.
 \begin{quote}\begin{description}
@@ -785,6 +785,10 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 \item {} 
 \textbf{background} (\emph{boolean}) -- whether to include background from sky, instrument, and dark current {[}default=True{]}
 
+\item {} 
+\textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used {[}default = True{]}
+
 \end{itemize}
 
 \item[{Returns}] \leavevmode
@@ -800,11 +804,24 @@ float or ndarray
 \index{SNRproptoPeak() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}}{}
+\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}, \emph{diginoise=True}}{}
 Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \textbf{info} (\emph{dict}) -- instrumental information such as zeropoint and background
+
+\item {} 
+\textbf{exptime} (\emph{float}) -- exposure time {[}seconds{]}
+
+\item {} 
+\textbf{exposures} (\emph{int}) -- number of exposures {[}default = 1{]}
+
+\item {} 
+\textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used {[}default = True{]}
+
+\end{itemize}
 
 \item[{Returns}] \leavevmode
 signal-to-noise ratio
@@ -819,7 +836,7 @@ float or ndarray
 \index{exposureTime() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=True}}{}
 Returns the exposure time for a given magnitude.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -830,17 +847,21 @@ Returns the exposure time for a given magnitude.
 \textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the objct
 
 \item {} 
-\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default=10{]}.
+\textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default = 10.0{]}.
 
 \item {} 
-\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in
+\textbf{exposures} (\emph{int}) -- number of exposures that the object is present in {[}default = 3{]}
 
 \item {} 
-\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default=0.7{]}
+\textbf{fudge} (\emph{float}) -- the fudge parameter to which to use to scale the snr to SExtractor required {[}default = 0.7{]}
 
 \item {} 
 \textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\item {} 
+\textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used {[}default = True{]}
 
 \end{itemize}
 
@@ -857,7 +878,7 @@ float or ndarray
 \index{limitingMagnitude() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}}{}
+\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=True}}{}
 Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
 level to be reached.
 \begin{quote}\begin{description}
@@ -883,6 +904,10 @@ otherwise.
 \item {} 
 \textbf{galaxy} (\emph{boolean}) -- whether the exposure time should be calculated for an average galaxy or a star.
 If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
+
+\item {} 
+\textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
+should be used {[}default = True{]}
 
 \end{itemize}
 
@@ -1148,6 +1173,9 @@ PyFITS (tested with 3.0.6)
 NumPy (tested with 1.6.1)
 
 \item[{requires}] \leavevmode
+numexpr (tested with 2.0.1)
+
+\item[{requires}] \leavevmode
 SciPy (tested with 0.10.1)
 
 \item[{requires}] \leavevmode
@@ -1193,9 +1221,9 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
 Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        2m53.005s
-user        2m46.237s
-sys         0m2.151s
+real        4m14.008s
+user        3m59.609s
+sys         0m4.728s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -1212,7 +1240,7 @@ and then analysing the results with e.g. RunSnakeRun.
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.07dev
+1.08dev
 
 \end{description}\end{quote}
 
@@ -1238,6 +1266,7 @@ Version and change logs:
       oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
       accuracy.
 1.07: included an option to apply non-linearity model. Cleaned the documentation.
+1.08: optimised some of the operations with numexpr (only a minor improvement).
 \end{Verbatim}
 
 
@@ -1314,7 +1343,7 @@ The image that is being build is in:
 \textbf{debug} (\emph{boolean}) -- debugging mode on/off
 
 \item {} 
-\textbf{section} (\emph{str}) -- name of the section of the configuration file to process
+\textbf{section} (\emph{string}) -- name of the section of the configuration file to process
 
 \end{itemize}
 

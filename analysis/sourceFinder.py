@@ -57,7 +57,7 @@ class sourceFinder():
         #set default parameter values and then update using kwargs
         self.settings = dict(above_background=4.0,
                              clean_size_min=2,
-                             clean_size_max=110,
+                             clean_size_max=20,
                              sigma=1.5,
                              disk_struct=3,
                              aperture=6.5,
@@ -202,9 +202,6 @@ class sourceFinder():
             bcg = self.background
         else:
             bcg = self.background * area
-
-        #fudge the errors...
-        self.background_std *= 2.
 
         photom = []
         ell = []
@@ -462,6 +459,10 @@ if __name__ == '__main__':
                           help="Size of the Gaussian smoothing kernel", metavar='float')
         parser.add_option('-l', '--largest', dest='large',
                           help="The maximum number of pixels a largest object can cover", metavar='float')
+        parser.add_option('-m', '--minimum', dest='minimum',
+                          help="The minimum number of pixels a smallest object can cover", metavar='float')
+        parser.add_option('-a', '--above_background', dest='above',
+                          help="The significance of the detection (x sigma above the background)", metavar='float')
         if printHelp:
             parser.print_help()
         else:
@@ -475,19 +476,15 @@ if __name__ == '__main__':
         processArgs(True)
         sys.exit(8)
 
-    settings = {'clean_size_max' : 20}
+    settings = dict()
     if opts.sigma is not None:
         settings.update({'sigma' : float(opts.sigma)})
     if opts.large is not None:
         settings.update({'clean_size_max' : float(opts.large)})
+    if opts.minimum is not None:
+        settings.update({'clean_size_min' : float(opts.minimum)})
+    if opts.above is not None:
+        settings.update({'above_background' : float(opts.above)})
 
     sf = sourceFinder(pf.getdata(opts.file), log, **settings)
     tmp = sf.runAll()
-
-
-    #for stars that all are 18th magnitude
-    #data = pf.getdata('Q0_00_00starsSameMag.fits')
-    #sf = sourceFinder(data, log,
-    #                  **{'clean_size_min' : 30, 'above_background' : 4.0, 'sigma' : 1.2, 'clean_size_max' : 500,
-    #                     'oversample' : 10.0})
-    #tmp = sf.runAll()

@@ -198,9 +198,11 @@ please report any weird or inconsistent simulations to the author.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1)</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">numexpr (tested with 2.0.1)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
 </tr>
 </tbody>
 </table>
@@ -235,9 +237,9 @@ float64).</p>
 <div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
 6798 objects were place on the detector
 
-real        2m53.005s
-user        2m46.237s
-sys         0m2.151s</pre>
+real        4m14.008s
+user        3m59.609s
+sys         0m4.728s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
@@ -252,7 +254,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.07dev</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.08dev</td>
 </tr>
 </tbody>
 </table>
@@ -275,7 +277,8 @@ as follows:</p>
 1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
       oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
       accuracy.
-1.07: included an option to apply non-linearity model. Cleaned the documentation.</pre>
+1.07: included an option to apply non-linearity model. Cleaned the documentation.
+1.08: optimised some of the operations with numexpr (only a minor improvement).</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -327,7 +330,7 @@ as follows:</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>configfile</strong> (<em>string</em>) &#8211; name of the configuration file</li>
 <li><strong>debug</strong> (<em>boolean</em>) &#8211; debugging mode on/off</li>
-<li><strong>section</strong> (<em>str</em>) &#8211; name of the section of the configuration file to process</li>
+<li><strong>section</strong> (<em>string</em>) &#8211; name of the section of the configuration file to process</li>
 </ul>
 </td>
 </tr>

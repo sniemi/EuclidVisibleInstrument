@@ -69,7 +69,7 @@
   \item Gaussian2D() (analysis.shape.shapeMeasurement method), \hyperpage{43}
   \item generateCatalog() (in module sources.createObjectCatalogue), \hyperpage{18}
   \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
-  \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{29}
+  \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{30}
   \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{27}
   \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
   \item generatePlots() (in module analysis.PSFproperties), \hyperpage{47}
@@ -81,7 +81,7 @@
 
   \indexspace
   \bigletter L
-  \item limitingMagnitude() (in module analysis.ETC), \hyperpage{14}
+  \item limitingMagnitude() (in module analysis.ETC), \hyperpage{15}
   \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
 
   \indexspace

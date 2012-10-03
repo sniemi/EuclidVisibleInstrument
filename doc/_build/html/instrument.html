@@ -99,11 +99,13 @@ size, dark current, gain, zeropoint, and sky background.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
-<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">numexpr</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.4</td>
 </tr>
 </tbody>
 </table>
@@ -111,6 +113,18 @@ size, dark current, gain, zeropoint, and sky background.</p>
 <dt id="support.VISinstrumentModel.CCDnonLinearityModel">
 <tt class="descclassname">support.VISinstrumentModel.</tt><tt class="descname">CCDnonLinearityModel</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#support.VISinstrumentModel.CCDnonLinearityModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function provides a non-linearity model for a VIS CCD273.</p>
+<p>The non-linearity is modelled based on the results presented in MSSL/Euclid/TR/12001 issue 2.
+Especially Fig. 5.6, 5.7, 5.9 and 5.10 were used as an input data. The shape of the non-linearity is
+assumed to follow a parabola (although this parabola has a break, see the note below). The MSSL report
+indicates that the residual non-linearity is on the level of +/-25 DN or about +/- 0.04 per cent over
+the measured range. This function tries to duplicate this effect.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is a break in the model around 22000e. This is because the non-linearity measurements
+performed thus far are not extremely reliable below 10ke (&lt; 0.5s exposure). However, the
+assumption is that at low counts the number of excess electrons appearing due to non-linearity should
+not be more than a few.</p>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

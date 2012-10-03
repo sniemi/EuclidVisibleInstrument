@@ -6,6 +6,7 @@ The file provides a function that returns VIS related information such as pixel
 size, dark current, gain, zeropoint, and sky background.
 
 :requires: NumPy
+:requires: numexpr
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -24,6 +25,7 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import datetime, math
 import numpy as np
+import numexpr as ne
 
 
 def VISinformation():
@@ -89,16 +91,30 @@ def CCDnonLinearityModel(data):
     """
     This function provides a non-linearity model for a VIS CCD273.
 
+    The non-linearity is modelled based on the results presented in MSSL/Euclid/TR/12001 issue 2.
+    Especially Fig. 5.6, 5.7, 5.9 and 5.10 were used as an input data. The shape of the non-linearity is
+    assumed to follow a parabola (although this parabola has a break, see the note below). The MSSL report
+    indicates that the residual non-linearity is on the level of +/-25 DN or about +/- 0.04 per cent over
+    the measured range. This function tries to duplicate this effect.
+
+    .. Note:: There is a break in the model around 22000e. This is because the non-linearity measurements
+              performed thus far are not extremely reliable below 10ke (< 0.5s exposure). However, the
+              assumption is that at low counts the number of excess electrons appearing due to non-linearity should
+              not be more than a few.
+
     :param data: data to which the non-linearity model is being applied to
     :type data: float, int or ndarray
 
     :return: input data after conversion with the non-linearity model
     :rtype: float or ndarray
     """
-    data[data < 1e4] -= np.sqrt(data[data < 1e4])
-    data[0] = 1
-    data[data > 1.5e5] -= np.sqrt(data[data > 1.5e5])
-    return data
+    out = data.copy()
+    msk = data < 22400.
+    mid = VISinformation()['fullwellcapacity'] / 2.15
+    non_linearity = ne.evaluate("0.00000002*(data-mid)**2 - 100")
+    out[~msk] += non_linearity[~msk].copy()
+    out[msk] += non_linearity[msk].copy()*0.05
+    return out
 
 
 def testNonLinearity():
@@ -120,23 +136,34 @@ def testNonLinearity():
     ax1 = fig.add_axes(rect1, title='VIS Non-linearity Model')
     ax2 = fig.add_axes(rect2)  #left, bottom, width, height
 
-    ax1.plot(data, data, 'k-')
-    ax1.plot(data, nonlin, 'r-', label='Model')
+    ax1.axhline(y=0, c='k', ls='--')
+    ax1.plot(data, (nonlin/data - 1.)*100, 'r-', label='Model')
 
-    ax2.plot(data, data/nonlin, 'g-')
+    ax2.axhline(y=0, c='k', ls='--')
+    ax2.plot(data, (nonlin - data)/vis['gain'], 'g-')
+
+    ax1.axvline(x=97, c='k', ls='--')
+    ax2.axvline(x=97, c='k', ls='--')
 
     ax1.set_xticklabels([])
     ax2.set_xlabel('Real Charge [electrons]')
-    ax1.set_ylabel('Output Charge [electrons]')
-    ax2.set_ylabel('Real / Out')
+    ax1.set_ylabel('(Output / Real - 1)*100')
+    ax2.set_ylabel('O - R [ADUs]')
 
     ax1.set_xlim(0, vis['fullwellcapacity'])
     ax2.set_xlim(0, vis['fullwellcapacity'])
-    ax1.set_ylim(0, vis['fullwellcapacity'])
+    ax1.set_ylim(-.15, .2)
 
     ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
-    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0)
     plt.savefig('NonlinearityModel.pdf')
+
+    ax1.set_ylim(-.1, 8)
+    ax2.set_ylim(0, 2)
+    ax1.set_xlim(50, 800)
+    ax2.set_xlim(50, 800)
+    plt.savefig('NonlinearityModel2.pdf')
+
     plt.close()
 
 

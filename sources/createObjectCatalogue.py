@@ -212,8 +212,8 @@ def starCatalogFixedMagnitude(stars=400, xmax=2048, ymax=2066, mag=18, random=Tr
 
 
 if __name__ == '__main__':
-    #settings = dict(besancon=False, deg=30)
-    #generateCatalog(**settings)
+    settings = dict(besancon=False, deg=30)
+    generateCatalog(**settings)
 
     #create 100 catalogs at deg=30
     #settings = dict(besancon=False, deg=30, ncatalogs=500)
@@ -221,4 +221,4 @@ if __name__ == '__main__':
 
     #starCatalog(stars=100)
     #starCatalog(stars=500)
-    starCatalogFixedMagnitude(mag=24.5, random=False, out='stars24.5.dat')
+    #starCatalogFixedMagnitude(mag=24.5, random=False, out='stars24.5.dat')

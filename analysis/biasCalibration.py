@@ -733,7 +733,7 @@ def addReadoutNoise(data, readnoise=4.5, number=1):
     :rtype: ndarray [same as input data]
     """
     shape = data.shape
-    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(number, shape[0], shape[1]))
+    biases = np.random.normal(loc=0.0, scale=readnoise, size=(number, shape[0], shape[1]))
     if number > 1:
         bias = np.median(biases.astype(np.int), axis=0, overwrite_input=True)
     elif number < 1:
@@ -751,17 +751,17 @@ if __name__ == '__main__':
     log.info('Testing bias level calibration...')
 
     if run:
-        print '\nSigma run:'
-        resultsSigma = testBiasCalibrationSigma(log, biases=15, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
-        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
+        #print '\nSigma run:'
+        #resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200, file='psf1xhighe.fits')
+        #fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
         print '\nDelta run:'
-        resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=500, surfaces=100, plots=False, file='psf1xhighe.fits')
+        resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=1000, surfaces=200, plots=False, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
     else:
         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
 
-    plotNumberOfFramesSigma(resultsSigma)
+    #plotNumberOfFramesSigma(resultsSigma)
     plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

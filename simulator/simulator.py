@@ -121,7 +121,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.08dev
+:version: 1.1
 
 Version and change logs::
 
@@ -145,6 +145,8 @@ Version and change logs::
           accuracy.
     1.07: included an option to apply non-linearity model. Cleaned the documentation.
     1.08: optimised some of the operations with numexpr (only a minor improvement).
+    1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
+         being underestimated due to the fact that it was included as a variance not standard deviation.
 
 
 Future Work
@@ -152,10 +154,10 @@ Future Work
 
 .. todo::
 
+    #. test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)
     #. check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
     #. objects.dat is now hard coded into the code, this should be read from the config file
     #. implement spatially variable PSF
-    #. test that the cosmic rays are correctly implemented
     #. implement CCD offsets (for focal plane simulations)
     #. test that the WCS is correctly implemented and allows CCD offsets
     #. implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
@@ -187,7 +189,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.08
+__version__ = 1.1
 
 
 class VISsimulator():
@@ -1096,7 +1098,7 @@ class VISsimulator():
         self.readCosmicRayInformation()
 
         #estimate the number of cosmics
-        cr_n = self.information['xsize'] * self.information['ysize'] * 0.014 / 43.263316
+        cr_n = self.information['xsize'] * self.information['ysize'] * 0.014 / 43.263316 * 2.
         #scale with exposure time, the above numbers are for the nominal 565s exposure
         cr_n *= (self.information['exptime'] / 565.0)
 
@@ -1133,7 +1135,11 @@ class VISsimulator():
         CCD_cr = self.cosmicRayIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
 
         #save image without cosmics rays
-        self.writeFITSfile(self.image, 'nonoisenocr' + self.information['output'])
+        if self.nonlinearity:
+            tmp = VISinstrumentModel.CCDnonLinearityModel(self.image.copy())
+            self.writeFITSfile(tmp, 'nonoisenocr' + self.information['output'])
+        else:
+            self.writeFITSfile(self.image, 'nonoisenocr' + self.information['output'])
 
         #image without cosmic rays
         self.imagenoCR = self.image.copy()
@@ -1223,7 +1229,7 @@ class VISsimulator():
 
     def applyNonlinearity(self):
         """
-        Applies CCD273 non-linearity model to the image being constructed.
+        Applies a CCD273 non-linearity model to the image being constructed.
         """
         #save fully linear image
         self.writeFITSfile(self.image, 'nononlinearity' + self.information['output'])
@@ -1241,11 +1247,9 @@ class VISsimulator():
         """
         Applies readout noise to the image being constructed.
 
-        The noise is drawn from a Normal (Gaussian) distribution.
-        Mean = 0.0, and std = sqrt(readout noise).
+        The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and std=readout noise.
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.information['readout']),
-                                 size=self.image.shape)
+        noise = np.random.normal(loc=0.0, scale=self.information['readout'], size=self.image.shape)
         self.log.info('Sum of readnoise = %f' % np.sum(noise))
 
         #save the readout noise image

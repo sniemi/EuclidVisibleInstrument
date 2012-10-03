@@ -19,7 +19,7 @@ The class supports multiprocessing.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.8
+:version: 0.9
 """
 import os, sys, datetime, time, math, tarfile
 import multiprocessing
@@ -311,7 +311,7 @@ class PostProcessing(multiprocessing.Process):
     def applyReadoutNoise(self, data):
         """
         Applies readout noise. The noise is drawn from a Normal (Gaussian) distribution.
-        Mean = 0.0, and std = sqrt(readout).
+        Mean = 0.0, and std = readout.
 
         :param data: input data to which the readout noise will be added to
         :type data: ndarray
@@ -319,7 +319,7 @@ class PostProcessing(multiprocessing.Process):
         :return: updated data, noise image
         :rtype: dict
         """
-        noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['readnoise']), size=data.shape)
+        noise = np.random.normal(loc=0.0, scale=self.values['readnoise'], size=data.shape)
 
         self.log.info('Adding readout noise to %s...' % self.filename)
         self.log.info('Sum of readnoise in %s = %f' % (self.filename, np.sum(noise)))

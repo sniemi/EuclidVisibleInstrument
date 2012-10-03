@@ -74,7 +74,7 @@ class reduceVISdata():
         self.log.debug('Generating a super bias on fly...')
         biases = []
         for x in range(nbiases):
-            noise = np.random.normal(loc=0.0, scale=math.sqrt(self.values['rnoise']), size=self.data.shape)
+            noise = np.random.normal(loc=0.0, scale=self.values['rnoise'], size=self.data.shape)
             biases.append(noise+self.values['bias'])
         biases = np.asarray(biases)
         self.bias = np.median(biases, axis=0)

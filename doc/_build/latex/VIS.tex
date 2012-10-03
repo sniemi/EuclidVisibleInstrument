@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{September 20, 2012}
+\date{October 03, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -121,7 +121,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-1.0
+1.01
 
 \end{description}\end{quote}
 
@@ -173,6 +173,9 @@ size, dark current, gain, zeropoint, and sky background.
 \item[{requires}] \leavevmode
 NumPy
 
+\item[{requires}] \leavevmode
+numexpr
+
 \item[{author}] \leavevmode
 Sami-Matias Niemi
 
@@ -188,6 +191,19 @@ Sami-Matias Niemi
 \begin{fulllineitems}
 \phantomsection\label{instrument:support.VISinstrumentModel.CCDnonLinearityModel}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{CCDnonLinearityModel}}{\emph{data}}{}
 This function provides a non-linearity model for a VIS CCD273.
+
+The non-linearity is modelled based on the results presented in MSSL/Euclid/TR/12001 issue 2.
+Especially Fig. 5.6, 5.7, 5.9 and 5.10 were used as an input data. The shape of the non-linearity is
+assumed to follow a parabola (although this parabola has a break, see the note below). The MSSL report
+indicates that the residual non-linearity is on the level of +/-25 DN or about +/- 0.04 per cent over
+the measured range. This function tries to duplicate this effect.
+
+\begin{notice}{note}{Note:}
+There is a break in the model around 22000e. This is because the non-linearity measurements
+performed thus far are not extremely reliable below 10ke (\textless{} 0.5s exposure). However, the
+assumption is that at low counts the number of excess electrons appearing due to non-linearity should
+not be more than a few.
+\end{notice}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
 \textbf{data} (\emph{float, int or ndarray}) -- data to which the non-linearity model is being applied to
@@ -309,7 +325,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.8
+0.9
 
 \end{description}\end{quote}
 \index{PostProcessing (class in postproc.postprocessing)}
@@ -404,7 +420,7 @@ ndarray
 \begin{fulllineitems}
 \phantomsection\label{postproc:postproc.postprocessing.PostProcessing.applyReadoutNoise}\pysiglinewithargsret{\bfcode{applyReadoutNoise}}{\emph{data}}{}
 Applies readout noise. The noise is drawn from a Normal (Gaussian) distribution.
-Mean = 0.0, and std = sqrt(readout).
+Mean = 0.0, and std = readout.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
 \textbf{data} (\emph{ndarray}) -- input data to which the readout noise will be added to
@@ -1240,7 +1256,7 @@ and then analysing the results with e.g. RunSnakeRun.
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.08dev
+1.1
 
 \end{description}\end{quote}
 
@@ -1267,6 +1283,8 @@ Version and change logs:
       accuracy.
 1.07: included an option to apply non-linearity model. Cleaned the documentation.
 1.08: optimised some of the operations with numexpr (only a minor improvement).
+1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
+     being underestimated due to the fact that it was included as a variance not standard deviation.
 \end{Verbatim}
 
 
@@ -1275,6 +1293,9 @@ Version and change logs:
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
+test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)
+
+\item {} 
 check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
 
 \item {} 
@@ -1282,9 +1303,6 @@ objects.dat is now hard coded into the code, this should be read from the config
 
 \item {} 
 implement spatially variable PSF
-
-\item {} 
-test that the cosmic rays are correctly implemented
 
 \item {} 
 implement CCD offsets (for focal plane simulations)
@@ -1463,7 +1481,7 @@ Additionally saves the image without noise to a FITS file.
 
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNonlinearity}\pysiglinewithargsret{\bfcode{applyNonlinearity}}{}{}
-Applies CCD273 non-linearity model to the image being constructed.
+Applies a CCD273 non-linearity model to the image being constructed.
 
 \end{fulllineitems}
 
@@ -1489,8 +1507,7 @@ Class :\emph{CDM03}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.applyReadoutNoise}\pysiglinewithargsret{\bfcode{applyReadoutNoise}}{}{}
 Applies readout noise to the image being constructed.
 
-The noise is drawn from a Normal (Gaussian) distribution.
-Mean = 0.0, and std = sqrt(readout noise).
+The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and std=readout noise.
 
 \end{fulllineitems}
 

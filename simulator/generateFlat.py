@@ -1,9 +1,11 @@
 """
-Generating a flat field image
-=============================
+Generating a pixel-to-pixel non-uniformity map
+==============================================
 
-This script provides a method to generate a flat fielding image that mimics the one expected
-for Euclid VIS. The field is a Gaussian random field with a few per cent fluctuations.
+This script provides a method to generate a pixel-to-pixel non-uniformity map (i.e. a flat fielding image)
+that mimics the one expected for Euclid VIS. The field is a Gaussian random field with a given fluctuations,
+usually either 1 or 2% (sigma=0.01/2). This map mimics the size and quantum efficiency variations in the
+CCD273 pixels.
 
 :requires: PyFITS
 :requires: NumPy
@@ -27,7 +29,7 @@ class flatField():
                      * loc = centre of the distribution
                      * sigma = standard deviation of the distribution
                      * xsize = size of the flat field image in x direction
-                     y xsize = size of the flat field image in y direction
+                     * xsize = size of the flat field image in y direction
     type kwargs: dict
     """
     def __init__(self, log, **kwargs):

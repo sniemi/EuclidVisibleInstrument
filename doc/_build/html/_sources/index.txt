@@ -3,7 +3,7 @@ Welcome to Euclid Visible InStrument (VIS) Python Package Documentation
 
 :Author: Sami-Matias Niemi
 :Contact: smn2@mssl.ucl.ac.uk
-:version: 1.0
+:version: 1.01
 
 
 This Python package provides subpackages and methods related to generating mock data and reducing it, the main

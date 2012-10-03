@@ -1,26 +1,26 @@
 \indexentry{support.VISinstrumentModel (module)|hyperpage}{5}
 \indexentry{CCDnonLinearityModel() (in module support.VISinstrumentModel)|hyperpage}{5}
-\indexentry{VISinformation() (in module support.VISinstrumentModel)|hyperpage}{5}
+\indexentry{VISinformation() (in module support.VISinstrumentModel)|hyperpage}{6}
 \indexentry{testNonLinearity() (in module support.VISinstrumentModel)|hyperpage}{6}
-\indexentry{postproc.postprocessing (module)|hyperpage}{6}
+\indexentry{postproc.postprocessing (module)|hyperpage}{7}
 \indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{7}
 \indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{7}
 \indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{7}
 \indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
 \indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
 \indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
-\indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
-\indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
+\indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
+\indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
 \indexentry{loadFITS() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
 \indexentry{radiateFullCCD() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
-\indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
-\indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
-\indexentry{postproc.tileCCD (module)|hyperpage}{9}
+\indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
+\indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
+\indexentry{postproc.tileCCD (module)|hyperpage}{10}
 \indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{10}
 \indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{10}
-\indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{10}
-\indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{10}
-\indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{10}
+\indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
+\indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
+\indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
 \indexentry{analysis.ETC (module)|hyperpage}{13}
 \indexentry{SNR() (in module analysis.ETC)|hyperpage}{13}
 \indexentry{SNRproptoPeak() (in module analysis.ETC)|hyperpage}{14}
@@ -39,7 +39,7 @@
 \indexentry{addLampFlux() (simulator.simulator.VISsimulator method)|hyperpage}{25}
 \indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{25}
 \indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{25}
-\indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{25}
+\indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{26}

@@ -17,7 +17,7 @@
   \item analysis.PSFproperties (module), \hyperpage{47}
   \item analysis.shape (module), \hyperpage{42}
   \item analysis.sourceFinder (module), \hyperpage{44}
-  \item applyBias() (simulator.simulator.VISsimulator method), \hyperpage{25}
+  \item applyBias() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyBleeding() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyCosmetics() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{34}
@@ -45,7 +45,7 @@
   \indexspace
   \bigletter D
   \item discretise() (simulator.simulator.VISsimulator method), \hyperpage{27}
-  \item discretisetoADUs() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
+  \item discretisetoADUs() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item doAll() (analysis.analyse.analyseVISdata method), \hyperpage{42}
   \item doAperturePhotometry() (analysis.sourceFinder.sourceFinder method), \hyperpage{44}, 
 		\hyperpage{46}
@@ -68,7 +68,7 @@
   \bigletter G
   \item Gaussian2D() (analysis.shape.shapeMeasurement method), \hyperpage{43}
   \item generateCatalog() (in module sources.createObjectCatalogue), \hyperpage{18}
-  \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
+  \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{30}
   \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{27}
   \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
@@ -109,8 +109,8 @@
   \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{39}
   \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{35}
   \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{35}
-  \item postproc.postprocessing (module), \hyperpage{6}
-  \item postproc.tileCCD (module), \hyperpage{9}
+  \item postproc.postprocessing (module), \hyperpage{7}
+  \item postproc.tileCCD (module), \hyperpage{10}
   \item PostProcessing (class in postproc.postprocessing), \hyperpage{7}
   \item processConfigs() (simulator.simulator.VISsimulator method), \hyperpage{27}
 
@@ -130,9 +130,9 @@
   \item readSources() (analysis.analyse.analyseVISdata method), \hyperpage{42}
   \item reduceVISdata (class in reduction.reduceVISdata), \hyperpage{33}
   \item reduction.reduceVISdata (module), \hyperpage{33}
-  \item run() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
+  \item run() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
   \item runAll() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
-  \item runAll() (postproc.tileCCD.tileCCD method), \hyperpage{10}
+  \item runAll() (postproc.tileCCD.tileCCD method), \hyperpage{11}
   \item runAll() (simulator.generateGalaxies.generateFakeData method), \hyperpage{30}
 
   \indexspace
@@ -158,18 +158,18 @@
   \item testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration), \hyperpage{39}
   \item testNonLinearity() (in module support.VISinstrumentModel), \hyperpage{6}
   \item tileCCD (class in postproc.tileCCD), \hyperpage{10}
-  \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{10}
+  \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{11}
 
   \indexspace
   \bigletter V
-  \item VISinformation() (in module support.VISinstrumentModel), \hyperpage{5}
+  \item VISinformation() (in module support.VISinstrumentModel), \hyperpage{6}
   \item VISsimulator (class in simulator.simulator), \hyperpage{25}
 
   \indexspace
   \bigletter W
   \item writeFITS() (analysis.shape.shapeMeasurement method), \hyperpage{44}
-  \item writeFITSfile() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
-  \item writeFITSfile() (postproc.tileCCD.tileCCD method), \hyperpage{10}
+  \item writeFITSfile() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
+  \item writeFITSfile() (postproc.tileCCD.tileCCD method), \hyperpage{11}
   \item writeFITSfile() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{34}
   \item writeFITSfile() (simulator.simulator.VISsimulator method), \hyperpage{29}
   \item writeOutputs() (simulator.simulator.VISsimulator method), \hyperpage{29}

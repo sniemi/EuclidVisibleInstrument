@@ -254,7 +254,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.08dev</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.1</td>
 </tr>
 </tbody>
 </table>
@@ -278,7 +278,9 @@ as follows:</p>
       oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
       accuracy.
 1.07: included an option to apply non-linearity model. Cleaned the documentation.
-1.08: optimised some of the operations with numexpr (only a minor improvement).</pre>
+1.08: optimised some of the operations with numexpr (only a minor improvement).
+1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
+     being underestimated due to the fact that it was included as a variance not standard deviation.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -286,10 +288,10 @@ as follows:</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
+<li>test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)</li>
 <li>check that the size distribution of galaxies is suitable (now the scaling is before convolution!)</li>
 <li>objects.dat is now hard coded into the code, this should be read from the config file</li>
 <li>implement spatially variable PSF</li>
-<li>test that the cosmic rays are correctly implemented</li>
 <li>implement CCD offsets (for focal plane simulations)</li>
 <li>test that the WCS is correctly implemented and allows CCD offsets</li>
 <li>implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit</li>
@@ -426,7 +428,7 @@ Scales dark and background with the exposure time.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyNonlinearity">
 <tt class="descname">applyNonlinearity</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyNonlinearity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Applies CCD273 non-linearity model to the image being constructed.</p>
+<dd><p>Applies a CCD273 non-linearity model to the image being constructed.</p>
 </dd></dl>
 
 <dl class="method">
@@ -443,8 +445,7 @@ Scales dark and background with the exposure time.</p>
 <dt id="simulator.simulator.VISsimulator.applyReadoutNoise">
 <tt class="descname">applyReadoutNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyReadoutNoise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies readout noise to the image being constructed.</p>
-<p>The noise is drawn from a Normal (Gaussian) distribution.
-Mean = 0.0, and std = sqrt(readout noise).</p>
+<p>The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and std=readout noise.</p>
 </dd></dl>
 
 <dl class="method">

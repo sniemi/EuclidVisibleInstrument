@@ -96,8 +96,8 @@ class sourceFinder():
         med = np.median(img)
         self.log.info('Median of the gaussian filtered image = %f' % med)
 
-        #find pixels above 2.*median, these are most likely from sources so assume that the rest is background
-        msk = self.image > 2.*med
+        #find pixels above 1.5*median, these are most likely from sources so assume that the rest is background
+        msk = self.image > 1.5*med
         #get background image and calculate statistics
         backgrd = self.origimage[~msk].copy()
         #only take values greater than zero

@@ -18,7 +18,7 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.8
+:version: 0.9
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -35,7 +35,7 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
-import math, datetime, cPickle, itertools, os, sys
+import math, datetime, cPickle, os
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
@@ -134,7 +134,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, norm=1.8e5,
     return reference, out
 
 
-def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results'):
+def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=False):
     """
     Creates a simple plot to combine and show the results.
 
@@ -197,9 +197,10 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results'):
     plt.text(xmin*1.05, 0.9*reqe, '%.1e' % reqe, ha='left', va='top', fontsize=11)
     ax.set_xlim(xmin, xmax)
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
-    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2, loc='upper left')
     plt.savefig(outdir+'/NonLinCalibrationsigmaE.pdf')
     plt.close()
 
@@ -224,7 +225,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results'):
 
     ax.set_yscale('log')
     ax.set_xscale('log')
-    ax.set_ylim(1e-6, 1e-3)
+    ax.set_ylim(6e-6, 4e-3)
     ax.set_xlabel('Error in the Non-linearity Correction')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
@@ -232,15 +233,81 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results'):
     plt.text(xmin*1.05, 0.9*reqr2, '%.1e' % reqr2, ha='left', va='top', fontsize=11)
     ax.set_xlim(xmin, xmax)
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
-    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8    )
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
     plt.savefig(outdir+'/NonLinCalibrationSigmaR2.pdf')
     plt.close()
 
+    print '\nDelta results:'
+    for i, key in enumerate(res):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        plt.title(r'VIS Non-linearity Correction: $\delta e$')
+
+        de1 = np.asarray(res[key][4])
+        de2 = np.asarray(res[key][5])
+        de = np.asarray(res[key][6])
+
+        avg1 = np.mean(de1) ** 2
+        avg2 = np.mean(de2) ** 2
+        avg = np.mean(de) ** 2
+
+        #write down the values
+        print i, key, avg, avg1, avg2
+        plt.text(0.08, 0.9, r'$\left< \delta e_{1} \right>^{2} = %e$' % avg1, fontsize=10, transform=ax.transAxes)
+        plt.text(0.08, 0.85, r'$\left< \delta e_{2}\right>^{2} = %e$' % avg2, fontsize=10, transform=ax.transAxes)
+        plt.text(0.08, 0.8, r'$\left< \delta | \bar{e} |\right>^{2} = %e$' % avg, fontsize=10, transform=ax.transAxes)
+
+        ax.hist(de, bins=15, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True, log=True)
+        ax.hist(de1, bins=15, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True, log=True)
+        ax.hist(de2, bins=15, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True, log=True)
+
+        ax.axvline(x=0, ls=':', c='k')
+
+        ax.set_ylabel('Probability Density')
+        ax.set_xlabel(r'$\delta e_{i}\ , \ \ \ i \in [1,2]$')
+
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
+        plt.savefig(outdir + '/NonlinearityEDelta%i.pdf' % i)
+        plt.close()
+
+    #same for R2s
+    for i, key in enumerate(res):
+        fig = plt.figure()
+        plt.title(r'VIS Non-linearity Correction: $\frac{\delta R^{2}}{R_{ref}^{2}}$')
+        ax = fig.add_subplot(111)
+
+        dR2 = np.asarray(res[key][7])
+        avg = np.mean(dR2 / ref['R2']) ** 2
+
+        ax.hist(dR2, bins=15, color='y', label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True, log=True)
+
+        print i, key, avg
+
+        plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' % avg,
+            fontsize=10, transform=ax.transAxes)
+
+        ax.axvline(x=0, ls=':', c='k')
+
+        ax.set_ylabel('Probability Density')
+        ax.set_xlabel(r'$\frac{\delta R^{2}}{R_{ref}^{2}}$')
+
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+
+        plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
+        plt.savefig(outdir + '/NonlinearityDeltaSize%i.pdf' % i)
+        plt.close()
+
 
 if __name__ == '__main__':
-    run = True
+    run = False
 
     #start the script
     log = lg.setUpLogger('nonlinearityCalibration.log')

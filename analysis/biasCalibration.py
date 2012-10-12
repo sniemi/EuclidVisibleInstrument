@@ -534,12 +534,14 @@ def plotEs(deltae1, deltae2, deltae, output, title=''):
     plt.close()
 
 
-def plotNumberOfFramesDelta(results):
+def plotNumberOfFramesDelta(results, timeStamp=False):
     """
     Creates a simple plot to combine and show the results for errors (delta).
 
     :param results: results to be plotted
     :type results: dict
+    :param timeStamp: whether to include a time stamp in the output image
+    :type timeStamp: bool
     """
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
 
@@ -568,16 +570,17 @@ def plotNumberOfFramesDelta(results):
         plt.text(0.08, 0.85, r'$\left< \delta e_{2}\right>^{2} = %e$' %avg2, fontsize=10, transform=ax.transAxes)
         plt.text(0.08, 0.8, r'$\left< \delta | \bar{e} |\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
 
-        ax.hist(de, bins=10, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True)
-        ax.hist(de1, bins=10, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True)
-        ax.hist(de2, bins=10, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True)
+        ax.hist(de, bins=10, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True, log=True)
+        ax.hist(de1, bins=10, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True, log=True)
+        ax.hist(de2, bins=10, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True, log=True)
 
         ax.axvline(x=0, ls=':', c='k')
 
         ax.set_ylabel('Probability Density')
         ax.set_xlabel(r'$\delta e_{i}\ , \ \ \ i \in [1,2]$')
 
-        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
         plt.savefig('BiasCalibrationEDelta%i.pdf' % key)
@@ -597,7 +600,7 @@ def plotNumberOfFramesDelta(results):
         dR2 = np.asarray(results[key][3])
         avg = np.mean(dR2)**2
 
-        ax.hist(dR2, bins=10, color='y', alpha=0.1, label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True)
+        ax.hist(dR2, bins=20, color='y', label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True, log=True)
 
         print key, avg
         plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
@@ -607,14 +610,15 @@ def plotNumberOfFramesDelta(results):
         ax.set_ylabel('Probability Density')
         ax.set_xlabel(r'$\delta \frac{\delta R^{2}}{R_{ref}^{2}}$')
 
-        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
         plt.savefig('BiasCalibrationDeltaSize%i.pdf' % key)
         plt.close()
 
 
-def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
+def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.01, timeStamp=False):
     """
     Creates a simple plot to combine and show the results.
 
@@ -626,6 +630,8 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     :type ymax: int or float
     :param shift: the amount to shift the e2 results on the abscissa (for clarity)
     :type shift: float
+    :param timeStamp: whether to include a time stamp in the output image
+    :type timeStamp: bool
     """
     print '\nSigma results:'
     txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
@@ -667,7 +673,8 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     ax.set_xlabel('Number of Bias Frames Median Combined')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
     plt.savefig('BiasCalibrationsigmaE.pdf')
@@ -711,7 +718,8 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1):
     ax.set_xlabel('Number of Bias Frames Median Combined')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8    )
     plt.savefig('BiasCalibrationSigmaR2.pdf')
@@ -744,16 +752,16 @@ def addReadoutNoise(data, readnoise=4.5, number=1):
 
 
 if __name__ == '__main__':
-    run = True
+    run = False
 
     #start the script
     log = lg.setUpLogger('biasCalibration.log')
     log.info('Testing bias level calibration...')
 
     if run:
-        #print '\nSigma run:'
-        #resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200, file='psf1xhighe.fits')
-        #fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
+        print '\nSigma run:'
+        resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200, file='psf1xhighe.fits')
+        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
         print '\nDelta run:'
         resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=1000, surfaces=200, plots=False, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
@@ -761,7 +769,7 @@ if __name__ == '__main__':
         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
 
-    #plotNumberOfFramesSigma(resultsSigma)
+    plotNumberOfFramesSigma(resultsSigma)
     plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

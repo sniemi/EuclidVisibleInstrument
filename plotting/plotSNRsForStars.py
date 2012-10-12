@@ -50,7 +50,7 @@ def MagnitudeDistribution(catalog, mag=18., bins=16):
     plt.close()
 
 
-def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231):
+def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231, timeStamp=False):
     """
     """
     data = sextutils.sextractor(file)
@@ -84,7 +84,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     xpos = np.mean(counts)
     std = np.std(data.counts/apcorr)
     snr = np.mean(data.counts/apcorr)/std
-    print snr, np.mean(data.counts)/std, 1527.57315282/std
+    print snr, np.mean(data.counts)/std, 1527.57315282/std, np.mean(data.counts), std
     kde = KDE(counts)
     kde.fit()
 
@@ -94,15 +94,17 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1 = fig.add_subplot(111)
 
     ax1.hist(counts, bins=bins, label='r=0.65 Aperture', alpha=0.2, normed=True, color='b')
-    ax1.plot(kde.support, kde.density, 'r-', label='Gaussian KDE')
-    ax1.axvline(x=xpos, c='b' ,ls='-', label='Mean')
+    ax1.plot(kde.support, kde.density, 'r-', label='Gaussian KDE', lw=2)
+    ax1.axvline(x=xpos, c='g' ,ls='-', label='Mean', lw=2)
 
     ax1.set_xlabel('Aperture Corrected Counts - Input Catalogue')
     ax1.set_ylabel('PDF')
 
     ax1.text(ax1.get_xlim()[0]*0.95, ax1.get_ylim()[1]*0.75, r'$SNR = \frac{\Sigma counts}{\sigma} \sim %.2f$' % snr)
 
-    #ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    if timeStamp:
+        ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
     plt.savefig('CountDistributionSourceFinder.pdf')
     plt.close()
@@ -114,17 +116,46 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1 = fig.add_subplot(111)
 
     ax1.hist(data.snr, bins=bins, label='r=0.65 Aperture', alpha=0.2, normed=True, color='b')
-    ax1.axvline(x=np.mean(data.snr), c='b' ,ls='-')
-    ax1.plot(kde.support, kde.density, 'r-', label='Gaussian KDE')
+    ax1.axvline(x=np.mean(data.snr), c='g' ,ls='-', label='Mean', lw=2)
+    ax1.plot(kde.support, kde.density, 'r-', label='Gaussian KDE', lw=2)
 
     ax1.set_xlabel('Derived Signal-to-Noise Ratio')
     ax1.set_ylabel('PDF')
 
-    ax1.text(ax1.get_xlim()[0]*1.02, ax1.get_ylim()[1]*0.9, r'$\bar{SNR} = %.2f$' % np.mean(data.snr))
+    #ax1.text(ax1.get_xlim()[0]*1.02, ax1.get_ylim()[1]*0.9, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
+    ax1.text(5.2, 0.33, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
 
-    ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    if timeStamp:
+        ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0, loc='upper left')
     plt.savefig('SNRsSourceFinder.pdf')
+    plt.close()
+
+    #pick the ones with well recovered flux
+    msk = data.counts > 1369. #90% of 1527.5
+
+    kde = KDE(data.snr[msk])
+    kde.fit()
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+
+    ax1.hist(data.snr[msk], bins=bins, label='r=0.65 Aperture', alpha=0.2, normed=True, color='b')
+    ax1.axvline(x=np.mean(data.snr[msk]), c='g' ,ls='-', label='Mean', lw=2)
+    ax1.plot(kde.support, kde.density, 'r-', label='Gaussian KDE', lw=2)
+
+    ax1.set_xlabel('Derived Signal-to-Noise Ratio')
+    ax1.set_ylabel('PDF')
+
+    #ax1.text(ax1.get_xlim()[0]*1.02, ax1.get_ylim()[1]*0.9, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
+    ax1.text(11., 0.8, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr[msk]))
+
+    if timeStamp:
+        ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0)
+    plt.savefig('SNRsSourceFinder2.pdf')
     plt.close()
 
     avg = np.mean(data.ellipticity)
@@ -145,6 +176,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
     plt.savefig('EllipticityDistributionSourceFinder.pdf')
     plt.close()
+
 
 
 if __name__ == '__main__':

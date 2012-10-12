@@ -42,7 +42,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import pyfits as pf
 import numpy as np
-import math, datetime, cPickle, itertools, glob, os, sys
+import datetime, cPickle, glob, os, sys
 from scipy.ndimage.interpolation import zoom
 from scipy import interpolate
 from analysis import shape
@@ -269,7 +269,7 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     return out, reference
 
 
-def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='results'):
+def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='results', timeStamp=False):
     """
     Creates a simple plot to combine and show the results.
 
@@ -283,6 +283,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     :type shift: float
     :param outdir: output directory to which the plots will be saved to
     :type outdir: str
+    :param timeStamp: whether or not to include a time stamp to the output image
+    :type timeStamp: bool
 
     :return: None
     """
@@ -352,7 +354,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
     plt.savefig(outdir+'/FlatCalibrationsigmaE.pdf')
@@ -411,7 +414,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
-    plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+    if timeStamp:
+        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8    )
     plt.savefig(outdir+'/FlatCalibrationSigmaR2.pdf')
@@ -439,16 +443,17 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         plt.text(0.08, 0.85, r'$\left< \delta e_{2}\right>^{2} = %e$' %avg2, fontsize=10, transform=ax.transAxes)
         plt.text(0.08, 0.8, r'$\left< \delta | \bar{e} |\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
 
-        ax.hist(de, bins=15, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True)
-        ax.hist(de1, bins=15, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True)
-        ax.hist(de2, bins=15, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True)
+        ax.hist(de, bins=15, color='y', alpha=0.2, label=r'$\delta | \bar{e} |$', normed=True, log=True)
+        ax.hist(de1, bins=15, color='b', alpha=0.5, label=r'$\delta e_{1}$', normed=True, log=True)
+        ax.hist(de2, bins=15, color='g', alpha=0.3, label=r'$\delta e_{2}$', normed=True, log=True)
 
         ax.axvline(x=0, ls=':', c='k')
 
         ax.set_ylabel('Probability Density')
         ax.set_xlabel(r'$\delta e_{i}\ , \ \ \ i \in [1,2]$')
 
-        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
         plt.savefig(outdir+'/FlatCalibrationEDelta%i.pdf' % key)
@@ -463,17 +468,19 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         dR2 = np.asarray(res[key][7])
         avg = np.mean(dR2/ref['R2'])**2
 
-        ax.hist(dR2, bins=15, color='y', alpha=0.1, label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True)
+        ax.hist(dR2, bins=15, color='y', label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True, log=True)
 
         print key, avg
-        plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' %avg, fontsize=10, transform=ax.transAxes)
+        plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' %avg,
+                 fontsize=10, transform=ax.transAxes)
 
         ax.axvline(x=0, ls=':', c='k')
 
         ax.set_ylabel('Probability Density')
         ax.set_xlabel(r'$\frac{\delta R^{2}}{R_{ref}^{2}}$')
 
-        plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
+        if timeStamp:
+            plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
         plt.savefig(outdir+'/FlatCalibrationDeltaSize%i.pdf' % key)
@@ -565,13 +572,13 @@ if __name__ == '__main__':
     log.info('Testing flat fielding calibration...')
 
     if run:
-        results = testFlatCalibration(log, flats=np.arange(2, 44, 4), surfaces=100, psfs=500, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(2, 52, 4), surfaces=200, psfs=1000, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
 
     if debug:
         residual = generateResidualFlatField(combine=30, plots=True, debug=True)
-        #results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
-        #plotNumberOfFrames(results)
+        results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
+        plotNumberOfFrames(results)
 
     if plots:
         if not run:

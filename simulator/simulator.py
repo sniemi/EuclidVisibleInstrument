@@ -816,7 +816,7 @@ class VISsimulator():
             #single PSF
             self.log.debug('Spatially static PSF:')
             self.log.info('Opening PSF file %s' % self.information['psffile'])
-            self.PSF = pf.getdata(self.information['psffile'])
+            self.PSF = pf.getdata(self.information['psffile']).astype(np.float64)
             self.PSF /= np.sum(self.PSF)
             self.PSFx = self.PSF.shape[1]
             self.PSFy = self.PSF.shape[0]
@@ -923,11 +923,7 @@ class VISsimulator():
         Scale the object's brightness in electrons and size using the input catalog magnitude.
         The size scaling is a crude fit to Massey et al. plot.
 
-        .. Note: scipy.signal.fftconvolve does not support np.float64, thus some accuracy
-                 lost is due to happen when using it. However, it is significantly faster
-                 than scipy.signal.convolve2d so in that sense it is the preferred method.
-                 In future, one should test how much the different convolution techniques
-                 effect the knowledge of the ellipticity and R-squared.
+        .. Note: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
         """
         #total number of objects in the input catalogue and counter for visible objects
         n_objects = self.objects.shape[0]
@@ -1010,12 +1006,11 @@ class VISsimulator():
                             self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
 
                         if self.information['variablePSF']:
-                            #spatially variable PSF, we need to convolve with the appropriate PSF
-                            #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                            #conv = signal.convolve2d(data, self.PSF, mode='same')
                             sys.exit('Spatially variable PSF not implemented yet!')
                         else:
-                            conv = signal.fftconvolve(data.astype(np.float32), self.PSF.astype(np.float32))
+                            #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                            #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
+                            conv = signal.fftconvolve(data, self.PSF, mode='full')
 
                         #scale the galaxy image size with the inverse of the PSF over sampling factor
                         if self.information['psfoversampling'] != 1.0:

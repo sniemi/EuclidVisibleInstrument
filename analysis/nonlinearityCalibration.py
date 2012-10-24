@@ -18,7 +18,7 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.9
+:version: 0.96
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -35,14 +35,16 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
-import math, datetime, cPickle, os
+import datetime, cPickle, os
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
+from support import VISinstrumentModel
 
 
-def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, norm=1.8e5,
-                     phases=500, amps=30, multiplier=12, minerror=-4., maxerror=-1.6, linspace=False):
+def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
+                     phases=None, psfs=10000, amps=15, multiplier=1.5, minerror=-8., maxerror=-2,
+                     linspace=False, debug=False):
     """
     Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.
 
@@ -56,17 +58,20 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, norm=1.8e5,
     :type file: str
     :param oversample: the PSF oversampling factor, which needs to match the input file [default=12]
     :type ovesample: float
-    :param norm: PSF normalization constant that the peak pixel will take.
-    :type norm: float
-    :param phases: the number of error curves to draw with random phases.
-    :type phases: int
+    :param sigma: 1sigma radius of the Gaussian weighting function for shape measurements
+    :type sigma: float
+    :param phases: if None then a single fixed phase will be applied, if an int then a given number of random
+                   phases will be used
+    :type phases: None or int
+    :param psfs: the number of PSFs to use.
+    :type psfs: int
     :param amps: the number of individual samplings used when covering the error space
     :type amps: int
     :param multiplier: the number of angular frequencies to be used
-    :type multiplier: int
-    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-4 i.e. 0.01%]
+    :type multiplier: int or float
+    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-8 i.e. 0.000001%]
     :type minerror: float
-    :param maxerror: the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]
+    :param maxerror: the maximum error to be covered, given in log10(max_error) [default=-2 i.e. 1%]
     :type maxerror: float
     :param linspace: whether the amplitudes of the error curves should be linearly or logarithmically spaced.
     :type linspace: boolean
@@ -77,26 +82,25 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, norm=1.8e5,
     #read in PSF and renormalize it to norm
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= norm
 
     #derive reference values from clean PSF
-    settings = dict(sampling=1.0/oversample)
+    settings = dict(sampling=1.0/oversample, sigma=sigma)
     sh = shape.shapeMeasurement(data.copy(), log, **settings)
     reference = sh.measureRefinedEllipticity()
-    print reference
+
+    #PSF scales
+    scales = np.random.random_integers(1e4, 2e5, psfs)
 
     #range of amplitude to study
     if linspace:
-        amplitudes = np.linspace(10**minerror, 1**maxerror, amps)
+        amplitudes = np.linspace(10**minerror, 1**maxerror, amps)[::-1] #flip so that the largest is first
     else:
-        amplitudes = np.logspace(minerror, maxerror, amps)
-
-    #PSF range for sin function that will be phased
-    var = data.copy()/data.max() * multiplier * math.pi
+        amplitudes = np.logspace(minerror, maxerror, amps)[::-1]
 
     out = {}
     #loop over all the amplitudes to be studied
     for i, amp in enumerate(amplitudes):
+        print'Run %i / %i with amplitude=%e' % (i+1, amps, amp)
         de1 = []
         de2 = []
         de = []
@@ -105,29 +109,36 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, norm=1.8e5,
         e1 = []
         e2 = []
         e = []
-        #random phases to Monte Carlo
-        ph = np.random.random(phases)
-        print'%i / %i: %e' % (i+1, amps, amp)
+
+        if phases is None:
+            ph = (0.45,)
+        else:
+            #random phases to Monte Carlo
+            ph = np.random.random(phases)
+
         for phase in ph:
-            #derive the non-linearity error curve, scaled to the amplitude being studied
-            non_line = amp*np.sin(var.copy() + phase*2.*math.pi)
+            print 'Phase: %.3f' % phase
+            for scale in scales:
+                #apply nonlinearity model to the scaled PSF
+                scaled = data.copy() * scale
+                newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
 
-            #multiply the original PSF with the non-linearity error and add to the PSF
-            newdata = data.copy() * non_line + data.copy()
+                if debug and i==0:
+                    fileIO.writeFITS(newdata, 'nonlinearData.fits')
 
-            #measure e and R2 from the postage stamp image
-            sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
-            results = sh.measureRefinedEllipticity()
+                #measure e and R2 from the postage stamp image
+                sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
+                results = sh.measureRefinedEllipticity()
 
-            #save values
-            e1.append(results['e1'])
-            e2.append(results['e2'])
-            e.append(results['ellipticity'])
-            R2.append(results['R2'])
-            de1.append(results['e1'] - reference['e1'])
-            de2.append(results['e2'] - reference['e2'])
-            de.append(results['ellipticity'] - reference['ellipticity'])
-            dR2.append(results['R2'] - reference['R2'])
+                #save values
+                e1.append(results['e1'])
+                e2.append(results['e2'])
+                e.append(results['ellipticity'])
+                R2.append(results['R2'])
+                de1.append(results['e1'] - reference['e1'])
+                de2.append(results['e2'] - reference['e2'])
+                de.append(results['ellipticity'] - reference['ellipticity'])
+                dR2.append(results['R2'] - reference['R2'])
 
         out[amp] = [e1, e2, e, R2, de1, de2, de, dR2]
 
@@ -216,7 +227,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
     keys.sort()
     for key in keys:
         dR2 = np.asarray(res[key][3])
-        std = np.std(dR2) / (ref['R2']**2)
+        std = np.std(dR2) / ref['R2']
         print key, std
         ax.scatter(key, std, c='b', marker='s', s=35, zorder=10)
 
@@ -307,19 +318,26 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
 
 if __name__ == '__main__':
-    run = False
+    run = True
+    debug = True
+    plot = True
 
     #start the script
     log = lg.setUpLogger('nonlinearityCalibration.log')
     log.info('Testing non-linearity calibration...')
 
     if run:
-        #res = testNonlinearity(log, phases=300, amps=15, file='data/psf3x.fits', oversample=3.0, multiplier=48)
-        res = testNonlinearity(log, phases=600, amps=15)
-        fileIO.cPickleDumpDictionary(res, 'nonlinResults.pk')
-    else:
-        res = cPickle.load(open('nonlinResults.pk'))
+        if debug:
+            res = testNonlinearity(log, psfs=1000, amps=10, file='data/psf1x.fits', oversample=1.0, debug=True)
+        else:
+            res = testNonlinearity(log)
 
-    plotResults(res)
+        fileIO.cPickleDumpDictionary(res, 'nonlinResults.pk')
+
+    if plot:
+        if not run:
+            res = cPickle.load(open('nonlinResults.pk'))
+
+        plotResults(res)
 
     log.info('Run finished...\n\n\n')

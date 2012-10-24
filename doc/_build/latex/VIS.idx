@@ -1,23 +1,24 @@
 \indexentry{support.VISinstrumentModel (module)|hyperpage}{5}
 \indexentry{CCDnonLinearityModel() (in module support.VISinstrumentModel)|hyperpage}{5}
+\indexentry{CCDnonLinearityModelSinusoidal() (in module support.VISinstrumentModel)|hyperpage}{6}
 \indexentry{VISinformation() (in module support.VISinstrumentModel)|hyperpage}{6}
-\indexentry{testNonLinearity() (in module support.VISinstrumentModel)|hyperpage}{6}
+\indexentry{testNonLinearity() (in module support.VISinstrumentModel)|hyperpage}{7}
 \indexentry{postproc.postprocessing (module)|hyperpage}{7}
-\indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{7}
-\indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{7}
-\indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{7}
-\indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
-\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
-\indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
+\indexentry{PostProcessing (class in postproc.postprocessing)|hyperpage}{8}
+\indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
+\indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{8}
+\indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
+\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
+\indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
 \indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
 \indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
-\indexentry{loadFITS() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
-\indexentry{radiateFullCCD() (postproc.postprocessing.PostProcessing method)|hyperpage}{9}
+\indexentry{loadFITS() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
+\indexentry{radiateFullCCD() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{run() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{writeFITSfile() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{postproc.tileCCD (module)|hyperpage}{10}
-\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{10}
-\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{10}
+\indexentry{tileCCD (class in postproc.tileCCD)|hyperpage}{11}
+\indexentry{readData() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
 \indexentry{runAll() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
 \indexentry{tileCCD() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
 \indexentry{writeFITSfile() (postproc.tileCCD.tileCCD method)|hyperpage}{11}
@@ -77,17 +78,20 @@
 \indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{34}
 \indexentry{analysis.biasCalibration (module)|hyperpage}{34}
 \indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{34}
+\indexentry{findTolerableErrorPiston() (in module analysis.biasCalibration)|hyperpage}{35}
+\indexentry{findTolerableErrorSlope() (in module analysis.biasCalibration)|hyperpage}{35}
 \indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{35}
 \indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{35}
-\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{35}
-\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{35}
-\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{35}
-\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{36}
+\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{36}
+\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{36}
+\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{36}
+\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{37}
 \indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{37}
+\indexentry{findTolerableError() (in module analysis.FlatfieldCalibration)|hyperpage}{38}
 \indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{38}
 \indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{39}
-\indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{39}
-\indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{39}
+\indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{40}
+\indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{40}
 \indexentry{analysis.analyse (module)|hyperpage}{41}
 \indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{41}
 \indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{42}

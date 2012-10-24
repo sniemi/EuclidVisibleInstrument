@@ -68,6 +68,10 @@ def VISinformation():
          'zeropoint': 25.58
          'zodiacal': 22.942
 
+    The zeropoint was calculatd as follows::
+
+        1./10**(-0.4*(25.57991044453)) = 1.705942e+10
+
     :return: instrument model parameters
     :rtype: dict
     """
@@ -103,7 +107,7 @@ def CCDnonLinearityModel(data):
               not be more than a few.
 
     :param data: data to which the non-linearity model is being applied to
-    :type data: float, int or ndarray
+    :type data: ndarray
 
     :return: input data after conversion with the non-linearity model
     :rtype: float or ndarray
@@ -114,6 +118,30 @@ def CCDnonLinearityModel(data):
     non_linearity = ne.evaluate("0.00000002*(data-mid)**2 - 100")
     out[~msk] += non_linearity[~msk].copy()
     out[msk] += non_linearity[msk].copy()*0.05
+    return out
+
+
+def CCDnonLinearityModelSinusoidal(data, amplitude, phase=0.45, multi=1.5):
+    """
+    This function provides a theoretical non-linearity model based on sinusoidal error with a given
+    amplitude, phase and number of waves (multi).
+
+    :param data: data to which the non-linearity model is being applied to
+    :type data: ndarray
+    :param amplitude: amplitude of the sinusoidal wave
+    :type amplitude: float
+    :param phase: phase of the sinusoidal wave
+    :type phase: float
+    :param multi: the number of waves to have over the dynamical range of the CCD
+    :type multi: float
+
+    :return: input data after conversion with the non-linearity model
+    :rtype: ndarray
+    """
+    out = data.copy()
+    full = VISinformation()['fullwellcapacity']
+    non_linearity = amplitude*np.sin(data.copy()/full * multi * math.pi + 2*phase*math.pi)*full
+    out += non_linearity
     return out
 
 

@@ -22,25 +22,26 @@
   \item applyCosmetics() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{34}
   \item applyFlatfield() (simulator.simulator.VISsimulator method), \hyperpage{26}
-  \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{7}
+  \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
   \item applyNoise() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyNonlinearity() (simulator.simulator.VISsimulator method), \hyperpage{26}
-  \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{7}
+  \item applyRadiationDamage() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
   \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{26}
-  \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
+  \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item applyReadoutNoise() (simulator.simulator.VISsimulator method), \hyperpage{26}
 
   \indexspace
   \bigletter C
   \item CCDnonLinearityModel() (in module support.VISinstrumentModel), \hyperpage{5}
+  \item CCDnonLinearityModelSinusoidal() (in module support.VISinstrumentModel), \hyperpage{6}
   \item circular2DGaussian() (analysis.shape.shapeMeasurement method), \hyperpage{43}
   \item cleanSample() (analysis.sourceFinder.sourceFinder method), \hyperpage{44}, \hyperpage{46}
-  \item compressAndRemoveFile() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
+  \item compressAndRemoveFile() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item configure() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item cosmicRayIntercepts() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item createGalaxylist() (simulator.generateGalaxies.generateFakeData method), \hyperpage{30}
   \item createStarlist() (simulator.generateGalaxies.generateFakeData method), \hyperpage{30}
-  \item cutoutRegion() (postproc.postprocessing.PostProcessing method), \hyperpage{8}
+  \item cutoutRegion() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
 
   \indexspace
   \bigletter D
@@ -62,6 +63,9 @@
   \bigletter F
   \item find() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
   \item findSources() (analysis.analyse.analyseVISdata method), \hyperpage{42}
+  \item findTolerableError() (in module analysis.FlatfieldCalibration), \hyperpage{38}
+  \item findTolerableErrorPiston() (in module analysis.biasCalibration), \hyperpage{35}
+  \item findTolerableErrorSlope() (in module analysis.biasCalibration), \hyperpage{35}
   \item flatfield() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{34}
 
   \indexspace
@@ -82,7 +86,7 @@
   \indexspace
   \bigletter L
   \item limitingMagnitude() (in module analysis.ETC), \hyperpage{15}
-  \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
+  \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
 
   \indexspace
   \bigletter M
@@ -107,11 +111,11 @@
   \item plotEncircledEnergy() (in module analysis.PSFproperties), \hyperpage{47}
   \item plotEs() (in module analysis.biasCalibration), \hyperpage{35}
   \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{39}
-  \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{35}
-  \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{35}
+  \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{36}
+  \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{36}
   \item postproc.postprocessing (module), \hyperpage{7}
   \item postproc.tileCCD (module), \hyperpage{10}
-  \item PostProcessing (class in postproc.postprocessing), \hyperpage{7}
+  \item PostProcessing (class in postproc.postprocessing), \hyperpage{8}
   \item processConfigs() (simulator.simulator.VISsimulator method), \hyperpage{27}
 
   \indexspace
@@ -120,11 +124,11 @@
 
   \indexspace
   \bigletter R
-  \item radiateFullCCD() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
+  \item radiateFullCCD() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
   \item readConfigs() (simulator.simulator.VISsimulator method), \hyperpage{28}
   \item readCosmicRayInformation() (simulator.simulator.VISsimulator method), \hyperpage{28}
   \item readData() (in module analysis.PSFproperties), \hyperpage{48}
-  \item readData() (postproc.tileCCD.tileCCD method), \hyperpage{10}
+  \item readData() (postproc.tileCCD.tileCCD method), \hyperpage{11}
   \item readObjectlist() (simulator.simulator.VISsimulator method), \hyperpage{28}
   \item readPSFs() (simulator.simulator.VISsimulator method), \hyperpage{29}
   \item readSources() (analysis.analyse.analyseVISdata method), \hyperpage{42}
@@ -152,12 +156,12 @@
 
   \indexspace
   \bigletter T
-  \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{35}
-  \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{36}
-  \item testFlatCalibration() (in module analysis.FlatfieldCalibration), \hyperpage{39}
-  \item testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration), \hyperpage{39}
-  \item testNonLinearity() (in module support.VISinstrumentModel), \hyperpage{6}
-  \item tileCCD (class in postproc.tileCCD), \hyperpage{10}
+  \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{36}
+  \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{37}
+  \item testFlatCalibration() (in module analysis.FlatfieldCalibration), \hyperpage{40}
+  \item testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration), \hyperpage{40}
+  \item testNonLinearity() (in module support.VISinstrumentModel), \hyperpage{7}
+  \item tileCCD (class in postproc.tileCCD), \hyperpage{11}
   \item tileCCD() (postproc.tileCCD.tileCCD method), \hyperpage{11}
 
   \indexspace

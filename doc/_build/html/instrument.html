@@ -129,11 +129,38 @@ not be more than a few.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>float, int or ndarray</em>) &#8211; data to which the non-linearity model is being applied to</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>ndarray</em>) &#8211; data to which the non-linearity model is being applied to</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">input data after conversion with the non-linearity model</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">float or ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.VISinstrumentModel.CCDnonLinearityModelSinusoidal">
+<tt class="descclassname">support.VISinstrumentModel.</tt><tt class="descname">CCDnonLinearityModelSinusoidal</tt><big>(</big><em>data</em>, <em>amplitude</em>, <em>phase=0.45</em>, <em>multi=1.5</em><big>)</big><a class="headerlink" href="#support.VISinstrumentModel.CCDnonLinearityModelSinusoidal" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides a theoretical non-linearity model based on sinusoidal error with a given
+amplitude, phase and number of waves (multi).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to which the non-linearity model is being applied to</li>
+<li><strong>amplitude</strong> (<em>float</em>) &#8211; amplitude of the sinusoidal wave</li>
+<li><strong>phase</strong> (<em>float</em>) &#8211; phase of the sinusoidal wave</li>
+<li><strong>multi</strong> (<em>float</em>) &#8211; the number of waves to have over the dynamical range of the CCD</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">input data after conversion with the non-linearity model</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -178,6 +205,10 @@ not be more than a few.</p>
 'ysize': 2066
 'zeropoint': 25.58
 'zodiacal': 22.942</pre>
+</div>
+<p>The zeropoint was calculatd as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mf">1.</span><span class="o">/</span><span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mf">0.4</span><span class="o">*</span><span class="p">(</span><span class="mf">25.57991044453</span><span class="p">))</span> <span class="o">=</span> <span class="mf">1.705942e+10</span>
+</pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

@@ -25,6 +25,8 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 :requires: matplotlib
 :requires: VISsim-Python
 
+:version: 0.95
+
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 """
@@ -198,7 +200,7 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     #read in PSF and rescale to avoid rounding or truncation errors
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= 1.e3
+    data *= 1.e4
 
     #derive reference values
     sh = shape.shapeMeasurement(data.copy(), log)
@@ -341,7 +343,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax.plot(x, vals, ':', c='0.2', zorder=20)
     msk = vals < reqe
     minn = np.min(x[msk])
-    plt.text(np.mean(frames), 5e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+    plt.text(np.mean(frames), 8e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
              ha='center', va='center', fontsize=11)
 
     ax.fill_between(np.arange(maxx+10), np.ones(maxx+10)*reqe, 1.0, facecolor='red', alpha=0.08)
@@ -349,7 +351,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     plt.text(1, 0.9*reqe, '%.1e' % reqe, ha='left', va='top', fontsize=11)
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-6, 1e-3)
+    ax.set_ylim(5e-6, 1e-4)
     ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
@@ -375,8 +377,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     for key in res:
         dR2 = np.asarray(res[key][3])
 
-        std = np.std(dR2) / (ref['R2']**2)
-        #var = np.var(dR2) / (ref['R2']**4)
+        std = np.std(dR2) / ref['R2']
 
         frames.append(key)
         values.append(std)
@@ -400,7 +401,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     ax.plot(x, vals, ':', c='0.2', zorder=10)
     msk = vals < reqr2
     minn = np.min(x[msk])
-    plt.text(np.mean(frames), 5e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+    plt.text(np.mean(frames), 2e-5, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
              fontsize=11, ha='center', va='center')
 
     #show the requirement
@@ -409,7 +410,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     plt.text(1, 0.9*reqr2, '%.1e' % reqr2, ha='left', va='top', fontsize=11)
 
     ax.set_yscale('log')
-    ax.set_ylim(1e-6, 1e-3)
+    ax.set_ylim(5e-6, 1e-3)
     ax.set_xlim(0, maxx+1)
     ax.set_xlabel('Number of Flat Fields Median Combined')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
@@ -487,6 +488,165 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         plt.close()
 
 
+def findTolerableError(log, file='data/psf4x.fits', oversample=4.0, psfs=1000, iterations=7, sigma=0.75):
+    """
+    Calculate ellipticity and size for PSFs of different scaling when there is a residual
+    pixel-to-pixel variations.
+    """
+    #read in PSF and renormalize it
+    data = pf.getdata(file)
+    data /= np.max(data)
+
+    #PSF scalings for the peak pixel, in electrons
+    scales = np.random.random_integers(3e2, 1e5, psfs)
+
+    #set the scale for shape measurement
+    settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
+
+    #residual from a perfect no pixel-to-pixel non-uniformity
+    residuals = np.logspace(-7, -1.6, 10)[::-1] #largest first
+    tot = residuals.size
+    res = {}
+    for i, residual in enumerate(residuals):
+        print'%i / %i' % (i+1, tot)
+        R2 = []
+        e1 = []
+        e2 = []
+        e = []
+
+        #loop over the PSFs
+        for scale in scales:
+            #random residual pixel-to-pixel variations
+            if oversample < 1.1:
+                residualSurface = np.random.normal(loc=1.0, scale=residual, size=data.shape)
+            elif oversample == 4.0:
+                tmp = np.random.normal(loc=1.0, scale=residual, size=(170, 170))
+                residualSurface = zoom(tmp, 4.013, order=0)
+            else:
+                sys.exit('ERROR when trying to generate a blocky pixel-to-pixel non-uniformity map...')
+
+            #make a copy of the PSF and scale it with the given scaling
+            #and then multiply with a residual pixel-to-pixel variation
+            tmp = data.copy() * scale * residualSurface
+
+            #measure e and R2 from the postage stamp image
+            sh = shape.shapeMeasurement(tmp.copy(), log, **settings)
+            results = sh.measureRefinedEllipticity()
+
+            #save values
+            e1.append(results['e1'])
+            e2.append(results['e2'])
+            e.append(results['ellipticity'])
+            R2.append(results['R2'])
+
+        out = dict(e1=np.asarray(e1), e2=np.asarray(e2), e=np.asarray(e), R2=np.asarray(R2))
+        res[residual] = out
+
+    return res
+
+
+def plotTolerableErrorR2(res, output, req=1e-4):
+    fig = plt.figure()
+    plt.title(r'VIS Bias Flat Fielding')
+    ax = fig.add_subplot(111)
+    #loop over the number of bias frames combined
+    vals = []
+    for key in res.keys():
+        dR2 = res[key]['R2']
+        normed = np.std(dR2) / np.mean(dR2)
+
+        ax.scatter(key, normed, c='m', marker='*', s=35)
+        vals.append(normed)
+
+        print key, normed
+
+    #for the legend
+    ax.scatter(key, normed, c='m', marker='*', label=r'$\frac{\sigma(R^{2})}{R_{ref}^{2}}$')
+
+    #show the requirement
+    ks = np.asarray(res.keys())
+    ran = np.linspace(ks.min() * 0.99, ks.max() * 1.01)
+    ax.fill_between(ran, np.ones(ran.size) * req, 1.0, facecolor='red', alpha=0.08)
+    ax.axhline(y=req, c='g', ls='--', label='Requirement')
+
+    #find the crossing
+    srt = np.argsort(ks)
+    values = np.asarray(vals)
+    f = interpolate.interp1d(ks[srt], values[srt], kind='cubic')
+    x = np.logspace(np.log10(ks.min()), np.log10(ks.max()), 100)
+    vals = f(x)
+    ax.plot(x, vals, ':', c='0.2', zorder=10)
+    msk = vals < req
+    maxn = np.max(x[msk])
+    plt.text(1e-5, 2e-5, r'Error must be $\leq %.2e$ per cent' % (maxn*100),
+             fontsize=11, ha='center', va='center')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-7, 1e-2)
+    ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
+    ax.set_xlabel('Residual Error')
+    ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output)
+    plt.close()
+
+
+def plotTolerableErrorE(res, output, req=3e-5):
+    fig = plt.figure()
+    plt.title(r'VIS Flat Fielding')
+    ax = fig.add_subplot(111)
+    #loop over the number of bias frames combined
+    vals = []
+    for key in res.keys():
+        e1 = np.std(res[key]['e1'])
+        e2 = np.std(res[key]['e'])
+        e = np.std(res[key]['e'])
+
+        vals.append(e)
+
+        ax.scatter(key, e1, c='m', marker='*', s=35)
+        ax.scatter(key, e2, c='y', marker='s', s=35)
+        ax.scatter(key, e, c='r', marker='o', s=35)
+
+        print key, e, e1, e2
+
+    #for the legend
+    ax.scatter(key, e1, c='m', marker='*', label=r'$\sigma(e_{1})$')
+    ax.scatter(key, e2, c='y', marker='s', label=r'$\sigma(e_{2})$')
+    ax.scatter(key, e, c='r', marker='o', label=r'$\sigma(e)$')
+
+    #show the requirement
+    ks = np.asarray(res.keys())
+    ran = np.linspace(ks.min() * 0.99, ks.max() * 1.01)
+    ax.fill_between(ran, np.ones(ran.size) * req, 1.0, facecolor='red', alpha=0.08)
+    ax.axhline(y=req, c='g', ls='--', label='Requirement')
+
+    #find the crossing
+    srt = np.argsort(ks)
+    values = np.asarray(vals)
+    f = interpolate.interp1d(ks[srt], values[srt], kind='cubic')
+    x = np.logspace(np.log10(ks.min()), np.log10(ks.max()), 100)
+    vals = f(x)
+    ax.plot(x, vals, ':', c='0.2', zorder=10)
+    msk = vals < req
+    maxn = np.max(x[msk])
+    plt.text(1e-5, 2e-5, r'Error for $e$ must be $\leq %.2e$ per cent' % (maxn*100),
+             fontsize=11, ha='center', va='center')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-7, 1e-2)
+    ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
+    ax.set_xlabel('Residual Error')
+    ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output)
+    plt.close()
+
+
 def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=500):
     """
     Calculate ellipticity and size variance and error in case of no pixel-to-pixel flat field correction.
@@ -560,19 +720,29 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
 
 
 if __name__ == '__main__':
-    run = True
-    #run = False
-    #debug = True
+    run = False
     debug = False
-    plots = True
-    #plots = False
+    plots = False
+    error = True
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
     log.info('Testing flat fielding calibration...')
 
+    if error:
+        res = findTolerableError(log)
+        fileIO.cPickleDumpDictionary(res, 'residuals.pk')
+        plotTolerableErrorE(res, output='FlatFieldingTolerableErrorE.pdf')
+        plotTolerableErrorR2(res, output='FlatFieldingTolerableErrorR2.pdf')
+
+        #calculate RMS on image with x frames combined together
+        combined = generateResidualFlatField(combine=25)
+        fileIO.writeFITS(combined, 'residualFlatfield.fits')
+        print np.std(combined), np.std(combined[500:561, 500:561]), np.std(combined[300:361, 300:361])
+
     if run:
-        results = testFlatCalibration(log, flats=np.arange(2, 52, 4), surfaces=200, psfs=1000, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=200, psfs=1000, file='psf1xhighe.fits')
+        #results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=3, psfs=10, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
 
     if debug:

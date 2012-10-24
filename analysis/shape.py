@@ -56,7 +56,8 @@ class shapeMeasurement():
                              platescale=120.0,
                              pixelSize=12.0,
                              sigma=0.75,
-                             weighted=True)
+                             weighted=True,
+                             debug=False)
         self.settings.update(kwargs)
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
@@ -239,6 +240,9 @@ class shapeMeasurement():
         # The squared radius R2 in um2
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2
 
+        if self.settings['debug']:
+            self.writeFITS(GaussianWeighted, 'GaussianWeighted.fits')
+
         out = dict(centreX=quad['centreX']+1, centreY=quad['centreY']+1,
                    e1=quad['e1'], e2=quad['e2'],
                    ellipticity=quad['ellipticity'],
@@ -269,7 +273,8 @@ class shapeMeasurement():
 
         #update and verify the header
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' \
+                               % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)

@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{October 03, 2012}
+\date{October 24, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -206,13 +206,45 @@ not be more than a few.
 \end{notice}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
-\textbf{data} (\emph{float, int or ndarray}) -- data to which the non-linearity model is being applied to
+\textbf{data} (\emph{ndarray}) -- data to which the non-linearity model is being applied to
 
 \item[{Returns}] \leavevmode
 input data after conversion with the non-linearity model
 
 \item[{Return type}] \leavevmode
 float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{CCDnonLinearityModelSinusoidal() (in module support.VISinstrumentModel)}
+
+\begin{fulllineitems}
+\phantomsection\label{instrument:support.VISinstrumentModel.CCDnonLinearityModelSinusoidal}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{CCDnonLinearityModelSinusoidal}}{\emph{data}, \emph{amplitude}, \emph{phase=0.45}, \emph{multi=1.5}}{}
+This function provides a theoretical non-linearity model based on sinusoidal error with a given
+amplitude, phase and number of waves (multi).
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- data to which the non-linearity model is being applied to
+
+\item {} 
+\textbf{amplitude} (\emph{float}) -- amplitude of the sinusoidal wave
+
+\item {} 
+\textbf{phase} (\emph{float}) -- phase of the sinusoidal wave
+
+\item {} 
+\textbf{multi} (\emph{float}) -- the number of waves to have over the dynamical range of the CCD
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+input data after conversion with the non-linearity model
+
+\item[{Return type}] \leavevmode
+ndarray
 
 \end{description}\end{quote}
 
@@ -260,6 +292,12 @@ Returns a dictionary describing VIS. The following information is provided:
 'ysize': 2066
 'zeropoint': 25.58
 'zodiacal': 22.942
+\end{Verbatim}
+
+The zeropoint was calculatd as follows:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{l+m+mf}{1.}\PYG{o}{/}\PYG{l+m+mi}{10}\PYG{o}{*}\PYG{o}{*}\PYG{p}{(}\PYG{o}{-}\PYG{l+m+mf}{0.4}\PYG{o}{*}\PYG{p}{(}\PYG{l+m+mf}{25.57991044453}\PYG{p}{)}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mf}{1.705942e+10}
 \end{Verbatim}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -1938,12 +1976,16 @@ of the classes, please see:
 \label{reduction:vis-data-reduction-and-processing}
 This simple script can be used to reduce (simulated) VIS data.
 
-Does the following steps:
+The script was initially written for reducing a single CCD data.
+However, since the version 0.5 the script tries to guess if the
+input is a single quadrant then reduce correctly.
+
+The script performs the following data reduction steps:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 1 Bias correction
-2 Flat fielding
-3 CTI correction (conversion to electrons and back to ADUs)
+2 Flat fielding (only if an input file is provided)
+3 CTI correction
 \end{Verbatim}
 
 To Run:
@@ -1968,15 +2010,12 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.4
+0.5
 
 \end{description}\end{quote}
 
 \begin{notice}{note}{Todo}
 \begin{enumerate}
-\item {} 
-FITS extension should probably be read from the command line
-
 \item {} 
 implement background/sky subtraction
 
@@ -2007,7 +2046,7 @@ when calling the Fortran code so I added them for now.
 
 \begin{fulllineitems}
 \phantomsection\label{reduction:reduction.reduceVISdata.reduceVISdata.flatfield}\pysiglinewithargsret{\bfcode{flatfield}}{}{}
-Take into account pixel-to-pixel non-uniformity through multipicative flat fielding.
+Take into account pixel-to-pixel non-uniformity through multiplicative flat fielding.
 
 \end{fulllineitems}
 
@@ -2061,6 +2100,9 @@ matplotlib
 \item[{requires}] \leavevmode
 VISsim-Python
 
+\item[{version}] \leavevmode
+0.95
+
 \item[{author}] \leavevmode
 Sami-Matias Niemi
 
@@ -2071,18 +2113,21 @@ Sami-Matias Niemi
 \index{addReadoutNoise() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.addReadoutNoise}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{addReadoutNoise}}{\emph{data}, \emph{readnoise=4.5}, \emph{number=1}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.addReadoutNoise}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{addReadoutNoise}}{\emph{data}, \emph{readnoise=4.5}, \emph{gain=3.5}, \emph{number=1}}{}
 Add readout noise to the input data. The readout noise is the median of the number of frames.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
-\textbf{data} (\emph{ndarray}) -- input data to which the readout noise will be added to
+\textbf{data} (\emph{ndarray}) -- input data to which the readout noise will be added to {[}ADUs{]}
 
 \item {} 
 \textbf{readnoise} (\emph{float}) -- standard deviation of the read out noise {[}electrons{]}
 
 \item {} 
-\textbf{number} (\emph{int}) -- number of read outs to median combine before adding to the data {[}default = 1{]}
+\textbf{gain} (\emph{float}) -- the gain factor that is used to convert electrons to ADUs
+
+\item {} 
+\textbf{number} (\emph{int}) -- number of read outs to median combine before adding to the data {[}default=1{]}
 
 \end{itemize}
 
@@ -2091,6 +2136,34 @@ data + read out noise
 
 \item[{Return type}] \leavevmode
 ndarray {[}same as input data{]}
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{findTolerableErrorPiston() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorPiston}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorPiston}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=500}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{debug=False}}{}
+Calculate ellipticity and size for PSFs of different scaling when there is a residual
+bias offset.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{sigma} (\emph{float}) -- 1sigma radius of the Gaussian weighting function for shape measurements
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{findTolerableErrorSlope() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorSlope}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorSlope}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=500}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{pixels=60}}{}
+Calculate ellipticity and size for PSFs of different scaling when there is a residual
+bias slope.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{sigma} (\emph{float}) -- 1sigma radius of the Gaussian weighting function for shape measurements
 
 \end{description}\end{quote}
 
@@ -2115,11 +2188,17 @@ Generates a simple plot showing the ellipticity components.
 \index{plotNumberOfFramesDelta() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesDelta}}{\emph{results}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesDelta}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesDelta}}{\emph{results}, \emph{timeStamp=False}}{}
 Creates a simple plot to combine and show the results for errors (delta).
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
 \textbf{results} (\emph{dict}) -- results to be plotted
+
+\item {} 
+\textbf{timeStamp} (\emph{bool}) -- whether to include a time stamp in the output image
+
+\end{itemize}
 
 \end{description}\end{quote}
 
@@ -2128,7 +2207,7 @@ Creates a simple plot to combine and show the results for errors (delta).
 \index{plotNumberOfFramesSigma() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.plotNumberOfFramesSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{plotNumberOfFramesSigma}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}, \emph{timeStamp=False}}{}
 Creates a simple plot to combine and show the results.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -2143,6 +2222,9 @@ Creates a simple plot to combine and show the results.
 
 \item {} 
 \textbf{shift} (\emph{float}) -- the amount to shift the e2 results on the abscissa (for clarity)
+
+\item {} 
+\textbf{timeStamp} (\emph{bool}) -- whether to include a time stamp in the output image
 
 \end{itemize}
 
@@ -2183,7 +2265,7 @@ Generates a set of plots that can be used to inspect the simulation.
 \index{testBiasCalibrationSigma() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=1000}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=70000.0}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.testBiasCalibrationSigma}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{testBiasCalibrationSigma}}{\emph{log}, \emph{numdata=2066}, \emph{floor=3500}, \emph{xsize=2048}, \emph{ysize=2066}, \emph{order=3}, \emph{biases=15}, \emph{surfaces=100}, \emph{file='psf1x.fits'}, \emph{psfs=500}, \emph{psfscale=100000.0}, \emph{gain=3.5}, \emph{debug=False}, \emph{plots=True}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.
 
@@ -2247,6 +2329,9 @@ matplotlib
 \item[{requires}] \leavevmode
 VISsim-Python
 
+\item[{version}] \leavevmode
+0.95
+
 \item[{author}] \leavevmode
 Sami-Matias Niemi
 
@@ -2254,6 +2339,15 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \end{description}\end{quote}
+\index{findTolerableError() (in module analysis.FlatfieldCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.findTolerableError}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{findTolerableError}}{\emph{log}, \emph{file='data/psf4x.fits'}, \emph{oversample=4.0}, \emph{psfs=1000}, \emph{iterations=7}, \emph{sigma=0.75}}{}
+Calculate ellipticity and size for PSFs of different scaling when there is a residual
+pixel-to-pixel variations.
+
+\end{fulllineitems}
+
 \index{generateResidualFlatField() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
@@ -2307,7 +2401,7 @@ ndarray
 \index{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.plotNumberOfFrames}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{plotNumberOfFrames}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}, \emph{outdir='results'}}{}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.plotNumberOfFrames}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{plotNumberOfFrames}}{\emph{results}, \emph{reqe=3e-05}, \emph{reqr2=0.0001}, \emph{shift=0.1}, \emph{outdir='results'}, \emph{timeStamp=False}}{}
 Creates a simple plot to combine and show the results.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -2325,6 +2419,9 @@ Creates a simple plot to combine and show the results.
 
 \item {} 
 \textbf{outdir} (\emph{str}) -- output directory to which the plots will be saved to
+
+\item {} 
+\textbf{timeStamp} (\emph{bool}) -- whether or not to include a time stamp to the output image
 
 \end{itemize}
 

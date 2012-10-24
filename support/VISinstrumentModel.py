@@ -121,7 +121,7 @@ def CCDnonLinearityModel(data):
     return out
 
 
-def CCDnonLinearityModelSinusoidal(data, amplitude, phase=0.45, multi=1.5):
+def CCDnonLinearityModelSinusoidal(data, amplitude, phase=0.49, multi=1.5):
     """
     This function provides a theoretical non-linearity model based on sinusoidal error with a given
     amplitude, phase and number of waves (multi).
@@ -140,7 +140,7 @@ def CCDnonLinearityModelSinusoidal(data, amplitude, phase=0.45, multi=1.5):
     """
     out = data.copy()
     full = VISinformation()['fullwellcapacity']
-    non_linearity = amplitude*np.sin(data.copy()/full * multi * math.pi + 2*phase*math.pi)*full
+    non_linearity = amplitude*np.sin(data.copy()/full * multi * math.pi + 2*phase*math.pi)*data.copy()
     out += non_linearity
     return out
 

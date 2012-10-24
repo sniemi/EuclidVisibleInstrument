@@ -43,8 +43,8 @@ from support import VISinstrumentModel
 
 
 def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
-                     phases=None, psfs=10000, amps=15, multiplier=1.5, minerror=-8., maxerror=-2,
-                     linspace=False, debug=False):
+                     phases=None, psfs=10000, amps=15, multiplier=2.0, minerror=-6., maxerror=-2,
+                     linspace=False):
     """
     Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.
 
@@ -69,7 +69,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     :type amps: int
     :param multiplier: the number of angular frequencies to be used
     :type multiplier: int or float
-    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-8 i.e. 0.000001%]
+    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-8 i.e. 0.0001%]
     :type minerror: float
     :param maxerror: the maximum error to be covered, given in log10(max_error) [default=-2 i.e. 1%]
     :type maxerror: float
@@ -85,11 +85,11 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
 
     #derive reference values from clean PSF
     settings = dict(sampling=1.0/oversample, sigma=sigma)
-    sh = shape.shapeMeasurement(data.copy(), log, **settings)
+    sh = shape.shapeMeasurement(data.copy()*1e5, log, **settings)
     reference = sh.measureRefinedEllipticity()
 
     #PSF scales
-    scales = np.random.random_integers(1e4, 2e5, psfs)
+    scales = np.random.random_integers(1e3, 2e5, psfs)
 
     #range of amplitude to study
     if linspace:
@@ -111,7 +111,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
         e = []
 
         if phases is None:
-            ph = (0.45,)
+            ph = (0.49,)
         else:
             #random phases to Monte Carlo
             ph = np.random.random(phases)
@@ -122,9 +122,6 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
                 #apply nonlinearity model to the scaled PSF
                 scaled = data.copy() * scale
                 newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
-
-                if debug and i==0:
-                    fileIO.writeFITS(newdata, 'nonlinearData.fits')
 
                 #measure e and R2 from the postage stamp image
                 sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
@@ -317,6 +314,32 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         plt.close()
 
 
+def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
+                          scale=1e5, amp=0.01, phase=0.49, multiplier=2.0):
+    #read in PSF and renormalize it to norm
+    data = pf.getdata(file)
+    data /= np.max(data)
+    data *= scale
+
+    #derive reference values from clean PSF
+    settings = dict(sampling=1.0 / oversample, sigma=sigma)
+    sh = shape.shapeMeasurement(data, log, **settings)
+    reference = sh.measureRefinedEllipticity()
+    print reference
+
+    #apply nonlinearity model to the scaled PSF
+    newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(data.copy(), amp, phase=phase, multi=multiplier)
+
+    fileIO.writeFITS(data, 'scaledPSF.fits')
+    fileIO.writeFITS(newdata, 'nonlinearData.fits')
+    fileIO.writeFITS(newdata/data, 'nonlinearRatio.fits')
+
+    #measure e and R2 from the postage stamp image
+    sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
+    results = sh.measureRefinedEllipticity()
+    print results
+
+
 if __name__ == '__main__':
     run = True
     debug = True
@@ -328,7 +351,8 @@ if __name__ == '__main__':
 
     if run:
         if debug:
-            res = testNonlinearity(log, psfs=1000, amps=10, file='data/psf1x.fits', oversample=1.0, debug=True)
+            testNonlinearityModel()
+            res = testNonlinearity(log, psfs=1000, amps=10, file='data/psf1x.fits', oversample=1.0)
         else:
             res = testNonlinearity(log)
 

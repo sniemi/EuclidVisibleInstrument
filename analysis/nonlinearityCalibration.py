@@ -15,10 +15,11 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 
 :requires: PyFITS
 :requires: NumPy
+:requires: SciPy
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.96
+:version: 0.97
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -37,13 +38,14 @@ import pyfits as pf
 import numpy as np
 import datetime, cPickle, os
 from analysis import shape
+from scipy import interpolate
 from support import logger as lg
 from support import files as fileIO
 from support import VISinstrumentModel
 
 
-def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
-                     phases=None, psfs=10000, amps=15, multiplier=2.0, minerror=-6., maxerror=-2,
+def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75, phs=0.98,
+                     phases=None, psfs=5000, amps=12, multiplier=1.5, minerror=-5., maxerror=-1,
                      linspace=False):
     """
     Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.
@@ -60,6 +62,8 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     :type ovesample: float
     :param sigma: 1sigma radius of the Gaussian weighting function for shape measurements
     :type sigma: float
+    :param phs: phase in case phases = None
+    :type phs: float
     :param phases: if None then a single fixed phase will be applied, if an int then a given number of random
                    phases will be used
     :type phases: None or int
@@ -69,9 +73,9 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     :type amps: int
     :param multiplier: the number of angular frequencies to be used
     :type multiplier: int or float
-    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-8 i.e. 0.0001%]
+    :param minerror: the minimum error to be covered, given in log10(min_error) [default=-5 i.e. 0.001%]
     :type minerror: float
-    :param maxerror: the maximum error to be covered, given in log10(max_error) [default=-2 i.e. 1%]
+    :param maxerror: the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]
     :type maxerror: float
     :param linspace: whether the amplitudes of the error curves should be linearly or logarithmically spaced.
     :type linspace: boolean
@@ -89,7 +93,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     reference = sh.measureRefinedEllipticity()
 
     #PSF scales
-    scales = np.random.random_integers(1e3, 2e5, psfs)
+    scales = np.random.random_integers(2e2, 2e5, psfs)
 
     #range of amplitude to study
     if linspace:
@@ -111,7 +115,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
         e = []
 
         if phases is None:
-            ph = (0.49,)
+            ph = (phs,)
         else:
             #random phases to Monte Carlo
             ph = np.random.random(phases)
@@ -172,6 +176,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
     keys = res.keys()
     keys.sort()
+    vals = []
     for key in keys:
         e1 = np.asarray(res[key][0])
         e2 = np.asarray(res[key][1])
@@ -180,6 +185,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         std1 = np.std(e1)
         std2 = np.std(e2)
         std = np.std(e)
+        vals.append(std)
 
         ax.scatter(key*0.9, std, c='m', marker='*')
         ax.scatter(key, std1, c='b', marker='o')
@@ -187,9 +193,21 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
         print key, std, std1, std2
 
+    #find the crossing
+    ks = np.asarray(keys)
+    values = np.asarray(vals)
+    f = interpolate.interp1d(ks, values, kind='cubic')
+    x = np.logspace(np.log10(ks.min()*1.05), np.log10(ks.max()*0.95), 1000)
+    vals = f(x)
+    ax.plot(x, vals, '--', c='0.2', zorder=10)
+    msk = vals < reqe
+    maxn = np.max(x[msk])
+    plt.text(1e-3, 2e-5, r'Error for $e$ must be $\leq %.2e$ per cent' % (maxn * 100),
+             fontsize=11, ha='center', va='center')
+
     #label
-    ax.scatter(key*0.9, std, c='m', marker='*', label=r'$\sigma (e)$')
-    ax.scatter(key, std1, c='b', marker='o', label=r'$\sigma (e_{1})$')
+    ax.scatter(key, std, c='m', marker='*', label=r'$\sigma (e)$')
+    ax.scatter(key*1.1, std1, c='b', marker='o', label=r'$\sigma (e_{1})$')
     ax.scatter(key, std2, c='y', marker='s', label=r'$\sigma (e_{2})$')
 
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
@@ -222,11 +240,25 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
     #loop over
     keys = res.keys()
     keys.sort()
+    vals = []
     for key in keys:
         dR2 = np.asarray(res[key][3])
         std = np.std(dR2) / ref['R2']
+        vals.append(std)
         print key, std
         ax.scatter(key, std, c='b', marker='s', s=35, zorder=10)
+
+    #find the crossing
+    ks = np.asarray(keys)
+    values = np.asarray(vals)
+    f = interpolate.interp1d(ks, values, kind='cubic')
+    x = np.logspace(np.log10(ks.min()*1.05), np.log10(ks.max()*0.95), 1000)
+    vals = f(x)
+    ax.plot(x, vals, '--', c='0.2', zorder=10)
+    msk = vals < reqr2
+    maxn = np.max(x[msk])
+    plt.text(1e-3, 7e-5, r'Error for $e$ must be $\leq %.2e$ per cent' % (maxn * 100),
+             fontsize=11, ha='center', va='center')
 
     ax.scatter(key, std, c='b', marker='s', label=r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
     ax.axhline(y=reqr2, c='g', ls='--', label='Requirement')
@@ -253,7 +285,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-        plt.title(r'VIS Non-linearity Correction: $\delta e$')
+        plt.title(r'VIS Non-linearity Correction (%f): $\delta e$' % key)
 
         de1 = np.asarray(res[key][4])
         de2 = np.asarray(res[key][5])
@@ -288,7 +320,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
     #same for R2s
     for i, key in enumerate(res):
         fig = plt.figure()
-        plt.title(r'VIS Non-linearity Correction: $\frac{\delta R^{2}}{R_{ref}^{2}}$')
+        plt.title(r'VIS Non-linearity Correction (%f): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
         ax = fig.add_subplot(111)
 
         dR2 = np.asarray(res[key][7])
@@ -315,7 +347,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
 
 def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
-                          scale=1e5, amp=0.01, phase=0.49, multiplier=2.0):
+                          scale=2e5, amp=0.1, phase=0.98, multiplier=1.5, outdir='.'):
     #read in PSF and renormalize it to norm
     data = pf.getdata(file)
     data /= np.max(data)
@@ -330,14 +362,16 @@ def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     #apply nonlinearity model to the scaled PSF
     newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(data.copy(), amp, phase=phase, multi=multiplier)
 
-    fileIO.writeFITS(data, 'scaledPSF.fits')
-    fileIO.writeFITS(newdata, 'nonlinearData.fits')
-    fileIO.writeFITS(newdata/data, 'nonlinearRatio.fits')
+    fileIO.writeFITS(data, outdir+'/scaledPSF.fits')
+    fileIO.writeFITS(newdata, outdir+'nonlinearData.fits')
+    fileIO.writeFITS(newdata/data, outdir+'nonlinearRatio.fits')
 
     #measure e and R2 from the postage stamp image
     sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
     results = sh.measureRefinedEllipticity()
     print results
+
+    print reference['ellipticity'] - results['ellipticity'], reference['R2'] - results['R2']
 
 
 if __name__ == '__main__':
@@ -345,23 +379,38 @@ if __name__ == '__main__':
     debug = True
     plot = True
 
-    #start the script
-    log = lg.setUpLogger('nonlinearityCalibration.log')
-    log.info('Testing non-linearity calibration...')
+    #different runs
+    runs = {'run1': dict(phase=0.0, multiplier=1.5),
+            'run2': dict(phase=0.5, multiplier=1.5),
+            'run3': dict(phase=1.0, multiplier=1.5),
+            'run4': dict(phase=0.98, multiplier=0.5),
+            'run5': dict(phase=0.98, multiplier=2.0),
+            'run6': dict(phase=0.98, multiplier=3.0),
+            'run7': dict(phase=0.98, multiplier=4.0)}
 
-    if run:
-        if debug:
-            testNonlinearityModel()
-            res = testNonlinearity(log, psfs=1000, amps=10, file='data/psf1x.fits', oversample=1.0)
-        else:
-            res = testNonlinearity(log)
+    for key, value in runs.iteritems():
+        if not os.path.exists(key):
+            os.makedirs(key)
 
-        fileIO.cPickleDumpDictionary(res, 'nonlinResults.pk')
+        #start a logger
+        log = lg.setUpLogger(key+'/nonlinearityCalibration.log')
+        log.info('Testing non-linearity calibration...')
+        log.info('Phase = %f' % value['phase'])
+        log.info('Multiplier = %f' % value['multiplier'])
 
-    if plot:
-        if not run:
-            res = cPickle.load(open('nonlinResults.pk'))
+        if run:
+            if debug:
+                testNonlinearityModel(phase=value['phase'], outdir=key)
+                res = testNonlinearity(log, psfs=1000, file='data/psf1x.fits', oversample=1.0, phs=value['phase'])
+            else:
+                res = testNonlinearity(log)
 
-        plotResults(res)
+            fileIO.cPickleDumpDictionary(res, key+'/nonlinResults.pk')
 
-    log.info('Run finished...\n\n\n')
+        if plot:
+            if not run:
+                res = cPickle.load(open(key+'/nonlinResults.pk'))
+
+            plotResults(res, outdir=key)
+
+        log.info('Run finished...\n\n\n')

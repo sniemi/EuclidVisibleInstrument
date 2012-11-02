@@ -1,5 +1,15 @@
 """
+This script can be used to convert lab data to FITS files and images of full CCDs.
 
+:requires: PyFITS
+:requires: NumPy
+:requires: matplotlib
+:requires: VISsim-Python
+
+:version: 0.2
+
+:author: Sami-Matias Niemi
+:contact: smn2@mssl.ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)

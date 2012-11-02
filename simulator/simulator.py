@@ -1110,7 +1110,6 @@ class VISsimulator():
         if self.cr['cr_cdfn'] > 1:
             ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
             self.cr['cr_l'] = ius(luck)
-
         else:
             self.cr['cr_l'] = np.sqrt(1.0 - luck ** 2) / luck
 

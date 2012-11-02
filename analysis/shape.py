@@ -294,27 +294,27 @@ class TestShape(unittest.TestCase):
 
         self.psffile12x = '../data/psf12x.fits'
         self.psffile = '../data/psf1x.fits'
-        self.tolerance = 1.e-3
+        self.tolerance = 1.e-7
         self.sigma = 40.0
         self.sigmax = 67.25
         self.sigmay = 24.15
         self.sigmax2 = 77.12343
         self.sigmay2 = 42.34543
-        self.xcent = 300.
-        self.ycent = 300.
+        self.xcent = 500.
+        self.ycent = 500.
 
         #create 2D Gaussians that will be used for testing
-        self.GaussianCirc = shapeMeasurement(np.zeros((600, 600)), self.log).circular2DGaussian(self.xcent,
-                                                                                                self.ycent,
-                                                                                                self.sigma)['Gaussian']
-        self.Gaussian = shapeMeasurement(np.zeros((600, 600)), self.log).Gaussian2D(self.xcent,
-                                                                                    self.ycent,
-                                                                                    self.sigmax,
-                                                                                    self.sigmay)['Gaussian']
-        self.Gaussian2 = shapeMeasurement(np.zeros((600, 600)), self.log).Gaussian2D(self.xcent,
-                                                                                     self.ycent,
-                                                                                     self.sigmax2,
-                                                                                     self.sigmay2)['Gaussian']
+        self.GaussianCirc = shapeMeasurement(np.zeros((1000, 1000)), self.log).circular2DGaussian(self.xcent,
+                                                                                                  self.ycent,
+                                                                                                  self.sigma)['Gaussian']
+        self.Gaussian = shapeMeasurement(np.zeros((1000, 1000)), self.log).Gaussian2D(self.xcent,
+                                                                                      self.ycent,
+                                                                                      self.sigmax,
+                                                                                      self.sigmay)['Gaussian']
+        self.Gaussian2 = shapeMeasurement(np.zeros((1000, 1000)), self.log).Gaussian2D(self.xcent,
+                                                                                       self.ycent,
+                                                                                       self.sigmax2,
+                                                                                       self.sigmay2)['Gaussian']
 
     def test_ellipticity_noweighting_circular_Gaussian(self):
         expected = 0.0
@@ -335,12 +335,12 @@ class TestShape(unittest.TestCase):
         self.assertAlmostEqual(expected, ae, msg='exp=%f, got=%f' % (expected, ae), delta=self.tolerance)
         self.assertAlmostEqual(expected, ae1, msg='exp=%f, got=%f' % (expected, ae1), delta=self.tolerance)
         self.assertAlmostEqual(0.0, ae2, msg='exp=%f, got=%f' % (expected, ae2), delta=self.tolerance)
-        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=1000*self.tolerance)
+        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=self.tolerance)
 
 
     def test_noweighting_Gaussian2(self):
         expected = math.fabs((self.sigmax2**2 - self.sigmay2**2) / (self.sigmax2**2 + self.sigmay2**2))
-        settings = dict(weighted=False, iterations=10)
+        settings = dict(weighted=False, iterations=40)
         actual = shapeMeasurement(self.Gaussian2, self.log, **settings).measureRefinedEllipticity()
         ae = actual['ellipticity']
         ae1 = actual['e1']
@@ -350,14 +350,14 @@ class TestShape(unittest.TestCase):
         self.assertAlmostEqual(expected, ae, msg='exp=%f, got=%f' % (expected, ae), delta=self.tolerance)
         self.assertAlmostEqual(expected, ae1, msg='exp=%f, got=%f' % (expected, ae1), delta=self.tolerance)
         self.assertAlmostEqual(0.0, ae2, msg='exp=%f, got=%f' % (expected, ae2), delta=self.tolerance)
-        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=10)
+        self.assertAlmostEqual(R2exp, R2, msg='exp=%f, got=%f' % (R2exp, R2), delta=1e-4)
 
 
     def test_ellipticity_Gaussian(self):
-        expected = 0.699293
-        settings = dict(sigma=10.)
+        expected = math.fabs((self.sigmax**2 - self.sigmay**2) / (self.sigmax**2 + self.sigmay**2))
+        settings = dict(sigma=3000., iterations=40)
         actual = shapeMeasurement(self.Gaussian, self.log, **settings).measureRefinedEllipticity()['ellipticity']
-        self.assertAlmostEqual(expected, actual, msg='exp=%f, got=%f' % (expected, actual), delta=self.tolerance)
+        self.assertAlmostEqual(expected, actual, msg='exp=%f, got=%f' % (expected, actual), delta=1e-5)
 
 
     def test_centroiding_weighting_Gaussian(self):
@@ -383,9 +383,9 @@ class TestShape(unittest.TestCase):
         settings = dict(sampling=1/12.0)
         actual = shapeMeasurement(data, self.log, **settings).measureRefinedEllipticity()
         self.assertAlmostEqual(expected, actual['ellipticity'],
-                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=self.tolerance)
+                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=10*self.tolerance)
         self.assertAlmostEqual(R2exp, actual['R2'],
-                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=self.tolerance)
+                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=10*self.tolerance)
 
     def test_PSF(self):
         expected = 0.045437
@@ -393,9 +393,9 @@ class TestShape(unittest.TestCase):
         data = pf.getdata(self.psffile)
         actual = shapeMeasurement(data, self.log).measureRefinedEllipticity()
         self.assertAlmostEqual(expected, actual['ellipticity'],
-                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=self.tolerance)
+                               msg='exp=%f, got=%f' % (expected, actual['ellipticity']), delta=10*self.tolerance)
         self.assertAlmostEqual(R2exp, actual['R2'],
-                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=self.tolerance)
+                               msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=10*self.tolerance)
 
 
 

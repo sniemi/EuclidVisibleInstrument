@@ -13,7 +13,7 @@
 
 
 \title{VIS Documentation}
-\date{October 24, 2012}
+\date{November 02, 2012}
 \release{0.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -221,7 +221,7 @@ float or ndarray
 \index{CCDnonLinearityModelSinusoidal() (in module support.VISinstrumentModel)}
 
 \begin{fulllineitems}
-\phantomsection\label{instrument:support.VISinstrumentModel.CCDnonLinearityModelSinusoidal}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{CCDnonLinearityModelSinusoidal}}{\emph{data}, \emph{amplitude}, \emph{phase=0.45}, \emph{multi=1.5}}{}
+\phantomsection\label{instrument:support.VISinstrumentModel.CCDnonLinearityModelSinusoidal}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{CCDnonLinearityModelSinusoidal}}{\emph{data}, \emph{amplitude}, \emph{phase=0.49}, \emph{multi=1.5}}{}
 This function provides a theoretical non-linearity model based on sinusoidal error with a given
 amplitude, phase and number of waves (multi).
 \begin{quote}\begin{description}
@@ -2435,7 +2435,7 @@ None
 \index{testFlatCalibration() (in module analysis.FlatfieldCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibration}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibration}}{\emph{log}, \emph{flats}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{plot=False}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.FlatfieldCalibration.testFlatCalibration}\pysiglinewithargsret{\code{analysis.FlatfieldCalibration.}\bfcode{testFlatCalibration}}{\emph{log}, \emph{flats}, \emph{surfaces=100}, \emph{file='data/psf1x.fits'}, \emph{psfs=500}, \emph{sigma=0.75}, \emph{iterations=10}, \emph{plot=False}, \emph{debug=False}}{}
 Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.
 

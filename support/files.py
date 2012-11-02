@@ -66,7 +66,7 @@ def readFITSDataExcludeScanRegions(files, ext=1):
     return np.asarray(data)
 
 
-def writeFITS(data, output, overwrite=True):
+def writeFITS(data, output, overwrite=True, int=True):
     """
     Write out a FITS file using PyFITS. Will remove an existing file if overwrite=True.
 
@@ -75,7 +75,9 @@ def writeFITS(data, output, overwrite=True):
     :param output: name of the output file
     :type output: string
     :param overwrite: removes an existing file if present before writing a new one
-    :type overwrite: boolean
+    :type overwrite: bool
+    :param int: whether or not to save the data scaled to 16bit unsigned integer values
+    :type int: bool
 
     :return: None
     """
@@ -87,6 +89,10 @@ def writeFITS(data, output, overwrite=True):
 
     #new image HDU
     hdu = pf.ImageHDU(data=data)
+
+    if int:
+        hdu.scale('int16', '', bzero=32768)
+        hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
     #update and verify the header
     hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')

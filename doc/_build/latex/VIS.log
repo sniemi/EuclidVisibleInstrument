@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.10.15)  24 OCT 2012 11:31
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.10.15)  2 NOV 2012 12:12
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -967,7 +967,7 @@ Overfull \hbox (17.67044pt too wide) in paragraph at lines 224--224
 
 
 Overfull \hbox (54.10243pt too wide) in paragraph at lines 224--224
-\T1/ptm/m/it/12 phase=0.45\T1/ptm/m/n/12 ,
+\T1/ptm/m/it/12 phase=0.49\T1/ptm/m/n/12 ,
  []
 
 
@@ -1564,6 +1564,21 @@ Overfull \hbox (36.86955pt too wide) in paragraph at lines 2438--2438
 
 Underfull \hbox (badness 10000) in paragraph at lines 2438--2438
 \T1/ptm/m/it/12 psfs=500\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2438--2438
+\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2438--2438
+\T1/ptm/m/it/12 it-er-a-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2438--2438
+\T1/ptm/m/it/12 tions=10\T1/ptm/m/n/12 ,
  []
 
 
@@ -2447,7 +2462,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 3303.
 Here is how much of TeX's memory you used:
  9389 strings out of 493488
  135582 string characters out of 3141325
- 226050 words of memory out of 3000000
+ 226051 words of memory out of 3000000
  12211 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
  958 hyphenation exceptions out of 8191
@@ -2466,7 +2481,7 @@ e1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw
 /helvetic/uhvr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/
 utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on VIS.pdf (68 pages, 1850322 bytes).
+Output written on VIS.pdf (68 pages, 1850359 bytes).
 PDF statistics:
  1011 PDF objects out of 1200 (max. 8388607)
  871 compressed objects within 9 object streams

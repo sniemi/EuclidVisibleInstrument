@@ -12,9 +12,11 @@ matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import numpy as np
-import os, time
+import pyfits as pf
+import os, time, sys
 import glob as g
 from support import files as fileIO
+from optparse import OptionParser
 
 
 def changePathNaming(folders='*', year=12):
@@ -134,10 +136,99 @@ def plotImage(image, output):
     plt.close()
 
 
+def combineToFullCCD(fileEF, fileGH, output, evm2=False):
+    """
+    Combines imaging data from files containing EF and GH image areas.
+
+    :param fileEF: name of the FITS file that contains EF image section
+    :type fileEF: str
+    :param fileGH: name of the FITS file that contains GH image section
+    :type fileGH: str
+    :param evm2: if EVM2 ROE board was used then the data need to be scaled
+    :type evm2: bool
+
+    :return: None
+    """
+    dataEF = pf.getdata(fileEF)
+    dataGH = pf.getdata(fileGH)[::-1, ::-1]  #GH data needs to be rotated because of how the data have been recorded
+
+    #remove two rows from data
+    dataEF = dataEF[:-2, :]
+    dataGH = dataGH[2:, :]
+
+    #calculate some statistics
+    print 'Statistics from %s' % fileEF
+    Q0EF = dataEF[:, :2099]
+    Q1EF = dataEF[:, 2098:]
+    m0 = Q0EF.mean()
+    m1 = Q1EF.mean()
+    msk0 = (Q0EF < 1.1*m0) & (Q0EF > 0.9*m0)
+    msk1 = (Q1EF < 1.1*m1) & (Q1EF > 0.9*m1)
+    print 'Q0 median mean max min std clipped'
+    print np.median(Q0EF), m0, Q0EF.max(), Q0EF.min(), Q0EF.std(), Q0EF[msk0].std()
+    print 'Q1 median mean max min std clipped'
+    print np.median(Q1EF), m1, Q1EF.max(), Q1EF.min(), Q1EF.std(), Q1EF[msk1].std()
+    print 'Statistics from %s' % fileGH
+    Q0GH = dataGH[:, :2099]
+    Q1GH = dataGH[:, 2098:]
+    m0 = Q0GH.mean()
+    m1 = Q1GH.mean()
+    msk0 = (Q0GH < 1.1*m0) & (Q0GH > 0.9*m0)
+    msk1 = (Q1GH < 1.1*m1) & (Q1GH > 0.9*m1)
+    print 'Q0 median mean max min std clipped'
+    print np.median(Q0GH), m0, Q0GH.max(), Q0GH.min(), Q0GH.std(), Q0GH[msk0].std()
+    print 'Q1 median mean max min std clipped'
+    print np.median(Q1GH), m1, Q1GH.max(), Q1GH.min(), Q1GH.std(), Q1GH[msk1].std()
+
+    if evm2:
+            #this bias level is higher than anticipated with DM
+            dataEF -= 2400
+            dataGH -= 2400
+
+    #stitch together
+    CCD = np.vstack((dataEF, dataGH))
+
+    #write out a FITS file
+    fileIO.writeFITS(CCD, output)
+
+
+def processArgs(printHelp=False):
+    """
+    Processes command line arguments.
+    """
+    parser = OptionParser()
+
+    parser.add_option('-c', '--combine', dest='combine', action='store_true',
+                      help='Combine EF and GH data to a single file containing a full CCD.')
+    parser.add_option('-p', '--process', dest='process', action='store_true',
+                      help='Process the current working directory to convert binary files to FITS format.')
+    parser.add_option('-e', '--ef', dest='ef',
+                      help="Input file containing EF data if combining data", metavar='string')
+    parser.add_option('-g', '--gh', dest='gh',
+                      help="Input file containing GH data if combining data", metavar='string')
+    parser.add_option('-o', '--output', dest='output',
+                      help="Name of the output file if combining data", metavar='string')
+    parser.add_option('-s', '--scale_evm2', dest='evm2', action='store_true',
+                      help='Will rescale the data if EVM2 board was used.')
+
+    if printHelp:
+        parser.print_help()
+    else:
+        return parser.parse_args()
+
+
 if __name__ == '__main__':
+    opts, args = processArgs()
 
-    #testing
-    #img = readBinaryFiles('05 Sep_10_45_31s_Euclid.bin')
-    #plotImage(img, 'test.pdf')
+    if opts.process is None and opts.combine is None:
+        processArgs(True)
+        sys.exit(8)
 
-    convertAllBinsToFITS()
+    if opts.process:
+        convertAllBinsToFITS()
+
+    if opts.combine:
+        if opts.output is None:
+            print 'Setting the output to tmp.fits'
+            opts.output = 'tmp.fits'
+        combineToFullCCD(opts.ef, opts.gh, opts.output, opts.evm2)

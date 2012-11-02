@@ -786,9 +786,12 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
         e = []
         #loop over the PSFs
         for scale in scales:
+            #piston = normally distributed around them mean = error and scale = readout noise
+            #ps = np.random.normal(loc=piston, scale=4.5, size=data.shape)
+            #tmp = data.copy() * scale + ps
+
             #make a copy of the PSF and scale it with the given scaling
             #and then add a random piston which is <= the error
-            #tmp = data.copy() * scale + (np.random.rand(50).max()*piston)
             tmp = data.copy() * scale + piston
 
             #measure e and R2 from the postage stamp image
@@ -973,7 +976,7 @@ if __name__ == '__main__':
     run = False
     plot = False
     error = True
-    debug = False
+    debug = True
 
     #start the script
     log = lg.setUpLogger('biasCalibration.log')

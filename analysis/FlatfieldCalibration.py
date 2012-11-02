@@ -189,7 +189,8 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     return res
 
 
-def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500, plot=False, debug=False):
+def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500,
+                        sigma=0.75, iterations=10, plot=False, debug=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of flat fields median combined.
@@ -200,10 +201,11 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     #read in PSF and rescale to avoid rounding or truncation errors
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= 1.e4
+    data *= 1.e5
 
     #derive reference values
-    sh = shape.shapeMeasurement(data.copy(), log)
+    settings = dict(sigma=sigma, iterations=iterations, weighted=False)
+    sh = shape.shapeMeasurement(data.copy(), log, **settings)
     reference = sh.measureRefinedEllipticity()
 
     #random positions for the PSFs, these positions are the lower corners
@@ -253,7 +255,7 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
                 small *= tmp
 
                 #measure e and R2 from the postage stamp image
-                sh = shape.shapeMeasurement(small.copy(), log)
+                sh = shape.shapeMeasurement(small.copy(), log, **settings)
                 results = sh.measureRefinedEllipticity()
 
                 #save values
@@ -377,7 +379,8 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     for key in res:
         dR2 = np.asarray(res[key][3])
 
-        std = np.std(dR2) / ref['R2']
+        #std = np.std(dR2) / ref['R2']
+        std = np.std(dR2) / np.mean(dR2)
 
         frames.append(key)
         values.append(std)
@@ -663,7 +666,7 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
     print reference
 
     #residual
-    residual = pf.getdata('data/VISFlatField2percent.fits')
+    residual = pf.getdata('data/VISFlatField2percent.fits') #'data/VISFlatField1percent.fits'
 
     if oversample == 4.0:
         residual = zoom(zoom(residual, 2, order=0), 2, order=0)
@@ -720,10 +723,10 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
 
 
 if __name__ == '__main__':
-    run = False
+    run = True
     debug = False
-    plots = False
-    error = True
+    plots = True
+    error = False
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
@@ -736,13 +739,13 @@ if __name__ == '__main__':
         plotTolerableErrorR2(res, output='FlatFieldingTolerableErrorR2.pdf')
 
         #calculate RMS on image with x frames combined together
-        combined = generateResidualFlatField(combine=25)
-        fileIO.writeFITS(combined, 'residualFlatfield.fits')
+        combined = generateResidualFlatField(combine=30, plots=True, debug=True)
         print np.std(combined), np.std(combined[500:561, 500:561]), np.std(combined[300:361, 300:361])
 
     if run:
-        results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=200, psfs=1000, file='psf1xhighe.fits')
-        #results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=3, psfs=10, file='psf1xhighe.fits')
+        results = testFlatCalibration(log, flats=np.arange(11, 91, 10), sigma=15., iterations=20,
+                                      surfaces=5, psfs=500, file='data/psf1x.fits')
+        #results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=200, psfs=1000, file='psf1xhighe.fits')
         fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
 
     if debug:

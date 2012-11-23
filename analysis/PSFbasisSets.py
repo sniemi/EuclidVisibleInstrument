@@ -90,7 +90,7 @@ def deriveBasisSetsKernelPCA(data, components=10):
     return pca
 
 
-def visualiseBasisSets(files, output):
+def visualiseBasisSets(files, output, outputfolder):
     """
     Generate visualisation of the basis sets.
 
@@ -116,9 +116,9 @@ def visualiseBasisSets(files, output):
         ax = Axes3D(fig, rect)
         plt.title('Basis Function $B_{%i}$' % numb)
         ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.set_zlim(-0.06, 0.06)
+        ax.set_zlim(-0.1, 0.1)
 
-    plt.savefig(output.replace('.pdf', '3D.pdf'))
+    plt.savefig(outputfolder + '/' + output.replace('.pdf', '3D.pdf'))
     plt.close()
 
     #individual 3D images
@@ -135,17 +135,13 @@ def visualiseBasisSets(files, output):
         ax = Axes3D(fig)
         plt.title('Basis Function $B_{%i}$' % numb)
         ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.set_zlim(-0.06, 0.06)
-
-        #flip x axis
-        #ax.invert_xaxis()
-
+        ax.set_zlim(-0.1, 0.1)
         plt.savefig(file.replace('.fits', '.pdf'))
         plt.close()
 
     #show the mean file
-    if os.path.isfile('mean.fits'):
-        image = pf.getdata('mean.fits')
+    if os.path.isfile(outputfolder + '/' + 'mean.fits'):
+        image = pf.getdata(outputfolder + '/' + 'mean.fits')
         stopy, stopx = image.shape
         X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
 
@@ -154,7 +150,7 @@ def visualiseBasisSets(files, output):
         ax = Axes3D(fig)
         plt.title('Average PSF')
         ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        plt.savefig('meanPSF.pdf')
+        plt.savefig(outputfolder + '/' + 'meanPSF.pdf')
         plt.close()
 
     #make 2D image
@@ -174,7 +170,7 @@ def visualiseBasisSets(files, output):
         ax.xaxis.set_major_locator(NullLocator()) # remove ticks
         ax.yaxis.set_major_locator(NullLocator())
 
-    plt.savefig(output.replace('.pdf', '2D.pdf'))
+    plt.savefig(outputfolder + '/' + output.replace('.pdf', '2D.pdf'))
     plt.close()
 
     #generate a movie
@@ -195,7 +191,7 @@ def visualiseBasisSets(files, output):
     ax.set_ylabel('Y [pixels]')
     ax.set_zlabel('')
     anime = animation.ArtistAnimation(fig, ims, interval=2000, blit=True)
-    anime.save(output.replace('.pdf', '.mp4'), fps=0.5)
+    anime.save(outputfolder + '/' + output.replace('.pdf', '.mp4'), fps=0.5)
 
 
 def processArgs(printHelp=False):
@@ -279,6 +275,6 @@ if __name__ == '__main__':
     deriveBasisSetsPCA(all, opts.cutout, opts.output, components=opts.basis)
 
     log.info('Visualising the derived basis sets')
-    visualiseBasisSets(glob.glob(opts.output+'/PCAbasis*.fits'), opts.output+'/PCABasisSets.pdf')
+    visualiseBasisSets(glob.glob(opts.output+'/PCAbasis*.fits'), 'PCABasisSets.pdf', opts.output)
 
     log.info('All done...')

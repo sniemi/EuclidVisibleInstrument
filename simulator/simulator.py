@@ -189,7 +189,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.1
+__version__ = 1.11
 
 
 class VISsimulator():
@@ -331,7 +331,6 @@ class VISsimulator():
                                                         self.config.get(self.section, 'output'))
 
         #booleans to control the flow
-        self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
         self.chargeInjectionx = self.config.getboolean(self.section, 'chargeInjectionx')
         self.chargeInjectiony = self.config.getboolean(self.section, 'chargeInjectiony')
         self.cosmicRays = self.config.getboolean(self.section, 'cosmicRays')
@@ -351,6 +350,10 @@ class VISsimulator():
             self.nonlinearity = self.config.getboolean(self.section, 'nonlinearity')
         except:
             self.nonlinearity = False
+        try:
+            self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
+        except:
+            self.flatfieldM = False
 
         self.information['variablePSF'] = False
 
@@ -745,15 +748,25 @@ class VISsimulator():
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
 
+        #if only a single object in the input, must force it to 2D
+        try:
+            tmp_ = self.objects.shape[1]
+        except:
+            self.objects = self.objects[np.newaxis, :]
+
         str = '{0:d} sources read from {1:s}'.format(np.shape(self.objects)[0], self.information['sourcelist'])
         self.log.info(str)
 
+        #read in object types
+        data = open('data/objects.dat').readlines()
+
+        #only 2D array will have second dimension, so this will trigger the exception if only one input source
+        tmp_ = self.objects.shape[1]
         #find all object types
         self.sp = np.asarray(np.unique(self.objects[:, 3]), dtype=np.int)
 
         #generate mapping between object type and data
         objectMapping = {}
-        data = open('data/objects.dat').readlines()
         for stype in self.sp:
             if stype == 0:
                 #delta function
@@ -774,8 +787,6 @@ class VISsimulator():
 
         #test that we have input data for each object type, if not exit with error
         if not np.array_equal(self.sp, np.asarray(list(objectMapping.keys()), dtype=np.int)):
-            print self.sp
-            print np.asarray(list(objectMapping.keys()), dtype=np.int)
             self.log.error('No all object types available, will exit!')
             sys.exit('No all object types available')
 
@@ -1206,7 +1217,8 @@ class VISsimulator():
         .. seealso:: Class :`CDM03`
         """
         #save image without CTI
-        self.writeFITSfile(self.image, 'nocti' + self.information['output'])
+        self.noCTI = self.image.copy()
+        self.writeFITSfile(self.noCTI, 'noctinonoise' + self.information['output'])
 
         self.log.debug('Starting to apply radiation damage model...')
         #at this point we can give fake data...
@@ -1251,6 +1263,11 @@ class VISsimulator():
 
         #add to the image
         self.image += noise
+
+        if self.radiationDamage:
+            self.noCTI += noise
+            self.noCTI /= self.information['e_adu']
+
         if self.cosmicRays:
             self.imagenoCR += noise
 
@@ -1261,6 +1278,7 @@ class VISsimulator():
         """
         self.image /= self.information['e_adu']
         self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_adu'])
+
         if self.cosmicRays:
             self.imagenoCR /= self.information['e_adu']
 
@@ -1274,6 +1292,7 @@ class VISsimulator():
         """
         self.image += self.information['bias']
         self.log.info('Bias of %i counts were added to the image' % self.information['bias'])
+
         if self.cosmicRays:
             self.imagenoCR += self.information['bias']
 
@@ -1378,6 +1397,10 @@ class VISsimulator():
         self.image[self.image > max] = max
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(self.image),
                                                                                              np.sum(self.image)))
+        if self.radiationDamage:
+            self.noCTI = self.noCTI.astype(np.int)
+            self.noCTI[self.noCTI > max] = max
+            self.writeFITSfile(self.noCTI, 'nocti' + self.information['output'], unsigned16bit=True)
 
 
     def writeOutputs(self):

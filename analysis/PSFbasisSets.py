@@ -28,6 +28,7 @@ import pyfits as pf
 from sklearn import decomposition
 from support import files as fileIO
 from support import logger as lg
+from analysis import centroidPSFs
 
 
 def deriveBasisSetsPCA(data, cut, outfolder, components=10, whiten=False):
@@ -243,15 +244,16 @@ if __name__ == '__main__':
     files = glob.glob(opts.input)
     all = []
     for file in files:
-        print file
         log.info('Processing %s' % file)
-
+        #load data
         data = pf.getdata(file)
-        data /= np.max(data)
 
-        midy, midx = data.shape
-        midx = math.floor(midx / 2.)
-        midy = math.floor(midy / 2.)
+        #find the centroid pixel
+        midy, midx = centroidPSFs.fwcentroid(data)
+        midx = int(round(midx, 0))
+        midy = int(round(midy, 0))
+
+        print file, midx, midy
 
         #take a smaller cutout and normalize the peak pixel to unity
         cutout = data[midy-opts.cutout:midy+opts.cutout, midx-opts.cutout:midx+opts.cutout]

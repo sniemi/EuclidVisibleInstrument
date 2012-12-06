@@ -11,7 +11,7 @@ Functions to find a centroid of an object, such as a PSF.
 import numpy as np
 
 
-def fwcentroid(image, checkbox=1, maxiterations=30, threshold=1e-4, halfwidth=50, verbose=False):
+def fwcentroid(image, checkbox=1, maxiterations=30, threshold=1e-5, halfwidth=35, verbose=False):
     """ Implement the Floating-window first moment centroid algorithm
         chosen for JWST target acquisition.
 
@@ -52,7 +52,7 @@ def fwcentroid(image, checkbox=1, maxiterations=30, threshold=1e-4, halfwidth=50
         XHW, YHW = halfwidth, halfwidth
 
     # Determine starting peak location
-    if checkbox >1:
+    if checkbox > 1:
         raise NotImplemented("Checkbox smoothing not done yet")
     else:
         # just use brightest pixel
@@ -170,10 +170,74 @@ def fwcentroid(image, checkbox=1, maxiterations=30, threshold=1e-4, halfwidth=50
 if __name__ == '__main__':
     import pyfits as pf
     import glob as g
+    import math
+    import scipy.ndimage.measurements
+    from scipy.ndimage import interpolation
+    from support import files as fileIO
+    from analysis import shape
+    from support import logger as lg
 
-    files = g.glob('PSF800nm/TOL*')
+    #inputs
+    cut = 500
+    files = g.glob('TOL*')
 
-    for file in files:
+    log = lg.setUpLogger('centroidPSF.log')
+    log.info('\n\nStarting to derive centred cutouts...')
+
+    all = []
+    for i, file in enumerate(files):
+        #load data
         data = pf.getdata(file)
-        ycen, xcen = fwcentroid(data)
-        print file, xcen, ycen
+
+        #find the centroid pixel with fwcentroid
+        #midy, midx = fwcentroid(data)
+        #midx += 1.
+        #midy += 1.
+
+        #scipy centre-of-mass
+        #midy, midx = scipy.ndimage.measurements.center_of_mass(data)
+
+        #peak location, take a small cutout around this region
+        #midy, midx = scipy.ndimage.measurements.maximum_position(data)
+        #data = data[midy-1000:midy+1001, midx-1000:midx+1001]
+
+        #data centre pixels
+        ceny, cenx = data.shape
+        ceny /= 2
+        cenx /= 2
+
+        #second order moments centroid finding
+        settings = dict(sampling=1./12., iterations=9, sigma=0.09)
+        res = shape.shapeMeasurement(data, log, **settings).measureRefinedEllipticity()
+        midx = res['centreX'] - 1
+        midy = res['centreY'] - 1
+
+        #interpolate to new location
+        #note however that sinc interpolation should probably be used instead of spline...
+        shiftx = -midx + cenx
+        shifty = -midy + ceny
+        cutout = interpolation.shift(data, [shifty, shiftx], order=3)
+
+        #take a cutout to match size
+        my, mx = cutout.shape
+        mx /= 2
+        my /= 2
+        cutout = cutout[my - cut:my + cut, mx - cut:mx + cut]
+
+        #write output
+        print 'Image %i shift' %(i+1), shiftx, shifty, np.argmax(cutout), cutout.shape
+        fileIO.writeFITS(cutout, 'cutout'+file.replace('.fits.gz', '.fits'), int=False)
+
+        all.append(cutout)
+
+    #calculate the average PSF
+    all = np.asarray(all)
+    mean = np.mean(all, axis=0)
+    fileIO.writeFITS(mean, 'averagePSF.fits', int=False)
+
+    #write out residuals
+    for file in g.glob('cutout*.fits'):
+        data = pf.getdata(file)
+        residual = data - mean
+        fileIO.writeFITS(residual, file.replace('cutout', 'residual'), int=False)
+        print file, np.max(residual), np.min(residual), np.std(residual)

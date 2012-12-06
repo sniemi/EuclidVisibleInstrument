@@ -1,6 +1,6 @@
 """
-Generating Basis Sets
-=====================
+Generating PSF Basis Sets
+=========================
 
 This script can be used to derive a basis set for point spread functions.
 
@@ -11,7 +11,7 @@ This script can be used to derive a basis set for point spread functions.
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.2
+:version: 0.3
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -28,7 +28,6 @@ import pyfits as pf
 from sklearn import decomposition
 from support import files as fileIO
 from support import logger as lg
-from analysis import centroidPSFs
 
 
 def deriveBasisSetsPCA(data, cut, outfolder, components=10, whiten=False):
@@ -63,32 +62,72 @@ def deriveBasisSetsPCA(data, cut, outfolder, components=10, whiten=False):
 
     #save each component to a FITS file
     for i, img in enumerate(image):
-        image = img.reshape(2*cut, 2*cut)
+        image = img.reshape(cut, cut)
         #to compare IDL results
-        image = -image
+        #image = -image
         fileIO.writeFITS(image, outfolder + '/PCAbasis%03d.fits' % (i+1),  int=False)
     return image
 
 
-def deriveBasisSetsKernelPCA(data, components=10):
+def deriveBasisSetsRandomizedPCA(data, cut, outfolder, components=10, whiten=False):
     """
-    Derives a basis set from input data using Kernel Principal component analysis (KPCA).
+    Derives a basis set from input data using Randomized Principal component analysis (PCA).
     Saves the basis sets to a FITS file for further processing.
 
-    Information about KPCA can be found from the scikit-learn website:
-    http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html#sklearn.decomposition.KernelPCA
+    Information about PCA can be found from the scikit-learn website:
+    http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html#sklearn.decomposition.RandomizedPCA
 
     :param data: input data from which the basis set are derived from. The input data must be an array of arrays.
                  Each array should describe an independent data set that has been flatted to 1D.
     :type data: ndarray
+    :param cut: size of the cutout region that has been used
+    :type cut: int
+    :param outfolder: name of the output folder e.g. 'output'
+    :type outfolder: str
     :param components: the number of basis set function components to derive
     :type components: int
+    :param whiten: When True (False by default) the components_ vectors are divided by n_samples times
+                   singular values to ensure uncorrelated outputs with unit component-wise variances.
+    :type whiten: bool
 
-    :return: KPCA components
+    :return: Randomized PCA components
     """
-    pca = decomposition.KernelPCA(n_components=components, kernel='rbf')
+    pca = decomposition.RandomizedPCA(n_components=components, whiten=whiten)
     pca.fit(data)
-    return pca
+    image = pca.components_
+
+    #output the variance ratio
+    print 'Variance Ratio:', pca.explained_variance_ratio_*100.
+
+    #save each component to a FITS file
+    for i, img in enumerate(image):
+        image = img.reshape(cut, cut)
+        #to compare IDL results
+        #image = -image
+        fileIO.writeFITS(image, outfolder + '/RandomPCAbasis%03d.fits' % (i+1),  int=False)
+    return image
+
+
+def deriveBasisSetsICA(data, cut, outfolder, components=10):
+    """
+    Derives a basis set from input data using Perform Fast Independent Component Analysis.
+    Saves the basis sets to a FITS file for further processing.
+
+    http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html#sklearn.decomposition.fastica
+    """
+    ica = decomposition.FastICA(n_components=components)
+    # ICA treats sequential observations as related.  Because of this, we need
+    # to fit with the transpose of the spectra
+    ica.fit(data.T)
+    image = ica.transform(data.T).T
+
+    #save each component to a FITS file
+    for i, img in enumerate(image):
+        image = img.reshape(cut, cut)
+        #to compare IDL results
+        #image = -image
+        fileIO.writeFITS(image, outfolder + '/ICAbasis%03d.fits' % (i+1),  int=False)
+    return image
 
 
 def visualiseBasisSets(files, output, outputfolder):
@@ -98,6 +137,49 @@ def visualiseBasisSets(files, output, outputfolder):
     :param files: a list of file names that should be visualised
     :return: None
     """
+    #individual 3D images
+    for file in files:
+        numb = int(file.split('basis')[-1].replace('.fits', ''))
+
+        image = pf.getdata(file)
+        #zoom to the centre 100x100
+        my, mx = image.shape
+        my /= 2
+        mx /= 2
+        image = image[my-100:my+100, mx-100:mx+100]
+
+        stopy, stopx = image.shape
+        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
+
+        #make plot
+        fig = plt.figure(figsize=(12, 12))
+        ax = Axes3D(fig)
+        plt.title('Basis Function $B_{%i}$' % numb)
+        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.set_zlim(-0.05, 0.05)
+        plt.savefig(file.replace('.fits', '.pdf'))
+        plt.close()
+
+    #show the mean file
+    if os.path.isfile(outputfolder + '/' + 'mean.fits'):
+        image = pf.getdata(outputfolder + '/' + 'mean.fits')
+        #zoom to the centre 100x100
+        my, mx = image.shape
+        my /= 2
+        mx /= 2
+        image = image[my-100:my+100, mx-100:mx+100]
+
+        stopy, stopx = image.shape
+        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
+
+        #make plot
+        fig = plt.figure(figsize=(8, 8))
+        ax = Axes3D(fig)
+        plt.title('Average PSF')
+        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        plt.savefig(outputfolder + '/' + 'meanPSF.pdf')
+        plt.close()
+
     #make 3D image
     fig = plt.figure(1, figsize=(18, 28))
     fig.subplots_adjust(hspace=0.1, wspace=0.001, left=0.10, bottom=0.095, top=0.975, right=0.98)
@@ -117,42 +199,10 @@ def visualiseBasisSets(files, output, outputfolder):
         ax = Axes3D(fig, rect)
         plt.title('Basis Function $B_{%i}$' % numb)
         ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.set_zlim(-0.1, 0.1)
+        ax.set_zlim(-0.05, 0.05)
 
-    plt.savefig(outputfolder + '/' + output.replace('.pdf', '3D.pdf'))
+    plt.savefig(outputfolder + '/' + output.replace('.pdf', '3D.png'))
     plt.close()
-
-    #individual 3D images
-    for file in files:
-        numb = int(file.split('basis')[-1].replace('.fits', ''))
-
-        image = pf.getdata(file)
-
-        stopy, stopx = image.shape
-        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
-
-        #make plot
-        fig = plt.figure(figsize=(12, 12))
-        ax = Axes3D(fig)
-        plt.title('Basis Function $B_{%i}$' % numb)
-        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.set_zlim(-0.1, 0.1)
-        plt.savefig(file.replace('.fits', '.pdf'))
-        plt.close()
-
-    #show the mean file
-    if os.path.isfile(outputfolder + '/' + 'mean.fits'):
-        image = pf.getdata(outputfolder + '/' + 'mean.fits')
-        stopy, stopx = image.shape
-        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
-
-        #make plot
-        fig = plt.figure(figsize=(8, 8))
-        ax = Axes3D(fig)
-        plt.title('Average PSF')
-        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        plt.savefig(outputfolder + '/' + 'meanPSF.pdf')
-        plt.close()
 
     #make 2D image
     fig = plt.figure(1, figsize=(18, 28))
@@ -163,6 +213,11 @@ def visualiseBasisSets(files, output, outputfolder):
 
     for i, file in enumerate(files):
         image = pf.getdata(file)
+        #zoom to the centre 100x100
+        my, mx = image.shape
+        my /= 2
+        mx /= 2
+        image = image[my-100:my+100, mx-100:mx+100]
 
         #add subplot
         ax = fig.add_subplot(rows, 2, i + 1, frame_on=False)
@@ -171,23 +226,29 @@ def visualiseBasisSets(files, output, outputfolder):
         ax.xaxis.set_major_locator(NullLocator()) # remove ticks
         ax.yaxis.set_major_locator(NullLocator())
 
-    plt.savefig(outputfolder + '/' + output.replace('.pdf', '2D.pdf'))
+    plt.savefig(outputfolder + '/' + output.replace('.pdf', '2D.png'))
     plt.close()
 
     #generate a movie
-    fig = plt.figure(2, figsize=(8, 8))
+    fig = plt.figure(2, figsize=(7, 7))
     ax = Axes3D(fig)
 
     ims = [] #to store the images for the movie
     for i, file in enumerate(files):
         image = pf.getdata(file)
+        #zoom to the centre 100x100
+        my, mx = image.shape
+        my /= 2
+        mx /= 2
+        image = image[my - 100:my + 100, mx - 100:mx + 100]
+
         stopy, stopx = image.shape
         X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
         #store image for the movie
         ims.append((ax.plot_surface(X, Y, image, rstride=1, cstride=1,
                     cmap=cm.coolwarm, linewidth=0, antialiased=False),))
 
-    ax.set_title('PCA Basis Sets')
+    ax.set_title('Basis Sets')
     ax.set_xlabel('X [pixels]')
     ax.set_ylabel('Y [pixels]')
     ax.set_zlabel('')
@@ -205,8 +266,6 @@ def processArgs(printHelp=False):
         help="Input files from which the basis sets will be derived from (e.g. '*.fits')", metavar='string')
     parser.add_option('-o', '--output', dest='output',
         help="Name of the output directory, [default=./]", metavar='string')
-    parser.add_option('-c', '--cutout', dest='cutout',
-        help='Size of the cutout region [default=50]', metavar='int')
     parser.add_option('-b', '--basis', dest='basis',
         help='Number of basis sets to derive [default=20]', metavar='int')
 
@@ -229,12 +288,6 @@ if __name__ == '__main__':
     log = lg.setUpLogger(opts.output + '/BasisSet.log')
     log.info('\n\nStarting to derive basis set functions...')
 
-    if opts.cutout is None:
-        opts.cutout = 50
-    else:
-        opts.cutout = int(opts.cutout)
-    log.info('Cutout size being used is %i' % opts.cutout)
-
     if opts.basis is None:
         opts.basis = 20
     else:
@@ -243,40 +296,39 @@ if __name__ == '__main__':
 
     files = glob.glob(opts.input)
     all = []
+    sides = []
     for file in files:
         log.info('Processing %s' % file)
         #load data
         data = pf.getdata(file)
-
-        #find the centroid pixel
-        midy, midx = centroidPSFs.fwcentroid(data)
-        midx = int(round(midx, 0))
-        midy = int(round(midy, 0))
-
-        print file, midx, midy
-
-        #take a smaller cutout and normalize the peak pixel to unity
-        cutout = data[midy-opts.cutout:midy+opts.cutout, midx-opts.cutout:midx+opts.cutout]
-        cutout /= np.max(cutout)
-
+        sides.append(data.shape[0])
         #flatten to a 1D array and save the info
-        all.append(np.ravel(cutout))
+        all.append(np.ravel(data))
+
+    if len(set(sides)) > 1:
+        sys.exit('Cannot process inputs of different sizes!')
 
     #convert to numpy array
     all = np.asarray(all)
+    nsamples, npixels = all.shape
 
     #save the mean
     log.info('Saving the mean of the input files')
-    mean = np.mean(all, axis=0).reshape(2*opts.cutout, 2*opts.cutout)
+    mean = np.mean(all, axis=0).reshape(sides[0], sides[0])
     mean /= np.max(mean)
     fileIO.writeFITS(mean, opts.output+'/mean.fits', int=False)
 
     #derive the basis sets and save the files
     log.info('Deriving basis sets')
     print 'Deriving basis sets with PCA'
-    deriveBasisSetsPCA(all, opts.cutout, opts.output, components=opts.basis)
+    deriveBasisSetsPCA(all, sides[0], opts.output, components=opts.basis)
+
+    print 'Deriving basis sets with ICA'
+    deriveBasisSetsICA(all, sides[0], opts.output, components=opts.basis)
 
     log.info('Visualising the derived basis sets')
+    print 'Visualising the derived basis sets'
     visualiseBasisSets(glob.glob(opts.output+'/PCAbasis*.fits'), 'PCABasisSets.pdf', opts.output)
+    visualiseBasisSets(glob.glob(opts.output+'/ICACAbasis*.fits'), 'ICACABasisSets.pdf', opts.output)
 
     log.info('All done...')

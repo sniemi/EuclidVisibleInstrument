@@ -6,15 +6,15 @@
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{times}
-\usepackage[Bjarne]{fncychap}
+\usepackage[Sonny]{fncychap}
 \usepackage{longtable}
 \usepackage{sphinx}
 \usepackage{multirow}
-
+\setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{November 02, 2012}
-\release{0.1}
+\date{December 03, 2012}
+\release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
 \renewcommand{\releasename}{Release}
@@ -3198,6 +3198,231 @@ Reads in the data from a given FITS file.
 
 \end{fulllineitems}
 
+\phantomsection\label{analysis:module-analysis.PSFbasisSets}\index{analysis.PSFbasisSets (module)}
+
+\subsection{Generating PSF Basis Sets}
+\label{analysis:generating-psf-basis-sets}
+This script can be used to derive a basis set for point spread functions.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+Scikit-learn
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{requires}] \leavevmode
+VISsim-Python
+
+\item[{version}] \leavevmode
+0.25
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{deriveBasisSetsICA() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.deriveBasisSetsICA}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{deriveBasisSetsICA}}{\emph{data}, \emph{cut}, \emph{outfolder}, \emph{components=10}}{}
+Derives a basis set from input data using Perform Fast Independent Component Analysis..
+Saves the basis sets to a FITS file for further processing.
+
+\href{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html\#sklearn.decomposition.fastica}{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html\#sklearn.decomposition.fastica}
+
+\end{fulllineitems}
+
+\index{deriveBasisSetsPCA() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.deriveBasisSetsPCA}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{deriveBasisSetsPCA}}{\emph{data}, \emph{cut}, \emph{outfolder}, \emph{components=10}, \emph{whiten=False}}{}
+Derives a basis set from input data using Principal component analysis (PCA).
+Saves the basis sets to a FITS file for further processing.
+
+Information about PCA can be found from the scikit-learn website:
+\href{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html\#sklearn.decomposition.PCA}{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html\#sklearn.decomposition.PCA}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- input data from which the basis set are derived from. The input data must be an array of arrays.
+Each array should describe an independent data set that has been flatted to 1D.
+
+\item {} 
+\textbf{cut} (\emph{int}) -- size of the cutout region that has been used
+
+\item {} 
+\textbf{outfolder} (\emph{str}) -- name of the output folder e.g. `output'
+
+\item {} 
+\textbf{components} (\emph{int}) -- the number of basis set function components to derive
+
+\item {} 
+\textbf{whiten} (\emph{bool}) -- When True (False by default) the {\color{red}\bfseries{}components\_} vectors are divided by n\_samples times
+singular values to ensure uncorrelated outputs with unit component-wise variances.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+PCA components
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.deriveBasisSetsRandomizedPCA}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{deriveBasisSetsRandomizedPCA}}{\emph{data}, \emph{cut}, \emph{outfolder}, \emph{components=10}, \emph{whiten=False}}{}
+Derives a basis set from input data using Randomized Principal component analysis (PCA).
+Saves the basis sets to a FITS file for further processing.
+
+Information about PCA can be found from the scikit-learn website:
+\href{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html\#sklearn.decomposition.RandomizedPCA}{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html\#sklearn.decomposition.RandomizedPCA}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{data} (\emph{ndarray}) -- input data from which the basis set are derived from. The input data must be an array of arrays.
+Each array should describe an independent data set that has been flatted to 1D.
+
+\item {} 
+\textbf{cut} (\emph{int}) -- size of the cutout region that has been used
+
+\item {} 
+\textbf{outfolder} (\emph{str}) -- name of the output folder e.g. `output'
+
+\item {} 
+\textbf{components} (\emph{int}) -- the number of basis set function components to derive
+
+\item {} 
+\textbf{whiten} (\emph{bool}) -- When True (False by default) the {\color{red}\bfseries{}components\_} vectors are divided by n\_samples times
+singular values to ensure uncorrelated outputs with unit component-wise variances.
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+Randomized PCA components
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{processArgs() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.processArgs}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{processArgs}}{\emph{printHelp=False}}{}
+Processes command line arguments.
+
+\end{fulllineitems}
+
+\index{visualiseBasisSets() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.visualiseBasisSets}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{visualiseBasisSets}}{\emph{files}, \emph{output}, \emph{outputfolder}}{}
+Generate visualisation of the basis sets.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{files} -- a list of file names that should be visualised
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\phantomsection\label{analysis:module-analysis.testCTIcorrection}\index{analysis.testCTIcorrection (module)}
+
+\subsection{Testing the CTI Correction Algorithm}
+\label{analysis:testing-the-cti-correction-algorithm}
+This script can be used to test the CTI correction algorithm performance.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{version}] \leavevmode
+0.1
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{plotResults() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.testCTIcorrection.plotResults}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{plotResults}}{\emph{results}}{}
+Plot the CTI correction algorithm results.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{results} -- CTI test results
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testCTIcorrection() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.testCTIcorrection.testCTIcorrection}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{testCTIcorrection}}{\emph{log}, \emph{files}, \emph{sigma=0.75}, \emph{iterations=4}, \emph{xcen=1900}, \emph{ycen=1900}, \emph{side=20}}{}
+Calculates PSF properties such as ellipticity and size from data without CTI and from
+reduced data.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- python logger instance
+
+\item {} 
+\textbf{files} (\emph{list}) -- a list of files to be processed
+
+\item {} 
+\textbf{sigma} (\emph{float}) -- size of the Gaussian weighting function
+
+\item {} 
+\textbf{iterations} (\emph{int}) -- the number of iterations for the moment based shape estimator
+
+\item {} 
+\textbf{xcen} (\emph{int}) -- x-coordinate of the object centre
+
+\item {} 
+\textbf{ycen} (\emph{int}) -- y-coordinate of the object centre
+
+\item {} 
+\textbf{side} (\emph{int}) -- size of the cutout around the centre (+/- side)
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+ellipticity and size
+
+\item[{Return type}] \leavevmode
+dict
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 
 The \emph{data} subfolder contains the supporting data, such as cosmic ray distributions, cosmetics maps,
 flat fielding files, PSFs, and an example configuration file.
@@ -3280,9 +3505,11 @@ and an average background, but without any radiation damage to the CCD.}\end{fig
 \item {\texttt{analysis.biasCalibration}}, \pageref{reduction:module-analysis.biasCalibration}
 \item {\texttt{analysis.ETC}}, \pageref{ETC:module-analysis.ETC}
 \item {\texttt{analysis.FlatfieldCalibration}}, \pageref{reduction:module-analysis.FlatfieldCalibration}
+\item {\texttt{analysis.PSFbasisSets}}, \pageref{analysis:module-analysis.PSFbasisSets}
 \item {\texttt{analysis.PSFproperties}}, \pageref{analysis:module-analysis.PSFproperties}
 \item {\texttt{analysis.shape}}, \pageref{analysis:module-analysis.shape}
 \item {\texttt{analysis.sourceFinder}}, \pageref{analysis:module-analysis.sourceFinder}
+\item {\texttt{analysis.testCTIcorrection}}, \pageref{analysis:module-analysis.testCTIcorrection}
 \indexspace
 \bigletter{p}
 \item {\texttt{postproc.postprocessing}}, \pageref{postproc:module-postproc.postprocessing}

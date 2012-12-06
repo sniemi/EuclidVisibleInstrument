@@ -3,23 +3,44 @@
 \BOOKMARK [0][-]{chapter.2}{Instrument Model}{}% 3
 \BOOKMARK [1][-]{section.2.1}{VIS Instrument Model}{chapter.2}% 4
 \BOOKMARK [1][-]{section.2.2}{Instrument Characteristics}{chapter.2}% 5
-\BOOKMARK [0][-]{chapter.3}{Exposure Times}{}% 6
-\BOOKMARK [1][-]{section.3.1}{Exposure Time Calculator}{chapter.3}% 7
-\BOOKMARK [0][-]{chapter.4}{Creating Object Catalogs}{}% 8
-\BOOKMARK [1][-]{section.4.1}{Generating Object Catalogue}{chapter.4}% 9
-\BOOKMARK [0][-]{chapter.5}{Creating Simulated Mock Images}{}% 10
-\BOOKMARK [1][-]{section.5.1}{Simulation tools}{chapter.5}% 11
-\BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 12
-\BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 13
-\BOOKMARK [1][-]{section.6.2}{VIS data reduction studies}{chapter.6}% 14
-\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 15
-\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 16
-\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 17
-\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 18
-\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 19
-\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 20
-\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 21
-\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 22
-\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 23
-\BOOKMARK [0][-]{section*.135}{Python Module Index}{}% 24
-\BOOKMARK [0][-]{section*.136}{Index}{}% 25
+\BOOKMARK [2][-]{subsection.2.2.1}{Postprocessing Tools}{section.2.2}% 6
+\BOOKMARK [3][-]{subsubsection*.8}{Inserting instrument characteristics}{subsection.2.2.1}% 7
+\BOOKMARK [3][-]{subsubsection*.22}{Generating a mosaic}{subsection.2.2.1}% 8
+\BOOKMARK [0][-]{chapter.3}{Exposure Times}{}% 9
+\BOOKMARK [1][-]{section.3.1}{Exposure Time Calculator}{chapter.3}% 10
+\BOOKMARK [2][-]{subsection.3.1.1}{Calculating Exposure Times and Limiting Magnitude}{section.3.1}% 11
+\BOOKMARK [0][-]{chapter.4}{Creating Object Catalogs}{}% 12
+\BOOKMARK [1][-]{section.4.1}{Generating Object Catalogue}{chapter.4}% 13
+\BOOKMARK [0][-]{chapter.5}{Creating Simulated Mock Images}{}% 14
+\BOOKMARK [1][-]{section.5.1}{Simulation tools}{chapter.5}% 15
+\BOOKMARK [2][-]{subsection.5.1.1}{The Euclid Visible Instrument Image Simulator}{section.5.1}% 16
+\BOOKMARK [3][-]{subsubsection*.38}{Dependencies}{subsection.5.1.1}% 17
+\BOOKMARK [3][-]{subsubsection*.39}{Testing}{subsection.5.1.1}% 18
+\BOOKMARK [3][-]{subsubsection*.40}{Benchmarking}{subsection.5.1.1}% 19
+\BOOKMARK [3][-]{subsubsection*.41}{Change Log}{subsection.5.1.1}% 20
+\BOOKMARK [3][-]{subsubsection*.42}{Future Work}{subsection.5.1.1}% 21
+\BOOKMARK [3][-]{subsubsection*.43}{Contact Information}{subsection.5.1.1}% 22
+\BOOKMARK [2][-]{subsection.5.1.2}{Generating Mock Objects with IRAF}{section.5.1}% 23
+\BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 24
+\BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 25
+\BOOKMARK [2][-]{subsection.6.1.1}{VIS Data Reduction and Processing}{section.6.1}% 26
+\BOOKMARK [1][-]{section.6.2}{VIS data reduction studies}{chapter.6}% 27
+\BOOKMARK [2][-]{subsection.6.2.1}{Bias Calibration}{section.6.2}% 28
+\BOOKMARK [2][-]{subsection.6.2.2}{Flat Field Calibration}{section.6.2}% 29
+\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 30
+\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 31
+\BOOKMARK [2][-]{subsection.7.1.1}{Object finding and measuring ellipticity}{section.7.1}% 32
+\BOOKMARK [2][-]{subsection.7.1.2}{Measuring a shape of an object}{section.7.1}% 33
+\BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 34
+\BOOKMARK [2][-]{subsection.7.1.4}{Properties of the Point Spread Function}{section.7.1}% 35
+\BOOKMARK [2][-]{subsection.7.1.5}{Generating PSF Basis Sets}{section.7.1}% 36
+\BOOKMARK [2][-]{subsection.7.1.6}{Testing the CTI Correction Algorithm}{section.7.1}% 37
+\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 38
+\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 39
+\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 40
+\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 41
+\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 42
+\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 43
+\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 44
+\BOOKMARK [0][-]{section*.144}{Python Module Index}{}% 45
+\BOOKMARK [0][-]{section*.145}{Index}{}% 46

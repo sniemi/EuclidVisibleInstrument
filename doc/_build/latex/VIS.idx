@@ -71,7 +71,7 @@
 \indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{reduction.reduceVISdata (module)|hyperpage}{33}
-\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{33}
+\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{34}
 \indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{34}
 \indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{34}
 \indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{34}
@@ -101,7 +101,7 @@
 \indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{42}
 \indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{42}
 \indexentry{analysis.shape (module)|hyperpage}{42}
-\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{42}
+\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{43}
 \indexentry{Gaussian2D() (analysis.shape.shapeMeasurement method)|hyperpage}{43}
 \indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{43}
 \indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{43}
@@ -128,8 +128,8 @@
 \indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{analysis.PSFproperties (module)|hyperpage}{47}
@@ -137,6 +137,15 @@
 \indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{47}
 \indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{47}
 \indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{47}
-\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{47}
-\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{47}
+\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{48}
+\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{48}
 \indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{48}
+\indexentry{analysis.PSFbasisSets (module)|hyperpage}{48}
+\indexentry{deriveBasisSetsICA() (in module analysis.PSFbasisSets)|hyperpage}{48}
+\indexentry{deriveBasisSetsPCA() (in module analysis.PSFbasisSets)|hyperpage}{48}
+\indexentry{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)|hyperpage}{49}
+\indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{49}
+\indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{49}
+\indexentry{analysis.testCTIcorrection (module)|hyperpage}{49}
+\indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{50}
+\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{50}

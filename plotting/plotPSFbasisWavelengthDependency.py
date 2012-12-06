@@ -201,9 +201,9 @@ if __name__ == '__main__':
     visualiseWavelengthDependency2D(np.log10(d1), np.log10(d2), np.log10(d3), 'MeanPSFComparison2D.pdf')
     visualiseWavelengthDependency3D(d1, d2, d3, 'MeanPSFComparison3D.pdf')
 
-    d1 = pf.getdata('PSF400nm/PCAbasis001.fits')
-    d2 = pf.getdata('PSF550nm/PCAbasis001.fits')
-    d3 = pf.getdata('PSF800nm/PCAbasis001.fits')
+    d1 = pf.getdata('PSF400nm/PCAbasis003.fits')
+    d2 = pf.getdata('PSF550nm/PCAbasis003.fits')
+    d3 = pf.getdata('PSF800nm/PCAbasis003.fits')
     visualiseWavelengthDependency2D(d1, d2, d3, 'PCA1PSFComparison2D.pdf', logscale=False)
     visualiseWavelengthDependency3D(d1, d2, d3, 'PCA1PSFComparison3D.pdf', PSF=False)
 

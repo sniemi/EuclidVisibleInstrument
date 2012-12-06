@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>VIS data analysis tools &mdash; VIS 0.1 documentation</title>
+    <title>VIS data analysis tools &mdash; VIS 1.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1',
+        VERSION:     '1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 0.1 documentation" href="index.html" />
+    <link rel="top" title="VIS 1.0 documentation" href="index.html" />
     <link rel="prev" title="Data reduction tools" href="reduction.html" /> 
   </head>
   <body>
@@ -60,6 +60,8 @@
 <li><a class="reference internal" href="#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
 <li><a class="reference internal" href="#source-finding">Source finding</a></li>
 <li><a class="reference internal" href="#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
+<li><a class="reference internal" href="#generating-psf-basis-sets">Generating PSF Basis Sets</a></li>
+<li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
 </ul>
 </li>
 </ul>
@@ -67,11 +69,6 @@
   <h4>Previous topic</h4>
   <p class="topless"><a href="reduction.html"
                         title="previous chapter">Data reduction tools</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/analysis.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -744,6 +741,190 @@ to an aperture of a given radius.</p>
 </dd></dl>
 
 </div>
+<span class="target" id="module-analysis.PSFbasisSets"></span><div class="section" id="generating-psf-basis-sets">
+<h2>Generating PSF Basis Sets<a class="headerlink" href="#generating-psf-basis-sets" title="Permalink to this headline">¶</a></h2>
+<p>This script can be used to derive a basis set for point spread functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">Scikit-learn</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.25</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.PSFbasisSets.deriveBasisSetsICA">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">deriveBasisSetsICA</tt><big>(</big><em>data</em>, <em>cut</em>, <em>outfolder</em>, <em>components=10</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.deriveBasisSetsICA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derives a basis set from input data using Perform Fast Independent Component Analysis..
+Saves the basis sets to a FITS file for further processing.</p>
+<p><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html#sklearn.decomposition.fastica">http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html#sklearn.decomposition.fastica</a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFbasisSets.deriveBasisSetsPCA">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">deriveBasisSetsPCA</tt><big>(</big><em>data</em>, <em>cut</em>, <em>outfolder</em>, <em>components=10</em>, <em>whiten=False</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.deriveBasisSetsPCA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derives a basis set from input data using Principal component analysis (PCA).
+Saves the basis sets to a FITS file for further processing.</p>
+<p>Information about PCA can be found from the scikit-learn website:
+<a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA">http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html#sklearn.decomposition.PCA</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; input data from which the basis set are derived from. The input data must be an array of arrays.
+Each array should describe an independent data set that has been flatted to 1D.</li>
+<li><strong>cut</strong> (<em>int</em>) &#8211; size of the cutout region that has been used</li>
+<li><strong>outfolder</strong> (<em>str</em>) &#8211; name of the output folder e.g. &#8216;output&#8217;</li>
+<li><strong>components</strong> (<em>int</em>) &#8211; the number of basis set function components to derive</li>
+<li><strong>whiten</strong> (<em>bool</em>) &#8211; When True (False by default) the <a href="#id1"><span class="problematic" id="id2">components_</span></a> vectors are divided by n_samples times
+singular values to ensure uncorrelated outputs with unit component-wise variances.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">PCA components</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFbasisSets.deriveBasisSetsRandomizedPCA">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">deriveBasisSetsRandomizedPCA</tt><big>(</big><em>data</em>, <em>cut</em>, <em>outfolder</em>, <em>components=10</em>, <em>whiten=False</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.deriveBasisSetsRandomizedPCA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derives a basis set from input data using Randomized Principal component analysis (PCA).
+Saves the basis sets to a FITS file for further processing.</p>
+<p>Information about PCA can be found from the scikit-learn website:
+<a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html#sklearn.decomposition.RandomizedPCA">http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.RandomizedPCA.html#sklearn.decomposition.RandomizedPCA</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; input data from which the basis set are derived from. The input data must be an array of arrays.
+Each array should describe an independent data set that has been flatted to 1D.</li>
+<li><strong>cut</strong> (<em>int</em>) &#8211; size of the cutout region that has been used</li>
+<li><strong>outfolder</strong> (<em>str</em>) &#8211; name of the output folder e.g. &#8216;output&#8217;</li>
+<li><strong>components</strong> (<em>int</em>) &#8211; the number of basis set function components to derive</li>
+<li><strong>whiten</strong> (<em>bool</em>) &#8211; When True (False by default) the <a href="#id3"><span class="problematic" id="id4">components_</span></a> vectors are divided by n_samples times
+singular values to ensure uncorrelated outputs with unit component-wise variances.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Randomized PCA components</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFbasisSets.processArgs">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">processArgs</tt><big>(</big><em>printHelp=False</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.processArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes command line arguments.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFbasisSets.visualiseBasisSets">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">visualiseBasisSets</tt><big>(</big><em>files</em>, <em>output</em>, <em>outputfolder</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.visualiseBasisSets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate visualisation of the basis sets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>files</strong> &#8211; a list of file names that should be visualised</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.testCTIcorrection"></span><div class="section" id="testing-the-cti-correction-algorithm">
+<h2>Testing the CTI Correction Algorithm<a class="headerlink" href="#testing-the-cti-correction-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>This script can be used to test the CTI correction algorithm performance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.testCTIcorrection.plotResults">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the CTI correction algorithm results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; CTI test results</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.testCTIcorrection.testCTIcorrection">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">testCTIcorrection</tt><big>(</big><em>log</em>, <em>files</em>, <em>sigma=0.75</em>, <em>iterations=4</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=20</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.testCTIcorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates PSF properties such as ellipticity and size from data without CTI and from
+reduced data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; python logger instance</li>
+<li><strong>files</strong> (<em>list</em>) &#8211; a list of files to be processed</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; size of the Gaussian weighting function</li>
+<li><strong>iterations</strong> (<em>int</em>) &#8211; the number of iterations for the moment based shape estimator</li>
+<li><strong>xcen</strong> (<em>int</em>) &#8211; x-coordinate of the object centre</li>
+<li><strong>ycen</strong> (<em>int</em>) &#8211; y-coordinate of the object centre</li>
+<li><strong>side</strong> (<em>int</em>) &#8211; size of the cutout around the centre (+/- side)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ellipticity and size</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -771,7 +952,6 @@ to an aperture of a given radius.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2012, Sami-Matias Niemi.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

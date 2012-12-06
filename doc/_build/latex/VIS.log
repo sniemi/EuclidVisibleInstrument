@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.10.15)  2 NOV 2012 12:12
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2012.10.15)  3 DEC 2012 16:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -288,24 +288,22 @@ Package: fncychap 2007/07/30 v1.34 LaTeX package (Revised chapters)
 \py=\skip47
 \pyy=\skip48
 \pxx=\skip49
-\c@AlphaCnt=\count89
-\c@AlphaDecCnt=\count90
 ) (/usr/local/texlive/2012/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2004/02/01 v4.11 Multi-page Table package (DPC)
 \LTleft=\skip50
 \LTright=\skip51
 \LTpre=\skip52
 \LTpost=\skip53
-\LTchunksize=\count91
+\LTchunksize=\count89
 \LTcapwidth=\dimen104
 \LT@head=\box26
 \LT@firsthead=\box27
 \LT@foot=\box28
 \LT@lastfoot=\box29
-\LT@cols=\count92
-\LT@rows=\count93
-\c@LT@tables=\count94
-\c@LT@chunks=\count95
+\LT@cols=\count90
+\LT@rows=\count91
+\c@LT@tables=\count92
+\c@LT@chunks=\count93
 \LT@p@ftn=\toks16
 )
 (./sphinx.sty
@@ -511,7 +509,7 @@ Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \extratabsurround=\skip65
 \backup@length=\skip66
 )
-\TY@count=\count96
+\TY@count=\count94
 \TY@linewidth=\dimen113
 \tymin=\dimen114
 \tymax=\dimen115
@@ -536,13 +534,13 @@ Package: amsbsy 1999/11/29 v1.2d
 (/usr/local/texlive/2012/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 1999/12/14 v2.01 operator names
 )
-\inf@bad=\count97
+\inf@bad=\count95
 LaTeX Info: Redefining \frac on input line 211.
-\uproot@=\count98
-\leftroot@=\count99
+\uproot@=\count96
+\leftroot@=\count97
 LaTeX Info: Redefining \overline on input line 307.
-\classnum@=\count100
-\DOTSCASE@=\count101
+\classnum@=\count98
+\DOTSCASE@=\count99
 LaTeX Info: Redefining \ldots on input line 379.
 LaTeX Info: Redefining \dots on input line 382.
 LaTeX Info: Redefining \cdots on input line 467.
@@ -551,15 +549,15 @@ LaTeX Info: Redefining \cdots on input line 467.
 \big@size=\dimen119
 LaTeX Font Info:    Redeclaring font encoding OML on input line 567.
 LaTeX Font Info:    Redeclaring font encoding OMS on input line 568.
-\macc@depth=\count102
-\c@MaxMatrixCols=\count103
+\macc@depth=\count100
+\c@MaxMatrixCols=\count101
 \dotsspace@=\muskip10
-\c@parentequation=\count104
-\dspbrk@lvl=\count105
+\c@parentequation=\count102
+\dspbrk@lvl=\count103
 \tag@help=\toks24
-\row@=\count106
-\column@=\count107
-\maxfields@=\count108
+\row@=\count104
+\column@=\count105
+\maxfields@=\count106
 \andhelp@=\toks25
 \eqnshift@=\dimen120
 \alignsep@=\dimen121
@@ -605,7 +603,7 @@ Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 (/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
-\Gread@gobject=\count109
+\Gread@gobject=\count107
 ))
 (/usr/local/texlive/2012/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2008/02/07
@@ -616,11 +614,11 @@ Style option: `fancyvrb' v2.7a, with DG/SPQR fixes, and firstline=lastline fix
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks28
 )
-\FV@CodeLineNo=\count110
+\FV@CodeLineNo=\count108
 \FV@InFile=\read2
 \FV@TabBox=\box35
-\c@FancyVerbLine=\count111
-\FV@StepNumber=\count112
+\c@FancyVerbLine=\count109
+\FV@StepNumber=\count110
 \FV@OutFile=\write4
 )
 (/usr/local/texlive/2012/texmf-dist/tex/latex/threeparttable/threeparttable.sty
@@ -634,7 +632,7 @@ Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 (/usr/local/texlive/2012/texmf-dist/tex/latex/wrapfig/wrapfig.sty
 \wrapoverhang=\dimen131
 \WF@size=\dimen132
-\c@WF@wrappedlines=\count113
+\c@WF@wrappedlines=\count111
 \WF@box=\box38
 \WF@everypar=\toks29
 Package: wrapfig 2003/01/31  v 3.6
@@ -725,15 +723,15 @@ Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
 Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
 \@linkdim=\dimen136
-\Hy@linkcounter=\count114
-\Hy@pagecounter=\count115
+\Hy@linkcounter=\count112
+\Hy@pagecounter=\count113
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2012/10/13 v6.83j Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
 ... no UTF-8 mapping file for font encoding PD1
 )
-\Hy@SavedSpaceFactor=\count116
+\Hy@SavedSpaceFactor=\count114
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
@@ -747,7 +745,7 @@ Package hyperref Info: Plain pages OFF on input line 4319.
 Package hyperref Info: Backreferencing OFF on input line 4324.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4549.
-\c@Hy@tempcnt=\count117
+\c@Hy@tempcnt=\count115
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip11
@@ -755,7 +753,7 @@ Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4902.
 \XeTeXLinkMargin=\dimen137
-\Fld@menulength=\count118
+\Fld@menulength=\count116
 \Field@Width=\dimen138
 \Fld@charsize=\dimen139
 Package hyperref Info: Hyper figures OFF on input line 6149.
@@ -767,17 +765,17 @@ Package hyperref Info: Link coloring with OCG OFF on input line 6174.
 Package hyperref Info: PDF/A mode OFF on input line 6179.
 LaTeX Info: Redefining \ref on input line 6219.
 LaTeX Info: Redefining \pageref on input line 6223.
-\Hy@abspage=\count119
-\c@Item=\count120
-\c@Hfootnote=\count121
+\Hy@abspage=\count117
+\c@Item=\count118
+\c@Hfootnote=\count119
 )
 
 Package hyperref Message: Driver (autodetected): hpdftex.
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/hyperref/hpdftex.def
 File: hpdftex.def 2012/10/13 v6.83j Hyperref driver for pdfTeX
-\Fld@listcount=\count122
-\c@bookmark@seq@number=\count123
+\Fld@listcount=\count120
+\c@bookmark@seq@number=\count121
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
@@ -830,16 +828,16 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 )
 (/usr/local/texlive/2012/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count124
+\scratchcounter=\count122
 \scratchdimen=\dimen141
 \scratchbox=\box40
-\nofMPsegments=\count125
-\nofMParguments=\count126
+\nofMPsegments=\count123
+\nofMParguments=\count124
 \everyMPshowfont=\toks30
-\MPscratchCnt=\count127
+\MPscratchCnt=\count125
 \MPscratchDim=\dimen142
-\MPnumerator=\count128
-\makeMPintoPDFobject=\count129
+\MPnumerator=\count126
+\makeMPintoPDFobject=\count127
 \everyMPtoPDFconversion=\toks31
 ) (/usr/local/texlive/2012/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
@@ -865,7 +863,7 @@ Package: nameref 2012/07/31 v2.42 Cross-referencing by name of section
 (/usr/local/texlive/2012/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count130
+\c@section@level=\count128
 )
 LaTeX Info: Redefining \ref on input line 110.
 LaTeX Info: Redefining \pageref on input line 110.
@@ -901,23 +899,21 @@ LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <20.74> not available
 ] (./VIS.toc
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <12> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 2.
-)
-\tf@toc=\write7
-\openout7 = `VIS.toc'.
-
-
-Adding blank page after the table of contents.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 113.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 30.
 pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has 
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.113 \tableofcontents
-                       [1
+l.30 ...t Field Calibration}{38}{subsection.6.2.2}
+                                                   [1
 
-]pdfTeX warning (ext4): destination with the same identifier (name{page.ii}) ha
-s been already used, duplicate ignored
+])
+\tf@toc=\write7
+\openout7 = `VIS.toc'.
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.ii}) has
+ been already used, duplicate ignored
 <to be read again> 
                    \relax 
 l.113 \tableofcontents
@@ -994,13 +990,13 @@ Underfull \hbox (badness 6542) in paragraph at lines 642--643
 12 ) -- whether to scale the data us-ing
  []
 
-[10]
+[10] [11]
 Underfull \hbox (badness 6542) in paragraph at lines 764--765
 []\T1/ptm/b/n/12 unsigned16bit \T1/ptm/m/n/12 (\T1/ptm/m/it/12 bool\T1/ptm/m/n/
 12 ) -- whether to scale the data us-ing
  []
 
-[11] [12]
+[12]
 Chapter 3.
 
 Underfull \hbox (badness 10000) in paragraph at lines 818--818
@@ -1130,7 +1126,7 @@ Overfull \hbox (106.99791pt too wide) in paragraph at lines 1077--1077
 \T1/ptm/m/it/12 out='starsSameMag.dat'\T1/pcr/m/n/12 ) 
  []
 
-<Distributions.pdf, id=268, 578.16pt x 433.62pt>
+<Distributions.pdf, id=370, 578.16pt x 433.62pt>
 File: Distributions.pdf Graphic file (type pdf)
  <use Distributions.pdf>
 Package pdftex.def Info: Distributions.pdf used on input line 1086.
@@ -1171,7 +1167,7 @@ Underfull \hbox (badness 6542) in paragraph at lines 1816--1817
 12 ) -- whether to scale the data us-ing
  []
 
-[29] [30] <simu.pdf, id=452, 2304.61pt x 1050.92625pt>
+[29] [30] <simu.pdf, id=546, 2304.61pt x 1050.92625pt>
 File: simu.pdf Graphic file (type pdf)
  <use simu.pdf>
 Package pdftex.def Info: simu.pdf used on input line 1961.
@@ -1625,7 +1621,7 @@ Overfull \hbox (31.57826pt too wide) in paragraph at lines 2449--2449
 Chapter 7.
 [41
 
-] [42] [43] [44] [45] [46]
+] [42] [43] [44] [45] [46] [47]
 Underfull \hbox (badness 10000) in paragraph at lines 3181--3181
 []\T1/ptm/m/it/12 file='data/psf12x.fits'\T1/ptm/m/n/12 , \T1/ptm/m/it/12 ra-
  []
@@ -1636,59 +1632,138 @@ Underfull \hbox (badness 10000) in paragraph at lines 3190--3190
 ,
  []
 
-[47] [48]
-Chapter 8.
-[49
 
-] [50
+Overfull \hbox (122.55539pt too wide) in paragraph at lines 3242--3243
+[][][]\T1/ptm/m/n/12 http://scikit-learn.org/stable/modules/generated/sklearn.d
+ecomposition.fastica.html#sklearn.decomposition.fastica[][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3249--3249
+[]\T1/ptm/m/it/12 data\T1/ptm/m/n/12 , \T1/ptm/m/it/12 cut\T1/ptm/m/n/12 , \T1/
+ptm/m/it/12 out-folder\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3249--3249
+\T1/ptm/m/it/12 com-po-nents=10\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (48.15741pt too wide) in paragraph at lines 3253--3255
+\T1/ptm/m/n/12 learn.org/stable/modules/generated/sklearn.decomposition.PCA.htm
+l#sklearn.decomposition.PCA[][] 
+ []
+
+[48]
+Underfull \hbox (badness 10000) in paragraph at lines 3286--3286
+[]\T1/ptm/m/it/12 data\T1/ptm/m/n/12 , \T1/ptm/m/it/12 cut\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3286--3286
+\T1/ptm/m/it/12 out-folder\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3286--3286
+\T1/ptm/m/it/12 com-po-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3286--3286
+\T1/ptm/m/it/12 nents=10\T1/ptm/m/n/12 ,
+ []
+
+
+Overfull \hbox (16.67389pt too wide) in paragraph at lines 3286--3286
+\T1/ptm/m/it/12 whiten=False\T1/pcr/m/n/12 ) 
+ []
+
+
+Overfull \hbox (169.47629pt too wide) in paragraph at lines 3290--3292
+\T1/ptm/m/n/12 learn.org/stable/modules/generated/sklearn.decomposition.Randomi
+zedPCA.html#sklearn.decomposition.RandomizedPCA[][] 
+ []
+
+[49]
+Underfull \hbox (badness 10000) in paragraph at lines 3388--3388
+[]\T1/ptm/m/it/12 log\T1/ptm/m/n/12 , \T1/ptm/m/it/12 files\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3388--3388
+\T1/ptm/m/it/12 sigma=0.75\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3388--3388
+\T1/ptm/m/it/12 it-er-a-tions=4\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3388--3388
+\T1/ptm/m/it/12 xcen=1900\T1/ptm/m/n/12 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3388--3388
+\T1/ptm/m/it/12 ycen=1900\T1/ptm/m/n/12 ,
+ []
+
+[50]
+Chapter 8.
+[51
+
+] [52
 
 ]
 Chapter 9.
-[51] [52
+[53] [54
 
 ]
 Chapter 10.
-<Magnitudes15.pdf, id=628, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=738, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 3249.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 3474.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 3249.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 3474.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- <magnitudes.pdf, id=629, 578.16pt x 433.62pt>
+ <magnitudes.pdf, id=739, 578.16pt x 433.62pt>
 File: magnitudes.pdf Graphic file (type pdf)
 
 <use magnitudes.pdf>
-Package pdftex.def Info: magnitudes.pdf used on input line 3256.
+Package pdftex.def Info: magnitudes.pdf used on input line 3481.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: magnitudes.pdf Graphic file (type pdf)
  <use magnitudes.pdf>
-Package pdftex.def Info: magnitudes.pdf used on input line 3256.
+Package pdftex.def Info: magnitudes.pdf used on input line 3481.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [53] [54 <./Magnitudes15.pdf>]
-[55 <./magnitudes.pdf>] [56
+ [55] [56 <./Magnitudes15.pdf>]
+[57 <./magnitudes.pdf>] [58
 
 ]
 Chapter 11.
-[57] [58
+[59] [60
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 3282--3283
+Underfull \hbox (badness 10000) in paragraph at lines 3507--3508
 []\T1/pcr/m/n/12 analysis.FlatfieldCalibration\T1/ptm/m/n/12 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3297--3298
+Underfull \hbox (badness 10000) in paragraph at lines 3524--3525
 []\T1/pcr/m/n/12 sources.createObjectCatalogue\T1/ptm/m/n/12 ,
  []
 
-[59
+[61
 
 
-] (./VIS.ind [60
+] (./VIS.ind [62
 
 
 ]
@@ -1757,28 +1832,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 11--12
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 20--21
-[]\T1/ptm/m/n/12 applyBias() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 20--21
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 21--22
-[]\T1/ptm/m/n/12 applyBleeding() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 21--22
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 22--23
-[]\T1/ptm/m/n/12 applyCosmetics() (sim-u-la-
+[]\T1/ptm/m/n/12 applyBias() (sim-u-la-
  []
 
 
@@ -1788,17 +1843,17 @@ Underfull \hbox (badness 7151) in paragraph at lines 22--23
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 23--24
-[]\T1/ptm/m/n/12 applyCTICorrection() (re-duc-
+[]\T1/ptm/m/n/12 applyBleeding() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 23--24
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+Underfull \hbox (badness 7151) in paragraph at lines 23--24
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 24--25
-[]\T1/ptm/m/n/12 applyFlatfield() (sim-u-la-
+[]\T1/ptm/m/n/12 applyCosmetics() (sim-u-la-
  []
 
 
@@ -1808,17 +1863,17 @@ Underfull \hbox (badness 7151) in paragraph at lines 24--25
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 25--26
-[]\T1/ptm/m/n/12 applyLinearCorrection() (post-
+[]\T1/ptm/m/n/12 applyCTICorrection() (re-duc-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 25--26
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 26--27
-[]\T1/ptm/m/n/12 applyNoise() (sim-u-la-
+[]\T1/ptm/m/n/12 applyFlatfield() (sim-u-la-
  []
 
 
@@ -1828,27 +1883,27 @@ Underfull \hbox (badness 7151) in paragraph at lines 26--27
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 27--28
-[]\T1/ptm/m/n/12 applyNonlinearity() (sim-u-la-
+[]\T1/ptm/m/n/12 applyLinearCorrection() (post-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 27--28
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
-[]\T1/ptm/m/n/12 applyRadiationDamage() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 28--29
+Underfull \hbox (badness 10000) in paragraph at lines 27--28
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 28--29
+[]\T1/ptm/m/n/12 applyNoise() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 28--29
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 29--30
-[]\T1/ptm/m/n/12 applyRadiationDamage() (sim-u-la-
+[]\T1/ptm/m/n/12 applyNonlinearity() (sim-u-la-
  []
 
 
@@ -1858,7 +1913,7 @@ Underfull \hbox (badness 7151) in paragraph at lines 29--30
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 30--31
-[]\T1/ptm/m/n/12 applyReadoutNoise() (post-
+[]\T1/ptm/m/n/12 applyRadiationDamage() (post-
  []
 
 
@@ -1868,7 +1923,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 30--31
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 31--32
-[]\T1/ptm/m/n/12 applyReadoutNoise() (sim-u-la-
+[]\T1/ptm/m/n/12 applyRadiationDamage() (sim-u-la-
  []
 
 
@@ -1877,596 +1932,646 @@ Underfull \hbox (badness 7151) in paragraph at lines 31--32
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 37--38
+Underfull \hbox (badness 10000) in paragraph at lines 32--33
+[]\T1/ptm/m/n/12 applyReadoutNoise() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 32--33
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 33--34
+[]\T1/ptm/m/n/12 applyReadoutNoise() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 33--34
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+[63
+
+]
+Underfull \hbox (badness 10000) in paragraph at lines 39--40
 []\T1/ptm/m/n/12 circular2DGaussian() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 37--38
+Underfull \hbox (badness 10000) in paragraph at lines 39--40
 \T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 38--39
+Underfull \hbox (badness 10000) in paragraph at lines 40--41
 []\T1/ptm/m/n/12 cleanSample() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 38--39
+Underfull \hbox (badness 10000) in paragraph at lines 40--41
 \T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-[61
-
-]
-Underfull \hbox (badness 10000) in paragraph at lines 39--40
-[]\T1/ptm/m/n/12 compressAndRemoveFile() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 39--40
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 41--42
-[]\T1/ptm/m/n/12 cosmicRayIntercepts() (sim-u-la-
+[]\T1/ptm/m/n/12 compressAndRemoveFile() (post-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 41--42
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 42--43
-[]\T1/ptm/m/n/12 createGalaxylist() (sim-u-la-
- []
-
-
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 42--43
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 43--44
-[]\T1/ptm/m/n/12 createStarlist() (sim-u-la-
- []
-
-
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 43--44
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 44--45
-[]\T1/ptm/m/n/12 cutoutRegion() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 44--45
+Underfull \hbox (badness 10000) in paragraph at lines 41--42
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 49--50
-[]\T1/ptm/m/n/12 discretisetoADUs() (post-
+Underfull \hbox (badness 10000) in paragraph at lines 43--44
+[]\T1/ptm/m/n/12 cosmicRayIntercepts() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 49--50
+Underfull \hbox (badness 7151) in paragraph at lines 43--44
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 44--45
+[]\T1/ptm/m/n/12 createGalaxylist() (sim-u-la-
+ []
+
+
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 44--45
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 45--46
+[]\T1/ptm/m/n/12 createStarlist() (sim-u-la-
+ []
+
+
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 45--46
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
+[]\T1/ptm/m/n/12 cutoutRegion() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--47
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 50--51
-[]\T1/ptm/m/n/12 doAll() (anal-y-sis.analyse.analyseVISdata
+[]\T1/ptm/m/n/12 deriveBasisSetsICA() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 51--53
-[]\T1/ptm/m/n/12 doAperturePhotometry() (anal-y-
+Underfull \hbox (badness 10000) in paragraph at lines 51--52
+[]\T1/ptm/m/n/12 deriveBasisSetsPCA() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 51--53
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+Underfull \hbox (badness 10000) in paragraph at lines 54--55
+[]\T1/ptm/m/n/12 discretisetoADUs() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 53--55
-[]\T1/ptm/m/n/12 drawFromCumulativeDistributionFunction()
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 53--55
-\T1/ptm/m/n/12 (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 53--55
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 58--59
-[]\T1/ptm/m/n/12 electrons2ADU() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 58--59
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 59--60
-[]\T1/ptm/m/n/12 encircledEnergy() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 64--65
-[]\T1/ptm/m/n/12 find() (anal-y-sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 65--66
-[]\T1/ptm/m/n/12 findSources() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 66--67
-[]\T1/ptm/m/n/12 findTolerableError() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 69--70
-[]\T1/ptm/m/n/12 flatfield() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 69--70
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 73--74
-[]\T1/ptm/m/n/12 Gaussian2D() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 73--74
-\T1/ptm/m/n/12 sis.shape.shapeMeasurement
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 74--75
-[]\T1/ptm/m/n/12 generateCatalog() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 74--75
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 75--76
-[]\T1/ptm/m/n/12 generateCTImap() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 75--76
+Underfull \hbox (badness 10000) in paragraph at lines 54--55
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 76--77
-[]\T1/ptm/m/n/12 generateFakeData (class in sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 55--56
+[]\T1/ptm/m/n/12 doAll() (anal-y-sis.analyse.analyseVISdata
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 77--78
-[]\T1/ptm/m/n/12 generateFinemaps() (sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 56--58
+[]\T1/ptm/m/n/12 doAperturePhotometry() (anal-y-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 77--78
+Underfull \hbox (badness 10000) in paragraph at lines 56--58
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--60
+[]\T1/ptm/m/n/12 drawFromCumulativeDistributionFunction()
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--60
+\T1/ptm/m/n/12 (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--60
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--64
+[]\T1/ptm/m/n/12 electrons2ADU() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 63--64
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 78--79
-[]\T1/ptm/m/n/12 generateOutput() (anal-y-
+Underfull \hbox (badness 10000) in paragraph at lines 64--65
+[]\T1/ptm/m/n/12 encircledEnergy() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 69--70
+[]\T1/ptm/m/n/12 find() (anal-y-sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
+[]\T1/ptm/m/n/12 findSources() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 71--72
+[]\T1/ptm/m/n/12 findTolerableError() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 74--75
+[]\T1/ptm/m/n/12 flatfield() (re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 74--75
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 78--79
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+[]\T1/ptm/m/n/12 Gaussian2D() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 78--79
+\T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 79--80
+[]\T1/ptm/m/n/12 generateCatalog() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 79--80
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 80--81
+[]\T1/ptm/m/n/12 generateCTImap() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 80--81
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 81--82
+[]\T1/ptm/m/n/12 generateFakeData (class in sim-u-la-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 82--83
+[]\T1/ptm/m/n/12 generateFinemaps() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 82--83
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 83--84
+[]\T1/ptm/m/n/12 generateOutput() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 83--84
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 84--85
 []\T1/ptm/m/n/12 generatePlots() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 81--82
+Underfull \hbox (badness 10000) in paragraph at lines 86--87
 []\T1/ptm/m/n/12 getCenterOfMass() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 81--82
+Underfull \hbox (badness 10000) in paragraph at lines 86--87
 \T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 82--83
+[64]
+Underfull \hbox (badness 10000) in paragraph at lines 87--88
 []\T1/ptm/m/n/12 getContours() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 82--83
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 83--84
-[]\T1/ptm/m/n/12 getFluxes() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 83--84
-\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 84--85
-[]\T1/ptm/m/n/12 getSizes() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 84--85
+Underfull \hbox (badness 10000) in paragraph at lines 87--88
 \T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 88--89
+[]\T1/ptm/m/n/12 getFluxes() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--90
+[]\T1/ptm/m/n/12 getSizes() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 89--90
+\T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 93--94
 []\T1/ptm/m/n/12 limitingMagnitude() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--90
+Underfull \hbox (badness 10000) in paragraph at lines 94--95
 []\T1/ptm/m/n/12 loadFITS() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 89--90
+Underfull \hbox (badness 10000) in paragraph at lines 94--95
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
-[62]
-Underfull \hbox (badness 10000) in paragraph at lines 93--94
+
+Underfull \hbox (badness 10000) in paragraph at lines 98--99
 []\T1/ptm/m/n/12 maskCrazyValues() (sim-u-la-
  []
 
 
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 93--94
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 98--99
 \T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 94--95
+Underfull \hbox (badness 10000) in paragraph at lines 99--100
 []\T1/ptm/m/n/12 measureChars() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 95--96
+Underfull \hbox (badness 10000) in paragraph at lines 100--101
 []\T1/ptm/m/n/12 measureEllipticity() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 96--97
+Underfull \hbox (badness 10000) in paragraph at lines 101--102
 []\T1/ptm/m/n/12 measureRefinedEllipticity() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 96--97
-\T1/ptm/m/n/12 sis.shape.shapeMeasurement
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 100--101
-[]\T1/ptm/m/n/12 objectOnDetector() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 100--101
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
 Underfull \hbox (badness 10000) in paragraph at lines 101--102
-[]\T1/ptm/m/n/12 overlayToCCD() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 101--102
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+\T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 105--106
-[]\T1/ptm/m/n/12 parseName() (in mod-ule anal-y-
+[]\T1/ptm/m/n/12 objectOnDetector() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 105--106
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 106--107
-[]\T1/ptm/m/n/12 peakFraction() (in mod-ule anal-y-
+[]\T1/ptm/m/n/12 overlayToCCD() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 107--108
-[]\T1/ptm/m/n/12 plot() (anal-y-sis.sourceFinder.sourceFinder
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 108--109
-[]\T1/ptm/m/n/12 plotDeltaEs() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 109--110
-[]\T1/ptm/m/n/12 plotDistributionFunction() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 109--110
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
+Underfull \hbox (badness 7151) in paragraph at lines 106--107
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 110--111
-[]\T1/ptm/m/n/12 plotEllipticityDistribution() (anal-y-
+[]\T1/ptm/m/n/12 parseName() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 111--112
-[]\T1/ptm/m/n/12 plotEncircledEnergy() (in mod-ule anal-y-
+[]\T1/ptm/m/n/12 peakFraction() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 112--113
+[]\T1/ptm/m/n/12 plot() (anal-y-sis.sourceFinder.sourceFinder
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 113--114
+[]\T1/ptm/m/n/12 plotDeltaEs() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+[]\T1/ptm/m/n/12 plotDistributionFunction() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 115--116
+[]\T1/ptm/m/n/12 plotEllipticityDistribution() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 116--117
+[]\T1/ptm/m/n/12 plotEncircledEnergy() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 120--121
 []\T1/ptm/m/n/12 plotNumberOfFramesSigma() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 118--119
+Underfull \hbox (badness 10000) in paragraph at lines 121--122
+[]\T1/ptm/m/n/12 plotResults() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 124--125
 []\T1/ptm/m/n/12 PostProcessing (class in post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 119--120
+Underfull \hbox (badness 10000) in paragraph at lines 125--126
+[]\T1/ptm/m/n/12 processArgs() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 126--127
 []\T1/ptm/m/n/12 processConfigs() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 119--120
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 123--124
-[]\T1/ptm/m/n/12 quadrupoles() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 123--124
-\T1/ptm/m/n/12 sis.shape.shapeMeasurement
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 127--128
-[]\T1/ptm/m/n/12 radiateFullCCD() (post-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 127--128
-\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 128--129
-[]\T1/ptm/m/n/12 readConfigs() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 128--129
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 129--130
-[]\T1/ptm/m/n/12 readCosmicRayInformation() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 129--130
+Underfull \hbox (badness 7151) in paragraph at lines 126--127
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 130--131
-[]\T1/ptm/m/n/12 readData() (in mod-ule anal-y-
+[]\T1/ptm/m/n/12 quadrupoles() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 131--132
-[]\T1/ptm/m/n/12 readData() (post-proc.tileCCD.tileCCD
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 132--133
-[]\T1/ptm/m/n/12 readObjectlist() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 7151) in paragraph at lines 132--133
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 134--135
-[]\T1/ptm/m/n/12 readSources() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 135--136
-[]\T1/ptm/m/n/12 reduceVISdata (class in re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 140--141
-[]\T1/ptm/m/n/12 runAll() (sim-u-la-
- []
-
-
-Overfull \hbox (6.14603pt too wide) in paragraph at lines 140--141
-\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
- []
-
-[63]
-Underfull \hbox (badness 10000) in paragraph at lines 152--153
-[]\T1/ptm/m/n/12 starCatalog() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 152--153
-\T1/ptm/m/n/12 sources.createObjectCatalogue),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 153--154
-[]\T1/ptm/m/n/12 starCatalogFixedMagnitude() (in mod-ule
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
-[]\T1/ptm/m/n/12 subtractBias() (re-duc-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
-\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 161--162
-[]\T1/ptm/m/n/12 testFlatCalibration() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 163--164
-[]\T1/ptm/m/n/12 testNonLinearity() (in mod-ule sup-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 165--166
-[]\T1/ptm/m/n/12 tileCCD() (post-proc.tileCCD.tileCCD
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 169--170
-[]\T1/ptm/m/n/12 VISinformation() (in mod-ule sup-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 174--175
-[]\T1/ptm/m/n/12 writeFITS() (anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 174--175
+Underfull \hbox (badness 10000) in paragraph at lines 130--131
 \T1/ptm/m/n/12 sis.shape.shapeMeasurement
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--176
-[]\T1/ptm/m/n/12 writeFITSfile() (post-
+Underfull \hbox (badness 10000) in paragraph at lines 134--135
+[]\T1/ptm/m/n/12 radiateFullCCD() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 175--176
+Underfull \hbox (badness 10000) in paragraph at lines 134--135
 \T1/ptm/m/n/12 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 176--177
-[]\T1/ptm/m/n/12 writeFITSfile() (post-proc.tileCCD.tileCCD
+Underfull \hbox (badness 10000) in paragraph at lines 135--136
+[]\T1/ptm/m/n/12 readConfigs() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 177--178
-[]\T1/ptm/m/n/12 writeFITSfile() (re-duc-
+Underfull \hbox (badness 7151) in paragraph at lines 135--136
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 177--178
+Underfull \hbox (badness 10000) in paragraph at lines 136--137
+[]\T1/ptm/m/n/12 readCosmicRayInformation() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 136--137
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 137--138
+[]\T1/ptm/m/n/12 readData() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
+[]\T1/ptm/m/n/12 readData() (post-proc.tileCCD.tileCCD
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 139--140
+[]\T1/ptm/m/n/12 readObjectlist() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 139--140
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+[65]
+Underfull \hbox (badness 10000) in paragraph at lines 141--142
+[]\T1/ptm/m/n/12 readSources() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--143
+[]\T1/ptm/m/n/12 reduceVISdata (class in re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 147--148
+[]\T1/ptm/m/n/12 runAll() (sim-u-la-
+ []
+
+
+Overfull \hbox (6.14603pt too wide) in paragraph at lines 147--148
+\T1/ptm/m/n/12 tor.generateGalaxies.generateFakeData
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 159--160
+[]\T1/ptm/m/n/12 starCatalog() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 159--160
+\T1/ptm/m/n/12 sources.createObjectCatalogue),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 160--161
+[]\T1/ptm/m/n/12 starCatalogFixedMagnitude() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 161--162
+[]\T1/ptm/m/n/12 subtractBias() (re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 161--162
 \T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 178--179
-[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
+Underfull \hbox (badness 10000) in paragraph at lines 168--169
+[]\T1/ptm/m/n/12 testCTIcorrection() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 178--179
-\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+Underfull \hbox (badness 10000) in paragraph at lines 169--170
+[]\T1/ptm/m/n/12 testFlatCalibration() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 171--172
+[]\T1/ptm/m/n/12 testNonLinearity() (in mod-ule sup-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 173--174
+[]\T1/ptm/m/n/12 tileCCD() (post-proc.tileCCD.tileCCD
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 177--178
+[]\T1/ptm/m/n/12 VISinformation() (in mod-ule sup-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 179--180
-[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+[]\T1/ptm/m/n/12 visualiseBasisSets() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 7151) in paragraph at lines 179--180
+Underfull \hbox (badness 10000) in paragraph at lines 183--184
+[]\T1/ptm/m/n/12 writeFITS() (anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 183--184
+\T1/ptm/m/n/12 sis.shape.shapeMeasurement
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+[]\T1/ptm/m/n/12 writeFITSfile() (post-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+\T1/ptm/m/n/12 proc.postprocessing.PostProcessing
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 185--186
+[]\T1/ptm/m/n/12 writeFITSfile() (post-proc.tileCCD.tileCCD
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 186--187
+[]\T1/ptm/m/n/12 writeFITSfile() (re-duc-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 186--187
+\T1/ptm/m/n/12 tion.reduceVISdata.reduceVISdata
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 187--188
+[]\T1/ptm/m/n/12 writeFITSfile() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 187--188
 \T1/ptm/m/n/12 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 180--182
+Underfull \hbox (badness 10000) in paragraph at lines 188--189
+[]\T1/ptm/m/n/12 writeOutputs() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 7151) in paragraph at lines 188--189
+\T1/ptm/m/n/12 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 189--191
 []\T1/ptm/m/n/12 writePhotometry() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 180--182
+Underfull \hbox (badness 10000) in paragraph at lines 189--191
 \T1/ptm/m/n/12 sis.sourceFinder.sourceFinder
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 182--183
+Underfull \hbox (badness 10000) in paragraph at lines 191--192
 []\T1/ptm/m/n/12 writeResults() (anal-y-
  []
 
-[64])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3303.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 3303.
+[66])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3530.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 3530.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 3303.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 3303.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 3530.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 3530.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: B46581AA96B458A7FD33980615FED386;1497.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 3303.
+(rerunfilecheck)             Checksum: 7F9CE9E584CC07C0237DFE620387E563;3206.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 3530.
  ) 
 Here is how much of TeX's memory you used:
- 9389 strings out of 493488
- 135582 string characters out of 3141325
- 226051 words of memory out of 3000000
- 12211 multiletter control sequences out of 15000+200000
+ 9428 strings out of 493488
+ 136578 string characters out of 3141325
+ 226352 words of memory out of 3000000
+ 12237 multiletter control sequences out of 15000+200000
  59788 words of font info for 74 fonts, out of 3000000 for 9000
  958 hyphenation exceptions out of 8191
- 36i,12n,45p,470b,633s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,12n,51p,470b,582s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/tex
@@ -2481,10 +2586,10 @@ e1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw
 /helvetic/uhvr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/
 utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on VIS.pdf (68 pages, 1850359 bytes).
+Output written on VIS.pdf (70 pages, 1858530 bytes).
 PDF statistics:
- 1011 PDF objects out of 1200 (max. 8388607)
- 871 compressed objects within 9 object streams
- 290 named destinations out of 1000 (max. 500000)
- 221 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1135 PDF objects out of 1200 (max. 8388607)
+ 992 compressed objects within 10 object streams
+ 303 named destinations out of 1000 (max. 500000)
+ 389 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -144,6 +144,7 @@
 \indexentry{deriveBasisSetsICA() (in module analysis.PSFbasisSets)|hyperpage}{48}
 \indexentry{deriveBasisSetsPCA() (in module analysis.PSFbasisSets)|hyperpage}{48}
 \indexentry{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)|hyperpage}{49}
+\indexentry{generateMovie() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{analysis.testCTIcorrection (module)|hyperpage}{49}

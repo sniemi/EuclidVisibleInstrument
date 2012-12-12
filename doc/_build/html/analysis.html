@@ -760,7 +760,7 @@ to an aperture of a given radius.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.25</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
 <tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -771,7 +771,7 @@ to an aperture of a given radius.</p>
 <dl class="function">
 <dt id="analysis.PSFbasisSets.deriveBasisSetsICA">
 <tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">deriveBasisSetsICA</tt><big>(</big><em>data</em>, <em>cut</em>, <em>outfolder</em>, <em>components=10</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.deriveBasisSetsICA" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derives a basis set from input data using Perform Fast Independent Component Analysis..
+<dd><p>Derives a basis set from input data using Perform Fast Independent Component Analysis.
 Saves the basis sets to a FITS file for further processing.</p>
 <p><a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html#sklearn.decomposition.fastica">http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html#sklearn.decomposition.fastica</a></p>
 </dd></dl>
@@ -835,6 +835,20 @@ singular values to ensure uncorrelated outputs with unit component-wise variance
 </dd></dl>
 
 <dl class="function">
+<dt id="analysis.PSFbasisSets.generateMovie">
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">generateMovie</tt><big>(</big><em>files</em>, <em>output</em>, <em>outputfolder</em>, <em>title</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.generateMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a movie from the basis set files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="analysis.PSFbasisSets.processArgs">
 <tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">processArgs</tt><big>(</big><em>printHelp=False</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.processArgs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes command line arguments.</p>
@@ -842,7 +856,7 @@ singular values to ensure uncorrelated outputs with unit component-wise variance
 
 <dl class="function">
 <dt id="analysis.PSFbasisSets.visualiseBasisSets">
-<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">visualiseBasisSets</tt><big>(</big><em>files</em>, <em>output</em>, <em>outputfolder</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.visualiseBasisSets" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.PSFbasisSets.</tt><tt class="descname">visualiseBasisSets</tt><big>(</big><em>files</em>, <em>output</em>, <em>outputfolder</em>, <em>big3d=False</em><big>)</big><a class="headerlink" href="#analysis.PSFbasisSets.visualiseBasisSets" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate visualisation of the basis sets.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

@@ -80,6 +80,7 @@
   \item generateCTImap() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item generateFakeData (class in simulator.generateGalaxies), \hyperpage{30}
   \item generateFinemaps() (simulator.simulator.VISsimulator method), \hyperpage{27}
+  \item generateMovie() (in module analysis.PSFbasisSets), \hyperpage{49}
   \item generateOutput() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
   \item generatePlots() (in module analysis.PSFproperties), \hyperpage{47}
   \item generateResidualFlatField() (in module analysis.FlatfieldCalibration), \hyperpage{38}

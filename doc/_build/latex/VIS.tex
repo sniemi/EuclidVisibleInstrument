@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{December 03, 2012}
+\date{December 12, 2012}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -3223,7 +3223,7 @@ matplotlib
 VISsim-Python
 
 \item[{version}] \leavevmode
-0.25
+0.3
 
 \item[{author}] \leavevmode
 Sami-Matias Niemi
@@ -3236,7 +3236,7 @@ Sami-Matias Niemi
 
 \begin{fulllineitems}
 \phantomsection\label{analysis:analysis.PSFbasisSets.deriveBasisSetsICA}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{deriveBasisSetsICA}}{\emph{data}, \emph{cut}, \emph{outfolder}, \emph{components=10}}{}
-Derives a basis set from input data using Perform Fast Independent Component Analysis..
+Derives a basis set from input data using Perform Fast Independent Component Analysis.
 Saves the basis sets to a FITS file for further processing.
 
 \href{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html\#sklearn.decomposition.fastica}{http://scikit-learn.org/stable/modules/generated/sklearn.decomposition.fastica.html\#sklearn.decomposition.fastica}
@@ -3317,6 +3317,19 @@ Randomized PCA components
 
 \end{fulllineitems}
 
+\index{generateMovie() (in module analysis.PSFbasisSets)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.PSFbasisSets.generateMovie}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{generateMovie}}{\emph{files}, \emph{output}, \emph{outputfolder}, \emph{title}}{}
+Generates a movie from the basis set files.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{processArgs() (in module analysis.PSFbasisSets)}
 
 \begin{fulllineitems}
@@ -3328,7 +3341,7 @@ Processes command line arguments.
 \index{visualiseBasisSets() (in module analysis.PSFbasisSets)}
 
 \begin{fulllineitems}
-\phantomsection\label{analysis:analysis.PSFbasisSets.visualiseBasisSets}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{visualiseBasisSets}}{\emph{files}, \emph{output}, \emph{outputfolder}}{}
+\phantomsection\label{analysis:analysis.PSFbasisSets.visualiseBasisSets}\pysiglinewithargsret{\code{analysis.PSFbasisSets.}\bfcode{visualiseBasisSets}}{\emph{files}, \emph{output}, \emph{outputfolder}, \emph{big3d=False}}{}
 Generate visualisation of the basis sets.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode

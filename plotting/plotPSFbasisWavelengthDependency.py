@@ -99,22 +99,56 @@ def visualiseWavelengthDependency3D(d1, d2, d3, outname, PSF=True):
     plt.close()
 
 
-def visualiseBasisWavelengthDependency():
-    d1400 = pf.getdata('PSF400nm/PCAbasis001.fits')
-    d1550 = pf.getdata('PSF550nm/PCAbasis001.fits')
-    d1800 = pf.getdata('PSF800nm/PCAbasis001.fits')
+def visualiseBasisWavelengthDependency(PCA=True):
+    if PCA:
+        d1400 = pf.getdata('PSF400nm/PCAbasis001.fits')
+        d1550 = pf.getdata('PSF550nm/PCAbasis001.fits')
+        d1800 = pf.getdata('PSF800nm/PCAbasis001.fits')
 
-    d2400 = pf.getdata('PSF400nm/PCAbasis002.fits')
-    d2550 = pf.getdata('PSF550nm/PCAbasis002.fits')
-    d2800 = pf.getdata('PSF800nm/PCAbasis002.fits')
+        d2400 = pf.getdata('PSF400nm/PCAbasis002.fits')
+        d2550 = pf.getdata('PSF550nm/PCAbasis002.fits')
+        d2800 = pf.getdata('PSF800nm/PCAbasis002.fits')
 
-    d3400 = pf.getdata('PSF400nm/PCAbasis003.fits')
-    d3550 = pf.getdata('PSF550nm/PCAbasis003.fits')
-    d3800 = pf.getdata('PSF800nm/PCAbasis003.fits')
+        d3400 = pf.getdata('PSF400nm/PCAbasis003.fits')
+        d3550 = pf.getdata('PSF550nm/PCAbasis003.fits')
+        d3800 = pf.getdata('PSF800nm/PCAbasis003.fits')
 
-    d4400 = pf.getdata('PSF400nm/PCAbasis004.fits')
-    d4550 = pf.getdata('PSF550nm/PCAbasis004.fits')
-    d4800 = pf.getdata('PSF800nm/PCAbasis004.fits')
+        d4400 = pf.getdata('PSF400nm/PCAbasis004.fits')
+        d4550 = pf.getdata('PSF550nm/PCAbasis004.fits')
+        d4800 = pf.getdata('PSF800nm/PCAbasis004.fits')
+    else:
+        d1400 = pf.getdata('PSF400nm/ICAbasis001.fits')
+        d1550 = pf.getdata('PSF550nm/ICAbasis001.fits')
+        d1800 = pf.getdata('PSF800nm/ICAbasis001.fits')
+
+        d2400 = pf.getdata('PSF400nm/ICAbasis002.fits')
+        d2550 = pf.getdata('PSF550nm/ICAbasis002.fits')
+        d2800 = pf.getdata('PSF800nm/ICAbasis002.fits')
+
+        d3400 = pf.getdata('PSF400nm/ICAbasis003.fits')
+        d3550 = pf.getdata('PSF550nm/ICAbasis003.fits')
+        d3800 = pf.getdata('PSF800nm/ICAbasis003.fits')
+
+        d4400 = pf.getdata('PSF400nm/ICAbasis004.fits')
+        d4550 = pf.getdata('PSF550nm/ICAbasis004.fits')
+        d4800 = pf.getdata('PSF800nm/ICAbasis004.fits')
+
+    #zoom in
+    my, mx = d1400.shape
+    my /= 2
+    mx /= 2
+    d1400 = d1400[my - 100:my + 100, mx - 100:mx + 100]
+    d1550 = d1550[my - 100:my + 100, mx - 100:mx + 100]
+    d1800 = d1800[my - 100:my + 100, mx - 100:mx + 100]
+    d2400 = d2400[my - 100:my + 100, mx - 100:mx + 100]
+    d2550 = d2550[my - 100:my + 100, mx - 100:mx + 100]
+    d2800 = d2800[my - 100:my + 100, mx - 100:mx + 100]
+    d3400 = d3400[my - 100:my + 100, mx - 100:mx + 100]
+    d3550 = d3550[my - 100:my + 100, mx - 100:mx + 100]
+    d3800 = d3800[my - 100:my + 100, mx - 100:mx + 100]
+    d4400 = d4400[my - 100:my + 100, mx - 100:mx + 100]
+    d4550 = d4550[my - 100:my + 100, mx - 100:mx + 100]
+    d4800 = d4800[my - 100:my + 100, mx - 100:mx + 100]
 
     stopy, stopx = d1400.shape
     X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
@@ -189,9 +223,11 @@ def visualiseBasisWavelengthDependency():
 
     plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 
-    plt.savefig('BasisSetComparison3D.pdf')
+    if PCA:
+        plt.savefig('PCABasisSetComparison3D.png')
+    else:
+        plt.savefig('ICABasisSetComparison3D.png')
     plt.close()
-
 
 
 if __name__ == '__main__':
@@ -199,12 +235,63 @@ if __name__ == '__main__':
     d2 = pf.getdata('PSF550nm/mean.fits')
     d3 = pf.getdata('PSF800nm/mean.fits')
     visualiseWavelengthDependency2D(np.log10(d1), np.log10(d2), np.log10(d3), 'MeanPSFComparison2D.pdf')
-    visualiseWavelengthDependency3D(d1, d2, d3, 'MeanPSFComparison3D.pdf')
+    #zoomed in
+    my, mx = d1.shape
+    my /= 2
+    mx /= 2
+    d1 = d1[my-100:my+100, mx-100:mx+100]
+    d2 = d2[my-100:my+100, mx-100:mx+100]
+    d3 = d3[my-100:my+100, mx-100:mx+100]
+    visualiseWavelengthDependency2D(np.log10(d1), np.log10(d2), np.log10(d3), 'MeanPSFComparison2DZoomed.pdf')
+    visualiseWavelengthDependency3D(d1, d2, d3, 'MeanPSFComparison3D.png')
 
-    d1 = pf.getdata('PSF400nm/PCAbasis003.fits')
-    d2 = pf.getdata('PSF550nm/PCAbasis003.fits')
-    d3 = pf.getdata('PSF800nm/PCAbasis003.fits')
+    d1 = pf.getdata('PSF400nm/PCAbasis001.fits')
+    d2 = pf.getdata('PSF550nm/PCAbasis001.fits')
+    d3 = pf.getdata('PSF800nm/PCAbasis001.fits')
+    my, mx = d1.shape
+    my /= 2
+    mx /= 2
+    d1 = d1[my-100:my+100, mx-100:mx+100]
+    d2 = d2[my-100:my+100, mx-100:mx+100]
+    d3 = d3[my-100:my+100, mx-100:mx+100]
     visualiseWavelengthDependency2D(d1, d2, d3, 'PCA1PSFComparison2D.pdf', logscale=False)
-    visualiseWavelengthDependency3D(d1, d2, d3, 'PCA1PSFComparison3D.pdf', PSF=False)
+    visualiseWavelengthDependency3D(d1, d2, d3, 'PCA1PSFComparison3D.png', PSF=False)
+
+    d1 = pf.getdata('PSF400nm/PCAbasis002.fits')
+    d2 = pf.getdata('PSF550nm/PCAbasis002.fits')
+    d3 = pf.getdata('PSF800nm/PCAbasis002.fits')
+    my, mx = d1.shape
+    my /= 2
+    mx /= 2
+    d1 = d1[my-100:my+100, mx-100:mx+100]
+    d2 = d2[my-100:my+100, mx-100:mx+100]
+    d3 = d3[my-100:my+100, mx-100:mx+100]
+    visualiseWavelengthDependency2D(d1, d2, d3, 'PCA2PSFComparison2D.pdf', logscale=False)
+    visualiseWavelengthDependency3D(d1, d2, d3, 'PCA2PSFComparison3D.png', PSF=False)
+
+    d1 = pf.getdata('PSF400nm/ICAbasis001.fits')
+    d2 = pf.getdata('PSF550nm/ICAbasis001.fits')
+    d3 = pf.getdata('PSF800nm/ICAbasis001.fits')
+    my, mx = d1.shape
+    my /= 2
+    mx /= 2
+    d1 = d1[my-100:my+100, mx-100:mx+100]
+    d2 = d2[my-100:my+100, mx-100:mx+100]
+    d3 = d3[my-100:my+100, mx-100:mx+100]
+    visualiseWavelengthDependency2D(d1, d2, d3, 'ICA1PSFComparison2D.pdf', logscale=False)
+    visualiseWavelengthDependency3D(d1, d2, d3, 'ICA1PSFComparison3D.png', PSF=False)
+
+    d1 = pf.getdata('PSF400nm/ICAbasis002.fits')
+    d2 = pf.getdata('PSF550nm/ICAbasis002.fits')
+    d3 = pf.getdata('PSF800nm/ICAbasis002.fits')
+    my, mx = d1.shape
+    my /= 2
+    mx /= 2
+    d1 = d1[my - 100:my + 100, mx - 100:mx + 100]
+    d2 = d2[my - 100:my + 100, mx - 100:mx + 100]
+    d3 = d3[my - 100:my + 100, mx - 100:mx + 100]
+    visualiseWavelengthDependency2D(d1, d2, d3, 'ICA2PSFComparison2D.pdf', logscale=False)
+    visualiseWavelengthDependency3D(d1, d2, d3, 'ICA2PSFComparison3D.png', PSF=False)
 
     visualiseBasisWavelengthDependency()
+    visualiseBasisWavelengthDependency(PCA=False)

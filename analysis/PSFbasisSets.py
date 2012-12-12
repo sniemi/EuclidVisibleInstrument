@@ -130,11 +130,12 @@ def deriveBasisSetsICA(data, cut, outfolder, components=10):
     return image
 
 
-def visualiseBasisSets(files, output, outputfolder):
+def visualiseBasisSets(files, output, outputfolder, big3d=False):
     """
     Generate visualisation of the basis sets.
 
     :param files: a list of file names that should be visualised
+
     :return: None
     """
     #individual 3D images
@@ -152,10 +153,10 @@ def visualiseBasisSets(files, output, outputfolder):
         X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
 
         #make plot
-        fig = plt.figure(figsize=(12, 12))
+        fig = plt.figure()
         ax = Axes3D(fig)
         plt.title('Basis Function $B_{%i}$' % numb)
-        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.plot_surface(X, Y, image, rstride=3, cstride=3, cmap=cm.coolwarm, linewidth=0, antialiased=False)
         ax.set_zlim(-0.05, 0.05)
         plt.savefig(file.replace('.fits', '.pdf'))
         plt.close()
@@ -176,36 +177,37 @@ def visualiseBasisSets(files, output, outputfolder):
         fig = plt.figure(figsize=(8, 8))
         ax = Axes3D(fig)
         plt.title('Average PSF')
-        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+        ax.plot_surface(X, Y, image, rstride=3, cstride=3, cmap=cm.coolwarm, linewidth=0, antialiased=False)
         plt.savefig(outputfolder + '/' + 'meanPSF.pdf')
         plt.close()
 
     #make 3D image
-    fig = plt.figure(1, figsize=(18, 28))
-    fig.subplots_adjust(hspace=0.1, wspace=0.001, left=0.10, bottom=0.095, top=0.975, right=0.98)
+    if big3d:
+        fig = plt.figure(1, figsize=(18, 28))
+        fig.subplots_adjust(hspace=0.1, wspace=0.001, left=0.10, bottom=0.095, top=0.975, right=0.98)
 
-    #number of rows needed if two columns
-    rows = math.ceil(len(files) / 2.)
+        #number of rows needed if two columns
+        rows = math.ceil(len(files) / 2.)
 
-    for i, file in enumerate(files):
-        numb = int(file.split('basis')[-1].replace('.fits', ''))
-        image = pf.getdata(file)
+        for i, file in enumerate(files):
+            numb = int(file.split('basis')[-1].replace('.fits', ''))
+            image = pf.getdata(file)
 
-        stopy, stopx = image.shape
-        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
+            stopy, stopx = image.shape
+            X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
 
-        #add subplot
-        rect = fig.add_subplot(rows, 2, i + 1, frame_on=False, visible=False).get_position()
-        ax = Axes3D(fig, rect)
-        plt.title('Basis Function $B_{%i}$' % numb)
-        ax.plot_surface(X, Y, image, rstride=1, cstride=1, cmap=cm.coolwarm, linewidth=0, antialiased=False)
-        ax.set_zlim(-0.05, 0.05)
+            #add subplot
+            rect = fig.add_subplot(rows, 2, i + 1, frame_on=False, visible=False).get_position()
+            ax = Axes3D(fig, rect)
+            plt.title('Basis Function $B_{%i}$' % numb)
+            ax.plot_surface(X, Y, image, rstride=3, cstride=3, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+            ax.set_zlim(-0.05, 0.05)
 
-    plt.savefig(outputfolder + '/' + output.replace('.pdf', '3D.png'))
-    plt.close()
+        plt.savefig(outputfolder + '/' + output.replace('.pdf', '3D.png'))
+        plt.close()
 
     #make 2D image
-    fig = plt.figure(1, figsize=(18, 28))
+    fig = plt.figure(1, figsize=(18, 38))
     fig.subplots_adjust(hspace=0.1, wspace=0.001, left=0.10, bottom=0.095, top=0.975, right=0.98)
 
     #number of rows needed if two columns
@@ -229,7 +231,13 @@ def visualiseBasisSets(files, output, outputfolder):
     plt.savefig(outputfolder + '/' + output.replace('.pdf', '2D.png'))
     plt.close()
 
-    #generate a movie
+
+def generateMovie(files, output, outputfolder, title):
+    """
+    Generates a movie from the basis set files.
+
+    :return: None
+    """
     fig = plt.figure(2, figsize=(7, 7))
     ax = Axes3D(fig)
 
@@ -245,15 +253,16 @@ def visualiseBasisSets(files, output, outputfolder):
         stopy, stopx = image.shape
         X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
         #store image for the movie
-        ims.append((ax.plot_surface(X, Y, image, rstride=1, cstride=1,
+        ims.append((ax.plot_surface(X, Y, image, rstride=3, cstride=3,
                     cmap=cm.coolwarm, linewidth=0, antialiased=False),))
 
-    ax.set_title('Basis Sets')
+    ax.set_title(title)
+    ax.set_title(title)
     ax.set_xlabel('X [pixels]')
     ax.set_ylabel('Y [pixels]')
     ax.set_zlabel('')
     anime = animation.ArtistAnimation(fig, ims, interval=2000, blit=True)
-    anime.save(outputfolder + '/' + output.replace('.pdf', '.mp4'), fps=0.5)
+    anime.save(outputfolder + '/' + output, fps=0.5)
 
 
 def processArgs(printHelp=False):
@@ -329,6 +338,11 @@ if __name__ == '__main__':
     log.info('Visualising the derived basis sets')
     print 'Visualising the derived basis sets'
     visualiseBasisSets(glob.glob(opts.output+'/PCAbasis*.fits'), 'PCABasisSets.pdf', opts.output)
-    visualiseBasisSets(glob.glob(opts.output+'/ICACAbasis*.fits'), 'ICACABasisSets.pdf', opts.output)
+    visualiseBasisSets(glob.glob(opts.output+'/ICAbasis*.fits'), 'ICABasisSets.pdf', opts.output)
+
+    log.info('Generating a movie from the derived basis sets')
+    print 'Generating a movie from the derived basis sets'
+    generateMovie(glob.glob(opts.output+'/PCAbasis*.fits'), 'PCABasisSets.mp4', opts.output, title='PCA Basis Sets')
+    generateMovie(glob.glob(opts.output+'/ICAbasis*.fits'), 'ICABasisSets.mp4', opts.output, title='ICA Basis Sets')
 
     log.info('All done...')

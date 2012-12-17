@@ -147,6 +147,12 @@
 \indexentry{generateMovie() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{49}
-\indexentry{analysis.testCTIcorrection (module)|hyperpage}{49}
-\indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{50}
-\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{50}
+\indexentry{analysis.fitPSF (module)|hyperpage}{49}
+\indexentry{BaysianPCAfitting() (in module analysis.fitPSF)|hyperpage}{50}
+\indexentry{ICAleastSq() (in module analysis.fitPSF)|hyperpage}{50}
+\indexentry{PCAleastSQ() (in module analysis.fitPSF)|hyperpage}{50}
+\indexentry{leastSQfit() (in module analysis.fitPSF)|hyperpage}{50}
+\indexentry{visualise() (in module analysis.fitPSF)|hyperpage}{52}
+\indexentry{analysis.testCTIcorrection (module)|hyperpage}{52}
+\indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{52}
+\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{52}

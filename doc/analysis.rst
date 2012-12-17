@@ -26,5 +26,8 @@ VIS data analysis tools
 .. automodule:: analysis.PSFbasisSets
     :members:
 
+.. automodule:: analysis.fitPSF
+    :members:
+
 .. automodule:: analysis.testCTIcorrection
     :members:

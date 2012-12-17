@@ -13,12 +13,13 @@
   \item analysis.analyse (module), \hyperpage{41}
   \item analysis.biasCalibration (module), \hyperpage{34}
   \item analysis.ETC (module), \hyperpage{13}
+  \item analysis.fitPSF (module), \hyperpage{49}
   \item analysis.FlatfieldCalibration (module), \hyperpage{37}
   \item analysis.PSFbasisSets (module), \hyperpage{48}
   \item analysis.PSFproperties (module), \hyperpage{47}
   \item analysis.shape (module), \hyperpage{42}
   \item analysis.sourceFinder (module), \hyperpage{44}
-  \item analysis.testCTIcorrection (module), \hyperpage{49}
+  \item analysis.testCTIcorrection (module), \hyperpage{52}
   \item applyBias() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyBleeding() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyCosmetics() (simulator.simulator.VISsimulator method), \hyperpage{26}
@@ -31,6 +32,10 @@
   \item applyRadiationDamage() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item applyReadoutNoise() (postproc.postprocessing.PostProcessing method), \hyperpage{9}
   \item applyReadoutNoise() (simulator.simulator.VISsimulator method), \hyperpage{26}
+
+  \indexspace
+  \bigletter B
+  \item BaysianPCAfitting() (in module analysis.fitPSF), \hyperpage{50}
 
   \indexspace
   \bigletter C
@@ -90,7 +95,12 @@
   \item getSizes() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
 
   \indexspace
+  \bigletter I
+  \item ICAleastSq() (in module analysis.fitPSF), \hyperpage{50}
+
+  \indexspace
   \bigletter L
+  \item leastSQfit() (in module analysis.fitPSF), \hyperpage{50}
   \item limitingMagnitude() (in module analysis.ETC), \hyperpage{15}
   \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
 
@@ -109,6 +119,7 @@
   \indexspace
   \bigletter P
   \item parseName() (in module analysis.PSFproperties), \hyperpage{47}
+  \item PCAleastSQ() (in module analysis.fitPSF), \hyperpage{50}
   \item peakFraction() (in module analysis.PSFproperties), \hyperpage{48}
   \item plot() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
   \item plotDeltaEs() (in module analysis.biasCalibration), \hyperpage{35}
@@ -119,7 +130,7 @@
   \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{39}
   \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{36}
   \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{36}
-  \item plotResults() (in module analysis.testCTIcorrection), \hyperpage{50}
+  \item plotResults() (in module analysis.testCTIcorrection), \hyperpage{52}
   \item postproc.postprocessing (module), \hyperpage{7}
   \item postproc.tileCCD (module), \hyperpage{10}
   \item PostProcessing (class in postproc.postprocessing), \hyperpage{8}
@@ -166,7 +177,7 @@
   \bigletter T
   \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{36}
   \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{37}
-  \item testCTIcorrection() (in module analysis.testCTIcorrection), \hyperpage{50}
+  \item testCTIcorrection() (in module analysis.testCTIcorrection), \hyperpage{52}
   \item testFlatCalibration() (in module analysis.FlatfieldCalibration), \hyperpage{40}
   \item testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration), \hyperpage{40}
   \item testNonLinearity() (in module support.VISinstrumentModel), \hyperpage{7}
@@ -177,6 +188,7 @@
   \bigletter V
   \item VISinformation() (in module support.VISinstrumentModel), \hyperpage{6}
   \item VISsimulator (class in simulator.simulator), \hyperpage{25}
+  \item visualise() (in module analysis.fitPSF), \hyperpage{52}
   \item visualiseBasisSets() (in module analysis.PSFbasisSets), \hyperpage{49}
 
   \indexspace

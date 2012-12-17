@@ -11,7 +11,7 @@ This script can be used to fit a set of basis functions to a point spread functi
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.1
+:version: 0.2
 
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
@@ -99,7 +99,7 @@ def visualise(popt, psf, modedata, output='PCA'):
     Plot the fitting results, residuals and coefficients
 
     :param popt: fitting coefficients
-    :type popt: array
+    :type popt: ndarray
     :param psf: data to which the modes were fitted to
     :type psf: ndarray
     :param modedata: each of the basis set modes that were fit to the data
@@ -217,23 +217,121 @@ def BaysianPCAfitting():
     :return: None
     """
     import pymc
-    import fitPSFmodel
 
-    R = pymc.MCMC(fitPSFmodel, db='pickle', dbname='test.pickle', verbose=3)
+    #load psf, mean, and PCA basis sets
+    psf = np.asarray(np.ravel(pf.getdata('PSF800.fits')[400:601, 400:601]), dtype=np.float64)
+    mean = np.asarray(np.ravel(pf.getdata('mean.fits')[400:601, 400:601]), dtype=np.float64)
+    modes = sorted(g.glob('modes/PCA*.fits'))
+    modedata = [np.ravel(pf.getdata(file)[400:601, 400:601]) for file in modes]
+    data = [mean, ] + modedata
+    data = np.asarray(data, dtype=np.float64)
 
-    # populate and run it
-    R.sample(iter=100000, burn=5000, thin=1)
+    #from mean + basis modes
+    xdata = pymc.distributions.Uniform('x', -1.0, 1.0, observed=True, value=data, trace=False)
 
-    print 'Summary of Results:'
-    print R.summary()
-    R.write_csv('fitting.csv')
+    #set uniform priors for the basis set functions
+    #these could actually be set based on the eigenvalues...
+    a0 = pymc.distributions.Uniform('a0', 0.5, 1.5, value=1.0)
+    a1 = pymc.distributions.Uniform('a1', -1.0, 1.0, value=-0.35)
+    a2 = pymc.distributions.Uniform('a2', -1.0, 1.0, value=0.1)
+    a3 = pymc.distributions.Uniform('a3', -1.0, 1.0, value=0.0)
+    a4 = pymc.distributions.Uniform('a4', -1.0, 1.0, value=0.0)
+    a5 = pymc.distributions.Uniform('a5', -1.0, 1.0, value=0.0)
+    a6 = pymc.distributions.Uniform('a6', -1.0, 1.0, value=0.0)
+    a7 = pymc.distributions.Uniform('a7', -1.0, 1.0, value=0.0)
+    a8 = pymc.distributions.Uniform('a8', -1.0, 1.0, value=0.0)
+    a9 = pymc.distributions.Uniform('a9', -1.0, 1.0, value=0.0)
+    a10 = pymc.distributions.Uniform('a10', -1.0, 1.0, value=0.0)
+    a11 = pymc.distributions.Uniform('a11', -1.0, 1.0, value=0.0)
+    a12 = pymc.distributions.Uniform('a12', -1.0, 1.0, value=0.0)
+    a13 = pymc.distributions.Uniform('a13', -1.0, 1.0, value=0.0)
+    a14 = pymc.distributions.Uniform('a14', -1.0, 1.0, value=0.0)
+    a15 = pymc.distributions.Uniform('a15', -1.0, 1.0, value=0.0)
+    a16 = pymc.distributions.Uniform('a16', -1.0, 1.0, value=0.0)
+    a17 = pymc.distributions.Uniform('a17', -1.0, 1.0, value=0.0)
+    a18 = pymc.distributions.Uniform('a18', -1.0, 1.0, value=0.0)
+    a19 = pymc.distributions.Uniform('a19', -1.0, 1.0, value=0.0)
+    a20 = pymc.distributions.Uniform('a20', -1.0, 1.0, value=0.0)
+
+    #model that is being fitted
+    @pymc.deterministic(plot=False, trace=False)
+    def model(x=xdata, a0=a0, a1=a1, a2=a2, a3=a3, a4=a4, a5=a5, a6=a6, a7=a7, a8=a8, a9=a9, a10=a10,
+              a11=a11, a12=a12, a13=a13, a14=a14, a15=a15, a16=a16, a17=a17, a18=a18, a19=a19, a20=a20):
+        tmp = a0 * x[0] + a1 * x[1] + a2 * x[2] + a3 * x[3] + a4 * x[4] + a5 * x[5] + a6 * x[6] +\
+              a7 * x[7] + a8 * x[8] + a9 * x[9] + a10 * x[10] + a11 * x[11] + a12 * x[12] + a13 * x[13] +\
+              a14 * x[14] + a15 * x[15] + a16 * x[16] + a17 * x[17] + a18 * x[18] + a19 * x[19] + a20 * x[20]
+        return tmp
+
+    #likelihood function, note that an inverse weighting has been applied... this could be something else too
+    y = pymc.distributions.Normal('y', mu=model, tau=1./psf**2, value=psf, observed=True, trace=False)
+
+    #store the model to a dictionary
+    d = {'a0' : a0,
+         'a1' : a1,
+         'a2' : a2,
+         'a3' : a3,
+         'a4' : a4,
+         'a5' : a5,
+         'a6' : a6,
+         'a7' : a7,
+         'a8' : a8,
+         'a9' : a9,
+         'a10': a10,
+         'a11': a11,
+         'a12': a12,
+         'a13': a13,
+         'a14': a14,
+         'a15': a15,
+         'a16': a16,
+         'a17': a17,
+         'a18': a18,
+         'a19': a19,
+         'a20': a20,
+         'f' : model,
+         'y': y}
+
+    print 'Will start running a chain...'
+    R = pymc.MCMC(d, verbose=0)
+    R.sample(iter=500000, burn=10000, thin=2)
 
     #generate plots
     pymc.Matplot.plot(R)
     pymc.Matplot.summary_plot(R)
 
-    #close MCMC to write database
-    R.db.close()
+    Rs = R.stats()
+    print 'PyMC finished...'
+
+    #calculate the residual residual given the found parameter values and write to a FITS file
+    vals = [Rs['a0']['mean'],
+            Rs['a1']['mean'],
+            Rs['a2']['mean'],
+            Rs['a3']['mean'],
+            Rs['a4']['mean'],
+            Rs['a5']['mean'],
+            Rs['a6']['mean'],
+            Rs['a7']['mean'],
+            Rs['a8']['mean'],
+            Rs['a9']['mean'],
+            Rs['a10']['mean'],
+            Rs['a11']['mean'],
+            Rs['a12']['mean'],
+            Rs['a13']['mean'],
+            Rs['a14']['mean'],
+            Rs['a15']['mean'],
+            Rs['a16']['mean'],
+            Rs['a17']['mean'],
+            Rs['a18']['mean'],
+            Rs['a19']['mean'],
+            Rs['a20']['mean']]
+    vals = np.asarray(vals)
+    print vals
+    print 'Calculating the residual...'
+    residual = (psf - leastSQfit(data, *vals)).reshape(201, 201)
+    fileIO.writeFITS(residual, 'BayesianResidual.fits', int=False)
+
+    #generate plots
+    print 'Doing further visualisation...'
+    visualise(vals, psf, data, output='Bayesian')
 
 
 if __name__ == '__main__':

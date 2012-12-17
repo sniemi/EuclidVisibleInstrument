@@ -77,7 +77,7 @@ def VISinformation():
     """
     out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
                diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
-               zeropoint=25.58, gain=3.5, sky_high=21.74, sky_low=22.94, magzero=1.7059e10,
+               zeropoint=25.57991044453, gain=3.5, sky_high=21.74, sky_low=22.94, magzero=1.7059e10,
                fullwellcapacity=200000, readout=4.5, bias=1000.0, cosmic_bkgd=0.172, e_adu=3.5,
                xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969)
 

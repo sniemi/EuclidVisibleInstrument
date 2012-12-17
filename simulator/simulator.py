@@ -239,7 +239,7 @@ class VISsimulator():
                                      dark=0.001,
                                      readout=4.5,
                                      bias=1000.0,
-                                     cosmic_bkgd=0.172,
+                                     cosmic_bkgd=0.1976806579195,
                                      e_adu=3.5,
                                      magzero=1.7059e10,
                                      exposures=1,

@@ -61,6 +61,7 @@
 <li><a class="reference internal" href="#source-finding">Source finding</a></li>
 <li><a class="reference internal" href="#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
 <li><a class="reference internal" href="#generating-psf-basis-sets">Generating PSF Basis Sets</a></li>
+<li><a class="reference internal" href="#psf-fitting">PSF Fitting</a></li>
 <li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
 </ul>
 </li>
@@ -865,6 +866,165 @@ singular values to ensure uncorrelated outputs with unit component-wise variance
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>files</strong> &#8211; a list of file names that should be visualised</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.fitPSF"></span><div class="section" id="psf-fitting">
+<h2>PSF Fitting<a class="headerlink" href="#psf-fitting" title="Permalink to this headline">¶</a></h2>
+<p>This script can be used to fit a set of basis functions to a point spread function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">Scikit-learn</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.fitPSF.BaysianPCAfitting">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">BaysianPCAfitting</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.fitPSF.BaysianPCAfitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform PCA basis set fitting using Bayesian Markov Chain Monte Carlo fitting technique.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body">pyMC</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.fitPSF.ICAleastSq">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">ICAleastSq</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.fitPSF.ICAleastSq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform least squares fitting using ICA basis set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.fitPSF.PCAleastSQ">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">PCAleastSQ</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.fitPSF.PCAleastSQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform least squares fitting using PCA basis set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.fitPSF.leastSQfit">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">leastSQfit</tt><big>(</big><em>x</em>, <em>a0</em>, <em>a1</em>, <em>a2</em>, <em>a3</em>, <em>a4</em>, <em>a5</em>, <em>a6</em>, <em>a7</em>, <em>a8</em>, <em>a9</em>, <em>a10</em>, <em>a11</em>, <em>a12</em>, <em>a13</em>, <em>a14</em>, <em>a15</em>, <em>a16</em>, <em>a17</em>, <em>a18</em>, <em>a19</em>, <em>a20</em><big>)</big><a class="headerlink" href="#analysis.fitPSF.leastSQfit" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple function returning a linear combination of 20 input parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>mdarray</em>) &#8211; data</li>
+<li><strong>a0</strong> &#8211; first fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a1</strong> &#8211; second fitting coefficient</li>
+<li><strong>a1</strong> &#8211; float</li>
+<li><strong>a2</strong> &#8211; third fitting coefficient</li>
+<li><strong>a2</strong> &#8211; float</li>
+<li><strong>a3</strong> &#8211; fourth fitting coefficient</li>
+<li><strong>a3</strong> &#8211; float</li>
+<li><strong>a4</strong> &#8211; fifth fitting coefficient</li>
+<li><strong>a4</strong> &#8211; float</li>
+<li><strong>a5</strong> &#8211; sixth fitting coefficient</li>
+<li><strong>a5</strong> &#8211; float</li>
+<li><strong>a6</strong> &#8211; seventh fitting coefficient</li>
+<li><strong>a6</strong> &#8211; float</li>
+<li><strong>a7</strong> &#8211; eight fitting coefficient</li>
+<li><strong>a7</strong> &#8211; float</li>
+<li><strong>a8</strong> &#8211; ninth fitting coefficient</li>
+<li><strong>a8</strong> &#8211; float</li>
+<li><strong>a9</strong> &#8211; tenth fitting coefficient</li>
+<li><strong>a9</strong> &#8211; float</li>
+<li><strong>a10</strong> &#8211; eleventh fitting coefficient</li>
+<li><strong>a10</strong> &#8211; float</li>
+<li><strong>a11</strong> &#8211; twelfth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a12</strong> &#8211; thirteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a13</strong> &#8211; fourteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a14</strong> &#8211; fifteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a15</strong> &#8211; sixteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a16</strong> &#8211; seventieth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a17</strong> &#8211; eighteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a18</strong> &#8211; nineteenth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a19</strong> &#8211; twentieth fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+<li><strong>a20</strong> &#8211; twentyfirst fitting coefficient</li>
+<li><strong>a0</strong> &#8211; float</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a linear combination of the data given the coefficients</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.fitPSF.visualise">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">visualise</tt><big>(</big><em>popt</em>, <em>psf</em>, <em>modedata</em>, <em>output='PCA'</em><big>)</big><a class="headerlink" href="#analysis.fitPSF.visualise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the fitting results, residuals and coefficients</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>popt</strong> (<em>ndarray</em>) &#8211; fitting coefficients</li>
+<li><strong>psf</strong> (<em>ndarray</em>) &#8211; data to which the modes were fitted to</li>
+<li><strong>modedata</strong> (<em>ndarray</em>) &#8211; each of the basis set modes that were fit to the data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
 </tr>
 </tbody>
 </table>

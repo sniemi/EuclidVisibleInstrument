@@ -1,7 +1,7 @@
 This is makeindex, version 2.15 [TeX Live 2012] (kpathsea + Thai support).
 Scanning style file ./python.ist......done (6 attributes redefined, 0 ignored).
-Scanning input file VIS.idx....done (152 entries accepted, 0 rejected).
-Sorting entries....done (1361 comparisons).
-Generating output file VIS.ind....done (194 lines written, 0 warnings).
+Scanning input file VIS.idx....done (158 entries accepted, 0 rejected).
+Sorting entries....done (1296 comparisons).
+Generating output file VIS.ind....done (206 lines written, 0 warnings).
 Output written in VIS.ind.
 Transcript written in VIS.ilg.

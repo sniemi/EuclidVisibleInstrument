@@ -50,6 +50,34 @@ def MagnitudeDistribution(catalog, mag=18., bins=16):
     plt.close()
 
 
+def SExtractorSNR(catalog, bins=16):
+    """
+    A simple plot showing the SNR SExtractor finds.
+    """
+    txt = '%s' % datetime.datetime.isoformat(datetime.datetime.now())
+
+    snr = 1./catalog.magerr_aper
+    kde1 = KDE(snr)
+    kde1.fit()
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+
+    ax1.hist(snr, bins=bins, label='r=0.65 Aperture', normed=True, color='r', alpha=0.5)
+    ax1.axvline(x=np.mean(snr), c='g' ,ls='--', label='Mean', lw=1.6)
+    ax1.plot(kde1.support, kde1.density, 'b-', label='Gaussian KDE', lw=1.6)
+
+    print np.mean(1./catalog.magerr_aper), np.mean(1./catalog.magerr_auto)
+
+    ax1.set_xlabel('SExtractor Signal-to-Noise Ratio')
+    ax1.set_ylabel('PDF')
+
+    #ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0)
+    plt.savefig('SExtractorSNR.pdf')
+    plt.close()
+
+
 def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231, timeStamp=False):
     """
     """
@@ -100,7 +128,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1.set_xlabel('Aperture Corrected Counts - Input Catalogue')
     ax1.set_ylabel('PDF')
 
-    ax1.text(ax1.get_xlim()[0]*0.95, ax1.get_ylim()[1]*0.75, r'$SNR = \frac{\Sigma counts}{\sigma} \sim %.2f$' % snr)
+    ax1.text(ax1.get_xlim()[0]*0.95, ax1.get_ylim()[1]*0.75, r'$SNR = \frac{\left < counts \right >}{\sigma} \sim %.2f$' % snr)
 
     if timeStamp:
         ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
@@ -186,3 +214,4 @@ if __name__ == '__main__':
 
     MagnitudeDistribution(cat, mag=24.5)
     plotSourceFinderResults(mag=24.5)
+    SExtractorSNR(cat)

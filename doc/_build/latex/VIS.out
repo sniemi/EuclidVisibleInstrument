@@ -34,13 +34,14 @@
 \BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 34
 \BOOKMARK [2][-]{subsection.7.1.4}{Properties of the Point Spread Function}{section.7.1}% 35
 \BOOKMARK [2][-]{subsection.7.1.5}{Generating PSF Basis Sets}{section.7.1}% 36
-\BOOKMARK [2][-]{subsection.7.1.6}{Testing the CTI Correction Algorithm}{section.7.1}% 37
-\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 38
-\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 39
-\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 40
-\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 41
-\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 42
-\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 43
-\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 44
-\BOOKMARK [0][-]{section*.145}{Python Module Index}{}% 45
-\BOOKMARK [0][-]{section*.146}{Index}{}% 46
+\BOOKMARK [2][-]{subsection.7.1.6}{PSF Fitting}{section.7.1}% 37
+\BOOKMARK [2][-]{subsection.7.1.7}{Testing the CTI Correction Algorithm}{section.7.1}% 38
+\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 39
+\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 40
+\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 41
+\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 42
+\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 43
+\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 44
+\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 45
+\BOOKMARK [0][-]{section*.151}{Python Module Index}{}% 46
+\BOOKMARK [0][-]{section*.152}{Index}{}% 47

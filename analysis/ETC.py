@@ -175,6 +175,7 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
     nom = flux_in_aperture * exptime
     if diginoise:
         denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2 * info['aperture_size']))
+        #denom = np.sqrt(nom + bgr + (info['readnoise']**2 + (info['gain']/2.)**2) * info['aperture_size'])
     else:
         denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
 
@@ -252,14 +253,14 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=True):
 
 
 if __name__ == '__main__':
-    magnitude = 18.0 #24.5
+    magnitude = 24.5 #18.0 #24.5
     exptime = 565.0
 
     info = VISinformation()
 
-    exp = exposureTime(info, magnitude, exposures=1, diginoise=False)
+    exp = exposureTime(info, magnitude, exposures=1)#, diginoise=False)
     limit = limitingMagnitude(info, exp=exptime)
-    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False, diginoise=False)
+    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False)#, diginoise=False)
 
     print 'Exposure time required to reach SNR=10 (or 14.29) for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
     print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exptime)

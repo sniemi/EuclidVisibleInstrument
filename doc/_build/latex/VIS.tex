@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{December 12, 2012}
+\date{December 17, 2012}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -3354,6 +3354,255 @@ None
 
 \end{fulllineitems}
 
+\phantomsection\label{analysis:module-analysis.fitPSF}\index{analysis.fitPSF (module)}
+
+\subsection{PSF Fitting}
+\label{analysis:psf-fitting}
+This script can be used to fit a set of basis functions to a point spread function.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+Scikit-learn
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
+matplotlib
+
+\item[{requires}] \leavevmode
+VISsim-Python
+
+\item[{version}] \leavevmode
+0.2
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+
+\end{description}\end{quote}
+\index{BaysianPCAfitting() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.BaysianPCAfitting}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{BaysianPCAfitting}}{}{}
+Perform PCA basis set fitting using Bayesian Markov Chain Monte Carlo fitting technique.
+\begin{quote}\begin{description}
+\item[{Requires }] \leavevmode
+pyMC
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{ICAleastSq() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.ICAleastSq}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{ICAleastSq}}{}{}
+Perform least squares fitting using ICA basis set.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{PCAleastSQ() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.PCAleastSQ}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{PCAleastSQ}}{}{}
+Perform least squares fitting using PCA basis set.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{leastSQfit() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.leastSQfit}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{leastSQfit}}{\emph{x}, \emph{a0}, \emph{a1}, \emph{a2}, \emph{a3}, \emph{a4}, \emph{a5}, \emph{a6}, \emph{a7}, \emph{a8}, \emph{a9}, \emph{a10}, \emph{a11}, \emph{a12}, \emph{a13}, \emph{a14}, \emph{a15}, \emph{a16}, \emph{a17}, \emph{a18}, \emph{a19}, \emph{a20}}{}
+A simple function returning a linear combination of 20 input parameters.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{x} (\emph{mdarray}) -- data
+
+\item {} 
+\textbf{a0} -- first fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a1} -- second fitting coefficient
+
+\item {} 
+\textbf{a1} -- float
+
+\item {} 
+\textbf{a2} -- third fitting coefficient
+
+\item {} 
+\textbf{a2} -- float
+
+\item {} 
+\textbf{a3} -- fourth fitting coefficient
+
+\item {} 
+\textbf{a3} -- float
+
+\item {} 
+\textbf{a4} -- fifth fitting coefficient
+
+\item {} 
+\textbf{a4} -- float
+
+\item {} 
+\textbf{a5} -- sixth fitting coefficient
+
+\item {} 
+\textbf{a5} -- float
+
+\item {} 
+\textbf{a6} -- seventh fitting coefficient
+
+\item {} 
+\textbf{a6} -- float
+
+\item {} 
+\textbf{a7} -- eight fitting coefficient
+
+\item {} 
+\textbf{a7} -- float
+
+\item {} 
+\textbf{a8} -- ninth fitting coefficient
+
+\item {} 
+\textbf{a8} -- float
+
+\item {} 
+\textbf{a9} -- tenth fitting coefficient
+
+\item {} 
+\textbf{a9} -- float
+
+\item {} 
+\textbf{a10} -- eleventh fitting coefficient
+
+\item {} 
+\textbf{a10} -- float
+
+\item {} 
+\textbf{a11} -- twelfth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a12} -- thirteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a13} -- fourteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a14} -- fifteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a15} -- sixteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a16} -- seventieth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a17} -- eighteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a18} -- nineteenth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a19} -- twentieth fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\item {} 
+\textbf{a20} -- twentyfirst fitting coefficient
+
+\item {} 
+\textbf{a0} -- float
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+a linear combination of the data given the coefficients
+
+\item[{Return type}] \leavevmode
+ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{visualise() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.visualise}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{visualise}}{\emph{popt}, \emph{psf}, \emph{modedata}, \emph{output='PCA'}}{}
+Plot the fitting results, residuals and coefficients
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{popt} (\emph{ndarray}) -- fitting coefficients
+
+\item {} 
+\textbf{psf} (\emph{ndarray}) -- data to which the modes were fitted to
+
+\item {} 
+\textbf{modedata} (\emph{ndarray}) -- each of the basis set modes that were fit to the data
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \phantomsection\label{analysis:module-analysis.testCTIcorrection}\index{analysis.testCTIcorrection (module)}
 
 \subsection{Testing the CTI Correction Algorithm}
@@ -3517,6 +3766,7 @@ and an average background, but without any radiation damage to the CCD.}\end{fig
 \item {\texttt{analysis.analyse}}, \pageref{analysis:module-analysis.analyse}
 \item {\texttt{analysis.biasCalibration}}, \pageref{reduction:module-analysis.biasCalibration}
 \item {\texttt{analysis.ETC}}, \pageref{ETC:module-analysis.ETC}
+\item {\texttt{analysis.fitPSF}}, \pageref{analysis:module-analysis.fitPSF}
 \item {\texttt{analysis.FlatfieldCalibration}}, \pageref{reduction:module-analysis.FlatfieldCalibration}
 \item {\texttt{analysis.PSFbasisSets}}, \pageref{analysis:module-analysis.PSFbasisSets}
 \item {\texttt{analysis.PSFproperties}}, \pageref{analysis:module-analysis.PSFproperties}

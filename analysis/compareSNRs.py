@@ -71,7 +71,8 @@ def compareMagnitudes(catalog, min=22.9, max=26.1, timestamp=False):
     ax1.set_xlim(min, max)
     ax1.set_ylim(min, max)
     ax2.set_xlim(min, max)
-    ax2.set_ylim(-0.4, 1.1)
+    #ax2.set_ylim(-0.4, 1.1)
+    ax2.set_ylim(-0.62, 0.62)
 
     if timestamp:
         ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
@@ -192,7 +193,8 @@ def compareCounts(catalog, min=50, max=1610, timestamp=False):
                  c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
 
     ax2.plot([min, max], [0, 0], 'k-')
-    delta = catalog.adus - catalog.flux_aper
+    #delta = catalog.adus - catalog.flux_aper
+    delta = -catalog.adus + catalog.flux_aper
     mn = np.mean(delta)
     print mn
     ax2.axhline(y=mn, c='r', ls='--')
@@ -238,7 +240,8 @@ def compareCounts(catalog, min=50, max=1610, timestamp=False):
              c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
 
     ax2.plot([0, 1000], [1, 1], 'k-')
-    ax2.plot(catalog.snr, sexsnr/catalog.snr, c='b', ls='None', marker='o', ms=3)
+    #ax2.plot(catalog.snr, sexsnr/catalog.snr, c='b', ls='None', marker='o', ms=3)
+    ax2.plot(catalog.snr, catalog.snr/sexsnr, c='b', ls='None', marker='o', ms=3)
 
     ax2.set_xlabel('SourceFinder SNRs')
     ax1.set_ylabel('SExtractor SNRs')

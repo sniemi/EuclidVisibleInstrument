@@ -1009,6 +1009,22 @@ singular values to ensure uncorrelated outputs with unit component-wise variance
 </dd></dl>
 
 <dl class="function">
+<dt id="analysis.fitPSF.test">
+<tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">test</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.fitPSF.test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple test using both least squares and Bayesian MCMC fitting.
+Includes Poisson noise to the PSF prior fitting. The PSF is build randomly
+from the the mean PSF and the PCA components are being fitted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="analysis.fitPSF.visualise">
 <tt class="descclassname">analysis.fitPSF.</tt><tt class="descname">visualise</tt><big>(</big><em>popt</em>, <em>psf</em>, <em>modedata</em>, <em>output='PCA'</em><big>)</big><a class="headerlink" href="#analysis.fitPSF.visualise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot the fitting results, residuals and coefficients</p>

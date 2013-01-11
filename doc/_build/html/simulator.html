@@ -155,7 +155,11 @@ scaling (first step), and finally overlay onto the detector according to its pos
 </li>
 <li><p class="first">Apply detector charge bleeding in column direction [optional].</p>
 </li>
-<li><p class="first">Add photon (Poisson) noise and constant dark current to the pixel grid [optional].</p>
+<li><p class="first">Add constant dark current and background light from Zodiacal light [optional].</p>
+</li>
+<li><p class="first">Include spatially uniform scattered light to the pixel grid [optional].</p>
+</li>
+<li><p class="first">Add photon (Poisson) noise [optional]</p>
 </li>
 <li><p class="first">Add cosmetic defects from an input file [optional].</p>
 </li>
@@ -229,7 +233,7 @@ float64).</p>
 <div class="section" id="benchmarking">
 <h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
 <p>A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:</p>
-<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
 6798 objects were place on the detector
 
 real        4m14.008s
@@ -249,7 +253,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.1</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.2</td>
 </tr>
 </tbody>
 </table>
@@ -275,7 +279,8 @@ as follows:</p>
 1.07: included an option to apply non-linearity model. Cleaned the documentation.
 1.08: optimised some of the operations with numexpr (only a minor improvement).
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
-     being underestimated due to the fact that it was included as a variance not standard deviation.</pre>
+     being underestimated due to the fact that it was included as a variance not standard deviation.
+1.2: Included a spatially uniform scattered light.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -404,6 +409,14 @@ serial direction.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground">
+<tt class="descname">applyDarkCurrentAndCosmicBackground</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply dark current and the cosmic background.
+Scales dark and background with the exposure time.</p>
+<p>Additionally saves the image without noise to a FITS file.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyFlatfield">
 <tt class="descname">applyFlatfield</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyFlatfield" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies multiplicative flat field to emulate pixel-to-pixel non-uniformity.</p>
@@ -413,17 +426,15 @@ the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="simulator.simulator.VISsimulator.applyNoise">
-<tt class="descname">applyNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyNoise" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply dark current, the cosmic background, and Poisson noise.
-Scales dark and background with the exposure time.</p>
-<p>Additionally saves the image without noise to a FITS file.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyNonlinearity">
 <tt class="descname">applyNonlinearity</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyNonlinearity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies a CCD273 non-linearity model to the image being constructed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyPoissonNoise">
+<tt class="descname">applyPoissonNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyPoissonNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add Poisson noise to the image.</p>
 </dd></dl>
 
 <dl class="method">
@@ -441,6 +452,12 @@ Scales dark and background with the exposure time.</p>
 <tt class="descname">applyReadoutNoise</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyReadoutNoise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies readout noise to the image being constructed.</p>
 <p>The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and std=readout noise.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyScatteredLight">
+<tt class="descname">applyScatteredLight</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyScatteredLight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds spatially uniform scattered light</p>
 </dd></dl>
 
 <dl class="method">

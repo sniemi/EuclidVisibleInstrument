@@ -32,54 +32,58 @@ def VISinformation():
     """
     Returns a dictionary describing VIS. The following information is provided::
 
-         'beta': 0.6
-         'bias': 1000.0
-         'cosmic_bkgd': 0.172
-         'dark': 0.001
-         'diameter': 1.3
-         'dob': 0
-         'e_adu': 3.5
-         'fullwellcapacity': 200000
-         'fwc': 175000
-         'gain': 3.5
-         'galaxy_fraction': 0.836
-         'magzero': 17059000000.0
-         'ovrscanx': 20
-         'peak_fraction': 0.261179
-         'pixel_size': 0.1
-         'prescanx': 50
-         'rdose': 30000000000.0
-         'readnoise': 4.5
-         'readout': 4.5
-         'readtime': 88.0
-         'sfwc': 730000.0
-         'sky_background': 22.34
-         'sky_high': 21.74
-         'sky_low': 22.94
-         'st': 5e-06
-         'star_fraction': 0.928243
-         'svg': 1e-10
-         't': 0.01024
-         'trapfile': 'cdm_euclid.dat'
-         'vg': 6e-11
-         'vth': 11680000.0
-         'xsize': 2048
-         'ysize': 2066
-         'zeropoint': 25.58
-         'zodiacal': 22.942
+         'apCorrection': 0.925969,
+         'aperture_size': 132.73228961416876,
+         'beta': 0.6,
+         'bias': 1000.0,
+         'cosmic_bkgd': 0.172,
+         'dark': 0.001,
+         'diameter': 1.3,
+         'dob': 0,
+         'e_adu': 3.1,
+         'fullwellcapacity': 200000,
+         'fwc': 175000,
+         'gain': 3.1,
+         'galaxy_fraction': 0.836,
+         'magzero': 15182880871.225231,
+         'ovrscanx': 20,
+         'peak_fraction': 0.261179,
+         'pixel_size': 0.1,
+         'prescanx': 50,
+         'rdose': 30000000000.0,
+         'readnoise': 4.5,
+         'readout': 4.5,
+         'readtime': 88.0,
+         'sfwc': 730000.0,
+         'sky_background': 22.34,
+         'sky_high': 21.74,
+         'sky_low': 22.94,
+         'st': 5e-06,
+         'star_fraction': 0.928243,
+         'svg': 1e-10,
+         't': 0.01024,
+         'trapfile': 'cdm_euclid.dat',
+         'vg': 6e-11,
+         'vth': 11680000.0,
+         'xsize': 2048,
+         'ysize': 2066,
+         'zeropoint': 25.45338546114,
+         'zeropointNoObscuration': 25.57991044453,
+         'zodiacal': 22.55
 
-    The zeropoint was calculatd as follows::
+    The magzero was calculated as follows::
 
-        1./10**(-0.4*(25.57991044453)) = 1.705942e+10
+        1./10**(-0.4*(25.45338546114)) = 15182880871.225231
 
     :return: instrument model parameters
     :rtype: dict
     """
-    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.34, zodiacal=22.942,
+    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.3203, zodiacal=22.55,
                diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
-               zeropoint=25.57991044453, gain=3.5, sky_high=21.74, sky_low=22.94, magzero=1.7059e10,
-               fullwellcapacity=200000, readout=4.5, bias=1000.0, cosmic_bkgd=0.172, e_adu=3.5,
-               xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969)
+               zeropoint=25.45338546114, gain=3.1, sky_high=21.7206, sky_low=22.9207, magzero=15182880871.225231,
+               fullwellcapacity=200000, readout=4.5, bias=1000.0, cosmic_bkgd=0.172, e_adu=3.1,
+               xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969,
+               zeropointNoObscuration=25.57991044453)
 
     out.update({'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat',
                 'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11,

@@ -43,33 +43,35 @@
 \indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{26}
+\indexentry{applyDarkCurrentAndCosmicBackground() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{26}
-\indexentry{applyNoise() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyNonlinearity() (simulator.simulator.VISsimulator method)|hyperpage}{26}
+\indexentry{applyPoissonNoise() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{26}
-\indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{26}
-\indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{26}
+\indexentry{applyScatteredLight() (simulator.simulator.VISsimulator method)|hyperpage}{27}
+\indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{27}
+\indexentry{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)|hyperpage}{27}
 \indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{27}
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{27}
 \indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{27}
 \indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{27}
 \indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{27}
-\indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{27}
+\indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{28}
 \indexentry{readConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{28}
+\indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{simulator.generateGalaxies (module)|hyperpage}{29}
+\indexentry{simulator.generateGalaxies (module)|hyperpage}{30}
 \indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{30}
 \indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
 \indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
-\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{30}
+\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{31}
 \indexentry{reduction.reduceVISdata (module)|hyperpage}{33}
 \indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{34}
 \indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{34}
@@ -152,6 +154,7 @@
 \indexentry{ICAleastSq() (in module analysis.fitPSF)|hyperpage}{50}
 \indexentry{PCAleastSQ() (in module analysis.fitPSF)|hyperpage}{50}
 \indexentry{leastSQfit() (in module analysis.fitPSF)|hyperpage}{50}
+\indexentry{test() (in module analysis.fitPSF)|hyperpage}{52}
 \indexentry{visualise() (in module analysis.fitPSF)|hyperpage}{52}
 \indexentry{analysis.testCTIcorrection (module)|hyperpage}{52}
 \indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{52}

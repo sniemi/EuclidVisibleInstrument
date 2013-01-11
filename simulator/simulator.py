@@ -36,7 +36,9 @@ The approximate sequence of events in the simulator is as follows:
       #. Add a charge injection line (horizontal and/or vertical) [optional].
       #. Add cosmic ray tracks onto the CCD with random positions but known distribution [optional].
       #. Apply detector charge bleeding in column direction [optional].
-      #. Add photon (Poisson) noise and constant dark current to the pixel grid [optional].
+      #. Add constant dark current and background light from Zodiacal light [optional].
+      #. Include spatially uniform scattered light to the pixel grid [optional].
+      #. Add photon (Poisson) noise [optional]
       #. Add cosmetic defects from an input file [optional].
       #. Add pre- and overscan regions in the serial direction [optional].
       #. Apply the CDM03 radiation damage model [optional].
@@ -95,7 +97,7 @@ Benchmarking
 
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file::
 
-    Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+    Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
     6798 objects were place on the detector
 
     real	4m14.008s
@@ -121,7 +123,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.1
+:version: 1.2
 
 Version and change logs::
 
@@ -147,6 +149,7 @@ Version and change logs::
     1.08: optimised some of the operations with numexpr (only a minor improvement).
     1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
          being underestimated due to the fact that it was included as a variance not standard deviation.
+    1.2: Included a spatially uniform scattered light.
 
 
 Future Work
@@ -189,7 +192,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.11
+__version__ = 1.2
 
 
 class VISsimulator():
@@ -239,9 +242,10 @@ class VISsimulator():
                                      dark=0.001,
                                      readout=4.5,
                                      bias=1000.0,
-                                     cosmic_bkgd=0.1976806579195,
-                                     e_adu=3.5,
-                                     magzero=1.7059e10,
+                                     cosmic_bkgd=0.182758225257,
+                                     scattered_light=2.96e-2,
+                                     e_adu=3.1,
+                                     magzero=15182880871.225231,
                                      exposures=1,
                                      exptime=565.0,
                                      ra=123.0,
@@ -354,6 +358,10 @@ class VISsimulator():
             self.flatfieldM = self.config.getboolean(self.section, 'flatfieldM')
         except:
             self.flatfieldM = False
+        try:
+            self.scatteredlight = self.config.getboolean(self.section, 'scatteredLight')
+        except:
+            self.scatteredlight = True
 
         self.information['variablePSF'] = False
 
@@ -1163,9 +1171,9 @@ class VISsimulator():
         self.writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
 
 
-    def applyNoise(self):
+    def applyDarkCurrentAndCosmicBackground(self):
         """
-        Apply dark current, the cosmic background, and Poisson noise.
+        Apply dark current and the cosmic background.
         Scales dark and background with the exposure time.
 
         Additionally saves the image without noise to a FITS file.
@@ -1181,9 +1189,22 @@ class VISsimulator():
         if self.cosmicRays:
             self.imagenoCR += noise
 
+
+    def applyScatteredLight(self):
+        """
+        Adds spatially uniform scattered light
+        """
+        sl = self.information['exptime'] * self.information['scattered_light']
+        self.image += sl
+        self.log.info('Added scattered light = %f' % sl)
+
+
+    def applyPoissonNoise(self):
+        """
+        Add Poisson noise to the image.
+        """
         self.image[self.image < 0.0] = 0.0
         self.image = np.random.poisson(self.image)
-        self.image[self.image < 0.0] = 0.0
         self.log.info('Added Poisson noise')
 
         if self.cosmicRays:
@@ -1504,7 +1525,13 @@ class VISsimulator():
             self.applyBleeding()
 
         if self.noise:
-            self.applyNoise()
+            self.applyDarkCurrentAndCosmicBackground()
+
+        if self.scatteredlight:
+            self.applyScatteredLight()
+
+        if self.noise:
+            self.applyPoissonNoise()
 
         if self.cosmetics:
             self.applyCosmetics()

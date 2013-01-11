@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{December 17, 2012}
+\date{January 11, 2013}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -257,47 +257,50 @@ ndarray
 Returns a dictionary describing VIS. The following information is provided:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-'beta': 0.6
-'bias': 1000.0
-'cosmic\_bkgd': 0.172
-'dark': 0.001
-'diameter': 1.3
-'dob': 0
-'e\_adu': 3.5
-'fullwellcapacity': 200000
-'fwc': 175000
-'gain': 3.5
-'galaxy\_fraction': 0.836
-'magzero': 17059000000.0
-'ovrscanx': 20
-'peak\_fraction': 0.261179
-'pixel\_size': 0.1
-'prescanx': 50
-'rdose': 30000000000.0
-'readnoise': 4.5
-'readout': 4.5
-'readtime': 88.0
-'sfwc': 730000.0
-'sky\_background': 22.34
-'sky\_high': 21.74
-'sky\_low': 22.94
-'st': 5e-06
-'star\_fraction': 0.928243
-'svg': 1e-10
-'t': 0.01024
-'trapfile': 'cdm\_euclid.dat'
-'vg': 6e-11
-'vth': 11680000.0
-'xsize': 2048
-'ysize': 2066
-'zeropoint': 25.58
-'zodiacal': 22.942
+'apCorrection': 0.925969,
+'aperture\_size': 132.73228961416876,
+'beta': 0.6,
+'bias': 1000.0,
+'cosmic\_bkgd': 0.172,
+'dark': 0.001,
+'diameter': 1.3,
+'dob': 0,
+'e\_adu': 3.1,
+'fullwellcapacity': 200000,
+'fwc': 175000,
+'gain': 3.1,
+'galaxy\_fraction': 0.836,
+'magzero': 15182880871.225231,
+'ovrscanx': 20,
+'peak\_fraction': 0.261179,
+'pixel\_size': 0.1,
+'prescanx': 50,
+'rdose': 30000000000.0,
+'readnoise': 4.5,
+'readout': 4.5,
+'readtime': 88.0,
+'sfwc': 730000.0,
+'sky\_background': 22.34,
+'sky\_high': 21.74,
+'sky\_low': 22.94,
+'st': 5e-06,
+'star\_fraction': 0.928243,
+'svg': 1e-10,
+'t': 0.01024,
+'trapfile': 'cdm\_euclid.dat',
+'vg': 6e-11,
+'vth': 11680000.0,
+'xsize': 2048,
+'ysize': 2066,
+'zeropoint': 25.45338546114,
+'zeropointNoObscuration': 25.57991044453,
+'zodiacal': 22.55
 \end{Verbatim}
 
-The zeropoint was calculatd as follows:
+The magzero was calculated as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\PYG{l+m+mf}{1.}\PYG{o}{/}\PYG{l+m+mi}{10}\PYG{o}{*}\PYG{o}{*}\PYG{p}{(}\PYG{o}{-}\PYG{l+m+mf}{0.4}\PYG{o}{*}\PYG{p}{(}\PYG{l+m+mf}{25.57991044453}\PYG{p}{)}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mf}{1.705942e+10}
+\PYG{l+m+mf}{1.}\PYG{o}{/}\PYG{l+m+mi}{10}\PYG{o}{*}\PYG{o}{*}\PYG{p}{(}\PYG{o}{-}\PYG{l+m+mf}{0.4}\PYG{o}{*}\PYG{p}{(}\PYG{l+m+mf}{25.45338546114}\PYG{p}{)}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mf}{15182880871.225231}
 \end{Verbatim}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
@@ -1180,7 +1183,13 @@ Add cosmic ray tracks onto the CCD with random positions but known distribution 
 Apply detector charge bleeding in column direction {[}optional{]}.
 
 \item {} 
-Add photon (Poisson) noise and constant dark current to the pixel grid {[}optional{]}.
+Add constant dark current and background light from Zodiacal light {[}optional{]}.
+
+\item {} 
+Include spatially uniform scattered light to the pixel grid {[}optional{]}.
+
+\item {} 
+Add photon (Poisson) noise {[}optional{]}
 
 \item {} 
 Add cosmetic defects from an input file {[}optional{]}.
@@ -1272,7 +1281,7 @@ float64).
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 intscale=199.421150298 size=0.0353116000387
+Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
 6798 objects were place on the detector
 
 real        4m14.008s
@@ -1294,7 +1303,7 @@ and then analysing the results with e.g. RunSnakeRun.
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.1
+1.2
 
 \end{description}\end{quote}
 
@@ -1323,6 +1332,7 @@ Version and change logs:
 1.08: optimised some of the operations with numexpr (only a minor improvement).
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
+1.2: Included a spatially uniform scattered light.
 \end{Verbatim}
 
 
@@ -1492,6 +1502,17 @@ This method does not work if the input file has exactly one line.
 
 \end{fulllineitems}
 
+\index{applyDarkCurrentAndCosmicBackground() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground}\pysiglinewithargsret{\bfcode{applyDarkCurrentAndCosmicBackground}}{}{}
+Apply dark current and the cosmic background.
+Scales dark and background with the exposure time.
+
+Additionally saves the image without noise to a FITS file.
+
+\end{fulllineitems}
+
 \index{applyFlatfield() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
@@ -1504,22 +1525,19 @@ the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).
 
 \end{fulllineitems}
 
-\index{applyNoise() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNoise}\pysiglinewithargsret{\bfcode{applyNoise}}{}{}
-Apply dark current, the cosmic background, and Poisson noise.
-Scales dark and background with the exposure time.
-
-Additionally saves the image without noise to a FITS file.
-
-\end{fulllineitems}
-
 \index{applyNonlinearity() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.applyNonlinearity}\pysiglinewithargsret{\bfcode{applyNonlinearity}}{}{}
 Applies a CCD273 non-linearity model to the image being constructed.
+
+\end{fulllineitems}
+
+\index{applyPoissonNoise() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyPoissonNoise}\pysiglinewithargsret{\bfcode{applyPoissonNoise}}{}{}
+Add Poisson noise to the image.
 
 \end{fulllineitems}
 
@@ -1546,6 +1564,14 @@ Class :\emph{CDM03}
 Applies readout noise to the image being constructed.
 
 The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and std=readout noise.
+
+\end{fulllineitems}
+
+\index{applyScatteredLight() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyScatteredLight}\pysiglinewithargsret{\bfcode{applyScatteredLight}}{}{}
+Adds spatially uniform scattered light
 
 \end{fulllineitems}
 
@@ -3573,6 +3599,21 @@ a linear combination of the data given the coefficients
 
 \item[{Return type}] \leavevmode
 ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{test() (in module analysis.fitPSF)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.fitPSF.test}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{test}}{}{}
+Simple test using both least squares and Bayesian MCMC fitting.
+Includes Poisson noise to the PSF prior fitting. The PSF is build randomly
+from the the mean PSF and the PCA components are being fitted.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
 
 \end{description}\end{quote}
 

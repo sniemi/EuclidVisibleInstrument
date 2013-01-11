@@ -108,11 +108,11 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     if np.abs(mag - 18.) < 0.1:
         counts = data.counts / apcorr - 608137.825681  #for 18mag
     else:
-        counts = data.counts / apcorr - 1527.57315282 #for 24.5mag
+        counts = data.counts / apcorr - 1359.57331621 #1527.57315282 #for 24.5mag
     xpos = np.mean(counts)
     std = np.std(data.counts/apcorr)
     snr = np.mean(data.counts/apcorr)/std
-    print snr, np.mean(data.counts)/std, 1527.57315282/std, np.mean(data.counts), std
+    print snr, np.mean(data.counts)/std, 1359.57331621/std, np.mean(data.counts), std
     kde = KDE(counts)
     kde.fit()
 
@@ -161,7 +161,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     plt.close()
 
     #pick the ones with well recovered flux
-    msk = data.counts > 1369. #90% of 1527.5
+    msk = data.counts > 1223.6 #90% of 1369.57
 
     kde = KDE(data.snr[msk])
     kde.fit()

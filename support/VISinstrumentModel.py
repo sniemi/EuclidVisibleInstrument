@@ -11,7 +11,7 @@ size, dark current, gain, zeropoint, and sky background.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.4
+:version: 0.5
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)

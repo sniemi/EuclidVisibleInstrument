@@ -149,7 +149,8 @@ Version and change logs::
     1.08: optimised some of the operations with numexpr (only a minor improvement).
     1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
          being underestimated due to the fact that it was included as a variance not standard deviation.
-    1.2: Included a spatially uniform scattered light.
+    1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
+         deriving the Poisson noise.
 
 
 Future Work
@@ -286,8 +287,8 @@ class VISsimulator():
             dark = 0.001
             readout = 4.5
             bias = 1000.0
-            cosmic_bkgd = 0.172
-            e_ADU = 3.5
+            cosmic_bkgd = 0.182
+            e_ADU = 3.1
             injection = 150000.0
             magzero = 1.7059e10
             exposures = 1
@@ -328,6 +329,9 @@ class VISsimulator():
 
         self.information.update(settings)
 
+        #force gain to be float
+        self.information['e_adu'] = float(self.information['e_adu'])
+
         #name of the output file, include quadrants and CCDs
         self.information['output'] = 'Q%i_0%i_0%i%s' % (self.information['quadrant'],
                                                         self.information['ccdx'],
@@ -362,6 +366,10 @@ class VISsimulator():
             self.scatteredlight = self.config.getboolean(self.section, 'scatteredLight')
         except:
             self.scatteredlight = True
+        try:
+            self.readoutNoise =  self.config.getboolean(self.section, 'readoutNoise')
+        except:
+            self.readoutNoise = True
 
         self.information['variablePSF'] = False
 
@@ -859,7 +867,7 @@ class VISsimulator():
         for k, stype in enumerate(self.sp):
 
             #finemap array
-            fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling))
+            fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling), dtype=np.float64)
 
             if stype == 0:
                 data = self.PSF.copy()
@@ -1192,7 +1200,7 @@ class VISsimulator():
 
     def applyScatteredLight(self):
         """
-        Adds spatially uniform scattered light
+        Adds spatially uniform scattered light to the image.
         """
         sl = self.information['exptime'] * self.information['scattered_light']
         self.image += sl
@@ -1203,14 +1211,16 @@ class VISsimulator():
         """
         Add Poisson noise to the image.
         """
-        self.image[self.image < 0.0] = 0.0
-        self.image = np.random.poisson(self.image)
+        rounded = np.rint(self.image)
+        residual = self.image.copy() - rounded #ugly workaround for multiple rounding operations...
+        rounded[rounded < 0.0] = 0.0
+        self.image = np.random.poisson(rounded).astype(np.float64)
         self.log.info('Added Poisson noise')
+        self.image += residual
 
         if self.cosmicRays:
-            self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
-            self.imagenoCR = np.random.poisson(self.imagenoCR)
-            self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
+            #self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
+            self.imagenoCR = np.random.poisson(np.rint(self.imagenoCR)).astype(np.float64)
 
 
     def applyCosmetics(self):
@@ -1297,6 +1307,10 @@ class VISsimulator():
         """
         Convert from electrons to ADUs using the value read from the configuration file.
         """
+        if self.debug:
+            #save the image without converting to integers
+            self.writeFITSfile(self.image, 'floatsNoGain' + self.information['output'])
+
         self.image /= self.information['e_adu']
         self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_adu'])
 
@@ -1407,19 +1421,24 @@ class VISsimulator():
         """
         #also write out an image without cosmics if those were added
         if self.cosmicRays:
-            self.imagenoCR = self.imagenoCR.astype(np.int)
+            self.imagenoCR = np.rint(self.imagenoCR).astype(np.int)
             self.imagenoCR[self.imagenoCR > max] = max
             self.writeFITSfile(self.imagenoCR, 'nocr' + self.information['output'], unsigned16bit=True)
 
-        #avoid negative numbers in case bias level was not added
-        self.image[self.image < 0.0] = 0
+        if self.debug:
+            #save the image without converting to integers
+            self.writeFITSfile(self.image, 'floats' + self.information['output'])
 
-        self.image = self.image.astype(np.int)
+        #avoid negative numbers in case bias level was not added
+        #self.image[self.image < 0.0] = 0.
+        #cut of the values larger than max
         self.image[self.image > max] = max
+
+        self.image = np.rint(self.image).astype(np.int)
         self.log.info('Maximum and total values of the image are %i and %i, respectively' % (np.max(self.image),
                                                                                              np.sum(self.image)))
         if self.radiationDamage:
-            self.noCTI = self.noCTI.astype(np.int)
+            self.noCTI = np.rint(self.noCTI).astype(np.int)
             self.noCTI[self.noCTI > max] = max
             self.writeFITSfile(self.noCTI, 'nocti' + self.information['output'], unsigned16bit=True)
 
@@ -1545,7 +1564,7 @@ class VISsimulator():
         if self.nonlinearity:
             self.applyNonlinearity()
 
-        if self.noise:
+        if self.readoutNoise:
             self.applyReadoutNoise()
 
         self.electrons2ADU()
@@ -1556,6 +1575,7 @@ class VISsimulator():
             self.applyBias()
 
         self.discretise()
+
         self.writeOutputs()
 
 

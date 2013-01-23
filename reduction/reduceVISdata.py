@@ -11,8 +11,9 @@ input is a single quadrant then reduce correctly.
 The script performs the following data reduction steps::
 
     1 Bias correction
-    2 Flat fielding (only if an input file is provided)
-    3 CTI correction
+    2 CTI correction
+    3 Flat fielding (only if an input file is provided)
+
 
 To Run::
 
@@ -245,8 +246,8 @@ class reduceVISdata():
 
     def doAll(self):
         self.subtractBias()
-        self.flatfield()
         self.applyCTICorrection()
+        self.flatfield()
         self.writeFITSfile()
 
 

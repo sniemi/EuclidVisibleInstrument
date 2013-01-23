@@ -7,13 +7,13 @@
   \item addLampFlux() (simulator.simulator.VISsimulator method), \hyperpage{25}
   \item addObjects() (simulator.generateGalaxies.generateFakeData method), \hyperpage{30}
   \item addObjects() (simulator.simulator.VISsimulator method), \hyperpage{25}
-  \item addPreOverScans() (simulator.simulator.VISsimulator method), \hyperpage{25}
+  \item addPreOverScans() (simulator.simulator.VISsimulator method), \hyperpage{26}
   \item addReadoutNoise() (in module analysis.biasCalibration), \hyperpage{34}
   \item analyseVISdata (class in analysis.analyse), \hyperpage{41}
   \item analysis.analyse (module), \hyperpage{41}
   \item analysis.biasCalibration (module), \hyperpage{34}
   \item analysis.ETC (module), \hyperpage{13}
-  \item analysis.fitPSF (module), \hyperpage{49}
+  \item analysis.fitPSF (module), \hyperpage{50}
   \item analysis.FlatfieldCalibration (module), \hyperpage{37}
   \item analysis.PSFbasisSets (module), \hyperpage{48}
   \item analysis.PSFproperties (module), \hyperpage{47}
@@ -93,8 +93,8 @@
   \item generatePlots() (in module analysis.PSFproperties), \hyperpage{47}
   \item generateResidualFlatField() (in module analysis.FlatfieldCalibration), \hyperpage{38}
   \item getCenterOfMass() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
-  \item getContours() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
-  \item getFluxes() (analysis.sourceFinder.sourceFinder method), \hyperpage{45, 46}
+  \item getContours() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
+  \item getFluxes() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
   \item getSizes() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
 
   \indexspace
@@ -121,7 +121,7 @@
 
   \indexspace
   \bigletter P
-  \item parseName() (in module analysis.PSFproperties), \hyperpage{47}
+  \item parseName() (in module analysis.PSFproperties), \hyperpage{48}
   \item PCAleastSQ() (in module analysis.fitPSF), \hyperpage{50}
   \item peakFraction() (in module analysis.PSFproperties), \hyperpage{48}
   \item plot() (analysis.sourceFinder.sourceFinder method), \hyperpage{45}, \hyperpage{47}
@@ -169,7 +169,7 @@
   \item simulator.simulator (module), \hyperpage{21}
   \item SNR() (in module analysis.ETC), \hyperpage{13}
   \item SNRproptoPeak() (in module analysis.ETC), \hyperpage{14}
-  \item sourceFinder (class in analysis.sourceFinder), \hyperpage{44, 45}
+  \item sourceFinder (class in analysis.sourceFinder), \hyperpage{44}, \hyperpage{46}
   \item sources.createObjectCatalogue (module), \hyperpage{17}
   \item starCatalog() (in module sources.createObjectCatalogue), \hyperpage{18}
   \item starCatalogFixedMagnitude() (in module sources.createObjectCatalogue), \hyperpage{18}
@@ -181,7 +181,7 @@
   \item test() (in module analysis.fitPSF), \hyperpage{52}
   \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{36}
   \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{37}
-  \item testCTIcorrection() (in module analysis.testCTIcorrection), \hyperpage{52}
+  \item testCTIcorrection() (in module analysis.testCTIcorrection), \hyperpage{53}
   \item testFlatCalibration() (in module analysis.FlatfieldCalibration), \hyperpage{40}
   \item testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration), \hyperpage{40}
   \item testNonLinearity() (in module support.VISinstrumentModel), \hyperpage{7}
@@ -193,7 +193,7 @@
   \item VISinformation() (in module support.VISinstrumentModel), \hyperpage{6}
   \item VISsimulator (class in simulator.simulator), \hyperpage{25}
   \item visualise() (in module analysis.fitPSF), \hyperpage{52}
-  \item visualiseBasisSets() (in module analysis.PSFbasisSets), \hyperpage{49}
+  \item visualiseBasisSets() (in module analysis.PSFbasisSets), \hyperpage{50}
 
   \indexspace
   \bigletter W

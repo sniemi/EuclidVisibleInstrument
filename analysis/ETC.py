@@ -35,7 +35,7 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True,
 
     :param info: information describing the instrument
     :type info: dict
-    :param magnitude: the magnitude of the objct
+    :param magnitude: the magnitude of the object
     :type magnitude: float or ndarray
     :param snr: signal-to-noise ratio required [default = 10.0].
     :type snr: float
@@ -47,7 +47,7 @@ def exposureTime(info, magnitude, snr=10.0, exposures=3, fudge=0.7, galaxy=True,
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
     :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
-                      should be used [default = True]
+                      should be used [default = False]
     :type diginoise: boolean
 
     :return: exposure time [seconds]
@@ -102,7 +102,7 @@ def limitingMagnitude(info, exp=565, snr=10.0, exposures=3, fudge=0.7, galaxy=Tr
                    If galaxy=True then the fraction of flux within an aperture is lower than in case of a point source.
     :type galaxy: boolean
     :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
-                      should be used [default = True]
+                      should be used [default = False]
     :type diginoise: boolean
 
     :return: limiting magnitude given the input information
@@ -153,7 +153,7 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
     :param background: whether to include background from sky, instrument, and dark current [default=True]
     :type background: boolean
     :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
-                      should be used [default = True]
+                      should be used [default = False]
     :type diginoise: boolean
 
     :return: signal-to-noise ratio
@@ -169,6 +169,7 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
     instrument = 0.2 * zodiacal  #20% of zodiacal background
     bgr = (sky + instrument + info['dark']) * info['aperture_size'] * exptime
 
+    #print bgr / info['aperture_size']
     #print info['zeropoint'], sky, zodiacal, instrument, bgr
 
     if not background:
@@ -194,7 +195,7 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False):
     :param exposures: number of exposures [default = 1]
     :type exposures: int
     :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
-                      should be used [default = True]
+                      should be used [default = False]
     :type diginoise: boolean
 
     :return: signal-to-noise ratio
@@ -254,7 +255,7 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False):
 
 
 if __name__ == '__main__':
-    magnitude = 18.0 #24.5
+    magnitude = 24.5
     exptime = 565.0
 
     info = VISinformation()

@@ -280,7 +280,8 @@ as follows:</p>
 1.08: optimised some of the operations with numexpr (only a minor improvement).
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
-1.2: Included a spatially uniform scattered light.</pre>
+1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
+     deriving the Poisson noise.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -581,8 +582,8 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <span class="n">dark</span> <span class="o">=</span> <span class="mf">0.001</span>
 <span class="n">readout</span> <span class="o">=</span> <span class="mf">4.5</span>
 <span class="n">bias</span> <span class="o">=</span> <span class="mf">1000.0</span>
-<span class="n">cosmic_bkgd</span> <span class="o">=</span> <span class="mf">0.172</span>
-<span class="n">e_ADU</span> <span class="o">=</span> <span class="mf">3.5</span>
+<span class="n">cosmic_bkgd</span> <span class="o">=</span> <span class="mf">0.182</span>
+<span class="n">e_ADU</span> <span class="o">=</span> <span class="mf">3.1</span>
 <span class="n">injection</span> <span class="o">=</span> <span class="mf">150000.0</span>
 <span class="n">magzero</span> <span class="o">=</span> <span class="mf">1.7059e10</span>
 <span class="n">exposures</span> <span class="o">=</span> <span class="mi">1</span>

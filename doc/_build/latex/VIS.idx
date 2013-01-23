@@ -39,7 +39,7 @@
 \indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{25}
 \indexentry{addLampFlux() (simulator.simulator.VISsimulator method)|hyperpage}{25}
 \indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{25}
-\indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{25}
+\indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{26}
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{26}
@@ -122,14 +122,14 @@
 \indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{45}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{45}
 \indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{45}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{45}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{46}
 \indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
 \indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{46}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
 \indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{47}
@@ -138,7 +138,7 @@
 \indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{47}
 \indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{47}
 \indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{47}
-\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{47}
+\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{48}
 \indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{48}
 \indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{48}
 \indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{48}
@@ -148,8 +148,8 @@
 \indexentry{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{generateMovie() (in module analysis.PSFbasisSets)|hyperpage}{49}
 \indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{49}
-\indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{49}
-\indexentry{analysis.fitPSF (module)|hyperpage}{49}
+\indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{50}
+\indexentry{analysis.fitPSF (module)|hyperpage}{50}
 \indexentry{BaysianPCAfitting() (in module analysis.fitPSF)|hyperpage}{50}
 \indexentry{ICAleastSq() (in module analysis.fitPSF)|hyperpage}{50}
 \indexentry{PCAleastSQ() (in module analysis.fitPSF)|hyperpage}{50}
@@ -158,4 +158,4 @@
 \indexentry{visualise() (in module analysis.fitPSF)|hyperpage}{52}
 \indexentry{analysis.testCTIcorrection (module)|hyperpage}{52}
 \indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{52}
-\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{52}
+\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{53}

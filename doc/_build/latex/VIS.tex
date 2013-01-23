@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{January 11, 2013}
+\date{January 15, 2013}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -183,7 +183,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.4
+0.5
 
 \end{description}\end{quote}
 \index{CCDnonLinearityModel() (in module support.VISinstrumentModel)}
@@ -818,7 +818,7 @@ Sami-Matias Niemi
 \index{SNR() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}, \emph{diginoise=True}}{}
+\phantomsection\label{ETC:analysis.ETC.SNR}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNR}}{\emph{info}, \emph{magnitude=24.5}, \emph{exptime=565.0}, \emph{exposures=3}, \emph{galaxy=True}, \emph{background=True}, \emph{diginoise=False}}{}
 Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
 number of exposures.
 \begin{quote}\begin{description}
@@ -844,7 +844,7 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 \item {} 
 \textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
-should be used {[}default = True{]}
+should be used {[}default = False{]}
 
 \end{itemize}
 
@@ -861,7 +861,7 @@ float or ndarray
 \index{SNRproptoPeak() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}, \emph{diginoise=True}}{}
+\phantomsection\label{ETC:analysis.ETC.SNRproptoPeak}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{SNRproptoPeak}}{\emph{info}, \emph{exptime=565.0}, \emph{exposures=1}, \emph{diginoise=False}}{}
 Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -876,7 +876,7 @@ Calculates the relation between the signal-to-noise ratio and the electrons in t
 
 \item {} 
 \textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
-should be used {[}default = True{]}
+should be used {[}default = False{]}
 
 \end{itemize}
 
@@ -893,7 +893,7 @@ float or ndarray
 \index{exposureTime() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=True}}{}
+\phantomsection\label{ETC:analysis.ETC.exposureTime}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{exposureTime}}{\emph{info}, \emph{magnitude}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=False}}{}
 Returns the exposure time for a given magnitude.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -901,7 +901,7 @@ Returns the exposure time for a given magnitude.
 \textbf{info} (\emph{dict}) -- information describing the instrument
 
 \item {} 
-\textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the objct
+\textbf{magnitude} (\emph{float or ndarray}) -- the magnitude of the object
 
 \item {} 
 \textbf{snr} (\emph{float}) -- signal-to-noise ratio required {[}default = 10.0{]}.
@@ -918,7 +918,7 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 \item {} 
 \textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
-should be used {[}default = True{]}
+should be used {[}default = False{]}
 
 \end{itemize}
 
@@ -935,7 +935,7 @@ float or ndarray
 \index{limitingMagnitude() (in module analysis.ETC)}
 
 \begin{fulllineitems}
-\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=True}}{}
+\phantomsection\label{ETC:analysis.ETC.limitingMagnitude}\pysiglinewithargsret{\code{analysis.ETC.}\bfcode{limitingMagnitude}}{\emph{info}, \emph{exp=565}, \emph{snr=10.0}, \emph{exposures=3}, \emph{fudge=0.7}, \emph{galaxy=True}, \emph{diginoise=False}}{}
 Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
 level to be reached.
 \begin{quote}\begin{description}
@@ -964,7 +964,7 @@ If galaxy=True then the fraction of flux within an aperture is lower than in cas
 
 \item {} 
 \textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
-should be used {[}default = True{]}
+should be used {[}default = False{]}
 
 \end{itemize}
 
@@ -1332,7 +1332,8 @@ Version and change logs:
 1.08: optimised some of the operations with numexpr (only a minor improvement).
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
-1.2: Included a spatially uniform scattered light.
+1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
+     deriving the Poisson noise.
 \end{Verbatim}
 
 
@@ -1715,8 +1716,8 @@ The configuration file may look as follows:
 \PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
 \PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
 \PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
-\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.172}
-\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.5}
+\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.182}
+\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.1}
 \PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
 \PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{1.7059e10}
 \PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
@@ -2797,7 +2798,7 @@ Sami-Matias Niemi
 \href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.5
+0.6
 
 \end{description}\end{quote}
 \index{sourceFinder (class in analysis.sourceFinder)}
@@ -2861,6 +2862,11 @@ Find all pixels above the median pixel after smoothing with a Gaussian filter.
 
 \begin{notice}{note}{Note:}
 maybe one should use mode instead of median?
+\end{notice}
+
+\begin{notice}{warning}{Warning:}
+The background estimation is very crude and should not be trusted. One should probably write
+an iterative scheme were the background is recalculated after identifying the objects.
 \end{notice}
 
 \end{fulllineitems}
@@ -3028,6 +3034,11 @@ Find all pixels above the median pixel after smoothing with a Gaussian filter.
 
 \begin{notice}{note}{Note:}
 maybe one should use mode instead of median?
+\end{notice}
+
+\begin{notice}{warning}{Warning:}
+The background estimation is very crude and should not be trusted. One should probably write
+an iterative scheme were the background is recalculated after identifying the objects.
 \end{notice}
 
 \end{fulllineitems}

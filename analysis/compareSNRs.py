@@ -71,8 +71,7 @@ def compareMagnitudes(catalog, min=22.9, max=26.1, timestamp=False):
     ax1.set_xlim(min, max)
     ax1.set_ylim(min, max)
     ax2.set_xlim(min, max)
-    #ax2.set_ylim(-0.4, 1.1)
-    ax2.set_ylim(-0.62, 0.62)
+    ax2.set_ylim(-0.23, 1.1)
 
     if timestamp:
         ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
@@ -81,7 +80,7 @@ def compareMagnitudes(catalog, min=22.9, max=26.1, timestamp=False):
     plt.close()
 
 
-def compareSNR(catalog, max=40, noNoise=False):
+def compareSNR(catalog, max=33, noNoise=False):
     """
     Compare SExtracted SNR to radiometric model from ETC module.
     """
@@ -173,7 +172,7 @@ def compareSNR(catalog, max=40, noNoise=False):
     plt.close()
 
 
-def compareCounts(catalog, min=50, max=1610, timestamp=False):
+def compareCounts(catalog, min=30, max=1610, timestamp=False):
     """
 
     """
@@ -193,8 +192,7 @@ def compareCounts(catalog, min=50, max=1610, timestamp=False):
                  c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
 
     ax2.plot([min, max], [0, 0], 'k-')
-    #delta = catalog.adus - catalog.flux_aper
-    delta = -catalog.adus + catalog.flux_aper
+    delta = catalog.adus - catalog.flux_aper
     mn = np.mean(delta)
     print mn
     ax2.axhline(y=mn, c='r', ls='--')
@@ -240,8 +238,7 @@ def compareCounts(catalog, min=50, max=1610, timestamp=False):
              c='b', ls='None', marker='o', ms=3, label='r=0.65 Aperture')
 
     ax2.plot([0, 1000], [1, 1], 'k-')
-    #ax2.plot(catalog.snr, sexsnr/catalog.snr, c='b', ls='None', marker='o', ms=3)
-    ax2.plot(catalog.snr, catalog.snr/sexsnr, c='b', ls='None', marker='o', ms=3)
+    ax2.plot(catalog.snr, sexsnr/catalog.snr, c='b', ls='None', marker='o', ms=3)
 
     ax2.set_xlabel('SourceFinder SNRs')
     ax1.set_ylabel('SExtractor SNRs')
@@ -251,9 +248,9 @@ def compareCounts(catalog, min=50, max=1610, timestamp=False):
     #ax1.set_yticks(ax1.get_yticks()[1:])
     #ax2.set_yticks(ax2.get_yticks()[::2])
 
-    ax1.set_xlim(3, 35)
-    ax1.set_ylim(3, 35)
-    ax2.set_xlim(3, 35)
+    ax1.set_xlim(2, 30)
+    ax1.set_ylim(2, 30)
+    ax2.set_xlim(2, 30)
     ax2.set_ylim(0.5, 1.1)
 
     if timestamp:

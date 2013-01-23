@@ -17,7 +17,7 @@ from support import sextutils
 from statsmodels.nonparametric.kde import KDE
 
 
-def MagnitudeDistribution(catalog, mag=18., bins=16):
+def MagnitudeDistribution(catalog, mag=18., bins=16, timeStamp=False):
     """
     A simple plot to compare input and extracted magnitudes for a fixed magnitude stars.
     """
@@ -44,13 +44,15 @@ def MagnitudeDistribution(catalog, mag=18., bins=16):
     ax1.set_xlabel('SExtractor Magnitude - Input Catalog')
     ax1.set_ylabel('PDF')
 
-    ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    if timeStamp:
+        ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0)
     plt.savefig('MagDistributionSExtractor.pdf')
     plt.close()
 
 
-def SExtractorSNR(catalog, bins=16):
+def SExtractorSNR(catalog, bins=16, timeStamp=False):
     """
     A simple plot showing the SNR SExtractor finds.
     """
@@ -67,18 +69,20 @@ def SExtractorSNR(catalog, bins=16):
     ax1.axvline(x=np.mean(snr), c='g' ,ls='--', label='Mean', lw=1.6)
     ax1.plot(kde1.support, kde1.density, 'b-', label='Gaussian KDE', lw=1.6)
 
-    print np.mean(1./catalog.magerr_aper), np.mean(1./catalog.magerr_auto)
+    print 'Sextractor:', np.mean(1./catalog.magerr_aper), np.mean(1./catalog.magerr_auto)
 
     ax1.set_xlabel('SExtractor Signal-to-Noise Ratio')
     ax1.set_ylabel('PDF')
 
-    #ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+    if timeStamp:
+        ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
+
     ax1.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.0)
     plt.savefig('SExtractorSNR.pdf')
     plt.close()
 
 
-def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231, timeStamp=False):
+def plotSourceFinderResults(file='objects.phot', mag=18., bins=14, apcorr=0.923, timeStamp=False):
     """
     """
     data = sextutils.sextractor(file)
@@ -108,11 +112,11 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     if np.abs(mag - 18.) < 0.1:
         counts = data.counts / apcorr - 608137.825681  #for 18mag
     else:
-        counts = data.counts / apcorr - 1359.57331621 #1527.57315282 #for 24.5mag
+        counts = data.counts / apcorr - 1359.57331621 #for 24.5mag
     xpos = np.mean(counts)
     std = np.std(data.counts/apcorr)
     snr = np.mean(data.counts/apcorr)/std
-    print snr, np.mean(data.counts)/std, 1359.57331621/std, np.mean(data.counts), std
+    print 'SourceFinder:', snr, np.mean(data.counts)/std, 1359.57331621/std, np.mean(data.counts/apcorr), std
     kde = KDE(counts)
     kde.fit()
 
@@ -151,7 +155,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1.set_ylabel('PDF')
 
     #ax1.text(ax1.get_xlim()[0]*1.02, ax1.get_ylim()[1]*0.9, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
-    ax1.text(5.2, 0.33, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
+    ax1.text(4.5, 0.33, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
 
     if timeStamp:
         ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)
@@ -177,7 +181,7 @@ def plotSourceFinderResults(file='objects.phot', mag=18., bins=12, apcorr=0.9231
     ax1.set_ylabel('PDF')
 
     #ax1.text(ax1.get_xlim()[0]*1.02, ax1.get_ylim()[1]*0.9, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr))
-    ax1.text(11., 0.8, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr[msk]))
+    ax1.text(11., 0.5, r'$\left < SNR \right > = %.2f$' % np.mean(data.snr[msk]))
 
     if timeStamp:
         ax1.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax1.transAxes, alpha=0.2)

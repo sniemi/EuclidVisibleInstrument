@@ -11,14 +11,12 @@ Simple source finder that can be used to find objects from astronomical images.
 :author: Sami-Matias Niemi
 :contact: smn2@mssl.ucl.ac.uk
 
-:version: 0.5
+:version: 0.6
 """
 import matplotlib
 matplotlib.use('PDF')
 import datetime, sys
 from optparse import OptionParser
-from itertools import groupby, izip, count
-from time import time
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
@@ -62,11 +60,10 @@ class sourceFinder():
                              disk_struct=3,
                              aperture=6.5,
                              oversample=10,
-                             gain=3.5,
+                             gain=3.1,
                              exptime=565.,
-                             #aperture_correction=0.928243,
                              aperture_correction=0.925969,
-                             magzero=1.7059e10,
+                             magzero=1.5182880871e10,
                              output='objects.txt')
         self.settings.update(kwargs)
 
@@ -90,6 +87,9 @@ class sourceFinder():
         Find all pixels above the median pixel after smoothing with a Gaussian filter.
 
         .. note:: maybe one should use mode instead of median?
+
+        .. warning:: The background estimation is very crude and should not be trusted. One should probably write
+                     an iterative scheme were the background is recalculated after identifying the objects.
         """
         #smooth the image
         img = ndimage.gaussian_filter(self.image, sigma=self.settings['sigma'])
@@ -98,7 +98,7 @@ class sourceFinder():
 
         #find pixels above 1.5*median, these are most likely from sources so assume that the rest is background
         msk = self.image > 1.5*med
-        #get background image and calculate statistics
+        #get background image
         backgrd = self.origimage[~msk].copy()
         #only take values greater than zero
         backgrd = backgrd[backgrd > 0.0]
@@ -113,6 +113,7 @@ class sourceFinder():
             self.log.warning('Trouble finding background, will modify cleaning sizes...')
         else:
             std = np.std(backgrd).item() #items required if image was memmap'ed by pyfits
+            med = np.median(backgrd).item() #items required if image was memmap'ed by pyfits
             #mean = np.mean(backgrd).item() #items required if image was memmap'ed by pyfits
 
             #find objects above the background
@@ -120,11 +121,11 @@ class sourceFinder():
             #self.mask = filtered - mean > std * self.settings['above_background']
             self.mask = filtered - med > std * self.settings['above_background']
 
-        #these are very very crude estimates!
-        self.log.info('Background: median={0:.4f} and std={1:.4f}'.format(med, std))
-        self.background = med
-        self.background_std = std
-        print 'Background: median={0:.4f} and std={1:.4f}'.format(med, std)
+        #TODO: these are very very crude estimates about the background, improved ones should be developed!
+        self.background = np.mean(backgrd  * self.settings['gain']).item() /  self.settings['gain']
+        self.background_std = np.std(self.origimage[~self.mask])
+        self.log.info('Background: mean={0:.4f} and std={1:.4f}'.format(self.background, self.background_std))
+        print 'Background: mean={0:.4f} and std={1:.4f}'.format(self.background, self.background_std)
 
         #get labels
         self.label_im, self.nb_labels = ndimage.label(self.mask)

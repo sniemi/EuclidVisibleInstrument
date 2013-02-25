@@ -176,7 +176,7 @@ Contact Information
 -------------------
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import os, sys, datetime, math, pprint
 import ConfigParser
@@ -1014,6 +1014,7 @@ class VISsimulator():
                         #size scaling along the minor axes
                         smin = min(self.shapex[stype], self.shapey[stype])
                         sbig = 0.2**((obj[2] - 22.)/7.) / smin / 2.
+                        #sbig = np.e**(-1.145-0.269*(obj[2] - 23.)) / smin   #from Miller et al. 2012 (1210.8201v1)
 
                         txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
                               " intscale=" + str(intscales[j]) + " size=" + str(sbig)

@@ -431,7 +431,7 @@ def addReadoutNoise(data, readnoise=4.5, number=1):
     :rtype: ndarray [same as input data]
     """
     shape = data.shape
-    biases = np.random.normal(loc=0.0, scale=math.sqrt(readnoise), size=(shape[0], shape[1], number))
+    biases = np.random.normal(loc=0.0, scale=readnoise, size=(shape[0], shape[1], number))
     bias = np.median(biases.astype(np.int), axis=2, overwrite_input=True)
     return data + bias
 

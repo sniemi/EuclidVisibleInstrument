@@ -5,7 +5,7 @@ Non-linearity Calibration
 This simple script can be used to study the error in the non-linearity correction that can be tolerated given the
 requirements.
 
-The following requirements related to the non-linearity has been taken from GDPRD.
+The following requirements related to the non-linearity have been taken from GDPRD.
 
 R-GDP-CAL-058: The contribution of the residuals of the non-linearity correction on the error on the determination
 of each ellipticity component of the local PSF shall not exceed 3x10**-5 (one sigma).

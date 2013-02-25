@@ -221,7 +221,7 @@ def doubleExponent(x, p, shift):
 
     :return: double exponential with a given parameters and shift
     """
-    return yshift + p[0] + p[1] * scipy.exp(-x / p[2]) + p[3] * scipy.exp(-x / p[4])
+    return shift + p[0] + p[1] * scipy.exp(-x / p[2]) + p[3] * scipy.exp(-x / p[4])
 
 
 def singleExponent(x, p, shift):

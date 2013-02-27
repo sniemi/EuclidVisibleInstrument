@@ -1,17 +1,13 @@
 """
-Non-linearity I: Calibration
-============================
+Non-linearity II: Model Transfer
+================================
 
-This simple script can be used to study the error in the non-linearity correction that can be tolerated given the
-requirements.
+Most PSF stars are bright while most weak lensing galaxies are faint,
+thus the PSF model needs to be transferable to an appropriate object luminosity (and colour, position, etc.).
+This simple script can be used to study the error in the model transfer due to non-linearity that can be
+tolerated given the requirements.
 
-The following requirements related to the non-linearity have been taken from GDPRD.
-
-R-GDP-CAL-058: The contribution of the residuals of the non-linearity correction on the error on the determination
-of each ellipticity component of the local PSF shall not exceed 3x10**-5 (one sigma).
-
-R-GDP-CAL-068: The contribution of the residuals of the non-linearity correction on the error on the relative
-error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exceed 1x10**-4 (one sigma).
+The following requirements related to the model transfer have been taken from CalCD-B.
 
 :requires: PyFITS
 :requires: NumPy
@@ -19,10 +15,10 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.97
+:version: 0.2
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)
@@ -44,9 +40,9 @@ from support import files as fileIO
 from support import VISinstrumentModel
 
 
-def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75, phs=0.98,
-                     phases=None, psfs=5000, amps=12, multiplier=1.5, minerror=-5., maxerror=-1,
-                     linspace=False):
+def testNonlinearityModelTransfer(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75,
+                                  psfs=5000, amps=12, multiplier=1.5, minerror=-5., maxerror=-1.,
+                                  lowflux=500, highflux=180000, linspace=False):
     """
     Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.
 
@@ -89,11 +85,8 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75, 
 
     #derive reference values from clean PSF
     settings = dict(sampling=1.0/oversample, sigma=sigma)
-    sh = shape.shapeMeasurement(data.copy()*1e5, log, **settings)
+    sh = shape.shapeMeasurement(data.copy()*175000., log, **settings)
     reference = sh.measureRefinedEllipticity()
-
-    #PSF scales
-    scales = np.random.random_integers(2e2, 2e5, psfs)
 
     #range of amplitude to study
     if linspace:
@@ -105,56 +98,51 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75, 
     #loop over all the amplitudes to be studied
     for i, amp in enumerate(amplitudes):
         print'Run %i / %i with amplitude=%e' % (i+1, amps, amp)
-        de1 = []
-        de2 = []
-        de = []
         R2 = []
-        dR2 = []
         e1 = []
         e2 = []
         e = []
 
-        if phases is None:
-            ph = (phs,)
-        else:
-            #random phases to Monte Carlo
-            ph = np.random.random(phases)
+        #random phases to Monte Carlo
+        ph = np.random.random(psfs)
 
         for phase in ph:
-            print 'Phase: %.3f' % phase
-            for scale in scales:
-                #apply nonlinearity model to the scaled PSF
-                scaled = data.copy() * scale
-                newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
+            #apply nonlinearity model to the scaled PSF
+            scaled = data.copy() * highflux
+            newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
 
-                #measure e and R2 from the postage stamp image
-                sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
-                results = sh.measureRefinedEllipticity()
+            #measure e and R2 from the postage stamp image
+            sh = shape.shapeMeasurement(newdata, log, **settings)
+            resultsH = sh.measureRefinedEllipticity()
 
-                #save values
-                e1.append(results['e1'])
-                e2.append(results['e2'])
-                e.append(results['ellipticity'])
-                R2.append(results['R2'])
-                de1.append(results['e1'] - reference['e1'])
-                de2.append(results['e2'] - reference['e2'])
-                de.append(results['ellipticity'] - reference['ellipticity'])
-                dR2.append(results['R2'] - reference['R2'])
+            #apply nonlinearity model to the scaled PSF
+            scaled = data.copy() * lowflux
+            newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
 
-        out[amp] = [e1, e2, e, R2, de1, de2, de, dR2]
+            #measure e and R2 from the postage stamp image
+            sh = shape.shapeMeasurement(newdata, log, **settings)
+            resultsL = sh.measureRefinedEllipticity()
+
+            #save values
+            e1.append(resultsH['e1'] - resultsL['e1'])
+            e2.append(resultsH['e2'] - resultsL['e2'])
+            e.append(resultsH['ellipticity'] - resultsL['ellipticity'])
+            R2.append(resultsH['R2'] - resultsL['R2'])
+
+        out[amp] = [e1, e2, e, R2]
 
     return reference, out
 
 
-def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=False):
+def plotResults(results, reqe=3.5e-5, reqr2=3.5e-4, outdir='results', timeStamp=False):
     """
     Creates a simple plot to combine and show the results.
 
     :param res: results to be plotted [reference values, results dictionary]
     :type res: list
-    :param reqe: the requirement for ellipticity [default=3e-5]
+    :param reqe: the requirement for ellipticity [default=3.5e-5]
     :type reqe: float
-    :param reqr2: the requirement for size R2 [default=1e-4]
+    :param reqr2: the requirement for size R2 [default=3.5e-4]
     :type reqr2: float
     :param outdir: output directory to which the plots will be saved to
     :type outdir: str
@@ -215,7 +203,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim(1e-6, 1e-3)
-    ax.set_xlabel('Error in the Non-linearity Correction')
+    ax.set_xlabel('Error in the Model Transfer Non-linearity')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
     xmin, xmax = ax.get_xlim()
@@ -227,7 +215,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2, loc='upper left')
-    plt.savefig(outdir+'/NonLinCalibrationsigmaE.pdf')
+    plt.savefig(outdir+'/NonLinModelTransferSigmaE.pdf')
     plt.close()
 
     #same for R2s
@@ -266,7 +254,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim(6e-6, 4e-3)
-    ax.set_xlabel('Error in the Non-linearity Correction')
+    ax.set_xlabel('Error in the Model Transfer Non-linearity')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     ax.fill_between(np.linspace(xmin, xmax, 10), np.ones(10)*reqr2, 1.0, facecolor='red', alpha=0.08)
@@ -277,7 +265,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
-    plt.savefig(outdir+'/NonLinCalibrationSigmaR2.pdf')
+    plt.savefig(outdir+'/NonLinModelTransferSigmaR2.pdf')
     plt.close()
 
     print '\nDelta results:'
@@ -287,9 +275,9 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
         plt.title(r'VIS Non-linearity Correction (%f): $\delta e$' % key)
 
-        de1 = np.asarray(res[key][4])
-        de2 = np.asarray(res[key][5])
-        de = np.asarray(res[key][6])
+        de1 = np.asarray(res[key][0])
+        de2 = np.asarray(res[key][1])
+        de = np.asarray(res[key][2])
 
         avg1 = np.mean(de1) ** 2
         avg2 = np.mean(de2) ** 2
@@ -314,7 +302,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
             plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=2.0, ncol=2)
-        plt.savefig(outdir + '/NonlinearityEDelta%i.pdf' % i)
+        plt.savefig(outdir + '/NonlinearityModelTransferEDelta%i.pdf' % i)
         plt.close()
 
     #same for R2s
@@ -323,7 +311,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         plt.title(r'VIS Non-linearity Correction (%f): $\frac{\delta R^{2}}{R_{ref}^{2}}$' % key)
         ax = fig.add_subplot(111)
 
-        dR2 = np.asarray(res[key][7])
+        dR2 = np.asarray(res[key][3])
         avg = np.mean(dR2 / ref['R2']) ** 2
 
         ax.hist(dR2, bins=15, color='y', label=r'$\frac{\delta R^{2}}{R_{ref}^{2}}$', normed=True, log=True)
@@ -331,7 +319,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
         print i, key, avg
 
         plt.text(0.1, 0.9, r'$\left<\frac{\delta R^{2}}{R^{2}_{ref}}\right>^{2} = %e$' % avg,
-            fontsize=10, transform=ax.transAxes)
+                 fontsize=10, transform=ax.transAxes)
 
         ax.axvline(x=0, ls=':', c='k')
 
@@ -342,37 +330,8 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
             plt.text(0.83, 1.12, txt, ha='left', va='top', fontsize=9, transform=ax.transAxes, alpha=0.2)
 
         plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8)
-        plt.savefig(outdir + '/NonlinearityDeltaSize%i.pdf' % i)
+        plt.savefig(outdir + '/NonlinearityModelTransferDeltaSize%i.pdf' % i)
         plt.close()
-
-
-def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
-                          scale=2e5, amp=0.1, phase=0.98, multiplier=1.5, outdir='.'):
-    #read in PSF and renormalize it to norm
-    data = pf.getdata(file)
-    data /= np.max(data)
-    data *= scale
-
-    #derive reference values from clean PSF
-    settings = dict(sampling=1.0 / oversample, sigma=sigma)
-    sh = shape.shapeMeasurement(data, log, **settings)
-    reference = sh.measureRefinedEllipticity()
-    print reference
-
-    #apply nonlinearity model to the scaled PSF
-    newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(data.copy(), amp, phase=phase, multi=multiplier)
-
-    fileIO.writeFITS(data, outdir+'/scaledPSF.fits')
-    fileIO.writeFITS(newdata, outdir+'nonlinearData.fits')
-    fileIO.writeFITS(newdata/data, outdir+'nonlinearRatio.fits')
-
-    #measure e and R2 from the postage stamp image
-    sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
-    results = sh.measureRefinedEllipticity()
-    print results
-
-    print reference['ellipticity'] - results['ellipticity'], reference['R2'] - results['R2']
-
 
 if __name__ == '__main__':
     run = True
@@ -380,36 +339,32 @@ if __name__ == '__main__':
     plot = True
 
     #different runs
-    runs = {'run1': dict(phase=0.0, multiplier=1.5),
-            'run2': dict(phase=0.5, multiplier=1.5),
-            'run3': dict(phase=1.0, multiplier=1.5),
-            'run4': dict(phase=0.98, multiplier=0.5),
-            'run5': dict(phase=0.98, multiplier=2.0),
-            'run6': dict(phase=0.98, multiplier=3.0),
-            'run7': dict(phase=0.98, multiplier=4.0)}
+    runs = {'run1': dict(multiplier=1.5),
+            'run2': dict(multiplier=0.5),
+            'run3': dict(multiplier=2.0),
+            'run4': dict(multiplier=3.0),
+            'run5': dict(multiplier=4.0)}
 
     for key, value in runs.iteritems():
         if not os.path.exists(key):
             os.makedirs(key)
 
         #start a logger
-        log = lg.setUpLogger(key+'/nonlinearityCalibration.log')
-        log.info('Testing non-linearity calibration...')
-        log.info('Phase = %f' % value['phase'])
+        log = lg.setUpLogger(key+'/nonlinearityModelTransfer.log')
+        log.info('Testing non-linearity model transfer...')
         log.info('Multiplier = %f' % value['multiplier'])
 
         if run:
             if debug:
-                testNonlinearityModel(phase=value['phase'], outdir=key)
-                res = testNonlinearity(log, psfs=1000, file='data/psf1x.fits', oversample=1.0, phs=value['phase'])
+                res = testNonlinearityModelTransfer(log, psfs=2000, file='data/psf1x.fits', oversample=1.0)
             else:
-                res = testNonlinearity(log)
+                res = testNonlinearityModelTransfer(log)
 
-            fileIO.cPickleDumpDictionary(res, key+'/nonlinResults.pk')
+            fileIO.cPickleDumpDictionary(res, key+'/nonlinModelResults.pk')
 
         if plot:
             if not run:
-                res = cPickle.load(open(key+'/nonlinResults.pk'))
+                res = cPickle.load(open(key+'/nonlinModelResults.pk'))
 
             plotResults(res, outdir=key)
 

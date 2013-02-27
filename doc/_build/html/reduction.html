@@ -107,8 +107,8 @@ However, since the version 0.5 the script tries to guess if the
 input is a single quadrant then reduce correctly.</p>
 <p>The script performs the following data reduction steps:</p>
 <div class="highlight-python"><pre>1 Bias correction
-2 Flat fielding (only if an input file is provided)
-3 CTI correction</pre>
+2 CTI correction
+3 Flat fielding (only if an input file is provided)</pre>
 </div>
 <p>To Run:</p>
 <div class="highlight-python"><pre>python reduceVISdata.py -i VISCCD.fits -b superBiasVIS.fits -f SuperFlatField.fits</pre>
@@ -235,7 +235,7 @@ the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorPiston">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=500</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=5000</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias offset.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -250,7 +250,7 @@ bias offset.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorSlope">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=500</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=5000</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias slope.</p>
 <table class="docutils field-list" frame="void" rules="none">

@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{January 15, 2013}
+\date{February 27, 2013}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -1387,7 +1387,7 @@ try to further improve the convolution speed (look into fftw package)
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
 \index{VISsimulator (class in simulator.simulator)}
@@ -1572,7 +1572,7 @@ The noise is drawn from a Normal (Gaussian) distribution with average=0.0 and st
 
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.applyScatteredLight}\pysiglinewithargsret{\bfcode{applyScatteredLight}}{}{}
-Adds spatially uniform scattered light
+Adds spatially uniform scattered light to the image.
 
 \end{fulllineitems}
 
@@ -2011,8 +2011,8 @@ The script performs the following data reduction steps:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 1 Bias correction
-2 Flat fielding (only if an input file is provided)
-3 CTI correction
+2 CTI correction
+3 Flat fielding (only if an input file is provided)
 \end{Verbatim}
 
 To Run:
@@ -2171,7 +2171,7 @@ ndarray {[}same as input data{]}
 \index{findTolerableErrorPiston() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorPiston}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorPiston}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=500}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorPiston}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorPiston}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=5000}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{debug=False}}{}
 Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias offset.
 \begin{quote}\begin{description}
@@ -2185,7 +2185,7 @@ bias offset.
 \index{findTolerableErrorSlope() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorSlope}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorSlope}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=500}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{pixels=60}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorSlope}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorSlope}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=5000}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{pixels=60}}{}
 Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias slope.
 \begin{quote}\begin{description}

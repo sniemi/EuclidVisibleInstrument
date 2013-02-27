@@ -48,7 +48,22 @@ from support import cosmicrays
 
 def testCosmicrayRejection(log, file='data/psf1x.fits', oversample=1.0, sigma=0.75, psfs=20000, scale=1e3,
                            min=1e-5, max=50, levels=15, covering=1.4, single=False):
-    #read in PSF and renormalize it to norm
+    """
+    This is for a single PSF.
+
+    :param log:
+    :param file:
+    :param oversample:
+    :param sigma:
+    :param psfs:
+    :param scale:
+    :param min:
+    :param max:
+    :param levels:
+    :param covering:
+    :param single:
+    :return:
+    """
     data = pf.getdata(file)
     data /= np.max(data)
 
@@ -101,6 +116,88 @@ def testCosmicrayRejection(log, file='data/psf1x.fits', oversample=1.0, sigma=0.
             dR2.append(results['R2'] - reference['R2'])
 
         out[level] = [e1, e2, e, R2, de1, de2, de, dR2]
+
+    return reference, out
+
+
+def testCosmicrayRejectionMultiPSF(log, file='data/psf1x.fits', oversample=1.0, sigma=0.75, psfs=2000, scale=1e3,
+                                   min=1e-4, max=1e2, levels=12, covering=2.0, single=False):
+    """
+
+    :param log:
+    :param file:
+    :param oversample:
+    :param sigma:
+    :param psfs:
+    :param scale:
+    :param min:
+    :param max:
+    :param levels:
+    :param covering:
+    :param single:
+    :return:
+    """
+    data = pf.getdata(file)
+    data /= np.max(data)
+
+    #derive reference values from clean PSF
+    settings = dict(sampling=1.0 / oversample, sigma=sigma, iterations=6)
+    scaled = data.copy() * scale
+    sh = shape.shapeMeasurement(scaled.copy(), log, **settings)
+    reference = sh.measureRefinedEllipticity()
+
+    cosmics = cosmicrays.cosmicrays(log, np.zeros((2, 2)))
+    crInfo = cosmics._readCosmicrayInformation()
+
+    out = {}
+    #loop over all the amplitudes to be studied
+    for level in np.logspace(np.log10(min), np.log10(max), levels):
+        print 'Deposited Energy of Cosmic Rays: %i electrons' % level
+
+        for x in xrange(1850):
+            de1 = []
+            de2 = []
+            de = []
+            R2 = []
+            dR2 = []
+            e1 = []
+            e2 = []
+            e = []
+            for i in range(psfs):
+                print'Run %i / %i' % (i + 1, psfs)
+
+                #add cosmic rays to the scaled image
+                cosmics = cosmicrays.cosmicrays(log, scaled, crInfo=crInfo)
+                #newdata = cosmics.addCosmicRays(limit=level)
+                if single:
+                    newdata = cosmics.addSingleEvent(limit=level)
+                else:
+                    newdata = cosmics.addUpToFraction(covering, limit=level)
+
+                #measure e and R2 from the postage stamp image
+                sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
+                results = sh.measureRefinedEllipticity()
+
+                #save values
+                e1.append(results['e1'])
+                e2.append(results['e2'])
+                e.append(results['ellipticity'])
+                R2.append(results['R2'])
+                de1.append(results['e1'] - reference['e1'])
+                de2.append(results['e2'] - reference['e2'])
+                de.append(results['ellipticity'] - reference['ellipticity'])
+                dR2.append(results['R2'] - reference['R2'])
+
+            e1 = np.mean(np.asarray(e1))
+            e2 = np.mean(np.asarray(e2))
+            e = np.mean(np.asarray(e))
+            de = np.mean(np.asarray(de))
+            de1 = np.mean(np.asarray(de1))
+            de2 = np.mean(np.asarray(de2))
+            R2 = np.mean(np.asarray(R2))
+            dR2 = np.mean(np.asarray(dR2))
+
+            out[level] = [e1, e2, e, R2, de1, de2, de, dR2]
 
     return reference, out
 
@@ -348,6 +445,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
 if __name__ == '__main__':
     run = True
+    multi = True
     plot = True
     debug = False
     file = 'CosmicrayResults.pk'
@@ -360,13 +458,20 @@ if __name__ == '__main__':
         test(log)
 
     if run:
-        res = testCosmicrayRejection(log, single=True)
+        if multi:
+            resM = testCosmicrayRejectionMultiPSF(log)
+            fileIO.cPickleDumpDictionary(resM, file.replace('.pk', 'Multi.pk'))
+
+        res = testCosmicrayRejection(log)
         fileIO.cPickleDumpDictionary(res, file)
 
     if plot:
         if not run:
+            if multi:
+                resM = cPickle.load(open(file.replace('.pk', 'Multi.pk')))
             res = cPickle.load(open(file))
 
         plotResults(res, outdir='results')
+        plotResults(resM, outdir='resultsMulti')
 
     log.info('Run finished...\n\n\n')

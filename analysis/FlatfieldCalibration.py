@@ -550,7 +550,7 @@ def findTolerableError(log, file='data/psf4x.fits', oversample=4.0, psfs=1000, i
 
 def plotTolerableErrorR2(res, output, req=1e-4):
     fig = plt.figure()
-    plt.title(r'VIS Bias Flat Fielding')
+    plt.title(r'VIS Flat Fielding')
     ax = fig.add_subplot(111)
     #loop over the number of bias frames combined
     vals = []
@@ -588,7 +588,7 @@ def plotTolerableErrorR2(res, output, req=1e-4):
     ax.set_xscale('log')
     ax.set_ylim(1e-7, 1e-2)
     ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
-    ax.set_xlabel('Residual Error')
+    ax.set_xlabel('Error in the Flat Field Map')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -642,7 +642,7 @@ def plotTolerableErrorE(res, output, req=3e-5):
     ax.set_xscale('log')
     ax.set_ylim(1e-7, 1e-2)
     ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
-    ax.set_xlabel('Residual Error')
+    ax.set_xlabel('Error in the Flat Field Map')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -723,18 +723,19 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
 
 
 if __name__ == '__main__':
-    run = True
+    run = False
     debug = False
-    plots = True
-    error = False
+    plots = False
+    error = True
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
     log.info('Testing flat fielding calibration...')
 
     if error:
-        res = findTolerableError(log)
-        fileIO.cPickleDumpDictionary(res, 'residuals.pk')
+        #res = findTolerableError(log)
+        #fileIO.cPickleDumpDictionary(res, 'errors/residuals.pk')
+        res = cPickle.load(open('errors/residuals.pk'))
         plotTolerableErrorE(res, output='FlatFieldingTolerableErrorE.pdf')
         plotTolerableErrorR2(res, output='FlatFieldingTolerableErrorR2.pdf')
 

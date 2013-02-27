@@ -752,7 +752,7 @@ def addReadoutNoise(data, readnoise=4.5, gain=3.5, number=1):
 
 
 def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
-                             psfs=500, sigma=0.36, iterations=6, debug=False):
+                             psfs=5000, sigma=0.36, iterations=6, debug=False):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
     bias offset.
@@ -769,7 +769,7 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
         write.writeFITSfile(data.copy()*1e4, 'normalizedPSF2.fits')
 
     #PSF scalings for the peak pixel, in electrons
-    scales = np.random.random_integers(1e4, 1e5, psfs)
+    scales = np.random.random_integers(2000, 2010, psfs)
 
     #set the scale for shape measurement
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
@@ -811,7 +811,7 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
 
 
 def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
-                            psfs=500, sigma=0.36, iterations=6, pixels=60):
+                            psfs=5000, sigma=0.36, iterations=6, pixels=60):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
     bias slope.
@@ -828,7 +828,7 @@ def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
     dx = (np.arange(noslope.shape[1]) - noslope.shape[1]/2.) / (pixels * oversample)
 
     #PSF scalings in electrons
-    scales = np.random.random_integers(1e4, 1e5, psfs)
+    scales = np.random.random_integers(2000, 2010, psfs)
 
     #set the scale for shape measurement
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
@@ -872,9 +872,9 @@ def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
     return res
 
 
-def plotTolerableErrorR2(res, output, req=1e-4):
+def plotTolerableErrorR2(res, title, output, req=1e-4):
     fig = plt.figure()
-    plt.title(r'VIS Bias Calibration')
+    plt.title(title)
     ax = fig.add_subplot(111)
     #loop over the number of bias frames combined
     vals = []
@@ -905,13 +905,13 @@ def plotTolerableErrorR2(res, output, req=1e-4):
     ax.plot(x, vals, ':', c='0.2', zorder=10)
     msk = vals < req
     maxn = np.max(x[msk])
-    plt.text(1e-2, 2e-5, r'Error must be $\leq %.2e$' % maxn, fontsize=11, ha='center', va='center')
+    plt.text(1e-2, 8e-5, r'Error must be $\leq %.2e$' % maxn, fontsize=11, ha='center', va='center')
 
     ax.set_yscale('log')
     ax.set_xscale('log')
     ax.set_ylim(1e-6, 1e-2)
     ax.set_xlim(ks.min()*0.99, ks.max()*1.01)
-    ax.set_xlabel('Residual Error')
+    ax.set_xlabel('Error in the Bias Map')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -919,9 +919,9 @@ def plotTolerableErrorR2(res, output, req=1e-4):
     plt.close()
 
 
-def plotTolerableErrorE(res, output, req=3e-5):
+def plotTolerableErrorE(res, title, output, req=3e-5):
     fig = plt.figure()
-    plt.title(r'VIS Bias Calibration')
+    plt.title(title)
     ax = fig.add_subplot(111)
     #loop over the number of bias frames combined
     vals = []
@@ -964,7 +964,7 @@ def plotTolerableErrorE(res, output, req=3e-5):
     ax.set_xscale('log')
     ax.set_ylim(1e-6, 1e-2)
     ax.set_xlim(ks.min()*0.99, ks.max()*1.01)
-    ax.set_xlabel('Residual Error')
+    ax.set_xlabel('Error in the Bias Map')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -976,7 +976,7 @@ if __name__ == '__main__':
     run = False
     plot = False
     error = True
-    debug = True
+    debug = False
 
     #start the script
     log = lg.setUpLogger('biasCalibration.log')
@@ -984,19 +984,19 @@ if __name__ == '__main__':
 
     if error:
         if debug:
-            resPiston = findTolerableErrorPiston(log, file='data/psf1x.fits', oversample=1.0, iterations=4)
-            resSlope = findTolerableErrorSlope(log, file='data/psf1x.fits', oversample=1.0, iterations=4)
+            resPiston = findTolerableErrorPiston(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=3000)
+            resSlope = findTolerableErrorSlope(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=3000)
         else:
             resPiston = findTolerableErrorPiston(log)
             resSlope = findTolerableErrorSlope(log)
 
         fileIO.cPickleDumpDictionary(resPiston, 'piston.pk')
-        plotTolerableErrorE(resPiston, output='BiasCalibrationTolerableErrorEPiston.pdf')
-        plotTolerableErrorR2(resPiston, output='BiasCalibrationTolerableErrorR2Piston.pdf')
+        plotTolerableErrorE(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorEPiston.pdf')
+        plotTolerableErrorR2(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorR2Piston.pdf')
 
         fileIO.cPickleDumpDictionary(resSlope, 'slope.pk')
-        plotTolerableErrorE(resSlope, output='BiasCalibrationTolerableErrorESlope.pdf')
-        plotTolerableErrorR2(resSlope, output='BiasCalibrationTolerableErrorR2Slope.pdf')
+        plotTolerableErrorE(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorESlope.pdf')
+        plotTolerableErrorR2(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorR2Slope.pdf')
 
     if run:
         print '\nSigma run:'

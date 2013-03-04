@@ -121,7 +121,7 @@ def testCosmicrayRejection(log, file='data/psf1x.fits', oversample=1.0, sigma=0.
 
 
 def testCosmicrayRejectionMultiPSF(log, file='data/psf1x.fits', oversample=1.0, sigma=0.75, psfs=2000, scale=1e3,
-                                   min=1e-4, max=1e2, levels=12, covering=2.0, single=False):
+                                   min=1e-4, max=1e2, levels=9, covering=2.0, stars=1850, single=False):
     """
 
     :param log:
@@ -152,9 +152,17 @@ def testCosmicrayRejectionMultiPSF(log, file='data/psf1x.fits', oversample=1.0, 
     out = {}
     #loop over all the amplitudes to be studied
     for level in np.logspace(np.log10(min), np.log10(max), levels):
-        print 'Deposited Energy of Cosmic Rays: %i electrons' % level
-
-        for x in xrange(1850):
+        print 'Deposited Energy of Cosmic Rays: %e electrons' % level
+        de1m = []
+        de2m = []
+        dem = []
+        R2m = []
+        dR2m = []
+        e1m = []
+        e2m = []
+        em = []
+        for x in xrange(stars):
+            print'Run %i / %i' % (x + 1, stars)
             de1 = []
             de2 = []
             de = []
@@ -164,10 +172,8 @@ def testCosmicrayRejectionMultiPSF(log, file='data/psf1x.fits', oversample=1.0, 
             e2 = []
             e = []
             for i in range(psfs):
-                print'Run %i / %i' % (i + 1, psfs)
-
                 #add cosmic rays to the scaled image
-                cosmics = cosmicrays.cosmicrays(log, scaled, crInfo=crInfo)
+                cosmics = cosmicrays.cosmicrays(log, scaled.copy(), crInfo=crInfo)
                 #newdata = cosmics.addCosmicRays(limit=level)
                 if single:
                     newdata = cosmics.addSingleEvent(limit=level)
@@ -188,16 +194,16 @@ def testCosmicrayRejectionMultiPSF(log, file='data/psf1x.fits', oversample=1.0, 
                 de.append(results['ellipticity'] - reference['ellipticity'])
                 dR2.append(results['R2'] - reference['R2'])
 
-            e1 = np.mean(np.asarray(e1))
-            e2 = np.mean(np.asarray(e2))
-            e = np.mean(np.asarray(e))
-            de = np.mean(np.asarray(de))
-            de1 = np.mean(np.asarray(de1))
-            de2 = np.mean(np.asarray(de2))
-            R2 = np.mean(np.asarray(R2))
-            dR2 = np.mean(np.asarray(dR2))
+            e1m.append(np.mean(np.asarray(e1)))
+            e2m.append(np.mean(np.asarray(e2)))
+            em.append(np.mean(np.asarray(e)))
+            dem.append(np.mean(np.asarray(de)))
+            de1m.append(np.mean(np.asarray(de1)))
+            de2m.append(np.mean(np.asarray(de2)))
+            R2m.append(np.mean(np.asarray(R2)))
+            dR2m.append(np.mean(np.asarray(dR2)))
 
-            out[level] = [e1, e2, e, R2, de1, de2, de, dR2]
+        out[level] = [e1m, e2m, em, R2m, de1m, de2m, dem, dR2m]
 
     return reference, out
 
@@ -459,19 +465,19 @@ if __name__ == '__main__':
 
     if run:
         if multi:
-            resM = testCosmicrayRejectionMultiPSF(log)
-            fileIO.cPickleDumpDictionary(resM, file.replace('.pk', 'Multi.pk'))
+            resM = testCosmicrayRejectionMultiPSF(log, stars=1000, psfs=200)
+            fileIO.cPickleDumpDictionary(resM, file.replace('.pk', 'Multi1000.pk'))
 
-        res = testCosmicrayRejection(log)
-        fileIO.cPickleDumpDictionary(res, file)
+        #res = testCosmicrayRejection(log)
+        #fileIO.cPickleDumpDictionary(res, file)
 
     if plot:
         if not run:
             if multi:
-                resM = cPickle.load(open(file.replace('.pk', 'Multi.pk')))
-            res = cPickle.load(open(file))
+                resM = cPickle.load(open(file.replace('.pk', 'Multi1000.pk')))
+            #res = cPickle.load(open(file))
 
-        plotResults(res, outdir='results')
-        plotResults(resM, outdir='resultsMulti')
+        #plotResults(res, outdir='results')
+        plotResults(resM, outdir='small1000')
 
     log.info('Run finished...\n\n\n')

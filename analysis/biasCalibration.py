@@ -752,7 +752,7 @@ def addReadoutNoise(data, readnoise=4.5, gain=3.5, number=1):
 
 
 def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
-                             psfs=5000, sigma=0.36, iterations=6, debug=False):
+                             psfs=4000, sigma=0.36, iterations=5, debug=False):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
     bias offset.
@@ -769,7 +769,7 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
         write.writeFITSfile(data.copy()*1e4, 'normalizedPSF2.fits')
 
     #PSF scalings for the peak pixel, in electrons
-    scales = np.random.random_integers(2000, 2010, psfs)
+    scales = np.random.random_integers(2000, 2100, psfs)
 
     #set the scale for shape measurement
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
@@ -811,7 +811,7 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
 
 
 def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
-                            psfs=5000, sigma=0.36, iterations=6, pixels=60):
+                            psfs=4000, sigma=0.36, iterations=5, pixels=60):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
     bias slope.
@@ -828,12 +828,12 @@ def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
     dx = (np.arange(noslope.shape[1]) - noslope.shape[1]/2.) / (pixels * oversample)
 
     #PSF scalings in electrons
-    scales = np.random.random_integers(2000, 2010, psfs)
+    scales = np.random.random_integers(2000, 2100, psfs)
 
     #set the scale for shape measurement
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
 
-    #first piston, residual flat surface, pistons are in electrons
+    #the slope is in electrons
     slopes = np.logspace(-4, 0.5, 12)
     tot = slopes.size
     res = {}
@@ -984,8 +984,8 @@ if __name__ == '__main__':
 
     if error:
         if debug:
-            resPiston = findTolerableErrorPiston(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=3000)
-            resSlope = findTolerableErrorSlope(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=3000)
+            resPiston = findTolerableErrorPiston(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
+            resSlope = findTolerableErrorSlope(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
         else:
             resPiston = findTolerableErrorPiston(log)
             resSlope = findTolerableErrorSlope(log)

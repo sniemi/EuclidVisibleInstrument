@@ -247,7 +247,7 @@ class cosmicrays():
         print text
 
 
-    def _drawEventsToCoveringFactor(self, coveringFraction=1.4, limit=1000):
+    def _drawEventsToCoveringFactor(self, coveringFraction=1.4, limit=1000, verbose=False):
         """
         Generate cosmic ray events up to a covering fraction and include it to a cosmic ray map (self.cosmicrayMap).
 
@@ -286,7 +286,7 @@ class cosmicrays():
             text = 'The cosmic ray covering factor is %i pixels i.e. %.3f per cent' \
                    % (area_cr, covering)
             self.log.info(text)
-            print text
+            if verbose: print text
 
 
     def addCosmicRays(self, limit=None):
@@ -319,7 +319,7 @@ class cosmicrays():
         return self.image
 
 
-    def addUpToFraction(self, coveringFraction, limit=None):
+    def addUpToFraction(self, coveringFraction, limit=None, verbose=False):
         """
 
         :param coveringFraction: covering fraction of cosmic rya events in per cent of total number of pixels
@@ -330,7 +330,7 @@ class cosmicrays():
         :return: image with cosmic rays
         :rtype: ndarray
         """
-        self._drawEventsToCoveringFactor(coveringFraction, limit=limit)
+        self._drawEventsToCoveringFactor(coveringFraction, limit=limit, verbose=verbose)
 
         #paste cosmic rays
         self.image += self.cosmicrayMap

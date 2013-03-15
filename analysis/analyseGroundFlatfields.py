@@ -2,6 +2,7 @@
 A simple script to analyse ground/lab flat fields.
 """
 import matplotlib
+#matplotlib.use('pdf')
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams['font.size'] = 17
 matplotlib.rc('xtick', labelsize=14)
@@ -10,13 +11,17 @@ matplotlib.rcParams['legend.fontsize'] = 11
 matplotlib.rcParams['legend.handlelength'] = 3
 matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
+matplotlib.rcParams['image.interpolation'] = 'none'
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
 import glob as g
+from scipy import fftpack
+from scipy import ndimage
 import cPickle
 from support import files as fileIO
 import scipy.optimize as optimize
+from matplotlib import animation
 
 
 def makeFlat(files):
@@ -829,9 +834,7 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
     :param size:
     :return:
     """
-    from scipy import ndimage
-
-    fluxlevels = np.linspace(1000, max, 30)
+    fluxlevels = np.linspace(1000, max, 40)
 
     #readnoise
     readnoise = np.random.normal(loc=0, scale=4.5, size=(size, size))
@@ -845,7 +848,8 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
     ax = fig.add_subplot(111)
 
     #correlation coefficient
-    val = 1.455e-6 / 2.
+    val = 1.455e-6 * 1.8
+    print val
 
     for flux in fluxlevels:
         d1 = np.random.poisson(flux, (size, size)) * prnu + readnoise
@@ -853,7 +857,11 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
 
         #convolution
         if ~Gaussian:
-            kernel = np.array([[0,val*flux,0],[0,(1-val),0],[0,val*flux,0]])
+            #kernel = np.array([[0,val*flux,0],[0,(1-val),0],[0,val*flux,0]])
+            #kernel = np.array([[0,val*flux,0],[val*flux,(1-val),val*flux],[0,val*flux,0]])
+            kernel = np.array([[0, val*flux/4., 0],
+                               [val*flux/4., (1-val), val*flux/4.],
+                               [0, val*flux/4., 0]])
             d1 = ndimage.convolve(d1, kernel)
             d2 = ndimage.convolve(d2, kernel)
 
@@ -882,7 +890,7 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
             rowfx.append(fx)
 
         ax.plot(rowfx, rowvar, 'b.', alpha=0.1)
-        ax.plot(np.average(np.asarray(rowfx)), np.average(np.asarray(rowvar)), 'bo')
+        ax.plot(np.average(np.asarray(rowfx)), np.average(np.asarray(rowvar)), 'bo', zorder=14)
         #ax.plot(np.median(np.asarray(rowfx)), np.median(np.asarray(rowvar)), 'bo')
 
         colvar = []
@@ -894,7 +902,7 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
             colfx.append(fx)
 
         ax.plot(colfx, colvar, 'r.', alpha=0.1)
-        ax.plot(np.average(np.asarray(colfx))+2000, np.average(np.asarray(colvar)), 'rs')
+        ax.plot(np.average(np.asarray(colfx))+2000, np.average(np.asarray(colvar)), 'rs', zorder=14)
         #ax.plot(np.average(np.median(colfx)), np.median(np.asarray(colvar)), 'rs')
 
     #save d1 to a FITS file...
@@ -908,10 +916,15 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
 
     ax.plot([0, max], [0, max], 'k-', lw=1.5, label='shot noise')
 
+    #fitted curve
+    x = np.arange(0, max+1000, 1000)
+    y = -1.375e-6*x**2 + 0.9857*x + 1084.37
+    ax.plot(x, y, 'g-', label='2nd order curve')
+
     ax.set_xlim(0, max)
     ax.set_ylim(0, max)
 
-    ax.set_xlabel(r'$ \left < \mathrm{Signal}_{%i} \right > \quad [e^{-}]$' % size)
+    ax.set_xlabel(r'$ \left < \mathrm{Signal}_{%i \times %i} \right > \quad [e^{-}]$' % (size, size))
     ax.set_ylabel(r'$\frac{1}{2}\sigma^{2}(\Delta \mathrm{Signal}) \quad [(e^{-})^{2}]$')
 
     plt.legend(shadow=True, fancybox=True, loc='upper left', numpoints=1)
@@ -923,19 +936,19 @@ def simulatePoissonProcessRowColumn(max=200000, size=200, short=True, Gaussian=F
 
 
 def analyseCorrelationFourier(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_36_31s_Euclid.fits',
-                              small=False, shift=False):
+                              gain=3.1, small=False, shift=False, interpolation='none'):
     """
 
     :param file1:
     :param file2:
     :param small:
     :param shift:
-    :return:
-    """
-    from scipy import fftpack
+    :param interpolation:
 
-    d1 = pf.getdata(file1)
-    d2 = pf.getdata(file2)
+    :return: None
+    """
+    d1 = pf.getdata(file1) * gain
+    d2 = pf.getdata(file2) * gain
 
     #pre/overscans
     #prescan1 = d1[11:2056, 9:51].mean()
@@ -946,84 +959,178 @@ def analyseCorrelationFourier(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_
     #define quadrants and subtract the bias levels
     #Q10 = d1[11:2051, 58:2095].copy() - prescan1
     #Q20 = d2[11:2051, 58:2095].copy() - prescan2
-    Q11 = d1[11:2051, 2110:4132].copy() - overscan1
-    Q21 = d2[11:2051, 2110:4132].copy() - overscan2
+    Q11 = d1[11:2050, 2110:4131].copy() - overscan1
+    Q21 = d2[11:2050, 2110:4131].copy() - overscan2
+
+    #limit to 1024
+    Q11 = Q11[300:1324, 300:1324]
+    Q21 = Q21[300:1324, 300:1324]
+    q1y, q1x = Q11.shape
 
     #small region
     if small:
-        Q11 = Q11[500:700, 500:700].copy()
-        Q21 = Q21[500:700, 500:700].copy()
+        Q11 = Q11[500:756, 500:756].copy()
+        Q21 = Q21[500:756, 500:756].copy()
+        print Q11.shape
 
     #Fourier analysis: calculate 2D power spectrum and take a log
     if shift:
-        fourierSpectrum1 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(Q11)))**2)
-        fourierSpectrum2 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(Q21)))**2)
+        fourierSpectrum1 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(Q11))) + 1)
+        fourierSpectrum2 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(Q21))) + 1)
     else:
-        fourierSpectrum1 = np.log10(np.abs(fftpack.fft2(Q11))**2)
-        fourierSpectrum2 = np.log10(np.abs(fftpack.fft2(Q21))**2)
+        fourierSpectrum1 = np.log10(np.abs(fftpack.fft2(Q11)) + 1)
+        fourierSpectrum2 = np.log10(np.abs(fftpack.fft2(Q21)) + 1)
     #difference image
     diff = (Q11 - Q21).copy()
     if shift:
-        fourierSpectrumD = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(diff)))**2)
+        fourierSpectrumD = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(diff))) + 1)
     else:
-        fourierSpectrumD = np.log10(np.abs(fftpack.fft2(diff))**2)
+        fourierSpectrumD = np.log10(np.abs(fftpack.fft2(diff)) + 1)
 
     #plot images
-    fig = plt.figure(figsize=(12,7))
+    fig = plt.figure(figsize=(14.5,6.5))
     plt.suptitle('Fourier Analysis of Flat-field Data')
-    plt.suptitle('Original Image', x=0.3, y=0.26)
-    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q11, origin='lower')
-    i2 = ax2.imshow(fourierSpectrum1, origin='lower')#, vmin=9, vmax=16)
+    plt.suptitle(r'Original Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.52, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.79, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(Q11, origin='lower', interpolation=interpolation)
+
     if small:
-        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[46000, 47000, 48000, 49000])
+        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[3.1*45000, 3.1*47000, 3.1*49000])
+        i2 = ax2.imshow(fourierSpectrum1[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2.5, vmax=6.5, rasterized=True)
+        i3 = ax3.imshow(fourierSpectrum1[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2.5, vmax=6.5, rasterized=True)
     else:
-        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[25000, 35000, 45000, 55000])
-    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[3.1*35000, 3.1*40000, 3.1*45000, 3.1*50000])
+        i2 = ax2.imshow(fourierSpectrum1[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=4, vmax=7, rasterized=True)
+        i3 = ax3.imshow(fourierSpectrum1[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=4, vmax=7, rasterized=True)
+
+    tmpx = ax3.get_xlim()
+    tmpy = ax3.get_ylim()
+    ax3.set_xlim(tmpx[1] - 20, tmpx[1])
+    ax3.set_ylim(tmpy[1] - 20, tmpy[1])
+
+    if small:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')
+    else:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')#, ticks=[10, 10.5, 11, 11.5, 12, 12.5])
+
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax3.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Y [pixel]')
+    #ax2.set_ylabel('$l_{y}$')
+    #ax3.set_ylabel('$l_{y}$')
+
     if small:
         plt.savefig('Fourier1.pdf')
     else:
         plt.savefig('Fourier1Full.pdf')
+
     plt.close()
 
-    fig = plt.figure(figsize=(12,7))
+    fig = plt.figure(figsize=(14.5,6.5))
     plt.suptitle('Fourier Analysis of Flat-field Data')
-    plt.suptitle('Original Image', x=0.3, y=0.26)
-    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q21, origin='lower')
-    i2 = ax2.imshow(fourierSpectrum2, origin='lower')#, vmin=9, vmax=16)
+    plt.suptitle(r'Original Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.52, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.79, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(Q21, origin='lower', interpolation=interpolation)
+
     if small:
-        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[46000, 47000, 48000, 49000])
+        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[3.1*45000, 3.1*47000, 3.1*49000])
+        i2 = ax2.imshow(fourierSpectrum2[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2, vmax=7,
+                        rasterized=True)
+        i3 = ax3.imshow(fourierSpectrum2[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2, vmax=7,
+                        rasterized=True)
     else:
-        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[25000, 35000, 45000, 55000])
-    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+        plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e', ticks=[3.1*35000, 3.1*40000, 3.1*45000, 3.1*50000])
+        i2 = ax2.imshow(fourierSpectrum2[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=4, vmax=7,
+                        rasterized=True)
+        i3 = ax3.imshow(fourierSpectrum2[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=4, vmax=7,
+                        rasterized=True)
+
+    tmpx = ax3.get_xlim()
+    tmpy = ax3.get_ylim()
+    ax3.set_xlim(tmpx[1] - 20, tmpx[1])
+    ax3.set_ylim(tmpy[1] - 20, tmpy[1])
+
+    if small:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')#, ticks=[6, 7, 8, 9, 10, 11, 12])
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')
+    else:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')#, ticks=[8, 9.5, 11, 13])
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')#, ticks=[10, 10.5, 11, 11.5, 12, 12.5])
+
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax3.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Y [pixel]')
+    #ax2.set_ylabel('$l_{y}$')
+    #ax3.set_ylabel('$l_{y}$')
+
     if small:
         plt.savefig('Fourier2.pdf')
     else:
         plt.savefig('Fourier2Full.pdf')
+
     plt.close()
 
-    fig = plt.figure(figsize=(12,7))
+    fig = plt.figure(figsize=(14.5,6.5))
     plt.suptitle('Fourier Analysis of Flat-field Data')
-    plt.suptitle('Difference Image', x=0.3, y=0.26)
-    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(diff, origin='lower', vmin=-400, vmax=400)
+    plt.suptitle(r'Original Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.52, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.79, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(diff, origin='lower', interpolation=interpolation, vmin=-1200, vmax=1200)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%i', ticks=[-1200, -600, 0, 600, 1200])
+
     if small:
-        i2 = ax2.imshow(fourierSpectrumD, origin='lower')#, vmin=7, vmax= 12)
+        i2 = ax2.imshow(fourierSpectrumD[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2, vmax=6.5,
+                        rasterized=True)
+        i3 = ax3.imshow(fourierSpectrumD[0:128, 0:128], interpolation=interpolation, origin='lower', vmin=2, vmax=6.5,
+                        rasterized=True)
     else:
-        i2 = ax2.imshow(fourierSpectrumD, origin='lower')#, vmin=9, vmax=12)
-    plt.colorbar(i1, ax=ax1, orientation='horizontal', ticks=[-400, -200, 0, 200, 400])
-    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+        i2 = ax2.imshow(fourierSpectrumD[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=2.5, vmax=7.5,
+                        rasterized=True)
+        i3 = ax3.imshow(fourierSpectrumD[0:q1y/2, 0:q1x/2], interpolation=interpolation, origin='lower', vmin=2.5, vmax=7.5,
+                        rasterized=True)
+
+    tmpx = ax3.get_xlim()
+    tmpy = ax3.get_ylim()
+    ax3.set_xlim(tmpx[1] - 20, tmpx[1])
+    ax3.set_ylim(tmpy[1] - 20, tmpy[1])
+
+    if small:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')#, ticks=[7, 8, 9, 10, 11, 12])
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')#, ticks=[7, 7.5, 8, 8.5, 9, 9.5])
+    else:
+        plt.colorbar(i2, ax=ax2, orientation='horizontal')#, ticks=[9.5, 10, 10.5, 11, 11.5])
+        plt.colorbar(i3, ax=ax3, orientation='horizontal')#, ticks=[9, 9.5, 10, 10.5, 11])
+
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax3.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Y [pixel]')
+    #ax2.set_ylabel('$l_{y}$')
+    #ax3.set_ylabel('$l_{y}$')
+
     if small:
         plt.savefig('FourierDifference.pdf')
     else:
         plt.savefig('FourierDifferenceFull.pdf')
+
     plt.close()
 
 
@@ -1080,8 +1187,8 @@ def analyseAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_
     plt.suptitle(r'$\log_{10}$(Autocorrelation)', x=0.75, y=0.26)
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q11, origin='lower')
-    i2 = ax2.imshow(fourierSpectrum1, origin='lower')
+    i1 = ax1.imshow(Q11, origin='lower', interpolation='none')
+    i2 = ax2.imshow(fourierSpectrum1, origin='lower', interpolation='none')
     plt.colorbar(i1, ax=ax1, orientation='horizontal')
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
     plt.savefig('Autocorr1.pdf')
@@ -1093,8 +1200,8 @@ def analyseAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_
     plt.suptitle(r'$\log_{10}$(Autocorrelation)', x=0.75, y=0.26)
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q21, origin='lower')
-    i2 = ax2.imshow(fourierSpectrum2, origin='lower')
+    i1 = ax1.imshow(Q21, origin='lower', interpolation='none')
+    i2 = ax2.imshow(fourierSpectrum2, origin='lower', interpolation='none')
     plt.colorbar(i1, ax=ax1, orientation='horizontal')
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
     plt.savefig('Autocorr2.pdf')
@@ -1106,20 +1213,593 @@ def analyseAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_
     plt.suptitle(r'Autocorrelation', x=0.75, y=0.26)
     ax1 = fig.add_subplot(121)
     ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(diff, origin='lower', vmin=-400, vmax=400)
-    i2 = ax2.imshow(fourierSpectrumD, origin='lower')
+    i1 = ax1.imshow(diff, origin='lower', vmin=-400, vmax=400, interpolation='none')
+    i2 = ax2.imshow(fourierSpectrumD, origin='lower', interpolation='none')
     plt.colorbar(i1, ax=ax1, orientation='horizontal')
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
     plt.savefig('AutocorrDifference.pdf')
     plt.close()
 
 
+def examples(interpolation='none'):
+    """
+    This function generates 1D and 2D power spectra from simulated data.
+
+    :param interpolation:
+    :return: None
+    """
+    Pois1D = np.random.poisson(100000, 1024)
+    PowerSpectrum = np.log10(np.abs(fftpack.fft(Pois1D)))
+    #PowerSpectrum = np.log10(np.abs(fftpack.fftshift(fftpack.fft(Pois1D))))
+    print '1D Poisson:'
+    print np.mean(PowerSpectrum), np.median(PowerSpectrum), np.min(PowerSpectrum), np.max(PowerSpectrum), np.std(PowerSpectrum)
+    fig = plt.figure(figsize=(14, 8))
+    plt.suptitle('Fourier Analysis of Poisson Noise')
+    plt.suptitle('Input Data', x=0.32, y=0.93)
+    plt.suptitle(r'Power Spectrum', x=0.72, y=0.93)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    a = plt.axes([.65, .6, .2, .2], axisbg='y')
+    ax1.plot(Pois1D, 'bo')
+    ax2.plot(PowerSpectrum, 'r-')
+    a.plot(PowerSpectrum, 'r-')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Input Values')
+    ax2.set_ylabel(r'$\log_{10}$(Power Spectrum)')
+    ax1.set_xlim(0, 1024)
+    ax2.set_xlim(0, 1024)
+    ax2.set_ylim(2, 7)
+    a.set_xlim(0, 20)
+    plt.savefig('FourierPoisson1D.pdf')
+    plt.close()
+
+    #remove mean
+    Pois1D -= 100000 #np.mean(Pois1D)
+    PowerSpectrum = np.abs(fftpack.fft(Pois1D))
+    print '1D Poisson (mean removed):'
+    print np.mean(PowerSpectrum), np.median(PowerSpectrum), np.min(PowerSpectrum), np.max(PowerSpectrum), np.std(
+        PowerSpectrum)
+    fig = plt.figure(figsize=(14, 8))
+    plt.suptitle('Fourier Analysis of Poisson Noise (mean removed)')
+    plt.suptitle('Input Data', x=0.32, y=0.93)
+    plt.suptitle(r'Power Spectrum', x=0.72, y=0.93)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    a = plt.axes([.65, .6, .2, .2], axisbg='y')
+    ax1.plot(Pois1D, 'bo')
+    ax2.plot(PowerSpectrum, 'r-')
+    a.hist(PowerSpectrum, bins=20)
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Input Values')
+    #ax2.set_ylabel(r'$\log_{10}$(Power Spectrum)')
+    ax2.set_ylabel('Power Spectrum')
+    ax1.set_xlim(0, 1024)
+    ax2.set_xlim(0, 1024)
+    #ax2.set_ylim(10**2, 10**7)
+    #a.set_xlim(0, 20)
+    plt.savefig('FourierPoissonMeanRemoved1D.pdf')
+    plt.close()
+
+    Sin1D = 20.*np.sin(np.arange(256) / 10.)
+    PowerSpectrum = np.log10(np.abs(fftpack.fft(Sin1D)))
+    print '1D Sin:'
+    print np.mean(PowerSpectrum), np.median(PowerSpectrum), np.min(PowerSpectrum), np.max(PowerSpectrum), np.std(PowerSpectrum)
+    fig = plt.figure(figsize=(14, 8))
+    plt.suptitle('Fourier Analysis of Sine Wave')
+    plt.suptitle('Input Data', x=0.32, y=0.93)
+    plt.suptitle(r'Power Spectrum', x=0.72, y=0.93)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    a = plt.axes([.65, .6, .2, .2], axisbg='y')
+    ax1.plot(Sin1D, 'bo')
+    ax2.plot(PowerSpectrum, 'r-')
+    a.plot(PowerSpectrum, 'r-')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Input Values')
+    ax2.set_ylabel(r'$\log_{10}$(Power Spectrum)')
+    ax1.set_xlim(0, 256)
+    ax2.set_xlim(0, 256)
+    a.set_xlim(0, 20)
+    plt.savefig('FourierSin1D.pdf')
+    plt.close()
+
+    Top1D = np.zeros(256)
+    Top1D[100:110] = 1.
+    PowerSpectrum = np.log10(np.abs(fftpack.fft(Top1D)))
+    print '1D Tophat:'
+    print np.mean(PowerSpectrum), np.median(PowerSpectrum), np.min(PowerSpectrum), np.max(PowerSpectrum), np.std(PowerSpectrum)
+    fig = plt.figure(figsize=(14, 8))
+    plt.suptitle('Fourier Analysis of Tophat')
+    plt.suptitle('Input Data', x=0.32, y=0.93)
+    plt.suptitle(r'Power Spectrum', x=0.72, y=0.93)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    ax1.plot(Top1D, 'bo')
+    ax2.plot(PowerSpectrum, 'r-')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Input Values')
+    ax2.set_ylabel(r'$\log_{10}$(Power Spectrum)')
+    ax1.set_xlim(0, 256)
+    ax2.set_xlim(0, 256)
+    plt.savefig('FourierTophat1D.pdf')
+    plt.close()
+
+    s = 2048
+    ss = s / 2
+    Pois = np.random.poisson(100000, size=(s, s))
+    #fourierSpectrum1 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(Pois))))
+    fourierSpectrum1 = np.log10(np.abs(fftpack.fft2(Pois)))
+    print 'Poisson 2d:', np.var(Pois)
+    print np.mean(fourierSpectrum1), np.median(fourierSpectrum1), np.std(fourierSpectrum1), np.max(fourierSpectrum1), np.min(fourierSpectrum1)
+
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle('Fourier Analysis of Poisson Data')
+    plt.suptitle('Original Image', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(Pois, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99000, 100000, 101000])
+    i2 = ax2.imshow(fourierSpectrum1[0:ss, 0:ss], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=3, vmax=7)
+    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('FourierPoisson.pdf')
+    ax2.set_xlim(0, 10)
+    ax2.set_ylim(0, 10)
+    plt.savefig('FourierPoisson2.pdf')
+    ax2.set_xlim(ss-10, ss-1)
+    ax2.set_ylim(ss-10, ss-1)
+    plt.savefig('FourierPoisson3.pdf')
+    plt.close()
+
+    #Poisson with smoothing...
+    #val = 1.455e-6 / 2.
+    #flux = 100000
+    #kernel = np.array([[0, val * flux, 0], [val * flux, (1 - val), val * flux], [0, val * flux, 0]])
+    #kernel = np.array([[0.01, 0.02, 0.01], [0.02, 0.88, 0.02], [0.01, 0.02, 0.01]])
+    kernel = np.array([[0.0025, 0.01, 0.0025], [0.01, 0.95, 0.01], [0.0025, 0.01, 0.0025]])
+    Pois = ndimage.convolve(Pois.copy(), kernel)
+    #Pois = ndimage.filters.gaussian_filter(Pois.copy(), sigma=0.4)
+    fourierSp = np.log10(np.abs(fftpack.fft2(Pois)))
+    print 'Poisson 2d Smoothed:', np.var(Pois)
+    print np.mean(fourierSp), np.median(fourierSp), np.std(fourierSp), np.max(fourierSp), np.min(fourierSp)
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle('Fourier Analysis of Smoothed Poisson Data')
+    plt.suptitle('Original Image', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    i1 = ax1.imshow(Pois, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99000, 100000, 101000])
+    i2 = ax2.imshow(fourierSp[0:ss, 0:ss], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=3, vmax=7)
+    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('FourierPoissonSmooth.pdf')
+    ax2.set_xlim(0, 10)
+    ax2.set_ylim(0, 10)
+    plt.savefig('FourierPoissonSmooth2.pdf')
+    ax2.set_xlim(ss-10, ss-1)
+    ax2.set_ylim(ss-10, ss-1)
+    plt.savefig('FourierPoissonSmooth3.pdf')
+    plt.close()
+
+    #difference
+    fig = plt.figure()
+    plt.suptitle('Power Spectrum of Smoothed Poisson Data / Power Spectrum of Poisson Data')
+    ax = fig.add_subplot(111)
+    i = ax.imshow(fourierSp[0:ss, 0:ss] / fourierSpectrum1[0:ss, 0:ss],
+                  origin='lower', interpolation=interpolation, vmin=0.9, vmax=1.1)
+    plt.colorbar(i, ax=ax, orientation='horizontal')
+    plt.savefig('FourierPSDiv.pdf')
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+    plt.savefig('FourierPSDiv2.pdf')
+    ax.set_xlim(ss-10, ss-1)
+    ax.set_ylim(ss-10, ss-1)
+    plt.savefig('FourierPSDiv3.pdf')
+    plt.close()
+
+    #x = np.arange(1024)
+    #y = 10 * np.sin(x / 30.) + 20
+    #img = np.vstack([y, ] * 1024)
+    x, y = np.mgrid[0:32, 0:32]
+    #img = 10*np.sin(x/40.) * 10*np.sin(y/40.)
+    img = 100 * np.cos(x*np.pi/4.) * np.cos(y*np.pi/4.)
+    kernel = np.array([[0.0025, 0.01, 0.0025], [0.01, 0.95, 0.01], [0.0025, 0.01, 0.0025]])
+    img = ndimage.convolve(img.copy(), kernel)
+
+    fourierSpectrum2 = np.abs(fftpack.fft2(img))
+    #fourierSpectrum2 = np.log10(np.abs(fftpack.fftshift(fftpack.fft2(img))))
+    print np.mean(fourierSpectrum2), np.median(fourierSpectrum2), np.std(fourierSpectrum2), np.max(fourierSpectrum2), np.min(fourierSpectrum2)
+
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle('Fourier Analysis of Flat-field Data')
+    plt.suptitle('Original Image', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e')
+    i2 = ax2.imshow(fourierSpectrum2[0:512, 0:512], interpolation=interpolation, origin='lower',
+                    rasterized=True)
+    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax2.set_ylim(0, 16)
+    ax2.set_xlim(0, 16)
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('FourierSin.pdf')
+    plt.close()
+
+    x, y = np.mgrid[0:1024, 0:1024]
+    img = 10*np.sin(x/40.) * 10*np.sin(y/40.)
+    fourierSpectrum2 = np.log10(np.abs(fftpack.fft2(img)))
+    print np.mean(fourierSpectrum2), np.median(fourierSpectrum2), np.std(fourierSpectrum2), np.max(fourierSpectrum2), np.min(fourierSpectrum2)
+
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle('Fourier Analysis of Flat-field Data')
+    plt.suptitle('Original Image', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e')
+    i2 = ax2.imshow(fourierSpectrum2[0:512, 0:512], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=-1, vmax=7)
+    plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax2.set_xlabel('$l_{x}$')
+    ax2.set_ylim(0, 20)
+    ax2.set_xlim(0, 20)
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('FourierSin2.pdf')
+    plt.close()
+
+
+def sinusoidalExample():
+    interpolation = 'none'
+
+    x, y = np.mgrid[0:32, 0:32]
+    img = 100 * np.cos(x*np.pi/4.) * np.cos(y*np.pi/4.)
+    power = np.log10(np.abs(fftpack.fft2(img.copy())))
+
+    sigma = np.linspace(0.2, 3.0, 20)
+
+    fig = plt.figure(figsize=(14.5, 7))
+    plt.suptitle('Fourier Analysis of Sinusoidal Data')
+    plt.suptitle('Gaussian Smoothed', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[-100, -50, 0, 50, 100])
+    i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=-1, vmax=7)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+        i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=-1, vmax=7)
+        sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, p2, p2, sigma_text
+
+
+    def animate(i):
+        im = ndimage.filters.gaussian_filter(img.copy(), sigma=sigma[i])
+        power = np.log10(np.abs(fftpack.fft2(im)))
+
+        i1 = ax1.imshow(im, origin='lower', interpolation=interpolation)
+        i2 = ax2.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=-1, vmax=7)
+        sigma_text.set_text('sigma=%f' % sigma[i])
+
+        return i1, p1, p2, p2, sigma_text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=20, interval=1, blit=True)
+    anim.save('FourierSmoothing.mp4', fps=3)
+
+
+def poissonExample():
+    interpolation = 'none'
+
+    img = np.random.poisson(100000, size=(32, 32))
+    power = np.log10(np.abs(fftpack.fft2(img.copy())))
+
+    sigma = np.linspace(0.2, 3.0, 20)
+
+    fig = plt.figure(figsize=(14.5, 7))
+    plt.suptitle('Fourier Analysis of Poisson Data')
+    plt.suptitle('Gaussian Smoothed', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99500, 100000, 100500])
+    i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=2, vmax=7)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+        i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, p2, p2, sigma_text
+
+
+    def animate(i):
+        im = ndimage.filters.gaussian_filter(img.copy(), sigma=sigma[i])
+        power = np.log10(np.abs(fftpack.fft2(im)))
+
+        i1 = ax1.imshow(im, origin='lower', interpolation=interpolation)
+        i2 = ax2.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text.set_text('sigma=%f' % sigma[i])
+
+        return i1, p1, p2, p2, sigma_text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=20, interval=1, blit=True)
+    anim.save('FourierSmoothingPoisson.mp4', fps=3)
+
+
+def poissonExampleLowpass():
+    interpolation = 'none'
+
+    img = np.random.poisson(100000, size=(32, 32))
+    power = np.log10(np.abs(fftpack.fft2(img.copy())))
+
+    sigma = np.linspace(0.1, 100.0, 20)
+
+    fig = plt.figure(figsize=(14.5, 7))
+    plt.suptitle('Fourier Analysis of Poisson Data (lowpass filtering)')
+    plt.suptitle('Lowpass Filtered', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99500, 100000, 100500])
+    i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=2, vmax=7)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+        i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, p2, p2, sigma_text
+
+
+    def animate(i):
+        kernel_low = [[1.0/sigma[i],1.0/sigma[i],1.0/sigma[i]],
+                      [1.0/sigma[i],1.0/sigma[i],1.0/sigma[i]],
+                      [1.0/sigma[i],1.0/sigma[i],1.0/sigma[i]]]
+        im = ndimage.convolve(img.copy(), kernel_low)
+        power = np.log10(np.abs(fftpack.fft2(im)))
+
+        i1 = ax1.imshow(im, origin='lower', interpolation=interpolation)
+        i2 = ax2.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text.set_text('kernel %f' % (1./sigma[i]))
+
+        return i1, p1, p2, p2, sigma_text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=20, interval=1, blit=True)
+    anim.save('FourierSmoothingPoissonLowpass.mp4', fps=3)
+
+
+def poissonExamplePixelSharing():
+    interpolation = 'none'
+
+    img = np.random.poisson(100000, size=(32, 32))
+    power = np.log10(np.abs(fftpack.fft2(img.copy())))
+
+    sigma = np.logspace(-4, 1, 100)
+
+    fig = plt.figure(figsize=(14.5, 7))
+    plt.suptitle('Fourier Analysis of Poisson Data (kernel smoothing)')
+    plt.suptitle('Kernel Convolved', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99500, 100000, 100500])
+    i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower',
+                    rasterized=True, vmin=2, vmax=7)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+        i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, p2, p2, sigma_text
+
+
+    def animate(i):
+        kernel = [[0.0,         sigma[i]/4.,            0.0],
+                  [sigma[i]/4., 1.0 - sigma[i],         sigma[i]/4.],
+                  [0.0,         sigma[i]/4.,            0.0]]
+        im = ndimage.convolve(img.copy(), kernel)
+        power = np.log10(np.abs(fftpack.fft2(im)))
+
+        i1 = ax1.imshow(im, origin='lower', interpolation=interpolation)
+        i2 = ax2.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=7)
+        sigma_text.set_text('kernel %f' % sigma[i])
+
+        return i1, p1, p2, p2, sigma_text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=100, interval=1, blit=True)
+    anim.save('FourierSmoothingPoissonSharing.mp4', fps=3)
+
+
+def poissonExamplePixelSharing2():
+    interpolation = 'none'
+
+    flux = 100000
+    size = 2**6
+    ss = size /2
+    img = np.random.poisson(flux, size=(size, size))
+    power = np.log10(np.abs(fftpack.fft2(img.copy())))
+
+    sigma = np.logspace(-3, -0.1, 25)
+
+    fig = plt.figure(figsize=(14.5, 7))
+    plt.suptitle('Fourier Analysis of Poisson Data (kernel smoothing)')
+    plt.suptitle('Kernel Convolved', x=0.32, y=0.26)
+    plt.suptitle(r'$\log_{10}$(2D Power Spectrum)', x=0.72, y=0.26)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1f', ticks=[99500, 100000, 100500])
+    i2 = ax1.imshow(power[0:ss, 0:ss], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=6)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
+        i2 = ax1.imshow(power[0:ss, 0:ss], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=6)
+        sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, p2, p2, sigma_text
+
+
+    def animate(i):
+        kernel = [[0.0,         sigma[i]/4.,            0.0],
+                  [sigma[i]/4., 1.0 - sigma[i],         sigma[i]/4.],
+                  [0.0,         sigma[i]/4.,            0.0]]
+        im = ndimage.convolve(img.copy(), kernel)
+        print 'smoothed', sigma[i], np.var(img), np.var(im)
+        power = np.log10(np.abs(fftpack.fft2(im)))
+
+        i1 = ax1.imshow(im, origin='lower', interpolation=interpolation)
+        i2 = ax2.imshow(power[0:ss, 0:ss], interpolation=interpolation, origin='lower', rasterized=True, vmin=2, vmax=6)
+        sigma_text.set_text('kernel %e' % sigma[i])
+
+        return i1, p1, p2, p2, sigma_text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=25, interval=1, blit=True)
+    anim.save('FourierSmoothingPoissonSharing2.mp4', fps=3)
+
+
+def comparePower(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_36_31s_Euclid.fits', gain=3.1):
+    d1 = pf.getdata(file1) * gain
+    d2 = pf.getdata(file2) * gain
+
+    #pre/overscans
+    overscan1 = d1[11:2056, 4150:4192].mean()
+    overscan2 = d2[11:2056, 4150:4192].mean()
+
+    #define quadrants and subtract the bias levels
+    Q11 = d1[11:2050, 2110:4131] - overscan1
+    Q21 = d2[11:2050, 2110:4131] - overscan2
+
+    #limit to 1024
+    Q11 = Q11[300:1324, 300:1324]
+    Q21 = Q21[300:1324, 300:1324]
+
+    #difference image
+    diff = Q11 - Q21
+    fourierSpectrumD = np.abs(fftpack.fft2(diff))[0:512, 0:512]
+
+    cornervalues = fourierSpectrumD[510:512, 510:512]
+    print 'data'
+    print cornervalues
+    print np.log10(cornervalues)
+    print fourierSpectrumD[511:512, 511:512]
+    print np.log10(fourierSpectrumD[511:512, 511:512])
+
+    #simulate
+    res = []
+    flux = 145000
+    size = 1024
+    ss = size / 2
+    #for x in xrange(20):
+    #    img1 = np.random.poisson(flux, size=(size, size))
+    #    img2 = np.random.poisson(flux, size=(size, size))
+    #    power = np.abs(fftpack.fft2((img1 - img2)))[0:ss, 0:ss]
+    #    res.append(power)
+    #res = np.average(res, axis=0)
+
+    img1 = np.random.poisson(flux, size=(size, size))
+    img2 = np.random.poisson(flux, size=(size, size))
+    res = np.abs(fftpack.fft2((img1 - img2)))[0:ss, 0:ss]
+
+    print 'simulated'
+    cornervalues = res[510:512, 510:512]
+    print cornervalues
+    print np.log10(cornervalues)
+    print res[511:512, 511:512]
+    print np.log10(res[511:512, 511:512])
+
+    fig = plt.figure(figsize=(15, 7))
+    plt.suptitle('Power Spectrum values')
+    plt.suptitle('Difference Image', x=0.3, y=0.94)
+    plt.suptitle('Simulated Poisson Data', x=0.72, y=0.94)
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+    fig.subplots_adjust(wspace=0.25)
+
+    ax1.hist(np.ravel(fourierSpectrumD), bins=40, normed=True, range=[0, 1750000], label='power spectrum values')
+    ax1.axvline(x=fourierSpectrumD[511, 511], c='r', ls='-', lw=2, zorder=14, label='(512, 512)')
+    ax1.axvline(x=fourierSpectrumD[510, 510], c='g', ls=':', lw=2, zorder=14, label='(511, 511)')
+    ax1.axvline(x=fourierSpectrumD[511, 510], c='y', ls='--', lw=2, zorder=14, label='(511, 512)')
+    ax1.axvline(x=fourierSpectrumD[510, 511], c='m', ls='-.', lw=2, zorder=14, label='(512, 511)')
+
+    ax2.hist(np.ravel(res), bins=40, normed=True, range=[0, 1750000], label='power spectrum values')
+    ax2.axvline(x=res[511, 511], c='r', ls='-', lw=2, zorder=14, label='(512, 512)')
+    ax2.axvline(x=res[510, 510], c='g', ls=':', lw=2, zorder=14, label='(511, 511)')
+    ax2.axvline(x=res[511, 510], c='y', ls='--', lw=2, zorder=14, label='(511, 512)')
+    ax2.axvline(x=res[510, 511], c='m', ls='-.', lw=2, zorder=14, label='(512, 511)')
+
+    ax1.locator_params(nbins=6)
+    ax2.locator_params(nbins=6)
+
+    ax1.legend(shadow=True, fancybox=True)
+    ax2.legend(shadow=True, fancybox=True)
+    plt.savefig('PowerSpectrumDistributions.pdf')
+    plt.close()
+
+
 if __name__ == '__main__':
     size = 200.
 
-    analyseCorrelationFourier()
-    analyseCorrelationFourier(small=True)
-    analyseAutocorrelation()
+    #examples()
+    #sinusoidalExample()
+    #poissonExample()
+    #poissonExampleLowpass()
+    #poissonExamplePixelSharing()
+    #poissonExamplePixelSharing2()
+
+    #analyseCorrelationFourier()
+    #analyseCorrelationFourier(small=True)
+
+    #analyseCorrelationFourier(shift=True)
+    #analyseCorrelationFourier(small=True, shift=True)
+
+    #comparePower()
+
+    #analyseAutocorrelation()
 
     #makeFlat(files)
     #plotDetectorCounts()
@@ -1139,12 +1819,12 @@ if __name__ == '__main__':
     #          ('05Sep_15_06_50s_Euclid.fits', '05Sep_15_08_18s_Euclid.fits'),
     #          ('05Sep_14_50_59s_Euclid.fits', '05Sep_14_52_31s_Euclid.fits'),
     #          ('05Sep_14_35_00s_Euclid.fits', '05Sep_14_36_31s_Euclid.fits')]
-    #
-    # #simulation
+
+    #simulation
     # simulatePoissonProcess(size=size)
     # simulatePoissonProcessRowColumn()
     # simulatePoissonProcessRowColumn(short=False)
-    #
+
     # #pixel region
     # output = pairwiseNoise(pairs, size=size)
     # fileIO.cPickleDumpDictionary(output, 'data.pk')

@@ -810,6 +810,56 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
     return res
 
 
+def pistonKnowledge(log, file='data/psf2x.fits', oversample=2.0, psfs=1000, sigma=0.36, iterations=4, debug=False):
+    """
+    """
+    #read in PSF and renormalize it
+    data = pf.getdata(file)
+    data /= np.max(data)
+    data *= 2000.
+
+    if debug:
+        write.writeFITSfile(data, 'normalizedPSF.fits')
+
+    #set the scale for shape measurement
+    settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
+
+    #residual from a perfectly flat surface, pistons are in electrons
+    pistons = np.logspace(-5, 1, 10)
+    tot = pistons.size
+    res = {}
+    for i, piston in enumerate(pistons):
+        print'Piston: %i / %i' % (i+1, tot)
+        R2 = []
+        e1 = []
+        e2 = []
+        e = []
+        pss = np.random.random(psfs) * piston
+        #loop over the PSFs
+        for ps in pss:
+            #make a copy of the PSF and scale it with the given scaling
+            #and then add a random piston which is <= the error
+            tmp = data.copy() + ps
+
+            #measure e and R2 from the postage stamp image
+            sh = shape.shapeMeasurement(tmp, log, **settings)
+            results = sh.measureRefinedEllipticity()
+
+            #save values
+            e1.append(results['e1'])
+            e2.append(results['e2'])
+            e.append(results['ellipticity'])
+            R2.append(results['R2'])
+
+        out = dict(e1=np.asarray(e1), e2=np.asarray(e2), e=np.asarray(e), R2=np.asarray(R2))
+        #res[piston] = out
+        res[np.std(pss)] = out
+        #or should we save std(ps)?
+
+    return res
+
+
+
 def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
                             psfs=4000, sigma=0.36, iterations=5, pixels=60):
     """
@@ -982,36 +1032,40 @@ if __name__ == '__main__':
     log = lg.setUpLogger('biasCalibration.log')
     log.info('Testing bias level calibration...')
 
-    if error:
-        if debug:
-            resPiston = findTolerableErrorPiston(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
-            resSlope = findTolerableErrorSlope(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
-        else:
-            resPiston = findTolerableErrorPiston(log)
-            resSlope = findTolerableErrorSlope(log)
+    res = pistonKnowledge(log)
+    plotTolerableErrorE(res, r'VIS Bias Calibration: Piston', output='BiasCalibrationEPistonKnowledge.pdf')
+    plotTolerableErrorR2(res, r'VIS Bias Calibration: Piston', output='BiasCalibrationR2PistonKnowledge.pdf')
 
-        fileIO.cPickleDumpDictionary(resPiston, 'piston.pk')
-        plotTolerableErrorE(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorEPiston.pdf')
-        plotTolerableErrorR2(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorR2Piston.pdf')
-
-        fileIO.cPickleDumpDictionary(resSlope, 'slope.pk')
-        plotTolerableErrorE(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorESlope.pdf')
-        plotTolerableErrorR2(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorR2Slope.pdf')
-
-    if run:
-        print '\nSigma run:'
-        resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200,
-                                                file='psf1xhighe.fits', plots=False)
-        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
-        print '\nDelta run:'
-        resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=1000, surfaces=200, plots=False, file='psf1xhighe.fits')
-        fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
-
-    if plot:
-        if not run:
-            resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
-            resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
-        plotNumberOfFramesSigma(resultsSigma)
-        plotNumberOfFramesDelta(resultsDelta)
+    # if error:
+    #     if debug:
+    #         resPiston = findTolerableErrorPiston(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
+    #         resSlope = findTolerableErrorSlope(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
+    #     else:
+    #         resPiston = findTolerableErrorPiston(log)
+    #         resSlope = findTolerableErrorSlope(log)
+    #
+    #     fileIO.cPickleDumpDictionary(resPiston, 'piston.pk')
+    #     plotTolerableErrorE(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorEPiston.pdf')
+    #     plotTolerableErrorR2(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorR2Piston.pdf')
+    #
+    #     fileIO.cPickleDumpDictionary(resSlope, 'slope.pk')
+    #     plotTolerableErrorE(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorESlope.pdf')
+    #     plotTolerableErrorR2(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorR2Slope.pdf')
+    #
+    # if run:
+    #     print '\nSigma run:'
+    #     resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200,
+    #                                             file='psf1xhighe.fits', plots=False)
+    #     fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
+    #     print '\nDelta run:'
+    #     resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=1000, surfaces=200, plots=False, file='psf1xhighe.fits')
+    #     fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
+    #
+    # if plot:
+    #     if not run:
+    #         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
+    #         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
+    #     plotNumberOfFramesSigma(resultsSigma)
+    #     plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

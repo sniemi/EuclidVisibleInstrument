@@ -2,8 +2,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
-
-fig = plt.figure()
 fig = plt.figure()
 ax1 = fig.add_subplot(121, aspect='equal', autoscale_on=False, xlim=(-0, 2), ylim=(-1.5, 1.5))
 ax2 = fig.add_subplot(122, aspect='equal', autoscale_on=False, xlim=(-1.1, 1.1), ylim=(-1.1, 1.1))

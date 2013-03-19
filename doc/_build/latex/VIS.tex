@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Documentation}
-\date{February 27, 2013}
+\date{March 18, 2013}
 \release{1.0}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -2171,7 +2171,7 @@ ndarray {[}same as input data{]}
 \index{findTolerableErrorPiston() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorPiston}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorPiston}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=5000}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{debug=False}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorPiston}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorPiston}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=4000}, \emph{sigma=0.36}, \emph{iterations=5}, \emph{debug=False}}{}
 Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias offset.
 \begin{quote}\begin{description}
@@ -2185,7 +2185,7 @@ bias offset.
 \index{findTolerableErrorSlope() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
-\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorSlope}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorSlope}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=5000}, \emph{sigma=0.36}, \emph{iterations=6}, \emph{pixels=60}}{}
+\phantomsection\label{reduction:analysis.biasCalibration.findTolerableErrorSlope}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{findTolerableErrorSlope}}{\emph{log}, \emph{file='data/psf12x.fits'}, \emph{oversample=12.0}, \emph{psfs=4000}, \emph{sigma=0.36}, \emph{iterations=5}, \emph{pixels=60}}{}
 Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias slope.
 \begin{quote}\begin{description}
@@ -2194,6 +2194,12 @@ bias slope.
 
 \end{description}\end{quote}
 
+\end{fulllineitems}
+
+\index{pistonKnowledge() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.pistonKnowledge}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{pistonKnowledge}}{\emph{log}, \emph{file='data/psf2x.fits'}, \emph{oversample=2.0}, \emph{psfs=1000}, \emph{sigma=0.36}, \emph{iterations=4}, \emph{debug=False}}{}
 \end{fulllineitems}
 
 \index{plotDeltaEs() (in module analysis.biasCalibration)}
@@ -2363,7 +2369,7 @@ VISsim-Python
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
 \index{findTolerableError() (in module analysis.FlatfieldCalibration)}

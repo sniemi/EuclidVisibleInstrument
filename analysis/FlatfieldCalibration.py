@@ -28,7 +28,7 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 :version: 0.95
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)

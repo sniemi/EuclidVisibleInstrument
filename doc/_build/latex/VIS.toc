@@ -28,21 +28,21 @@
 \contentsline {section}{\numberline {6.2}VIS data reduction studies}{34}{section.6.2}
 \contentsline {subsection}{\numberline {6.2.1}Bias Calibration}{34}{subsection.6.2.1}
 \contentsline {subsection}{\numberline {6.2.2}Flat Field Calibration}{38}{subsection.6.2.2}
-\contentsline {chapter}{\numberline {7}Data Analysis}{41}{chapter.7}
-\contentsline {section}{\numberline {7.1}VIS data analysis tools}{41}{section.7.1}
-\contentsline {subsection}{\numberline {7.1.1}Object finding and measuring ellipticity}{41}{subsection.7.1.1}
-\contentsline {subsection}{\numberline {7.1.2}Measuring a shape of an object}{42}{subsection.7.1.2}
-\contentsline {subsection}{\numberline {7.1.3}Source finding}{44}{subsection.7.1.3}
-\contentsline {subsection}{\numberline {7.1.4}Properties of the Point Spread Function}{47}{subsection.7.1.4}
-\contentsline {subsection}{\numberline {7.1.5}Generating PSF Basis Sets}{48}{subsection.7.1.5}
-\contentsline {subsection}{\numberline {7.1.6}PSF Fitting}{50}{subsection.7.1.6}
-\contentsline {subsection}{\numberline {7.1.7}Testing the CTI Correction Algorithm}{52}{subsection.7.1.7}
-\contentsline {chapter}{\numberline {8}Charge Transfer Inefficiency}{55}{chapter.8}
-\contentsline {section}{\numberline {8.1}Fortran code for CTI}{55}{section.8.1}
-\contentsline {chapter}{\numberline {9}Supporting methods and files}{57}{chapter.9}
-\contentsline {section}{\numberline {9.1}Objects}{57}{section.9.1}
-\contentsline {section}{\numberline {9.2}Code}{57}{section.9.2}
-\contentsline {chapter}{\numberline {10}Photometric Accuracy}{59}{chapter.10}
-\contentsline {chapter}{\numberline {11}Indices and tables}{63}{chapter.11}
-\contentsline {chapter}{Python Module Index}{65}{section*.154}
-\contentsline {chapter}{Index}{67}{section*.155}
+\contentsline {chapter}{\numberline {7}Data Analysis}{43}{chapter.7}
+\contentsline {section}{\numberline {7.1}VIS data analysis tools}{43}{section.7.1}
+\contentsline {subsection}{\numberline {7.1.1}Object finding and measuring ellipticity}{43}{subsection.7.1.1}
+\contentsline {subsection}{\numberline {7.1.2}Measuring a shape of an object}{44}{subsection.7.1.2}
+\contentsline {subsection}{\numberline {7.1.3}Source finding}{46}{subsection.7.1.3}
+\contentsline {subsection}{\numberline {7.1.4}Properties of the Point Spread Function}{49}{subsection.7.1.4}
+\contentsline {subsection}{\numberline {7.1.5}Generating PSF Basis Sets}{50}{subsection.7.1.5}
+\contentsline {subsection}{\numberline {7.1.6}PSF Fitting}{52}{subsection.7.1.6}
+\contentsline {subsection}{\numberline {7.1.7}Testing the CTI Correction Algorithm}{54}{subsection.7.1.7}
+\contentsline {chapter}{\numberline {8}Charge Transfer Inefficiency}{57}{chapter.8}
+\contentsline {section}{\numberline {8.1}Fortran code for CTI}{57}{section.8.1}
+\contentsline {chapter}{\numberline {9}Supporting methods and files}{59}{chapter.9}
+\contentsline {section}{\numberline {9.1}Objects}{59}{section.9.1}
+\contentsline {section}{\numberline {9.2}Code}{59}{section.9.2}
+\contentsline {chapter}{\numberline {10}Photometric Accuracy}{61}{chapter.10}
+\contentsline {chapter}{\numberline {11}Indices and tables}{65}{chapter.11}
+\contentsline {chapter}{Python Module Index}{67}{section*.155}
+\contentsline {chapter}{Index}{69}{section*.156}

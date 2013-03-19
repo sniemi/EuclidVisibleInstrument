@@ -18,6 +18,7 @@ import numpy as np
 import glob as g
 from scipy import fftpack
 from scipy import ndimage
+from scipy import signal
 import cPickle
 from support import files as fileIO
 import scipy.optimize as optimize
@@ -1134,90 +1135,147 @@ def analyseCorrelationFourier(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_
     plt.close()
 
 
-def autocorr(data):
+def spatialAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_36_31s_Euclid.fits',
+                           gain=3.1, interpolation='none', size=1024):
     """
+    Calculates a spatial 2D autocorrelation from the difference image and visualises the findings.
+    Generates also two plots from simulated data for comparisons.
 
-    :param data:
-    :return:
+    :param file1: name of the first FITS file to be used in the analysis
+    :param file2: name of the second FITS file to be used in the analysis
+    :param gain: gain conversion between ADUs and electrons
+    :param interpolation: whether the visualisation grid should be interpolated or not
+    :param size: side length in pixels of the area to be used for analysis
+
+    :return: None
     """
-    #dataFT = np.fft.fft(data, axis=1)
-    dataFT = np.fft.fft(data)
-    #dataAC = np.fft.ifft(dataFT * np.conjugate(dataFT), axis=1).real
-    dataAC = np.fft.ifft(dataFT * np.conjugate(dataFT)).real
-    return dataAC
-
-
-def analyseAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_36_31s_Euclid.fits'):
-    """
-
-    :param file1:
-    :param file2:
-    :return:
-    """
-    d1 = pf.getdata(file1)
-    d2 = pf.getdata(file2)
+    d1 = pf.getdata(file1) * gain
+    d2 = pf.getdata(file2) * gain
 
     #pre/overscans
-    #prescan1 = d1[11:2056, 9:51].mean()
     overscan1 = d1[11:2056, 4150:4192].mean()
-    #prescan2 = d2[11:2056, 9:51].mean()
     overscan2 = d2[11:2056, 4150:4192].mean()
 
     #define quadrants and subtract the bias levels
-    #Q10 = d1[11:2051, 58:2095].copy() - prescan1
-    #Q20 = d2[11:2051, 58:2095].copy() - prescan2
-    Q11 = d1[11:2051, 2110:4132].copy() - overscan1
-    Q21 = d2[11:2051, 2110:4132].copy() - overscan2
+    Q11 = d1[11:2050, 2110:4131].copy() - overscan1
+    Q21 = d2[11:2050, 2110:4131].copy() - overscan2
 
-    #small region
-    Q11 = Q11[500:700, 500:700].copy()
-    Q21 = Q21[500:700, 500:700].copy()
+    #limit to 1024
+    Q11 = Q11[300:1324, 300:1324]
+    Q21 = Q21[300:1324, 300:1324]
+    print Q11.mean(), Q21.mean()
+    level = (np.average(Q11) + np.average(Q21)) / 2.
 
-    #autocorrelation
-    fourierSpectrum1 = np.log10(autocorr(Q11))
-    fourierSpectrum2 = np.log10(autocorr(Q21))
-    #difference image
-    diff = (Q11 - Q21).copy()
-    fourierSpectrumD = autocorr(diff)
+    if size > Q11.shape[0] or size > Q11.shape[1]:
+        print 'size too large, will abort...'
+        return None
+
+    diff = Q11 - Q21
+    diff = diff[0:size, 0:size]
+
+    #autoc = signal.correlate2d(diff, diff, mode='full')  #slow
+    autoc = signal.fftconvolve(diff, np.flipud(np.fliplr(diff)), mode='full')
+    autoc /= np.max(autoc)
+    autoc *= 100.
+    fileIO.writeFITS(autoc, 'autocorrelationRealdata.fits', int=False)
+    yc, xc = autoc.shape
+    xc /= 2.
+    yc /= 2.
+    xc -= 0.5
+    yc -= 0.5
 
     #plot images
-    fig = plt.figure(figsize=(12, 7))
-    plt.suptitle('Autocorrelation Analysis of Flat-field Data')
-    plt.suptitle('Original Image', x=0.3, y=0.26)
-    plt.suptitle(r'$\log_{10}$(Autocorrelation)', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q11, origin='lower', interpolation='none')
-    i2 = ax2.imshow(fourierSpectrum1, origin='lower', interpolation='none')
-    plt.colorbar(i1, ax=ax1, orientation='horizontal')
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle(r'Autocorrelation of Flat Field Data ($%i \times %i$ grid)' % (size, size))
+    plt.suptitle(r'Difference Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.51, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.78, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(diff, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.0f', ticks=[-1500, -750, 0, 750, 1500])
+    i2 = ax2.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    i3 = ax3.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    ax3.set_xlim(xc - 5, xc + 5)
+    ax3.set_ylim(yc - 5, yc + 5)
+
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
-    plt.savefig('Autocorr1.pdf')
+    plt.colorbar(i3, ax=ax3, orientation='horizontal')#, ticks=[10, 10.5, 11, 11.5, 12, 12.5])
+    ax1.set_xlabel('X [pixel]')
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('SpatialAutocorrelation.pdf')
     plt.close()
 
-    fig = plt.figure(figsize=(12, 7))
-    plt.suptitle('Autocorrelation Analysis of Flat-field Data')
-    plt.suptitle('Original Image', x=0.3, y=0.26)
-    plt.suptitle(r'$\log_{10}$(Autocorrelation)', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(Q21, origin='lower', interpolation='none')
-    i2 = ax2.imshow(fourierSpectrum2, origin='lower', interpolation='none')
-    plt.colorbar(i1, ax=ax1, orientation='horizontal')
+    diff = np.random.poisson(level, size=(size, size)) - np.random.poisson(level, size=(size, size))
+    #autoc = signal.correlate2d(diff, diff, mode='full')  #slow
+    autoc = signal.fftconvolve(diff, np.flipud(np.fliplr(diff)), mode='full')
+    autoc /= np.max(autoc)
+    autoc *= 100.
+    fileIO.writeFITS(autoc, 'autocorrelationSimulated.fits', int=False)
+    yc, xc = autoc.shape
+    xc /= 2.
+    yc /= 2.
+    xc -= 0.5
+    yc -= 0.5
+
+    #plot images
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle(r'Autocorrelation of Simulated Data ($%i \times %i$ grid)' % (size, size))
+    plt.suptitle(r'Difference Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.51, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.78, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(diff, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.0f', ticks=[-1500, -750, 0, 750, 1500])
+    i2 = ax2.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    i3 = ax3.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    ax3.set_xlim(xc - 5, xc + 5)
+    ax3.set_ylim(yc - 5, yc + 5)
+
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
-    plt.savefig('Autocorr2.pdf')
+    plt.colorbar(i3, ax=ax3, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax1.set_ylabel('Y [pixel]')
+    plt.savefig('SpatialAutocorrelationSimulation.pdf')
     plt.close()
 
-    fig = plt.figure(figsize=(12, 7))
-    plt.suptitle('Autocorrelation Analysis of Flat-field Data')
-    plt.suptitle('Difference Image', x=0.3, y=0.26)
-    plt.suptitle(r'Autocorrelation', x=0.75, y=0.26)
-    ax1 = fig.add_subplot(121)
-    ax2 = fig.add_subplot(122)
-    i1 = ax1.imshow(diff, origin='lower', vmin=-400, vmax=400, interpolation='none')
-    i2 = ax2.imshow(fourierSpectrumD, origin='lower', interpolation='none')
-    plt.colorbar(i1, ax=ax1, orientation='horizontal')
+    size = 128
+    diff = np.random.poisson(level, size=(size, size))
+    autoc = signal.correlate2d(diff, diff, mode='full')
+    autoc /= np.max(autoc)
+    autoc *= 100.
+    yc, xc = autoc.shape
+    xc /= 2.
+    yc /= 2.
+
+    #plot images
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle(r'Autocorrelation of Simulated Data ($%i \times %i$ grid)' % (size, size))
+    plt.suptitle(r'Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.51, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.78, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(diff, origin='lower', interpolation=interpolation)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.1e')
+    i2 = ax2.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    i3 = ax3.imshow(autoc, interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    ax3.set_xlim(xc - 5, xc + 5)
+    ax3.set_ylim(yc - 5, yc + 5)
+
     plt.colorbar(i2, ax=ax2, orientation='horizontal')
-    plt.savefig('AutocorrDifference.pdf')
+    plt.colorbar(i3, ax=ax3, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax1.set_ylabel('Y [pixel]')
+
+    plt.savefig('SpatialAutocorrelationSimulationSingle.pdf')
     plt.close()
 
 
@@ -1799,7 +1857,7 @@ if __name__ == '__main__':
 
     #comparePower()
 
-    #analyseAutocorrelation()
+    #spatialAutocorrelation()
 
     #makeFlat(files)
     #plotDetectorCounts()

@@ -272,7 +272,7 @@ class shapeMeasurement():
         hdu = pf.ImageHDU(data=data)
 
         #update and verify the header
-        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
         hdu.header.add_history('This file has been created with the VISsim Python Package at %s' \
                                % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')

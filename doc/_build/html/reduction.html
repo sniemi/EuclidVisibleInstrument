@@ -235,7 +235,7 @@ the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorPiston">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=5000</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias offset.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -250,7 +250,7 @@ bias offset.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorSlope">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=5000</em>, <em>sigma=0.36</em>, <em>iterations=6</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias slope.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -262,6 +262,11 @@ bias slope.</p>
 </tbody>
 </table>
 </dd></dl>
+
+<dl class="function">
+<dt id="analysis.biasCalibration.pistonKnowledge">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">pistonKnowledge</tt><big>(</big><em>log</em>, <em>file='data/psf2x.fits'</em>, <em>oversample=2.0</em>, <em>psfs=1000</em>, <em>sigma=0.36</em>, <em>iterations=4</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.pistonKnowledge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.plotDeltaEs">
@@ -389,7 +394,7 @@ takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>

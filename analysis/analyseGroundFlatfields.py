@@ -1279,6 +1279,114 @@ def spatialAutocorrelation(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_
     plt.close()
 
 
+def spatialAutocorrelationMovie(pairs, gain=3.1, interpolation='none', calculate=False):
+    """
+    Calculates a spatial 2D autocorrelation from the difference image and visualises the findings.
+
+    :param gain: gain conversion between ADUs and electrons
+    :param interpolation: whether the visualisation grid should be interpolated or not
+    :param calculate: whether to recalculate the autocorrelation functions or load from existing file
+
+    :return: None
+    """
+    if calculate:
+        data = {}
+        for file1, file2 in pairs:
+            d1 = pf.getdata(file1) * gain
+            d2 = pf.getdata(file2) * gain
+
+            #pre/overscans
+            overscan1 = d1[11:2056, 4150:4192].mean()
+            overscan2 = d2[11:2056, 4150:4192].mean()
+
+            #define quadrants and subtract the bias levels
+            Q11 = d1[11:2050, 2110:4131].copy() - overscan1
+            Q21 = d2[11:2050, 2110:4131].copy() - overscan2
+
+            #limit to 1024
+            Q11 = Q11[500:1524, 500:1524]
+            Q21 = Q21[500:1524, 500:1524]
+
+            #difference image
+            diff = Q11 - Q21
+
+            #check the average signal levels
+            Q11a = np.average(Q11)
+            Q21a = np.average(Q21)
+            d = np.abs(Q11a - Q21a)
+
+            print Q11a, Q21a, d, file1, file2
+
+            if d > 50.:
+                print 'too large difference in the average signal level, will ignore...'
+                #seems to be rather sensitive to this!
+                continue
+
+            autoc = signal.fftconvolve(diff, np.flipud(np.fliplr(diff)), mode='full')
+            autoc /= np.max(autoc)
+            autoc *= 100.
+
+            level = (Q11a + Q21a) / 2.
+
+            data[level] = dict(data=diff, autoc=autoc)
+
+        fileIO.cPickleDumpDictionary(data, 'spatialAutocorrelationMovieData.pk')
+    else:
+        data = cPickle.load(open('spatialAutocorrelationMovieData.pk'))
+
+    #average signal levels, sorted
+    keys = data.keys()
+    keys.sort()
+
+    #centre of the autocorrelation
+    yc, xc = data[keys[0]]['autoc'].shape
+    xc /= 2.
+    yc /= 2.
+    xc -= 0.5
+    yc -= 0.5
+
+    #plot images
+    fig = plt.figure(figsize=(14.5, 6.5))
+    plt.suptitle(r'Autocorrelation of Flat Field Data')
+    plt.suptitle(r'Difference Image $[e^{-}]$', x=0.24, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.51, y=0.26)
+    plt.suptitle(r'Autocorrelation Interaction $[\%]$', x=0.78, y=0.26)
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    i1 = ax1.imshow(data[keys[0]]['data'], origin='lower', interpolation=interpolation, vmin=-1000, vmax=1000, rasterized=True)
+    p1 = plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.0f', ticks=[-1000, -500, 0, 500, 1000])
+    i2 = ax2.imshow(data[keys[0]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    i3 = ax3.imshow(data[keys[0]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+    ax3.set_xlim(xc - 5, xc + 5)
+    ax3.set_ylim(yc - 5, yc + 5)
+    p2 = plt.colorbar(i2, ax=ax2, orientation='horizontal')
+    p3 = plt.colorbar(i3, ax=ax3, orientation='horizontal')
+    ax1.set_xlabel('X [pixel]')
+    ax1.set_ylabel('Y [pixel]')
+    text = ax1.text(0.02, 0.9, '', transform=ax1.transAxes)
+
+    def init():
+        i1 = ax1.imshow(data[keys[0]]['data'], origin='lower', interpolation=interpolation, vmin=-1000, vmax=1000, rasterized=True)
+        i2 = ax2.imshow(data[keys[0]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+        i3 = ax3.imshow(data[keys[0]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+        text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        return i1, p1, i2, p2, i3, p3, text
+
+
+    def animate(i):
+        i1 = ax1.imshow(data[keys[i]]['data'], origin='lower', interpolation=interpolation, vmin=-1000, vmax=1000, rasterized=True)
+        i2 = ax2.imshow(data[keys[i]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+        i3 = ax3.imshow(data[keys[i]]['autoc'], interpolation=interpolation, origin='lower', rasterized=True, vmin=0, vmax=5)
+        text.set_text('Mean Signal $\sim$ %.0f $e^{-}$' % keys[i])
+        return i1, p1, i2, p2, i3, p3, text
+
+    #note that the frames defines the number of times animate functions is being called
+    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=len(keys), interval=2, blit=True)
+    anim.save('SpatialCorrelation.mp4', fps=1)
+
+
 def examples(interpolation='none'):
     """
     This function generates 1D and 2D power spectra from simulated data.
@@ -1554,7 +1662,7 @@ def sinusoidalExample():
         i1 = ax1.imshow(img, origin='lower', interpolation=interpolation, rasterized=True)
         i2 = ax1.imshow(power[0:16, 0:16], interpolation=interpolation, origin='lower', rasterized=True, vmin=-1, vmax=7)
         sigma_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
-        return i1, p1, p2, p2, sigma_text
+        return i1, p1, i2, p2, sigma_text
 
 
     def animate(i):
@@ -1842,6 +1950,25 @@ def comparePower(file1='05Sep_14_35_00s_Euclid.fits', file2='05Sep_14_36_31s_Euc
 if __name__ == '__main__':
     size = 200.
 
+    #makeFlat(files)
+    #plotDetectorCounts()
+    #findPairs()
+    #
+    pairs = [('05Sep_14_57_00s_Euclid.fits', '05Sep_14_58_27s_Euclid.fits'),
+             ('05Sep_14_41_10s_Euclid.fits', '05Sep_14_43_30s_Euclid.fits'),
+             ('05Sep_14_25_05s_Euclid.fits', '05Sep_14_26_30s_Euclid.fits'),
+             ('05Sep_15_00_09s_Euclid.fits', '05Sep_15_02_21s_Euclid.fits'),
+             ('05Sep_14_45_07s_Euclid.fits', '05Sep_14_46_28s_Euclid.fits'),
+             ('05Sep_14_27_58s_Euclid.fits', '05Sep_14_30_22s_Euclid.fits'),
+             ('05Sep_14_09_15s_Euclid.fits', '05Sep_14_10_38s_Euclid.fits'),
+             ('05Sep_15_03_51s_Euclid.fits', '05Sep_15_05_18s_Euclid.fits'),
+             ('05Sep_14_47_56s_Euclid.fits', '05Sep_14_49_25s_Euclid.fits'),
+             ('05Sep_14_31_56s_Euclid.fits', '05Sep_14_33_23s_Euclid.fits'),
+             ('05Sep_14_13_32s_Euclid.fits', '05Sep_14_14_57s_Euclid.fits'),
+             ('05Sep_15_06_50s_Euclid.fits', '05Sep_15_08_18s_Euclid.fits'),
+             ('05Sep_14_50_59s_Euclid.fits', '05Sep_14_52_31s_Euclid.fits'),
+             ('05Sep_14_35_00s_Euclid.fits', '05Sep_14_36_31s_Euclid.fits')]
+
     #examples()
     #sinusoidalExample()
     #poissonExample()
@@ -1858,25 +1985,7 @@ if __name__ == '__main__':
     #comparePower()
 
     #spatialAutocorrelation()
-
-    #makeFlat(files)
-    #plotDetectorCounts()
-    #findPairs()
-    #
-    # pairs = [('05Sep_14_57_00s_Euclid.fits', '05Sep_14_58_27s_Euclid.fits'),
-    #          ('05Sep_14_41_10s_Euclid.fits', '05Sep_14_43_30s_Euclid.fits'),
-    #          ('05Sep_14_25_05s_Euclid.fits', '05Sep_14_26_30s_Euclid.fits'),
-    #          ('05Sep_15_00_09s_Euclid.fits', '05Sep_15_02_21s_Euclid.fits'),
-    #          ('05Sep_14_45_07s_Euclid.fits', '05Sep_14_46_28s_Euclid.fits'),
-    #          ('05Sep_14_27_58s_Euclid.fits', '05Sep_14_30_22s_Euclid.fits'),
-    #          ('05Sep_14_09_15s_Euclid.fits', '05Sep_14_10_38s_Euclid.fits'),
-    #          ('05Sep_15_03_51s_Euclid.fits', '05Sep_15_05_18s_Euclid.fits'),
-    #          ('05Sep_14_47_56s_Euclid.fits', '05Sep_14_49_25s_Euclid.fits'),
-    #          ('05Sep_14_31_56s_Euclid.fits', '05Sep_14_33_23s_Euclid.fits'),
-    #          ('05Sep_14_13_32s_Euclid.fits', '05Sep_14_14_57s_Euclid.fits'),
-    #          ('05Sep_15_06_50s_Euclid.fits', '05Sep_15_08_18s_Euclid.fits'),
-    #          ('05Sep_14_50_59s_Euclid.fits', '05Sep_14_52_31s_Euclid.fits'),
-    #          ('05Sep_14_35_00s_Euclid.fits', '05Sep_14_36_31s_Euclid.fits')]
+    spatialAutocorrelationMovie(pairs)
 
     #simulation
     # simulatePoissonProcess(size=size)

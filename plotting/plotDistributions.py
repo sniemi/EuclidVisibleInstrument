@@ -3,13 +3,11 @@ A Simple script to plot the distributions of stars and galaxies in a generated c
 """
 import datetime
 import numpy as np
-import statsmodels.api as sm
 from statsmodels.nonparametric.kde import KDE
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import host_subplot
 import mpl_toolkits.axisartist as AA
-from scipy.stats import gaussian_kde
-from analysis import ETC
+from ETC import ETC
 from sources import createObjectCatalogue as cr
 from support.VISinstrumentModel import VISinformation
 

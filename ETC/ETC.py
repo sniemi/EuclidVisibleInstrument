@@ -184,7 +184,7 @@ def SNR(info, magnitude=24.5, exptime=565.0, exposures=3, galaxy=True, backgroun
     return nom / denom * np.sqrt(exposures)
 
 
-def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False):
+def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False, server=False):
     """
     Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.
 
@@ -250,7 +250,10 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False):
     ax.set_xlim(xmax=np.max(peak))
 
     plt.legend(shadow=True, fancybox=True, loc='lower right')
-    plt.savefig('Peak.pdf')
+    if server:
+        plt.savefig('delete.png')
+    else:
+        plt.savefig('Peak.pdf')
     plt.close()
 
 

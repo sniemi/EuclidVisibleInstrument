@@ -2,6 +2,7 @@
 This script can be used to compare SNRs of SExtracted pointed sources to the radiometric calculations.
 """
 import matplotlib
+from ETC import ETC
 from support.VISinstrumentModel import VISinformation
 
 matplotlib.rc('text', usetex=True)
@@ -15,7 +16,6 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import datetime
 from support import sextutils
-from analysis import ETC
 import numpy as np
 
 

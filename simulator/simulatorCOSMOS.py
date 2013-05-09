@@ -123,7 +123,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.2
+:version: 1.3cosmos (a special version to generate a VIS COSMOS field)
 
 Version and change logs::
 
@@ -193,7 +193,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.2
+__version__ = '1.3cosmos'
 
 
 class VISsimulator():
@@ -204,37 +204,29 @@ class VISsimulator():
 
         self.image
 
-    :param configfile: name of the configuration file
-    :type configfile: string
-    :param debug: debugging mode on/off
-    :type debug: boolean
-    :param section: name of the section of the configuration file to process
-    :type section: string
+    :param opts: OptionParser instance
+    :type opts: OptionParser instance
     """
 
-    def __init__(self, configfile, debug, section='SCIENCE'):
+    def __init__(self, opts):
         """
         Class Constructor.
 
-        :param configfile: name of the configuration file
-        :type configfile: string
-        :param debug: debugging mode on/off
-        :type debug: boolean
-        :param section: name of the section of the configuration file to process
-        :type section: string
+        :param opts: OptionParser instance
+        :type opts: OptionParser instance
         """
-        self.configfile = configfile
-        self.section = section
-        self.debug = debug
+        self.configfile = opts.configfile
+        self.section = opts.section
+        self.debug = opts.debug
 
         #load instrument model
         self.information = VISinstrumentModel.VISinformation()
 
         #update settings with defaults
-        self.information.update(dict(psfoversampling=1.0,
-                                     quadrant=0,
-                                     ccdx=0,
-                                     ccdy=0,
+        self.information.update(dict(quadrant=int(opts.quadrant),
+                                     ccdx=int(opts.xCCD),
+                                     ccdy=int(opts.yCCD),
+                                     psfoversampling=3.0,
                                      xsize=2048,
                                      ysize=2066,
                                      prescanx=50,
@@ -370,10 +362,6 @@ class VISsimulator():
             self.readoutNoise =  self.config.getboolean(self.section, 'readoutNoise')
         except:
             self.readoutNoise = True
-        try:
-            self.postages = self.config.getboolean(self.section, 'postageStamps')
-        except:
-            self.postages = True
 
         self.information['variablePSF'] = False
 
@@ -559,7 +547,7 @@ class VISsimulator():
         :return: whether the object falls on the detector or not
         :rtype: boolean
         """
-        ny, nx = self.finemap[object[3]].shape
+        ny, nx = 10, 10   #TODO
         mx = self.information['xsize']
         my = self.information['ysize']
         xt = object[0]
@@ -567,7 +555,8 @@ class VISsimulator():
 
         if object[3] > 0:
             #galaxy
-            fac = (0.2**((object[2] - 22.)/7.)) / self.shapey[object[3]] / 2.
+            #fac = (0.2**((object[2] - 22.)/7.)) / self.shapey[object[3]] / 2.
+            fac = (0.2**((object[2] - 22.)/7.)) / 10. / 2.
         else:
             #star
             fac = 1.0
@@ -725,9 +714,8 @@ class VISsimulator():
             hdu.header.update(key.upper(), str(value), 'Boolean Flags')
 
         #update and verify the header
-        hdu.header.add_history('This is an itermediate data product no the final output!')
-        hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
-                                                                           datetime.datetime.isoformat(datetime.datetime.now())))
+        hdu.header.add_history('This is an intermediate data product no the final output!')
+        hdu.header.add_history('Created by VISsim (version=%s) at %s' % (__version__, datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -761,64 +749,29 @@ class VISsimulator():
             #. rotation [0 for stars, [0, 360] for galaxies]
 
         This method also displaces the object coordinates based on the quadrant and the
-        CCD to be simulated.
-
-        .. Note:: If even a single object type does not have a corresponding input then this method
-                  forces the program to exit.
+        CCD to be simulated and masks all objects outside the quadrant FoV.
         """
         self.objects = np.loadtxt(self.information['sourcelist'])
+        self.originalx = self.objects[:, 0].copy()
+        self.originaly = self.objects[:, 1].copy()
 
-        #if only a single object in the input, must force it to 2D
-        try:
-            tmp_ = self.objects.shape[1]
-        except:
-            self.objects = self.objects[np.newaxis, :]
+        strg = '{0:d} sources read from {1:s}'.format(np.shape(self.objects)[0], self.information['sourcelist'])
+        self.log.info(strg)
 
-        str = '{0:d} sources read from {1:s}'.format(np.shape(self.objects)[0], self.information['sourcelist'])
-        self.log.info(str)
+        #the input sextractor catalog has been derived from oversampled ACS data
+        self.objects[:, 0] /= self.information['psfoversampling']
+        self.objects[:, 1] /= self.information['psfoversampling']
 
-        #read in object types
-        data = open('data/objects.dat').readlines()
-
-        #only 2D array will have second dimension, so this will trigger the exception if only one input source
-        tmp_ = self.objects.shape[1]
-        #find all object types
-        self.sp = np.asarray(np.unique(self.objects[:, 3]), dtype=np.int)
-
-        #generate mapping between object type and data
-        objectMapping = {}
-        for stype in self.sp:
-            if stype == 0:
-                #delta function
-                objectMapping[stype] = 'PSF'
-            else:
-                for line in data:
-                    tmp = line.split()
-                    if int(tmp[0]) == stype:
-                        #found match
-                        if tmp[2].endswith('.fits'):
-                            d = pf.getdata(tmp[2])
-                        else:
-                            d = np.loadtxt(tmp[2], skiprows=2)
-                        objectMapping[stype] = dict(file=tmp[2], data=d)
-                        break
-
-        self.objectMapping = objectMapping
-
-        #test that we have input data for each object type, if not exit with error
-        if not np.array_equal(self.sp, np.asarray(list(objectMapping.keys()), dtype=np.int)):
-            self.log.error('No all object types available, will exit!')
-            sys.exit('No all object types available')
-
-        #change the image coordinates based on CCD
-        #if self.information['quadrant'] > 1:
-        #    skyy = skyy + ( yn * pix_y / ( ps_y * 3.6))
-        #if self.information['quadrant'] % 2 != 0:
-        #    skyx = skyx - ( xn * pix_x / ( ps_x * 3.6))
+        #change the image coordinates based on the CCD being simulated
+        if self.information['ccdx'] > 0:
+            #x coordinate shift
+            self.objects[:, 0] -= (self.information['ccdx'] * (4196. + (1.643 * 1000 / 12.)))
+        if self.information['ccdy'] > 0:
+            #y coordinate shift
+            self.objects[:, 1] -= (self.information['ccdy'] * (4132. + (8.116 * 1000 / 12.)))
 
         #and quadrant
         if self.information['quadrant'] > 0:
-
             if self.information['quadrant'] > 1:
                 #change y coordinate value
                 self.log.info('Changing y coordinates to take into account quadrant')
@@ -827,10 +780,6 @@ class VISsimulator():
             if self.information['quadrant'] % 2 != 0:
                 self.log.info('Changing x coordinates to take into account quadrant')
                 self.objects[:, 0] -= self.information['xsize']
-
-        self.log.info('Object types:')
-        self.log.info(self.sp)
-        self.log.info('Total number of object types is %i' % len(self.sp))
 
 
     def readPSFs(self):
@@ -843,6 +792,7 @@ class VISsimulator():
             #grid of PSFs
             self.log.debug('Spatially variable PSF:')
             self.log.error('NOT IMPLEMENTED!')
+            sys.exit(-9)
         else:
             #single PSF
             self.log.debug('Spatially static PSF:')
@@ -852,99 +802,6 @@ class VISsimulator():
             self.PSFx = self.PSF.shape[1]
             self.PSFy = self.PSF.shape[0]
             self.log.info('PSF sampling (x,y) = (%i, %i) ' % (self.PSFx, self.PSFy))
-
-
-    def generateFinemaps(self):
-        """
-        Generates finely sampled images of the input data.
-
-        .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
-                     not probably very effective. Assumes the PSF sampling for other finemaps.
-        """
-        self.finemap = {}
-        self.shapex = {}
-        self.shapey = {}
-
-        #This could be force all the images to be oversampled with a given factor
-        finemapsampling = 1
-
-        for k, stype in enumerate(self.sp):
-
-            #finemap array
-            fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling), dtype=np.float64)
-
-            if stype == 0:
-                data = self.PSF.copy()
-
-                ny, nx = data.shape
-
-                i1 = (self.PSFx*finemapsampling - nx) / 2
-                if i1 < 1:
-                    i1 = 0
-                i2 = i1 + ny
-
-                j1 = (self.PSFy*finemapsampling - ny) / 2
-                if j1 < 1:
-                    j1 = 0
-                j2 = j1 + nx
-
-                fm[j1:j2, i1:i2] = data
-
-                #normalize to sum to unity
-                fm /= np.sum(fm)
-                self.finemap[stype] = fm
-
-                self.finemap[stype] = fm
-                self.shapex[stype] = 0
-                self.shapey[stype] = 0
-            else:
-                if self.information['psfoversampling'] > 1.0:
-                    data = scipy.ndimage.zoom(self.objectMapping[stype]['data'],
-                                              self.information['psfoversampling'],
-                                              order=0)
-                else:
-                    data = self.objectMapping[stype]['data']
-
-                ny, nx = data.shape
-
-                i1 = (self.PSFx*finemapsampling - nx) / 2
-                if i1 < 1:
-                    i1 = 0
-                i2 = i1 + ny
-
-                j1 = (self.PSFy*finemapsampling - ny) / 2
-                if j1 < 1:
-                    j1 = 0
-                j2 = j1 + nx
-
-                fm[j1:j2, i1:i2] = data
-
-                #normalize to sum to unity
-                fm /= np.sum(fm)
-                self.finemap[stype] = fm
-
-                #Compute a shape tensor, translated from Fortran so not very effective.
-                #TODO: rewrite with numpy meshgrid
-                Qxx = 0.
-                Qxy = 0.
-                Qyy = 0.
-                for i in xrange(0, self.PSFx*finemapsampling):
-                    for j in xrange(0, self.PSFy*finemapsampling):
-                        Qxx += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(i-0.5*(self.PSFx*finemapsampling-1))
-                        Qxy += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
-                        Qyy += fm[j,i]*(j-0.5*(self.PSFy*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
-
-                shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                self.shapex[stype] = (np.sqrt(shx / np.sum(fm)))
-                self.shapey[stype] = (np.sqrt(shy / np.sum(fm)))
-
-            if self.debug:
-                scipy.misc.imsave('finemap%i.jpg' % (k+1), (fm / np.max(fm) * 255))
-
-        #sum of the finemaps, this should be exactly the number of finemaps
-        #because these have been normalized to sum to unity.
-        self.log.info('finemap sum = %f' %np.sum(np.asarray(self.finemap.values())))
 
 
     def addObjects(self):
@@ -968,112 +825,94 @@ class VISsimulator():
                     self.information['magzero'] * \
                     self.information['exptime']
 
-        #loop over exposures
-        for i in xrange(self.information['exposures']):
-            #loop over the number of objects
-            for j, obj in enumerate(self.objects):
+        #TODO remove hardcoded file name
+        fh = pf.open('hlsp_candels_hst_acs_cos-tot_f814w_v1.0_drz.fits', mmap=True) #memmap
 
-                stype = obj[3]
+        #loop over the number of objects
+        for j, obj in enumerate(self.objects):
 
-                if self.objectOnDetector(obj):
-                    visible += 1
-                    if stype == 0:
-                        #point source, apply PSF
-                        txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
-                        print txt
-                        self.log.info(txt)
+            stype = obj[3]
 
-                        data = self.finemap[stype].copy()
+            if self.objectOnDetector(obj):
+                visible += 1
+                if stype == 0:
+                    #point source, apply PSF
+                    txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                    print txt
+                    self.log.info(txt)
+                    #data, simply copy PSF
+                    data = self.PSF.copy()
 
-                        #map the data to new grid aligned with the centre of the object and scale
-                        #def shift_func(output_coords):
-                        #    return output_coords[0] - (obj[0] % 1), output_coords[1] - (obj[1] % 1)
-                        #data = ndimage.geometric_transform(data, shift_func, order=0)
-                        yind, xind = np.indices(data.shape)
-                        yi = yind.astype(np.float) + (obj[0] % 1)
-                        xi = xind.astype(np.float) + (obj[1] % 1)
-                        data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
-                        if self.information['psfoversampling'] != 1.0:
-                            data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'], order=1)
+                    #map the data to new grid aligned with the centre of the object and scale
+                    yind, xind = np.indices(data.shape)
+                    yi = yind.astype(np.float) + (obj[0] % 1)
+                    xi = xind.astype(np.float) + (obj[1] % 1)
+                    data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+                    if self.information['psfoversampling'] != 1.0:
+                        data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'], order=1)
 
-                        #suppress negative numbers, renormalise and scale with the intscale
-                        data[data < 0.0] = 0.0
-                        sum = np.sum(data)
-                        sca = intscales[j] / sum
-                        data = ne.evaluate("data * sca")
+                    #suppress negative numbers, renormalise and scale with the intscale
+                    data[data < 0.0] = 0.0
+                    sum = np.sum(data)
+                    sca = intscales[j] / sum
+                    data = ne.evaluate("data * sca")
 
-                        self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
+                    self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
-                        #overlay the scaled PSF on the image
-                        self.overlayToCCD(data, obj)
-                    else:
-                        #extended source, rename finemap
-                        data = self.finemap[stype].copy()
-                        #map the data to new grid aligned with the centre of the object
-                        yind, xind = np.indices(data.shape)
-                        yi = yind.astype(np.float) + (obj[0] % 1)
-                        xi = xind.astype(np.float) + (obj[1] % 1)
-                        data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
-
-                        #size scaling along the minor axes
-                        smin = min(self.shapex[stype], self.shapey[stype])
-                        sbig = 0.2**((obj[2] - 22.)/7.) / smin / 2.
-                        #sbig = np.e**(-1.145-0.269*(obj[2] - 23.)) / smin   #from Miller et al. 2012 (1210.8201v1)
-
-                        txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
-                              " intscale=" + str(intscales[j]) + " size=" + str(sbig)
-                        print txt
-                        self.log.info(txt)
-
-                        #rotate the image using interpolation and suppress negative values
-                        if math.fabs(obj[4]) > 1e-5:
-                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
-
-                        #scale the size of the galaxy before convolution
-                        if sbig != 1.0:
-                            data = scipy.ndimage.zoom(data, self.information['psfoversampling']*sbig, order=0)
-                            data[data < 0.0] = 0.0
-
-                        if self.debug:
-                            self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
-
-                        if self.information['variablePSF']:
-                            sys.exit('Spatially variable PSF not implemented yet!')
-                        else:
-                            #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                            #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                            conv = signal.fftconvolve(data, self.PSF, mode='full')
-
-                        #scale the galaxy image size with the inverse of the PSF over sampling factor
-                        if self.information['psfoversampling'] != 1.0:
-                            conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'], order=1)
-
-                        #suppress negative numbers
-                        conv[conv < 0.0] = 0.0
-
-                        #renormalise and scale to the right magnitude
-                        sum = np.sum(conv)
-                        sca = intscales[j] / sum
-                        conv = ne.evaluate("conv * sca")
-
-                        #tiny galaxies sometimes end up with completely zero array
-                        #checking this costs time, so perhaps this could be removed
-                        if np.isnan(np.sum(conv)):
-                            continue
-
-                        if self.debug:
-                            scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
-                            self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
-
-                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
-
-                        #overlay the convolved image on the image
-                        self.overlayToCCD(conv, obj)
-
+                    #overlay the scaled PSF on the image
+                    self.overlayToCCD(data, obj)
                 else:
-                    #not on the screen
-                    print 'OFFscreen: ', j+1
-                    self.log.info('Object %i was outside the detector area' % (j+1))
+                    #extended source, load data from correct x and y position
+
+                    #cutout a postage stamp from the COSMOS data
+                    sz = 0.2**((obj[2] - 22.)/7.) * 110
+                    xmin = int(max(self.originalx[j]-sz, 0))
+                    ymin = int(max(self.originaly[j]-sz, 0))
+                    xmax = int(min(self.originalx[j]+sz, fh[0].data.shape[1]))
+                    ymax = int(min(self.originaly[j]+sz, fh[0].data.shape[0]))
+                    data = fh[0].data[ymin:ymax, xmin:xmax].copy().astype(np.float64)
+
+                    #renormalize the flux, try to cope with background
+                    data[data < 1e-5] = 0.0
+                    data /= data.sum()
+
+                    txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
+                          " intscale=" + str(intscales[j]) + \
+                          " original position=" + str(self.originalx[j]) + ', ' + str(self.originaly[j]) + \
+                          " postage stamp size=" + str(sz)
+                    print txt
+                    self.log.info(txt)
+
+                    #convolve with the PSF
+                    conv = signal.fftconvolve(data, self.PSF, mode='full')
+                    del data
+
+                    #scale the galaxy image size with the inverse of the PSF over sampling factor
+                    if self.information['psfoversampling'] != 1.0:
+                        conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'], order=1)
+
+                    #suppress negative numbers
+                    conv[conv < 0.0] = 0.0
+
+                    #renormalise and scale to the right magnitude
+                    sum = np.sum(conv)
+                    sca = intscales[j] / sum
+                    conv = ne.evaluate("conv * sca")
+
+                    #tiny galaxies sometimes end up with completely zero array
+                    #checking this costs time, so perhaps this could be removed
+                    if np.isnan(np.sum(conv)):
+                        print 'ERROR -- small galaxy, no pixels to include'
+                        continue
+
+                    if self.debug:
+                        scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
+                        self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+
+                    self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
+
+                    #overlay the convolved image on the image
+                    self.overlayToCCD(conv, obj)
 
         self.log.info('%i objects were place on the detector' % visible)
         print '%i objects were place on the detector' % visible
@@ -1507,9 +1346,8 @@ class VISsimulator():
                 key = key[:7]
             hdu.header.update(key.upper(), str(value), 'Boolean Flags')
 
-        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
-                                                                           datetime.datetime.isoformat(datetime.datetime.now())))
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
+        hdu.header.add_history('Created by VISsim (version=%s) at %s' % (__version__, datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -1528,7 +1366,6 @@ class VISsimulator():
         self.configure()
         self.readObjectlist()
         self.readPSFs()
-        self.generateFinemaps()
 
         if self.addsources:
             self.addObjects()
@@ -1594,6 +1431,12 @@ def processArgs(printHelp=False):
                       help="Name of the configuration file", metavar="string")
     parser.add_option('-s', '--section', dest='section',
                       help="Name of the section of the config file [SCIENCE]", metavar="string")
+    parser.add_option('-q', '--quadrant', dest='quadrant', help='CCD quadrant to simulate [0, 1, 2, 3]',
+                      metavar='int')
+    parser.add_option('-x', '--xCCD', dest='xCCD', help='CCD number in X-direction within the FPA matrix',
+                      metavar='int')
+    parser.add_option('-y', '--yCCD', dest='yCCD', help='CCD number in Y-direction within the FPA matrix',
+                      metavar='int')
     parser.add_option('-d', '--debug', dest='debug', action='store_true',
                       help='Debugging mode on')
     if printHelp:
@@ -1609,9 +1452,5 @@ if __name__ == '__main__':
         processArgs(True)
         sys.exit(1)
 
-    if opts.section is None:
-        simulate = VISsimulator(opts.configfile, opts.debug)
-    else:
-        simulate = VISsimulator(opts.configfile, opts.debug, opts.section)
-
+    simulate = VISsimulator(opts)
     simulate.simulate()

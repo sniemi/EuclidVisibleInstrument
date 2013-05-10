@@ -1,6 +1,6 @@
 """
-Generating a mosaic
-===================
+Generating a CCD mosaic
+=======================
 
 This file contains a class to create a single VIS CCD image from separate files one for each quadrant.
 
@@ -8,7 +8,7 @@ This file contains a class to create a single VIS CCD image from separate files 
 :requires: PyFITS
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 
 To execute::
 
@@ -17,7 +17,7 @@ To execute::
 where -f argument defines the input files to be tiled and the -e argument marks the
 FITS extension from which the imaging data are being read.
 
-:version: 0.4
+:version: 0.5
 
 .. todo::
 
@@ -100,7 +100,7 @@ class tileCCD():
         :type ysize: int
 
         :return: image array of size (ysize*2, xsize*2)
-        :rtype: dnarray
+        :rtype: ndnarray
         """
         self.CCDdata = np.zeros((ysize*2, xsize*2))
 

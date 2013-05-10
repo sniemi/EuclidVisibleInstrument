@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Exposure Time Calculator &mdash; VIS 1.0 documentation</title>
+    <title>Exposure Time Calculator &mdash; VIS 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 1.0 documentation" href="index.html" />
+    <link rel="top" title="VIS 1.1 documentation" href="index.html" />
     <link rel="next" title="Generating Object Catalogue" href="sources.html" />
     <link rel="prev" title="Postprocessing Tools" href="postproc.html" /> 
   </head>
@@ -92,8 +92,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-analysis.ETC">
-<span id="exposure-time-calculator"></span><h1>Exposure Time Calculator<a class="headerlink" href="#module-analysis.ETC" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-ETC.ETC">
+<span id="exposure-time-calculator"></span><h1>Exposure Time Calculator<a class="headerlink" href="#module-ETC.ETC" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="calculating-exposure-times-and-limiting-magnitude">
 <h2>Calculating Exposure Times and Limiting Magnitude<a class="headerlink" href="#calculating-exposure-times-and-limiting-magnitude" title="Permalink to this headline">¶</a></h2>
 <p>This file provides a simple functions to calculate exposure times or limiting magnitudes.</p>
@@ -111,13 +111,13 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
 <dl class="function">
-<dt id="analysis.ETC.SNR">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em>, <em>background=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNR" title="Permalink to this definition">¶</a></dt>
+<dt id="ETC.ETC.SNR">
+<tt class="descclassname">ETC.ETC.</tt><tt class="descname">SNR</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exptime=565.0</em>, <em>exposures=3</em>, <em>galaxy=True</em>, <em>background=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#ETC.ETC.SNR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the signal-to-noise ratio for an object of a given magnitude in a given exposure time and a
 number of exposures.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -148,8 +148,8 @@ should be used [default = False]</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="analysis.ETC.SNRproptoPeak">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#analysis.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
+<dt id="ETC.ETC.SNRproptoPeak">
+<tt class="descclassname">ETC.ETC.</tt><tt class="descname">SNRproptoPeak</tt><big>(</big><em>info</em>, <em>exptime=565.0</em>, <em>exposures=1</em>, <em>diginoise=False</em>, <em>server=False</em><big>)</big><a class="headerlink" href="#ETC.ETC.SNRproptoPeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the relation between the signal-to-noise ratio and the electrons in the peak pixel.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -159,8 +159,9 @@ should be used [default = False]</li>
 <li><strong>info</strong> (<em>dict</em>) &#8211; instrumental information such as zeropoint and background</li>
 <li><strong>exptime</strong> (<em>float</em>) &#8211; exposure time [seconds]</li>
 <li><strong>exposures</strong> (<em>int</em>) &#8211; number of exposures [default = 1]</li>
-<li><strong>diginoise</strong> (<em>boolean</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
+<li><strong>diginoise</strong> (<em>bool</em>) &#8211; if the readout noise is undersampled or poorly resolved then the effective readout noise
 should be used [default = False]</li>
+<li><strong>server</strong> (<em>bool</em>) &#8211; whether to save the figure in a PNG or PDF format (the former can be used together with the WWW server)</li>
 </ul>
 </td>
 </tr>
@@ -175,8 +176,8 @@ should be used [default = False]</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="analysis.ETC.exposureTime">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#analysis.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
+<dt id="ETC.ETC.exposureTime">
+<tt class="descclassname">ETC.ETC.</tt><tt class="descname">exposureTime</tt><big>(</big><em>info</em>, <em>magnitude</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#ETC.ETC.exposureTime" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the exposure time for a given magnitude.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -206,8 +207,8 @@ should be used [default = False]</li>
 </dd></dl>
 
 <dl class="function">
-<dt id="analysis.ETC.limitingMagnitude">
-<tt class="descclassname">analysis.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#analysis.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
+<dt id="ETC.ETC.limitingMagnitude">
+<tt class="descclassname">ETC.ETC.</tt><tt class="descname">limitingMagnitude</tt><big>(</big><em>info</em>, <em>exp=565</em>, <em>snr=10.0</em>, <em>exposures=3</em>, <em>fudge=0.7</em>, <em>galaxy=True</em>, <em>diginoise=False</em><big>)</big><a class="headerlink" href="#ETC.ETC.limitingMagnitude" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the limiting magnitude for a given exposure time, number of exposures and minimum signal-to-noise
 level to be reached.</p>
 <table class="docutils field-list" frame="void" rules="none">

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Postprocessing Tools &mdash; VIS 1.0 documentation</title>
+    <title>Postprocessing Tools &mdash; VIS 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 1.0 documentation" href="index.html" />
+    <link rel="top" title="VIS 1.1 documentation" href="index.html" />
     <link rel="next" title="Exposure Time Calculator" href="ETC.html" />
     <link rel="prev" title="VIS Instrument Model" href="instrument.html" /> 
   </head>
@@ -61,7 +61,8 @@
   <ul>
 <li><a class="reference internal" href="#">Postprocessing Tools</a><ul>
 <li><a class="reference internal" href="#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
-<li><a class="reference internal" href="#generating-a-mosaic">Generating a mosaic</a></li>
+<li><a class="reference internal" href="#generating-a-ccd-mosaic">Generating a CCD mosaic</a></li>
+<li><a class="reference internal" href="#generating-an-fpa-mosaic">Generating an FPA mosaic</a></li>
 </ul>
 </li>
 </ul>
@@ -397,8 +398,8 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 
 </dd></dl>
 
-<span class="target" id="module-postproc.tileCCD"></span><div class="section" id="generating-a-mosaic">
-<h2>Generating a mosaic<a class="headerlink" href="#generating-a-mosaic" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-postproc.tileCCD"></span><div class="section" id="generating-a-ccd-mosaic">
+<h2>Generating a CCD mosaic<a class="headerlink" href="#generating-a-ccd-mosaic" title="Permalink to this headline">¶</a></h2>
 <p>This file contains a class to create a single VIS CCD image from separate files one for each quadrant.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -410,7 +411,7 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -423,7 +424,7 @@ FITS extension from which the imaging data are being read.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.4</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.5</td>
 </tr>
 </tbody>
 </table>
@@ -473,7 +474,7 @@ which quadrant is being processed so that the extra regions are subtracted corre
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">image array of size (ysize*2, xsize*2)</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dnarray</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndnarray</p>
 </td>
 </tr>
 </tbody>
@@ -483,6 +484,104 @@ which quadrant is being processed so that the extra regions are subtracted corre
 <dl class="method">
 <dt id="postproc.tileCCD.tileCCD.writeFITSfile">
 <tt class="descname">writeFITSfile</tt><big>(</big><em>data=None</em>, <em>unsigned16bit=True</em><big>)</big><a class="headerlink" href="#postproc.tileCCD.tileCCD.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out FITS files using PyFITS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file, if None use self.data</li>
+<li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-postproc.tileFPA"></span><div class="section" id="generating-an-fpa-mosaic">
+<h2>Generating an FPA mosaic<a class="headerlink" href="#generating-an-fpa-mosaic" title="Permalink to this headline">¶</a></h2>
+<p>This file contains a class to create a single VIS FPA image from separate files one for each CCD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<p>To execute:</p>
+<div class="highlight-python"><pre>python tileFPA.py -f 'CCD*science.fits' -e 1</pre>
+</div>
+<p>where -f argument defines the input files to be tiled and the -e argument marks the
+FITS extension from which the imaging data are being read.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="class">
+<dt id="postproc.tileFPA.tileFPA">
+<em class="property">class </em><tt class="descclassname">postproc.tileFPA.</tt><tt class="descname">tileFPA</tt><big>(</big><em>inputs</em>, <em>log</em><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to create a single VIS FPA image from separate CCD files.</p>
+<dl class="method">
+<dt id="postproc.tileFPA.tileFPA.readData">
+<tt class="descname">readData</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.readData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in data from all the input files and the header from the first file.
+Input files are taken from the input dictionary given when class was initiated.</p>
+<p>Subtracts the pre- and overscan regions if these were simulated. Takes into account
+which quadrant is being processed so that the extra regions are subtracted correctly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileFPA.tileFPA.runAll">
+<tt class="descname">runAll</tt><big>(</big><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.runAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper to perform all class methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileFPA.tileFPA.tileFPA">
+<tt class="descname">tileFPA</tt><big>(</big><em>xgap=1.643</em>, <em>ygap=8.116</em><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.tileFPA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tiles quadrants to form a single CCD image.</p>
+<p>Assume that the input file naming convention is Qx_CCDX_CCDY_name.fits.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xgap</strong> (<em>float</em>) &#8211; length of the gap between in mm two CCDs in column direction [default=1.643]</li>
+<li><strong>ygap</strong> (<em>float</em>) &#8211; length of the gap between in mm two CCDs in row direction [default=8.116]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">FPA image array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndnarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="postproc.tileFPA.tileFPA.writeFITSfile">
+<tt class="descname">writeFITSfile</tt><big>(</big><em>data=None</em>, <em>unsigned16bit=True</em><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.writeFITSfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write out FITS files using PyFITS.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

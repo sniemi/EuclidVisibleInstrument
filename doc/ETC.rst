@@ -1,5 +1,5 @@
 Exposure Time Calculator
 ========================
 
-.. automodule:: analysis.ETC
+.. automodule:: ETC.ETC
     :members:

@@ -1,5 +1,8 @@
 """
-A simple script to study the effects of CTI trailing to weak lensing and power spectrum.
+Impact of CTI Trailing on Shear Power Spectrum
+==============================================
+
+A simple script to study the effects of CTI trailing to weak lensing shear power spectrum.
 
 :requires: NumPy
 :requires: SciPy
@@ -26,8 +29,9 @@ from scipy import fftpack
 
 def plotCTIeffect(data):
     """
-    Data is assumed to be in the following format:
-    x [deg]     y [deg] g1_parallel   g1_serial    g1_total    g2_total
+    This function plots the CTI impact on shear. The Data is assumed to be in the following format::
+
+        x [deg]     y [deg] g1_parallel   g1_serial    g1_total    g2_total
 
     :param data:
     :return:
@@ -65,15 +69,18 @@ def plotCTIeffect(data):
     plt.savefig('CTITotal.pdf')
     plt.close()
 
+
 def azimuthalAverageSimple(image, center=None):
     """
-    Calculate the azimuthally averaged radial profile.
+    A simple algorithm to calculate the azimuthally averaged radial profile.
 
-    image - The 2D image
-    center - The [x,y] pixel coordinates used as the center. The default is
-             None, which then uses the center of the image (including
-             fractional pixels).
+    :param image: image
+    :type image: ndarray
+    :param center: The [x,y] pixel coordinates used as the centre. The default is
+                   None, which then uses the center of the image (including fractional pixels).
+    :type center: list or None
 
+    :return: radial profile
     """
     # Calculate the indices from the image
     y, x = np.indices(image.shape)
@@ -108,30 +115,25 @@ def azimuthalAverageSimple(image, center=None):
 def azimuthalAverage(image, center=None, stddev=False, returnradii=False, return_nr=False,
                      binsize=0.5, weights=None, steps=False, interpnan=False, left=None, right=None):
     """
-    Calculate the azimuthally averaged radial profile.
+    Calculates the azimuthally averaged radial profile.
 
-    image - The 2D image
-    center - The [x,y] pixel coordinates used as the center. The default is
-             None, which then uses the center of the image (including
-             fractional pixels).
-    stddev - if specified, return the azimuthal standard deviation instead of the average
-    returnradii - if specified, return (radii_array,radial_profile)
-    return_nr   - if specified, return number of pixels per radius *and* radius
-    binsize - size of the averaging bin.  Can lead to strange results if
-        non-binsize factors are used to specify the center and the binsize is
-        too large
-    weights - can do a weighted average instead of a simple average if this keyword parameter
-        is set.  weights.shape must = image.shape.  weighted stddev is undefined, so don't
-        set weights and stddev.
-    steps - if specified, will return a double-length bin array and radial
-        profile so you can plot a step-form radial profile (which more accurately
-        represents what's going on)
-    interpnan - Interpolate over NAN values, i.e. bins where there is no data?
-        left,right - passed to interpnan; they set the extrapolated values
-
-    If a bin contains NO DATA, it will have a NAN value because of the
-    divide-by-sum-of-weights component.  I think this is a useful way to denote
-    lack of data, but users let me know if an alternative is preferred...
+    :param image: image
+    :type image: ndarray
+    :param center: The [x,y] pixel coordinates used as the centre. The default is
+                   None, which then uses the center of the image (including fractional pixels).
+    :type center: list or None
+    :param stddev: if specified, return the azimuthal standard deviation instead of the average
+    :param returnradii: if specified, return (radii_array, radial_profile)
+    :param return_nr: if specified, return number of pixels per radius *and* radius
+    :param binsize: size of the averaging bin.  Can lead to strange results if
+                    non-binsize factors are used to specify the center and the binsize is too large.
+    :param weights: can do a weighted average instead of a simple average if this keyword parameter
+                    is set.  weights.shape must = image.shape.  weighted stddev is undefined, so don't
+                    set weights and stddev.
+    :param steps: if specified, will return a double-length bin array and radial profile
+    :param interpnan: Interpolate over NAN values, i.e. bins where there is no data
+    :param left: passed to interpnan to set the extrapolated values
+    :param right: passed to interpnan to set the extrapolated values
 
     """
     #indeces

@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>VIS data analysis tools &mdash; VIS 1.0 documentation</title>
+    <title>VIS data analysis tools &mdash; VIS 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 1.0 documentation" href="index.html" />
+    <link rel="top" title="VIS 1.1 documentation" href="index.html" />
     <link rel="prev" title="Data reduction tools" href="reduction.html" /> 
   </head>
   <body>
@@ -59,10 +59,12 @@
 <li><a class="reference internal" href="#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
 <li><a class="reference internal" href="#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
 <li><a class="reference internal" href="#source-finding">Source finding</a></li>
+<li><a class="reference internal" href="#ccd-spot-measurements">CCD Spot Measurements</a></li>
 <li><a class="reference internal" href="#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
 <li><a class="reference internal" href="#generating-psf-basis-sets">Generating PSF Basis Sets</a></li>
 <li><a class="reference internal" href="#psf-fitting">PSF Fitting</a></li>
-<li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
+<li><a class="reference internal" href="#impact-of-cti-trailing-on-shear-power-spectrum">Impact of CTI Trailing on Shear Power Spectrum</a></li>
+<li><a class="reference internal" href="#non-linearity-ii-model-transfer">Non-linearity II: Model Transfer</a></li>
 </ul>
 </li>
 </ul>
@@ -210,7 +212,7 @@ because NumPy arrays are column major.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 <tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
@@ -353,7 +355,7 @@ The number of iterations is defined in self.settings[&#8216;iterations&#8217;].<
 </tr>
 <tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 <tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.6</td>
 </tr>
@@ -682,6 +684,211 @@ an iterative scheme were the background is recalculated after identifying the ob
 
 </dd></dl>
 
+<span class="target" id="module-analysis.analyseSpotMeasurements"></span><div class="section" id="ccd-spot-measurements">
+<h2>CCD Spot Measurements<a class="headerlink" href="#ccd-spot-measurements" title="Permalink to this headline">¶</a></h2>
+<p>This scripts can be used to study CCD spot measurements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.analyseSpotsDeconvolution">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">analyseSpotsDeconvolution</tt><big>(</big><em>files</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.analyseSpotsDeconvolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyse spot measurements using deconvolutions.</p>
+<p>Note: does not really work... perhaps an issue with sizes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>files</strong> (<em>list</em>) &#8211; a list of input files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.analyseSpotsFitting">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">analyseSpotsFitting</tt><big>(</big><em>files</em>, <em>gaussian=False</em>, <em>pixelvalues=False</em>, <em>bessel=True</em>, <em>maxfev=10000</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.analyseSpotsFitting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyse spot measurements using different fitting methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>files</strong> &#8211; names of the FITS files to analyse (should match the IDs)</li>
+<li><strong>gaussian</strong> &#8211; whether or not to do a simple Gaussian fitting analysis</li>
+<li><strong>pixelvalues</strong> &#8211; whether or not to plot pixel values on a grid</li>
+<li><strong>bessel</strong> &#8211; whether or not to do a Bessel + Gaussian convolution analysis</li>
+<li><strong>maxfev</strong> &#8211; maximum number of iterations in the least squares fitting</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.examples">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">examples</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.examples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple convolution-deconvolution examples.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.fitf">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">fitf</tt><big>(</big><em>height</em>, <em>center_x</em>, <em>center_y</em>, <em>width_x</em>, <em>width_y</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.fitf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fitting function: 2D gaussian</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.gaussianFit">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">gaussianFit</tt><big>(</big><em>ydata</em>, <em>xdata=None</em>, <em>initials=None</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.gaussianFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits a single Gaussian to a given data.
+Uses scipy.optimize.leastsq for fitting.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ydata</strong> &#8211; to which a Gaussian will be fitted to.</li>
+<li><strong>xdata</strong> &#8211; if not given uses np.arange</li>
+<li><strong>initials</strong> &#8211; initial guess for Gaussian parameters in order [amplitude, mean, sigma, floor]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">coefficients, best fit params, success</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dictionary</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.generateBessel">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">generateBessel</tt><big>(</big><em>radius=1.5</em>, <em>oversample=500</em>, <em>size=1000</em>, <em>cx=None</em>, <em>cy=None</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.generateBessel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a 2D Bessel function by taking a Fourier transform of a disk with a given radius. The real image
+and the subsequent power spectrum is oversampled with a given factor. The peak value of the generated
+Bessel function is normalized to unity.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>radius</strong> &#8211; radius of the disc [default=1.5]</li>
+<li><strong>oversample</strong> &#8211; oversampling factor [default=500]</li>
+<li><strong>size</strong> &#8211; size of the output array</li>
+<li><strong>cx</strong> &#8211; centre of the disc in x direction</li>
+<li><strong>cy</strong> &#8211; centre of the disc in y direction</li>
+<li><strong>debug</strong> &#8211; whether or not to generate FITS files</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.plotGaussianResults">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">plotGaussianResults</tt><big>(</big><em>data, ids, output, vals=[0, 2]</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.plotGaussianResults" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> &#8211; results</li>
+<li><strong>ids</strong> &#8211; file identifiers</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.readData">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">readData</tt><big>(</big><em>filename</em>, <em>crop=True</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.readData" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> &#8211; </li>
+<li><strong>crop</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseSpotMeasurements.weinerFilter">
+<tt class="descclassname">analysis.analyseSpotMeasurements.</tt><tt class="descname">weinerFilter</tt><big>(</big><em>data</em>, <em>kernel</em>, <em>reqularization=0.01</em>, <em>normalize=True</em><big>)</big><a class="headerlink" href="#analysis.analyseSpotMeasurements.weinerFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs Wiener deconvolution on data using a given kernel. The input can be either 1D or 2D array.</p>
+<p>For further information:
+<a class="reference external" href="http://en.wikipedia.org/wiki/Wiener_deconvolution">http://en.wikipedia.org/wiki/Wiener_deconvolution</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; data to be deconvolved (either 1D or 2D array)</li>
+<li><strong>kernel</strong> &#8211; kernel that is used for the deconvolution</li>
+<li><strong>reqularization</strong> &#8211; reqularization parameter</li>
+<li><strong>normalize</strong> &#8211; whether or not the peak value should be normalized to unity</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">deconvolved data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
 <span class="target" id="module-analysis.PSFproperties"></span><div class="section" id="properties-of-the-point-spread-function">
 <h2>Properties of the Point Spread Function<a class="headerlink" href="#properties-of-the-point-spread-function" title="Permalink to this headline">¶</a></h2>
 <p>This script can be used to plot some PSF properties such as ellipticity and size as a function of the focal plane position.</p>
@@ -1057,16 +1264,16 @@ from the the mean PSF and the PCA components are being fitted.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-analysis.testCTIcorrection"></span><div class="section" id="testing-the-cti-correction-algorithm">
-<h2>Testing the CTI Correction Algorithm<a class="headerlink" href="#testing-the-cti-correction-algorithm" title="Permalink to this headline">¶</a></h2>
-<p>This script can be used to test the CTI correction algorithm performance.</p>
+<span class="target" id="module-analysis.CTIpower"></span><div class="section" id="impact-of-cti-trailing-on-shear-power-spectrum">
+<h2>Impact of CTI Trailing on Shear Power Spectrum<a class="headerlink" href="#impact-of-cti-trailing-on-shear-power-spectrum" title="Permalink to this headline">¶</a></h2>
+<p>A simple script to study the effects of CTI trailing to weak lensing shear power spectrum.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
@@ -1074,50 +1281,205 @@ from the the mean PSF and the PCA components are being fitted.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
 <dl class="function">
-<dt id="analysis.testCTIcorrection.plotResults">
-<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.plotResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot the CTI correction algorithm results.</p>
+<dt id="analysis.CTIpower.azimuthalAverage">
+<tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">azimuthalAverage</tt><big>(</big><em>image</em>, <em>center=None</em>, <em>stddev=False</em>, <em>returnradii=False</em>, <em>return_nr=False</em>, <em>binsize=0.5</em>, <em>weights=None</em>, <em>steps=False</em>, <em>interpnan=False</em>, <em>left=None</em>, <em>right=None</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.azimuthalAverage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the azimuthally averaged radial profile.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; CTI test results</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>image</strong> (<em>ndarray</em>) &#8211; image</li>
+<li><strong>center</strong> (<em>list or None</em>) &#8211; The [x,y] pixel coordinates used as the centre. The default is
+None, which then uses the center of the image (including fractional pixels).</li>
+<li><strong>stddev</strong> &#8211; if specified, return the azimuthal standard deviation instead of the average</li>
+<li><strong>returnradii</strong> &#8211; if specified, return (radii_array, radial_profile)</li>
+<li><strong>return_nr</strong> &#8211; if specified, return number of pixels per radius <em>and</em> radius</li>
+<li><strong>binsize</strong> &#8211; size of the averaging bin.  Can lead to strange results if
+non-binsize factors are used to specify the center and the binsize is too large.</li>
+<li><strong>weights</strong> &#8211; can do a weighted average instead of a simple average if this keyword parameter
+is set.  weights.shape must = image.shape.  weighted stddev is undefined, so don&#8217;t
+set weights and stddev.</li>
+<li><strong>steps</strong> &#8211; if specified, will return a double-length bin array and radial profile</li>
+<li><strong>interpnan</strong> &#8211; Interpolate over NAN values, i.e. bins where there is no data</li>
+<li><strong>left</strong> &#8211; passed to interpnan to set the extrapolated values</li>
+<li><strong>right</strong> &#8211; passed to interpnan to set the extrapolated values</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="analysis.testCTIcorrection.testCTIcorrection">
-<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">testCTIcorrection</tt><big>(</big><em>log</em>, <em>files</em>, <em>sigma=0.75</em>, <em>iterations=4</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=20</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.testCTIcorrection" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates PSF properties such as ellipticity and size from data without CTI and from
-reduced data.</p>
+<dt id="analysis.CTIpower.azimuthalAverageSimple">
+<tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">azimuthalAverageSimple</tt><big>(</big><em>image</em>, <em>center=None</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.azimuthalAverageSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple algorithm to calculate the azimuthally averaged radial profile.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>log</strong> (<em>instance</em>) &#8211; python logger instance</li>
-<li><strong>files</strong> (<em>list</em>) &#8211; a list of files to be processed</li>
-<li><strong>sigma</strong> (<em>float</em>) &#8211; size of the Gaussian weighting function</li>
-<li><strong>iterations</strong> (<em>int</em>) &#8211; the number of iterations for the moment based shape estimator</li>
-<li><strong>xcen</strong> (<em>int</em>) &#8211; x-coordinate of the object centre</li>
-<li><strong>ycen</strong> (<em>int</em>) &#8211; y-coordinate of the object centre</li>
-<li><strong>side</strong> (<em>int</em>) &#8211; size of the cutout around the centre (+/- side)</li>
+<li><strong>image</strong> (<em>ndarray</em>) &#8211; image</li>
+<li><strong>center</strong> (<em>list or None</em>) &#8211; The [x,y] pixel coordinates used as the centre. The default is
+None, which then uses the center of the image (including fractional pixels).</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ellipticity and size</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">radial profile</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.CTIpower.plot">
+<tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">plot</tt><big>(</big><em>data</em>, <em>fourier</em>, <em>radius</em>, <em>profile</em>, <em>xi</em>, <em>yi</em>, <em>output</em>, <em>title</em>, <em>log=False</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.plot" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> &#8211; </li>
+<li><strong>fourier</strong> &#8211; </li>
+<li><strong>profile</strong> &#8211; </li>
+<li><strong>output</strong> &#8211; </li>
+<li><strong>title</strong> &#8211; </li>
+<li><strong>log</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.CTIpower.plotCTIeffect">
+<tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">plotCTIeffect</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.plotCTIeffect" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function plots the CTI impact on shear. The Data is assumed to be in the following format:</p>
+<div class="highlight-python"><pre>x [deg]     y [deg] g1_parallel   g1_serial    g1_total    g2_total</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.CTIpower.plotPower">
+<tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">plotPower</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.plotPower" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.nonlinearityModelTransfer"></span><div class="section" id="non-linearity-ii-model-transfer">
+<h2>Non-linearity II: Model Transfer<a class="headerlink" href="#non-linearity-ii-model-transfer" title="Permalink to this headline">¶</a></h2>
+<p>Most PSF stars are bright while most weak lensing galaxies are faint,
+thus the PSF model needs to be transferable to an appropriate object luminosity (and colour, position, etc.).
+This simple script can be used to study the error in the model transfer due to non-linearity that can be
+tolerated given the requirements.</p>
+<p>The following requirements related to the model transfer have been taken from CalCD-B.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.nonlinearityModelTransfer.plotResults">
+<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em>, <em>reqe=3.5e-05</em>, <em>reqr2=0.00035</em>, <em>outdir='results'</em>, <em>timeStamp=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [reference values, results dictionary]</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3.5e-5]</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=3.5e-4]</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer">
+<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">testNonlinearityModelTransfer</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>sigma=0.75</em>, <em>psfs=5000</em>, <em>amps=12</em>, <em>multiplier=1.5</em>, <em>minerror=-5.0</em>, <em>maxerror=-1.0</em>, <em>lowflux=500</em>, <em>highflux=180000</em>, <em>linspace=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.</p>
+<p>The error has been assumed to follow a sinusoidal curve with random phase and a given number of angular
+frequencies (defined by the multiplier). The amplitudes being studied, i.e. the size of the maximum deviation,
+can be spaced either linearly or logarithmically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger instance</li>
+<li><strong>file</strong> (<em>str</em>) &#8211; name of the PSF FITS files to use [default=data/psf12x.fits]</li>
+<li><strong>oversample</strong> &#8211; the PSF oversampling factor, which needs to match the input file [default=12]</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; 1sigma radius of the Gaussian weighting function for shape measurements</li>
+<li><strong>phs</strong> (<em>float</em>) &#8211; phase in case phases = None</li>
+<li><strong>phases</strong> (<em>None or int</em>) &#8211; if None then a single fixed phase will be applied, if an int then a given number of random
+phases will be used</li>
+<li><strong>psfs</strong> (<em>int</em>) &#8211; the number of PSFs to use.</li>
+<li><strong>amps</strong> (<em>int</em>) &#8211; the number of individual samplings used when covering the error space</li>
+<li><strong>multiplier</strong> (<em>int or float</em>) &#8211; the number of angular frequencies to be used</li>
+<li><strong>minerror</strong> (<em>float</em>) &#8211; the minimum error to be covered, given in log10(min_error) [default=-5 i.e. 0.001%]</li>
+<li><strong>maxerror</strong> (<em>float</em>) &#8211; the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]</li>
+<li><strong>linspace</strong> (<em>boolean</em>) &#8211; whether the amplitudes of the error curves should be linearly or logarithmically spaced.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">reference value and results dictionaries</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
 </td>
 </tr>
 </tbody>

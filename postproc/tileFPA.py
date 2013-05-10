@@ -1,6 +1,6 @@
 """
-Generating a mosaic
-===================
+Generating an FPA mosaic
+========================
 
 This file contains a class to create a single VIS FPA image from separate files one for each CCD.
 
@@ -72,13 +72,13 @@ class tileFPA():
 
         Assume that the input file naming convention is Qx_CCDX_CCDY_name.fits.
 
-        :param xsize: length of a quadrant in column direction
-        :type xsize: int
-        :param ysize: length of a quadrant in row direction
-        :type ysize: int
+        :param xgap: length of the gap between in mm two CCDs in column direction [default=1.643]
+        :type xgap: float
+        :param ygap: length of the gap between in mm two CCDs in row direction [default=8.116]
+        :type ygap: float
 
-        :return: image array of size (ysize*2, xsize*2)
-        :rtype: dnarray
+        :return: FPA image array
+        :rtype: ndnarray
         """
         self.xshift = xgap * 1000 / 12.
         self.yshift = ygap * 1000 / 12.

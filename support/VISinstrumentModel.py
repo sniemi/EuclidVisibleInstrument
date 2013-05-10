@@ -30,50 +30,55 @@ import numexpr as ne
 
 def VISinformation():
     """
-    Returns a dictionary describing VIS. The following information is provided::
+    Returns a dictionary describing VIS. The following information is provided (id: value - reference)::
 
-         'apCorrection': 0.925969,
-         'aperture_size': 132.73228961416876,
-         'beta': 0.6,
-         'bias': 1000.0,
-         'cosmic_bkgd': 0.172,
-         'dark': 0.001,
-         'diameter': 1.3,
-         'dob': 0,
-         'e_adu': 3.1,
-         'fullwellcapacity': 200000,
-         'fwc': 175000,
-         'gain': 3.1,
-         'galaxy_fraction': 0.836,
-         'magzero': 15182880871.225231,
-         'ovrscanx': 20,
-         'peak_fraction': 0.261179,
-         'pixel_size': 0.1,
-         'prescanx': 50,
-         'rdose': 30000000000.0,
-         'readnoise': 4.5,
-         'readout': 4.5,
-         'readtime': 88.0,
-         'sfwc': 730000.0,
-         'sky_background': 22.34,
-         'sky_high': 21.74,
-         'sky_low': 22.94,
-         'st': 5e-06,
-         'star_fraction': 0.928243,
-         'svg': 1e-10,
-         't': 0.01024,
-         'trapfile': 'cdm_euclid.dat',
-         'vg': 6e-11,
-         'vth': 11680000.0,
-         'xsize': 2048,
-         'ysize': 2066,
-         'zeropoint': 25.45338546114,
-         'zeropointNoObscuration': 25.57991044453,
-         'zodiacal': 22.55
+         apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
+         aperture_size: 132.73228961416876 - derived (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
+         beta: 0.6 - CDM03 (Short et al. 2010)
+         bias: 1000.0 - ROE spec
+         cosmic_bkgd: 0.172 - derived  (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
+         dark: 0.001 - CCD spec EUCL-EST-RS-6-002
+         diameter: 1.3 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         dob: 0 - CDM03 (Short et al. 2010)
+         e_adu: 3.1 - ROE spec
+         fullwellcapacity: 200000 - CCD spec (for simulator)
+         fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
+         gain: 3.1 - ROE spec
+         galaxy_fraction: 0.836 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         magzero: 15182880871.225231 - derived, see belowCDM (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
+         ovrscanx: 20 - ROE spec (req: CalCD-B)
+         peak_fraction: 0.261179 - derived
+         pixel_size: 0.1 - CCD spec EUCL-EST-RS-6-002
+         prescanx: 50 - CCD spec EUCL-EST-RS-6-002 (also in CalCD-B)
+         rdose: 30000000000.0 - derived (above the PLM requirement)
+         readnoise: 4.5 - WL requirement (PERD R-VIS-P-021)
+         readout: 4.5 - WL requirement (PERD R-VIS-P-021)
+         readtime: 88.0 - derived
+         sfwc: 730000.0 - CDM03 (Short et al. 2010), see also the CCD spec EUCL-EST-RS-6-002
+         sky_background: 22.3203 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         sky_high: 21.7206 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         sky_low: 22.9207 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         st: 5e-06 - CDM03 (Short et al. 2010)
+         star_fraction: 0.928243 -  derived using VIS system PSF (see EUCL-MSS-RP-6-001)
+         svg: 1e-10 - CDM03 (Short et al. 2010)
+         t: 0.01024 - CDM03 (Short et al. 2010)
+         trapfile: cdm_euclid.dat - CDM03 (derived, refitted to CCD204 data)
+         vg: 6e-11 - CDM03 (Short et al. 2010)
+         vth: 11680000.0 - CDM03 (Short et al. 2010)
+         xsize: 2048 - CCD spec EUCL-EST-RS-6-002
+         ysize: 2066 - CCD spec EUCL-EST-RS-6-002
+         zeropoint: 25.45338546114 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         zeropointNoObscuration: 25.57991044453 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         zodiacal: 22.55 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
 
     The magzero was calculated as follows::
 
         1./10**(-0.4*(25.45338546114)) = 15182880871.225231
+
+    The throughput input values are derived from two Excel Spreadsheets namely:
+
+        #. 110413_EUC_TN_00051_SYS_PERF_REF_iss4.xlsx
+        #. radiometric_model_reference_phase4_JA110415_2_MSSL_version
 
     :return: instrument model parameters
     :rtype: dict
@@ -86,7 +91,7 @@ def VISinformation():
                zeropointNoObscuration=25.57991044453)
 
     out.update({'dob' : 0, 'rdose' : 3e10, 'trapfile' : 'cdm_euclid.dat',
-                'beta' : 0.6, 'fwc' : 175000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11,
+                'beta' : 0.6, 'fwc' : 200000, 'vth' : 1.168e7, 't' : 1.024e-2, 'vg' : 6.e-11,
                 'st' : 5.e-6, 'sfwc' : 730000., 'svg' : 1.0e-10})
 
     apsize = math.pi * (out['diameter']/2./out['pixel_size'])**2

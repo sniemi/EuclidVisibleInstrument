@@ -20,6 +20,9 @@ VIS data analysis tools
 .. autoclass:: sourceFinder
     :members:
 
+.. automodule:: analysis.analyseSpotMeasurements
+    :members:
+
 .. automodule:: analysis.PSFproperties
     :members:
 
@@ -29,5 +32,9 @@ VIS data analysis tools
 .. automodule:: analysis.fitPSF
     :members:
 
-.. automodule:: analysis.testCTIcorrection
+.. automodule:: analysis.CTIpower
     :members:
+
+.. automodule:: analysis.nonlinearityModelTransfer
+    :members:
+

@@ -11,7 +11,7 @@ This script can be used to test the CTI correction algorithm performance.
 :version: 0.1
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)

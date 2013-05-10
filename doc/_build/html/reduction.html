@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Data reduction tools &mdash; VIS 1.0 documentation</title>
+    <title>Data reduction tools &mdash; VIS 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 1.0 documentation" href="index.html" />
+    <link rel="top" title="VIS 1.1 documentation" href="index.html" />
     <link rel="next" title="VIS data analysis tools" href="analysis.html" />
     <link rel="prev" title="Simulation tools" href="simulator.html" /> 
   </head>
@@ -66,6 +66,10 @@
 <li><a class="reference internal" href="#module-analysis.biasCalibration">VIS data reduction studies</a><ul>
 <li><a class="reference internal" href="#bias-calibration">Bias Calibration</a></li>
 <li><a class="reference internal" href="#flat-field-calibration">Flat Field Calibration</a></li>
+<li><a class="reference internal" href="#non-linearity-i-calibration">Non-linearity I: Calibration</a></li>
+<li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
+<li><a class="reference internal" href="#cosmic-ray-rejection">Cosmic Ray Rejection</a></li>
+<li><a class="reference internal" href="#impact-of-ghost-images">Impact of Ghost Images</a></li>
 </ul>
 </li>
 </ul>
@@ -484,6 +488,397 @@ and a given number of flat fields median combined.</p>
 <dt id="analysis.FlatfieldCalibration.testNoFlatfieldingEffects">
 <tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testNoFlatfieldingEffects</tt><big>(</big><em>log</em>, <em>file='data/psf1x.fits'</em>, <em>oversample=1.0</em>, <em>psfs=500</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testNoFlatfieldingEffects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size variance and error in case of no pixel-to-pixel flat field correction.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.nonlinearityCalibration"></span><div class="section" id="non-linearity-i-calibration">
+<h2>Non-linearity I: Calibration<a class="headerlink" href="#non-linearity-i-calibration" title="Permalink to this headline">¶</a></h2>
+<p>This simple script can be used to study the error in the non-linearity correction that can be tolerated given the
+requirements.</p>
+<p>The following requirements related to the non-linearity have been taken from GDPRD.</p>
+<p>R-GDP-CAL-058: The contribution of the residuals of the non-linearity correction on the error on the determination
+of each ellipticity component of the local PSF shall not exceed 3x10**-5 (one sigma).</p>
+<p>R-GDP-CAL-068: The contribution of the residuals of the non-linearity correction on the error on the relative
+error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exceed 1x10**-4 (one sigma).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.97</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.nonlinearityCalibration.plotResults">
+<tt class="descclassname">analysis.nonlinearityCalibration.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em>, <em>reqe=3e-05</em>, <em>reqr2=0.0001</em>, <em>outdir='results'</em>, <em>timeStamp=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityCalibration.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [reference values, results dictionary]</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3e-5]</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=1e-4]</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.nonlinearityCalibration.testNonlinearity">
+<tt class="descclassname">analysis.nonlinearityCalibration.</tt><tt class="descname">testNonlinearity</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>sigma=0.75</em>, <em>phs=0.98</em>, <em>phases=None</em>, <em>psfs=5000</em>, <em>amps=12</em>, <em>multiplier=1.5</em>, <em>minerror=-5.0</em>, <em>maxerror=-1</em>, <em>linspace=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityCalibration.testNonlinearity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.</p>
+<p>The error has been assumed to follow a sinusoidal curve with random phase and a given number of angular
+frequencies (defined by the multiplier). The amplitudes being studied, i.e. the size of the maximum deviation,
+can be spaced either linearly or logarithmically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger instance</li>
+<li><strong>file</strong> (<em>str</em>) &#8211; name of the PSF FITS files to use [default=data/psf12x.fits]</li>
+<li><strong>oversample</strong> &#8211; the PSF oversampling factor, which needs to match the input file [default=12]</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; 1sigma radius of the Gaussian weighting function for shape measurements</li>
+<li><strong>phs</strong> (<em>float</em>) &#8211; phase in case phases = None</li>
+<li><strong>phases</strong> (<em>None or int</em>) &#8211; if None then a single fixed phase will be applied, if an int then a given number of random
+phases will be used</li>
+<li><strong>psfs</strong> (<em>int</em>) &#8211; the number of PSFs to use.</li>
+<li><strong>amps</strong> (<em>int</em>) &#8211; the number of individual samplings used when covering the error space</li>
+<li><strong>multiplier</strong> (<em>int or float</em>) &#8211; the number of angular frequencies to be used</li>
+<li><strong>minerror</strong> (<em>float</em>) &#8211; the minimum error to be covered, given in log10(min_error) [default=-5 i.e. 0.001%]</li>
+<li><strong>maxerror</strong> (<em>float</em>) &#8211; the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]</li>
+<li><strong>linspace</strong> (<em>boolean</em>) &#8211; whether the amplitudes of the error curves should be linearly or logarithmically spaced.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">reference value and results dictionaries</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.testCTIcorrection"></span><div class="section" id="testing-the-cti-correction-algorithm">
+<h2>Testing the CTI Correction Algorithm<a class="headerlink" href="#testing-the-cti-correction-algorithm" title="Permalink to this headline">¶</a></h2>
+<p>This script can be used to test the CTI correction algorithm performance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.testCTIcorrection.plotResults">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the CTI correction algorithm results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; CTI test results</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.testCTIcorrection.testCTIcorrection">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">testCTIcorrection</tt><big>(</big><em>log</em>, <em>files</em>, <em>sigma=0.75</em>, <em>iterations=4</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=20</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.testCTIcorrection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates PSF properties such as ellipticity and size from data without CTI and from
+reduced data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; python logger instance</li>
+<li><strong>files</strong> (<em>list</em>) &#8211; a list of files to be processed</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; size of the Gaussian weighting function</li>
+<li><strong>iterations</strong> (<em>int</em>) &#8211; the number of iterations for the moment based shape estimator</li>
+<li><strong>xcen</strong> (<em>int</em>) &#8211; x-coordinate of the object centre</li>
+<li><strong>ycen</strong> (<em>int</em>) &#8211; y-coordinate of the object centre</li>
+<li><strong>side</strong> (<em>int</em>) &#8211; size of the cutout around the centre (+/- side)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ellipticity and size</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.cosmicrayCalibration"></span><div class="section" id="cosmic-ray-rejection">
+<h2>Cosmic Ray Rejection<a class="headerlink" href="#cosmic-ray-rejection" title="Permalink to this headline">¶</a></h2>
+<p>This simple script can be used to study the error in the cosmic ray rejection that can be tolerated given the
+requirements.</p>
+<p>The following requirements related to the cosmic rays have been taken from CalCD-B.</p>
+<p>Note that the analysis is for a single star. Thus, if we consider a single exposure we can
+relax the requirements given that there will be on average about 1850 stars in each field that
+are usable for PSF modelling. Furthermore it shuold be noted that the presence of cosmic rays
+will always increase the size. Because of this one cannot combine the contribution from cosmic
+rays with other effects by adding each individual contribution in quadrature. It is more
+appropriate to add the impact of cosmic rays to the size of the PSF linearly given the preferred
+direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.cosmicrayCalibration.plotResults">
+<tt class="descclassname">analysis.cosmicrayCalibration.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em>, <em>reqe=3e-05</em>, <em>reqr2=0.0001</em>, <em>outdir='results'</em>, <em>timeStamp=False</em><big>)</big><a class="headerlink" href="#analysis.cosmicrayCalibration.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [reference values, results dictionary]</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3e-5]</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=1e-4]</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.cosmicrayCalibration.testCosmicrayRejection">
+<tt class="descclassname">analysis.cosmicrayCalibration.</tt><tt class="descname">testCosmicrayRejection</tt><big>(</big><em>log</em>, <em>file='data/psf1x.fits'</em>, <em>oversample=1.0</em>, <em>sigma=0.75</em>, <em>psfs=20000</em>, <em>scale=1000.0</em>, <em>min=1e-05</em>, <em>max=50</em>, <em>levels=15</em>, <em>covering=1.4</em>, <em>single=False</em><big>)</big><a class="headerlink" href="#analysis.cosmicrayCalibration.testCosmicrayRejection" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is for a single PSF.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; </li>
+<li><strong>file</strong> &#8211; </li>
+<li><strong>oversample</strong> &#8211; </li>
+<li><strong>sigma</strong> &#8211; </li>
+<li><strong>psfs</strong> &#8211; </li>
+<li><strong>scale</strong> &#8211; </li>
+<li><strong>min</strong> &#8211; </li>
+<li><strong>max</strong> &#8211; </li>
+<li><strong>levels</strong> &#8211; </li>
+<li><strong>covering</strong> &#8211; </li>
+<li><strong>single</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.cosmicrayCalibration.testCosmicrayRejectionMultiPSF">
+<tt class="descclassname">analysis.cosmicrayCalibration.</tt><tt class="descname">testCosmicrayRejectionMultiPSF</tt><big>(</big><em>log</em>, <em>file='data/psf1x.fits'</em>, <em>oversample=1.0</em>, <em>sigma=0.75</em>, <em>psfs=2000</em>, <em>scale=1000.0</em>, <em>min=0.0001</em>, <em>max=100.0</em>, <em>levels=9</em>, <em>covering=2.0</em>, <em>stars=1850</em>, <em>single=False</em><big>)</big><a class="headerlink" href="#analysis.cosmicrayCalibration.testCosmicrayRejectionMultiPSF" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; </li>
+<li><strong>file</strong> &#8211; </li>
+<li><strong>oversample</strong> &#8211; </li>
+<li><strong>sigma</strong> &#8211; </li>
+<li><strong>psfs</strong> &#8211; </li>
+<li><strong>scale</strong> &#8211; </li>
+<li><strong>min</strong> &#8211; </li>
+<li><strong>max</strong> &#8211; </li>
+<li><strong>levels</strong> &#8211; </li>
+<li><strong>covering</strong> &#8211; </li>
+<li><strong>single</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.analyseGhosts"></span><div class="section" id="impact-of-ghost-images">
+<h2>Impact of Ghost Images<a class="headerlink" href="#impact-of-ghost-images" title="Permalink to this headline">¶</a></h2>
+<p>This scripts can be used to study the impact of ghost images on the weak lensing measurements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (1.7.0 or newer for numpy.pad)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.analyseGhosts.analyseInFocusImpact">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">analyseInFocusImpact</tt><big>(</big><em>log</em>, <em>filename='data/psf4x.fits'</em>, <em>psfscale=100000</em>, <em>maxdistance=100</em>, <em>oversample=4.0</em>, <em>psfs=1000</em>, <em>iterations=6</em>, <em>sigma=0.75</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.analyseInFocusImpact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates PSF size and ellipticity when including another PSF scaled to a given level (requirement = 5e-5)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; </li>
+<li><strong>filename</strong> &#8211; name of the PSF file to analyse</li>
+<li><strong>psfscale</strong> &#8211; level to which the original PSF is scaled to</li>
+<li><strong>maxdistance</strong> &#8211; maximum distance the ghost image can be from the original PSF (centre to centre)</li>
+<li><strong>oversample</strong> &#8211; oversampling factor</li>
+<li><strong>psfs</strong> &#8211; number of PSFs to analyse (number of ghosts in random locations)</li>
+<li><strong>iterations</strong> &#8211; number of iterations in the shape measurement</li>
+<li><strong>sigma</strong> &#8211; size of the Gaussian weighting function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">results</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.analyseOutofFocusImpact">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">analyseOutofFocusImpact</tt><big>(</big><em>log</em>, <em>filename='data/psf4x.fits'</em>, <em>psfscale=100000</em>, <em>maxdistance=100</em>, <em>inner=8</em>, <em>outer=60</em>, <em>oversample=4.0</em>, <em>psfs=1000</em>, <em>iterations=6</em>, <em>sigma=0.75</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.analyseOutofFocusImpact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates PSF size and ellipticity when including an out-of-focus doughnut of a given contrast level.
+The dougnut pixel values are all scaled to a given scaling value (requirement 5e-5).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; logger instance</li>
+<li><strong>filename</strong> &#8211; name of the PSF file to analyse</li>
+<li><strong>psfscale</strong> &#8211; level to which the original PSF is scaled to</li>
+<li><strong>maxdistance</strong> &#8211; maximum distance the ghost image can be from the original PSF (centre to centre)</li>
+<li><strong>inner</strong> &#8211; inner radius of the out-of-focus doughnut</li>
+<li><strong>outer</strong> &#8211; outer radius of the out-of-focus doughnut</li>
+<li><strong>oversample</strong> &#8211; oversampling factor</li>
+<li><strong>psfs</strong> &#8211; number of PSFs to analyse (number of ghosts in random locations)</li>
+<li><strong>iterations</strong> &#8211; number of iterations in the shape measurement</li>
+<li><strong>sigma</strong> &#8211; size of the Gaussian weighting function</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">results</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.drawDoughnut">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">drawDoughnut</tt><big>(</big><em>inner</em>, <em>outer</em>, <em>oversample=1</em>, <em>plot=False</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.drawDoughnut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a doughnut shape with a given inner and outer radius.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>inner</strong> (<em>float</em>) &#8211; inner radius in pixels</li>
+<li><strong>outer</strong> (<em>float</em>) &#8211; outer radius in pixels</li>
+<li><strong>oversample</strong> (<em>int</em>) &#8211; oversampling factor [default=1]</li>
+<li><strong>plot</strong> (<em>bool</em>) &#8211; whether to generate a plot showing the doughnut or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">image, xcentre, ycentre</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

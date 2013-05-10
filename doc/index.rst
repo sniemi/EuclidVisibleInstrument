@@ -1,24 +1,26 @@
-Welcome to Euclid Visible InStrument (VIS) Python Package Documentation
-=======================================================================
+Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation
+================================================================================
 
 :Author: Sami-Matias Niemi
-:Contact: smn2@mssl.ucl.ac.uk
-:version: 1.01
+:Contact: s.niemi@ucl.ac.uk
+:version: 1.1
+:date: |today|
 
 
-This Python package provides subpackages and methods related to generating mock data and reducing it, the main
-consideration being the visible instrument (VIS) that is being developed for the
-the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+This Python package VIS-PP provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the Euclid telescope.
+The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
 characteristics such as readout noise and CTI to "pristine" images generated with e.g. the GREAT10 photon
 shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
 this package tries to provide an end-to-end simulation chain for the VIS instrument.
 
+The documentation is also available in PDF format, please download the `VIS Python Package Manual <https://www.mssl.ucl.ac.uk/~smn2/Manual.pdf>`_.
 
 Installation
 ============
 
-The VIS Python package is held in a GIT repository. You can download or fork the repository
+The VIS Python Package (VIS-PP) is held in a GIT repository. You can download or fork the repository
 `here <https://bitbucket.org/niemi/vissim-python/overview>`_. The package contains a mixture of classes
 and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
 installation instructions yet. To get most scripts working you should place

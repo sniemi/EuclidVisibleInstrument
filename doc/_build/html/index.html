@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Euclid Visible InStrument (VIS) Python Package Documentation &mdash; VIS 1.0 documentation</title>
+    <title>Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation &mdash; VIS 1.1 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '1.0',
+        VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="VIS 1.0 documentation" href="#" />
+    <link rel="top" title="VIS 1.1 documentation" href="#" />
     <link rel="next" title="VIS Instrument Model" href="instrument.html" /> 
   </head>
   <body>
@@ -55,7 +55,7 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) Python Package Documentation</a></li>
+<li><a class="reference internal" href="#">Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation</a></li>
 <li><a class="reference internal" href="#installation">Installation</a><ul>
 <li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
@@ -118,31 +118,34 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="welcome-to-euclid-visible-instrument-vis-python-package-documentation">
-<h1>Welcome to Euclid Visible InStrument (VIS) Python Package Documentation<a class="headerlink" href="#welcome-to-euclid-visible-instrument-vis-python-package-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-euclid-visible-instrument-vis-python-package-vis-pp-documentation">
+<h1>Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation<a class="headerlink" href="#welcome-to-euclid-visible-instrument-vis-python-package-vis-pp-documentation" title="Permalink to this headline">¶</a></h1>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">Contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.01</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">date:</th><td class="field-body">May 10, 2013</td>
 </tr>
 </tbody>
 </table>
-<p>This Python package provides subpackages and methods related to generating mock data and reducing it, the main
-consideration being the visible instrument (VIS) that is being developed for the
-the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+<p>This Python package VIS-PP provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the Euclid telescope.
+The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
 characteristics such as readout noise and CTI to &#8220;pristine&#8221; images generated with e.g. the GREAT10 photon
 shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
 this package tries to provide an end-to-end simulation chain for the VIS instrument.</p>
+<p>The documentation is also available in PDF format, please download the <a class="reference external" href="https://www.mssl.ucl.ac.uk/~smn2/Manual.pdf">VIS Python Package Manual</a>.</p>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>The VIS Python package is held in a GIT repository. You can download or fork the repository
+<p>The VIS Python Package (VIS-PP) is held in a GIT repository. You can download or fork the repository
 <a class="reference external" href="https://bitbucket.org/niemi/vissim-python/overview">here</a>. The package contains a mixture of classes
 and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
 installation instructions yet. To get most scripts working you should place
@@ -179,7 +182,8 @@ of the Python classes, please see:</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="postproc.html">Postprocessing Tools</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="postproc.html#inserting-instrument-characteristics">Inserting instrument characteristics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="postproc.html#generating-a-mosaic">Generating a mosaic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#generating-a-ccd-mosaic">Generating a CCD mosaic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postproc.html#generating-an-fpa-mosaic">Generating an FPA mosaic</a></li>
 </ul>
 </li>
 </ul>
@@ -268,6 +272,10 @@ of the classes, please see:</p>
 <li class="toctree-l1"><a class="reference internal" href="reduction.html#module-analysis.biasCalibration">VIS data reduction studies</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="reduction.html#bias-calibration">Bias Calibration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reduction.html#flat-field-calibration">Flat Field Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduction.html#non-linearity-i-calibration">Non-linearity I: Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduction.html#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduction.html#cosmic-ray-rejection">Cosmic Ray Rejection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reduction.html#impact-of-ghost-images">Impact of Ghost Images</a></li>
 </ul>
 </li>
 </ul>
@@ -284,10 +292,12 @@ documentation of the classes, please see:</p>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#object-finding-and-measuring-ellipticity">Object finding and measuring ellipticity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#measuring-a-shape-of-an-object">Measuring a shape of an object</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#source-finding">Source finding</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#ccd-spot-measurements">CCD Spot Measurements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#properties-of-the-point-spread-function">Properties of the Point Spread Function</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#generating-psf-basis-sets">Generating PSF Basis Sets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="analysis.html#psf-fitting">PSF Fitting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="analysis.html#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#impact-of-cti-trailing-on-shear-power-spectrum">Impact of CTI Trailing on Shear Power Spectrum</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#non-linearity-ii-model-transfer">Non-linearity II: Model Transfer</a></li>
 </ul>
 </li>
 </ul>

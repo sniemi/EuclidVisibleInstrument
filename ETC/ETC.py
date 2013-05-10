@@ -11,7 +11,7 @@ This file provides a simple functions to calculate exposure times or limiting ma
 :version: 0.3
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)
@@ -196,7 +196,9 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False, server=Fals
     :type exposures: int
     :param diginoise: if the readout noise is undersampled or poorly resolved then the effective readout noise
                       should be used [default = False]
-    :type diginoise: boolean
+    :type diginoise: bool
+    :param server: whether to save the figure in a PNG or PDF format (the former can be used together with the WWW server)
+    :type server: bool
 
     :return: signal-to-noise ratio
     :rtype: float or ndarray

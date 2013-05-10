@@ -11,7 +11,7 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 :requres: PyFITS
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 
 :version: 0.3
 """

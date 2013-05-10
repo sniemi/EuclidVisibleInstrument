@@ -9,7 +9,7 @@ Simple source finder that can be used to find objects from astronomical images.
 :requires: matplotlib
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 
 :version: 0.6
 """

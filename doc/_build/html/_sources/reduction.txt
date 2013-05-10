@@ -21,3 +21,16 @@ VIS data reduction studies
 
 .. automodule:: analysis.FlatfieldCalibration
     :members:
+
+.. automodule:: analysis.nonlinearityCalibration
+    :members:
+
+.. automodule:: analysis.testCTIcorrection
+    :members:
+
+.. automodule:: analysis.cosmicrayCalibration
+    :members:
+
+.. automodule:: analysis.analyseGhosts
+    :members:
+

@@ -14,3 +14,10 @@ Postprocessing Tools
 
 .. autoclass:: tileCCD
     :members:
+
+
+.. automodule:: postproc.tileFPA
+
+.. autoclass:: tileFPA
+    :members:
+

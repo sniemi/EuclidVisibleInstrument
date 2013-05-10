@@ -287,10 +287,10 @@ class VISsimulator():
             dark = 0.001
             readout = 4.5
             bias = 1000.0
-            cosmic_bkgd = 0.182
+            cosmic_bkgd = 0.182758225257
             e_ADU = 3.1
             injection = 150000.0
-            magzero = 1.7059e10
+            magzero = 15182880871.225231
             exposures = 1
             exptime = 565.0
             RA = 145.95
@@ -312,8 +312,10 @@ class VISsimulator():
             bleeding = yes
             flatfieldM = yes
 
-        For explanation of each field, see /data/test.config.
-
+        For explanation of each field, see /data/test.config. Note that if an input field does not exist,
+        then the values are taken from the default instrument model as described in
+        support.VISinstrumentModel.VISinformation(). Any of the defaults can be overwritten by providing
+        a config file with a correct field name.
         """
         #parse options and update the information dictionary
         options = self.config.options(self.section)

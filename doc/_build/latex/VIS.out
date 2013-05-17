@@ -12,43 +12,44 @@
 \BOOKMARK [2][-]{subsection.3.1.1}{Calculating Exposure Times and Limiting Magnitude}{section.3.1}% 12
 \BOOKMARK [0][-]{chapter.4}{Creating Object Catalogs}{}% 13
 \BOOKMARK [1][-]{section.4.1}{Generating Object Catalogue}{chapter.4}% 14
-\BOOKMARK [0][-]{chapter.5}{Creating Simulated Mock Images}{}% 15
-\BOOKMARK [1][-]{section.5.1}{Simulation tools}{chapter.5}% 16
-\BOOKMARK [2][-]{subsection.5.1.1}{The Euclid Visible Instrument Image Simulator}{section.5.1}% 17
-\BOOKMARK [3][-]{subsubsection*.45}{Dependencies}{subsection.5.1.1}% 18
-\BOOKMARK [3][-]{subsubsection*.46}{Testing}{subsection.5.1.1}% 19
-\BOOKMARK [3][-]{subsubsection*.47}{Benchmarking}{subsection.5.1.1}% 20
-\BOOKMARK [3][-]{subsubsection*.48}{Change Log}{subsection.5.1.1}% 21
-\BOOKMARK [3][-]{subsubsection*.49}{Future Work}{subsection.5.1.1}% 22
-\BOOKMARK [3][-]{subsubsection*.50}{Contact Information}{subsection.5.1.1}% 23
-\BOOKMARK [2][-]{subsection.5.1.2}{Generating Mock Objects with IRAF}{section.5.1}% 24
-\BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 25
-\BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 26
-\BOOKMARK [2][-]{subsection.6.1.1}{VIS Data Reduction and Processing}{section.6.1}% 27
-\BOOKMARK [1][-]{section.6.2}{VIS data reduction studies}{chapter.6}% 28
-\BOOKMARK [2][-]{subsection.6.2.1}{Bias Calibration}{section.6.2}% 29
-\BOOKMARK [2][-]{subsection.6.2.2}{Flat Field Calibration}{section.6.2}% 30
-\BOOKMARK [2][-]{subsection.6.2.3}{Non-linearity I: Calibration}{section.6.2}% 31
-\BOOKMARK [2][-]{subsection.6.2.4}{Testing the CTI Correction Algorithm}{section.6.2}% 32
-\BOOKMARK [2][-]{subsection.6.2.5}{Cosmic Ray Rejection}{section.6.2}% 33
-\BOOKMARK [2][-]{subsection.6.2.6}{Impact of Ghost Images}{section.6.2}% 34
-\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 35
-\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 36
-\BOOKMARK [2][-]{subsection.7.1.1}{Object finding and measuring ellipticity}{section.7.1}% 37
-\BOOKMARK [2][-]{subsection.7.1.2}{Measuring a shape of an object}{section.7.1}% 38
-\BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 39
-\BOOKMARK [2][-]{subsection.7.1.4}{CCD Spot Measurements}{section.7.1}% 40
-\BOOKMARK [2][-]{subsection.7.1.5}{Properties of the Point Spread Function}{section.7.1}% 41
-\BOOKMARK [2][-]{subsection.7.1.6}{Generating PSF Basis Sets}{section.7.1}% 42
-\BOOKMARK [2][-]{subsection.7.1.7}{PSF Fitting}{section.7.1}% 43
-\BOOKMARK [2][-]{subsection.7.1.8}{Impact of CTI Trailing on Shear Power Spectrum}{section.7.1}% 44
-\BOOKMARK [2][-]{subsection.7.1.9}{Non-linearity II: Model Transfer}{section.7.1}% 45
-\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 46
-\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 47
-\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 48
-\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 49
-\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 50
-\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 51
-\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 52
-\BOOKMARK [0][-]{section*.192}{Python Module Index}{}% 53
-\BOOKMARK [0][-]{section*.193}{Index}{}% 54
+\BOOKMARK [1][-]{section.4.2}{Generating Postage Stamp Images}{chapter.4}% 15
+\BOOKMARK [0][-]{chapter.5}{Creating Simulated Mock Images}{}% 16
+\BOOKMARK [1][-]{section.5.1}{Simulation tools}{chapter.5}% 17
+\BOOKMARK [2][-]{subsection.5.1.1}{The Euclid Visible Instrument Image Simulator}{section.5.1}% 18
+\BOOKMARK [3][-]{subsubsection*.48}{Dependencies}{subsection.5.1.1}% 19
+\BOOKMARK [3][-]{subsubsection*.49}{Testing}{subsection.5.1.1}% 20
+\BOOKMARK [3][-]{subsubsection*.50}{Benchmarking}{subsection.5.1.1}% 21
+\BOOKMARK [3][-]{subsubsection*.51}{Change Log}{subsection.5.1.1}% 22
+\BOOKMARK [3][-]{subsubsection*.52}{Future Work}{subsection.5.1.1}% 23
+\BOOKMARK [3][-]{subsubsection*.53}{Contact Information}{subsection.5.1.1}% 24
+\BOOKMARK [2][-]{subsection.5.1.2}{Generating Mock Objects with IRAF}{section.5.1}% 25
+\BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 26
+\BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 27
+\BOOKMARK [2][-]{subsection.6.1.1}{VIS Data Reduction and Processing}{section.6.1}% 28
+\BOOKMARK [1][-]{section.6.2}{VIS data reduction studies}{chapter.6}% 29
+\BOOKMARK [2][-]{subsection.6.2.1}{Bias Calibration}{section.6.2}% 30
+\BOOKMARK [2][-]{subsection.6.2.2}{Flat Field Calibration}{section.6.2}% 31
+\BOOKMARK [2][-]{subsection.6.2.3}{Non-linearity I: Calibration}{section.6.2}% 32
+\BOOKMARK [2][-]{subsection.6.2.4}{Testing the CTI Correction Algorithm}{section.6.2}% 33
+\BOOKMARK [2][-]{subsection.6.2.5}{Cosmic Ray Rejection}{section.6.2}% 34
+\BOOKMARK [2][-]{subsection.6.2.6}{Impact of Ghost Images}{section.6.2}% 35
+\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 36
+\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 37
+\BOOKMARK [2][-]{subsection.7.1.1}{Object finding and measuring ellipticity}{section.7.1}% 38
+\BOOKMARK [2][-]{subsection.7.1.2}{Measuring a shape of an object}{section.7.1}% 39
+\BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 40
+\BOOKMARK [2][-]{subsection.7.1.4}{CCD Spot Measurements}{section.7.1}% 41
+\BOOKMARK [2][-]{subsection.7.1.5}{Properties of the Point Spread Function}{section.7.1}% 42
+\BOOKMARK [2][-]{subsection.7.1.6}{Generating PSF Basis Sets}{section.7.1}% 43
+\BOOKMARK [2][-]{subsection.7.1.7}{PSF Fitting}{section.7.1}% 44
+\BOOKMARK [2][-]{subsection.7.1.8}{Impact of CTI Trailing on Shear Power Spectrum}{section.7.1}% 45
+\BOOKMARK [2][-]{subsection.7.1.9}{Non-linearity II: Model Transfer}{section.7.1}% 46
+\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 47
+\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 48
+\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 49
+\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 50
+\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 51
+\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 52
+\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 53
+\BOOKMARK [0][-]{section*.195}{Python Module Index}{}% 54
+\BOOKMARK [0][-]{section*.196}{Index}{}% 55

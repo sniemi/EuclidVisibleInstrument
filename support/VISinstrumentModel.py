@@ -9,7 +9,7 @@ size, dark current, gain, zeropoint, and sky background.
 :requires: numexpr
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 
 :version: 0.5
 """

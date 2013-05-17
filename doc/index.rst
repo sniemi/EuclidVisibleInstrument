@@ -3,7 +3,8 @@ Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation
 
 :Author: Sami-Matias Niemi
 :Contact: s.niemi@ucl.ac.uk
-:version: 1.1
+:issue: 1.0
+:version: 1.2
 :date: |today|
 
 

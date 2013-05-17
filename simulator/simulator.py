@@ -76,11 +76,14 @@ Testing
 
 Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
-please run the SCIENCE section from the test.config as follows::
+please run the unittest as follows::
 
-    python simulator.py -c data/test.config -s TESTSCIENCE1X
+    python simulator.py -t
 
-This will produce an image representing VIS lower left (0th) quadrant. Because
+This will run the unittest and compare the result to a previously calculated image.
+Please inspect the standard output for results.
+
+Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
@@ -97,13 +100,12 @@ Benchmarking
 
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file::
 
-    Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
-    6798 objects were place on the detector
+    Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+    6791 objects were place on the detector
 
-    real	4m14.008s
-    user	3m59.609s
-    sys	        0m4.728s
-
+    real	2m19.378s
+    user	2m13.237s
+    sys	        0m4.394s
 
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -116,7 +118,7 @@ and then analysing the results with e.g. RunSnakeRun.
 
 .. Note: The result above was obtained with nominally sampled PSF, however, that is only good for
          testing purposes. If instead one uses say three times over sampled PSF (TESTSCIENCE3x) then the
-         execution time rises significantly (to about 22 minutes). This is mostly due to the fact that convolution
+         execution time rises significantly (to about 20 minutes). This is mostly due to the fact that convolution
          becomes rather expensive when done in the finely sampled PSF domain.
 
 
@@ -150,7 +152,7 @@ Version and change logs::
     1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
          being underestimated due to the fact that it was included as a variance not standard deviation.
     1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
-         deriving the Poisson noise.
+         deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
 
 
 Future Work
@@ -158,14 +160,9 @@ Future Work
 
 .. todo::
 
-    #. test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)
-    #. check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
     #. objects.dat is now hard coded into the code, this should be read from the config file
     #. implement spatially variable PSF
-    #. implement CCD offsets (for focal plane simulations)
     #. test that the WCS is correctly implemented and allows CCD offsets
-    #. implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
-    #. centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
     #. charge injection line positions are now hardcoded to the code, read from the config file
     #. include rotation in metrology
     #. implement optional dithered offsets
@@ -178,11 +175,12 @@ Contact Information
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 """
-import os, sys, datetime, math, pprint
+import os, sys, datetime, math, pprint, unittest
 import ConfigParser
 from optparse import OptionParser
 import scipy
 from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.ndimage import interpolation
 from scipy import ndimage
 from scipy import signal
 import pyfits as pf
@@ -204,37 +202,44 @@ class VISsimulator():
 
         self.image
 
-    :param configfile: name of the configuration file
-    :type configfile: string
-    :param debug: debugging mode on/off
-    :type debug: boolean
-    :param section: name of the section of the configuration file to process
-    :type section: string
+    :param opts: OptionParser instance
+    :type opts: OptionParser instance
     """
 
-    def __init__(self, configfile, debug, section='SCIENCE'):
+    def __init__(self, opts):
         """
         Class Constructor.
 
-        :param configfile: name of the configuration file
-        :type configfile: string
-        :param debug: debugging mode on/off
-        :type debug: boolean
-        :param section: name of the section of the configuration file to process
-        :type section: string
+        :param opts: OptionParser instance
+        :type opts: OptionParser instance
         """
-        self.configfile = configfile
-        self.section = section
-        self.debug = debug
+        self.configfile = opts.configfile
+
+        if opts.section is None:
+            self.section = 'DEFAULT'
+        else:
+            self.section = opts.section
+
+        if opts.debug is None:
+            self.debug = False
+        else:
+            self.debug = opts.debug
+
+        try:
+            self.testing = opts.testing
+        except:
+            self.testing = False
 
         #load instrument model
         self.information = VISinstrumentModel.VISinformation()
 
         #update settings with defaults
-        self.information.update(dict(psfoversampling=1.0,
-                                     quadrant=0,
-                                     ccdx=0,
-                                     ccdy=0,
+        self.information.update(dict(quadrant=int(opts.quadrant),
+                                     ccdx=int(opts.xCCD),
+                                     ccdy=int(opts.yCCD),
+                                     psfoversampling=1.0,
+                                     ccdxgap=1.643,
+                                     ccdygap=8.116,
                                      xsize=2048,
                                      ysize=2066,
                                      prescanx=50,
@@ -279,6 +284,8 @@ class VISsimulator():
             quadrant = 0
             CCDx = 0
             CCDy = 0
+            CCDxgap = 1.643
+            CCDygap = 8.116
             xsize = 2048
             ysize = 2066
             prescanx = 50
@@ -746,7 +753,7 @@ class VISsimulator():
         self.readConfigs()
         self.processConfigs()
         self._createEmpty()
-        self.log.info('Read in the configuration files and created and empty array')
+        self.log.info('Read in the configuration files and created an empty array')
 
 
     def readObjectlist(self):
@@ -809,18 +816,23 @@ class VISsimulator():
 
         #test that we have input data for each object type, if not exit with error
         if not np.array_equal(self.sp, np.asarray(list(objectMapping.keys()), dtype=np.int)):
+            print self.sp
+            print self.objectMapping
+            print data
+            print np.asarray(list(objectMapping.keys()))
             self.log.error('No all object types available, will exit!')
             sys.exit('No all object types available')
 
-        #change the image coordinates based on CCD
-        #if self.information['quadrant'] > 1:
-        #    skyy = skyy + ( yn * pix_y / ( ps_y * 3.6))
-        #if self.information['quadrant'] % 2 != 0:
-        #    skyx = skyx - ( xn * pix_x / ( ps_x * 3.6))
+        #change the image coordinates based on the CCD being simulated
+        if self.information['ccdx'] > 0:
+            #x coordinate shift
+            self.objects[:, 0] -= (self.information['ccdx'] * (4196. + (self.information['ccdxgap'] * 1000 / 12.)))
+        if self.information['ccdy'] > 0:
+            #y coordinate shift
+            self.objects[:, 1] -= (self.information['ccdy'] * (4132. + (self.information['ccdxgap'] * 1000 / 12.)))
 
         #and quadrant
         if self.information['quadrant'] > 0:
-
             if self.information['quadrant'] > 1:
                 #change y coordinate value
                 self.log.info('Changing y coordinates to take into account quadrant')
@@ -845,6 +857,8 @@ class VISsimulator():
             #grid of PSFs
             self.log.debug('Spatially variable PSF:')
             self.log.error('NOT IMPLEMENTED!')
+            print 'Spatially variable PSF not implemented -- exiting'
+            sys.exit(-9)
         else:
             #single PSF
             self.log.debug('Spatially static PSF:')
@@ -859,44 +873,16 @@ class VISsimulator():
     def generateFinemaps(self):
         """
         Generates finely sampled images of the input data.
-
-        .. Warning:: This should be rewritten. Now a direct conversion from FORTRAN, and thus
-                     not probably very effective. Assumes the PSF sampling for other finemaps.
         """
         self.finemap = {}
         self.shapex = {}
         self.shapey = {}
 
-        #This could be force all the images to be oversampled with a given factor
-        finemapsampling = 1
-
         for k, stype in enumerate(self.sp):
-
-            #finemap array
-            fm = np.zeros((self.PSFy*finemapsampling, self.PSFx*finemapsampling), dtype=np.float64)
-
             if stype == 0:
-                data = self.PSF.copy()
-
-                ny, nx = data.shape
-
-                i1 = (self.PSFx*finemapsampling - nx) / 2
-                if i1 < 1:
-                    i1 = 0
-                i2 = i1 + ny
-
-                j1 = (self.PSFy*finemapsampling - ny) / 2
-                if j1 < 1:
-                    j1 = 0
-                j2 = j1 + nx
-
-                fm[j1:j2, i1:i2] = data
-
-                #normalize to sum to unity
-                fm /= np.sum(fm)
-                self.finemap[stype] = fm
-
-                self.finemap[stype] = fm
+                data = self.PSF.copy().astype(np.float64)
+                data /= np.sum(data)
+                self.finemap[stype] = data
                 self.shapex[stype] = 0
                 self.shapey[stype] = 0
             else:
@@ -907,46 +893,73 @@ class VISsimulator():
                 else:
                     data = self.objectMapping[stype]['data']
 
-                ny, nx = data.shape
+                #suppress background
+                data[data < 7e-5] = 0.0
 
-                i1 = (self.PSFx*finemapsampling - nx) / 2
-                if i1 < 1:
-                    i1 = 0
-                i2 = i1 + ny
+                #calculate shape tensor -- used later for size scaling
+                #make a copy
+                image = data.copy()
 
-                j1 = (self.PSFy*finemapsampling - ny) / 2
-                if j1 < 1:
-                    j1 = 0
-                j2 = j1 + nx
+                #normalization factor
+                imsum = float(np.sum(image))
 
-                fm[j1:j2, i1:i2] = data
+                #generate a mesh coordinate grid
+                sizeY, sizeX = image.shape
+                Xvector = np.arange(0, sizeX)
+                Yvector = np.arange(0, sizeY)
+                Xmesh, Ymesh = np.meshgrid(Xvector, Yvector)
 
-                #normalize to sum to unity
-                fm /= np.sum(fm)
-                self.finemap[stype] = fm
+                #take centroid from data and weighting with input image
+                Xcentre = np.sum(Xmesh.copy() * image.copy()) / imsum
+                Ycentre = np.sum(Ymesh.copy() * image.copy()) / imsum
 
-                #Compute a shape tensor, translated from Fortran so not very effective.
-                #TODO: rewrite with numpy meshgrid
-                Qxx = 0.
-                Qxy = 0.
-                Qyy = 0.
-                for i in xrange(0, self.PSFx*finemapsampling):
-                    for j in xrange(0, self.PSFy*finemapsampling):
-                        Qxx += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(i-0.5*(self.PSFx*finemapsampling-1))
-                        Qxy += fm[j,i]*(i-0.5*(self.PSFx*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
-                        Qyy += fm[j,i]*(j-0.5*(self.PSFy*finemapsampling-1))*(j-0.5*(self.PSFy*finemapsampling-1))
+                #coordinate array
+                Xarray = Xcentre * np.ones([sizeY, sizeX])
+                Yarray = Ycentre * np.ones([sizeY, sizeX])
 
-                shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy ))/2.
-                self.shapex[stype] = (np.sqrt(shx / np.sum(fm)))
-                self.shapey[stype] = (np.sqrt(shy / np.sum(fm)))
+                #centroided positions
+                Xpos = Xmesh - Xarray
+                Ypos = Ymesh - Yarray
+
+                #squared and cross term
+                Xpos2 = Xpos * Xpos
+                Ypos2 = Ypos * Ypos
+                XYpos = Ypos * Xpos
+
+                #integrand
+                Qyyint = Ypos2 * image.copy()
+                Qxxint = Xpos2 * image.copy()
+                Qxyint = XYpos * image.copy()
+
+                #sum over and normalize to get the quadrupole moments
+                Qyy = np.sum(Qyyint) / imsum
+                Qxx = np.sum(Qxxint) / imsum
+                Qxy = np.sum(Qxyint) / imsum
+
+                shx = (Qxx + Qyy + np.sqrt((Qxx - Qyy) ** 2 + 4. * Qxy * Qxy)) / 2.
+                shy = (Qxx + Qyy - np.sqrt((Qxx - Qyy) ** 2 + 4. * Qxy * Qxy)) / 2.
+
+                #recentroid -- interpolation, not good for weak lensing etc.
+                ceny, cenx = data.shape
+                ceny /= 2
+                cenx /= 2
+                shiftx = -Xcentre + cenx
+                shifty = -Ycentre + ceny
+
+                #one should do sinc-interpolation instead...
+                data = interpolation.shift(data, [shifty, shiftx], order=3, cval=0.0, mode='constant')
+
+                data[data < 0.] = 0.0
+                data /= np.sum(data)
+                self.finemap[stype] = data
+
+                self.shapex[stype] = (np.sqrt(shx / np.sum(data)))
+                self.shapey[stype] = (np.sqrt(shy / np.sum(data)))
+
+                self.log.info('shapex = %5f, shapey = %5f' % (self.shapex[stype], self.shapey[stype]))
 
             if self.debug:
-                scipy.misc.imsave('finemap%i.jpg' % (k+1), (fm / np.max(fm) * 255))
-
-        #sum of the finemaps, this should be exactly the number of finemaps
-        #because these have been normalized to sum to unity.
-        self.log.info('finemap sum = %f' %np.sum(np.asarray(self.finemap.values())))
+                scipy.misc.imsave('finemap%i.jpg' % (k + 1), (data / np.max(data) * 255))
 
 
     def addObjects(self):
@@ -954,7 +967,10 @@ class VISsimulator():
         Add objects from the object list to the CCD image (self.image).
 
         Scale the object's brightness in electrons and size using the input catalog magnitude.
-        The size scaling is a crude fit to Massey et al. plot.
+        The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+        Appendix "prior distributions"). The spread is estimated from Figure 1 to be around 0".1 (1 sigma).
+        A random draw from a Gaussian distribution with spread of 0".1 arc sec is performed so that galaxies
+        of the same brightness would not be exactly the same size.
 
         .. Note: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
         """
@@ -966,116 +982,227 @@ class VISsimulator():
         self.log.info('Total number of objects in the input catalog = %i' % n_objects)
 
         #calculate the scaling factors from the magnitudes
-        intscales = 10.0**(-0.4 * self.objects[:, 2]) * \
-                    self.information['magzero'] * \
-                    self.information['exptime']
+        intscales = 10.0**(-0.4 * self.objects[:, 2]) * self.information['magzero'] * self.information['exptime']
 
-        #loop over exposures
-        for i in xrange(self.information['exposures']):
-            #loop over the number of objects
-            for j, obj in enumerate(self.objects):
+        if self.testing:
+            #testin mode will bypass the small random scaling in the size-mag relation
+            #loop over exposures
+            for i in xrange(self.information['exposures']):
+                #loop over the number of objects
+                for j, obj in enumerate(self.objects):
 
-                stype = obj[3]
+                    stype = obj[3]
 
-                if self.objectOnDetector(obj):
-                    visible += 1
-                    if stype == 0:
-                        #point source, apply PSF
-                        txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
-                        print txt
-                        self.log.info(txt)
+                    if self.objectOnDetector(obj):
+                        visible += 1
+                        if stype == 0:
+                            #point source, apply PSF
+                            txt = "Star: " + str(j + 1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                            print txt
+                            self.log.info(txt)
 
-                        data = self.finemap[stype].copy()
+                            data = self.finemap[stype].copy()
 
-                        #map the data to new grid aligned with the centre of the object and scale
-                        #def shift_func(output_coords):
-                        #    return output_coords[0] - (obj[0] % 1), output_coords[1] - (obj[1] % 1)
-                        #data = ndimage.geometric_transform(data, shift_func, order=0)
-                        yind, xind = np.indices(data.shape)
-                        yi = yind.astype(np.float) + (obj[0] % 1)
-                        xi = xind.astype(np.float) + (obj[1] % 1)
-                        data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
-                        if self.information['psfoversampling'] != 1.0:
-                            data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'], order=1)
+                            #map the data to new grid aligned with the centre of the object and scale
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+                            if self.information['psfoversampling'] != 1.0:
+                                data = scipy.ndimage.zoom(data, 1. / self.information['psfoversampling'], order=1)
 
-                        #suppress negative numbers, renormalise and scale with the intscale
-                        data[data < 0.0] = 0.0
-                        sum = np.sum(data)
-                        sca = intscales[j] / sum
-                        data = ne.evaluate("data * sca")
-
-                        self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
-
-                        #overlay the scaled PSF on the image
-                        self.overlayToCCD(data, obj)
-                    else:
-                        #extended source, rename finemap
-                        data = self.finemap[stype].copy()
-                        #map the data to new grid aligned with the centre of the object
-                        yind, xind = np.indices(data.shape)
-                        yi = yind.astype(np.float) + (obj[0] % 1)
-                        xi = xind.astype(np.float) + (obj[1] % 1)
-                        data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
-
-                        #size scaling along the minor axes
-                        smin = min(self.shapex[stype], self.shapey[stype])
-                        sbig = 0.2**((obj[2] - 22.)/7.) / smin / 2.
-                        #sbig = np.e**(-1.145-0.269*(obj[2] - 23.)) / smin   #from Miller et al. 2012 (1210.8201v1)
-
-                        txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + \
-                              " intscale=" + str(intscales[j]) + " size=" + str(sbig)
-                        print txt
-                        self.log.info(txt)
-
-                        #rotate the image using interpolation and suppress negative values
-                        if math.fabs(obj[4]) > 1e-5:
-                            data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
-
-                        #scale the size of the galaxy before convolution
-                        if sbig != 1.0:
-                            data = scipy.ndimage.zoom(data, self.information['psfoversampling']*sbig, order=0)
+                            #suppress negative numbers, renormalise and scale with the intscale
                             data[data < 0.0] = 0.0
+                            sum = np.sum(data)
+                            sca = intscales[j] / sum
+                            data = ne.evaluate("data * sca")
 
-                        if self.debug:
-                            self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
+                            self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
 
-                        if self.information['variablePSF']:
-                            sys.exit('Spatially variable PSF not implemented yet!')
+                            #overlay the scaled PSF on the image
+                            self.overlayToCCD(data, obj)
                         else:
-                            #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                            #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                            conv = signal.fftconvolve(data, self.PSF, mode='full')
+                            #extended source, rename finemap
+                            data = self.finemap[stype].copy()
+                            #map the data to new grid aligned with the centre of the object
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
 
-                        #scale the galaxy image size with the inverse of the PSF over sampling factor
-                        if self.information['psfoversampling'] != 1.0:
-                            conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'], order=1)
+                            #size scaling along the minor axes
+                            smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                            sbig = np.e**(-1.145-0.269*(obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                            sbig /= smin
 
-                        #suppress negative numbers
-                        conv[conv < 0.0] = 0.0
+                            txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
+                                  " intscale=" + str(intscales[j]) + " FWHM=" + str(sbig*smin) + " arc sec"
+                            print txt
+                            self.log.info(txt)
 
-                        #renormalise and scale to the right magnitude
-                        sum = np.sum(conv)
-                        sca = intscales[j] / sum
-                        conv = ne.evaluate("conv * sca")
+                            #rotate the image using interpolation and suppress negative values
+                            if math.fabs(obj[4]) > 1e-5:
+                                data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
 
-                        #tiny galaxies sometimes end up with completely zero array
-                        #checking this costs time, so perhaps this could be removed
-                        if np.isnan(np.sum(conv)):
-                            continue
+                            #scale the size of the galaxy before convolution
+                            if sbig != 1.0:
+                                data = scipy.ndimage.zoom(data, self.information['psfoversampling'] * sbig, order=0)
+                                data[data < 0.0] = 0.0
 
-                        if self.debug:
-                            scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
-                            self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+                            if self.debug:
+                                self.writeFITSfile(data, 'beforeconv%i.fits' % (j + 1))
 
-                        self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
+                            if self.information['variablePSF']:
+                                sys.exit('Spatially variable PSF not implemented yet!')
+                            else:
+                                #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
+                                conv = signal.fftconvolve(data, self.PSF, mode='full')
 
-                        #overlay the convolved image on the image
-                        self.overlayToCCD(conv, obj)
+                            #scale the galaxy image size with the inverse of the PSF over sampling factor
+                            if self.information['psfoversampling'] != 1.0:
+                                conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
 
-                else:
-                    #not on the screen
-                    print 'OFFscreen: ', j+1
-                    self.log.info('Object %i was outside the detector area' % (j+1))
+                            #suppress negative numbers
+                            conv[conv < 0.0] = 0.0
+
+                            #renormalise and scale to the right magnitude
+                            sum = np.sum(conv)
+                            sca = intscales[j] / sum
+                            conv = ne.evaluate("conv * sca")
+
+                            #tiny galaxies sometimes end up with completely zero array
+                            #checking this costs time, so perhaps this could be removed
+                            if np.isnan(np.sum(conv)):
+                                continue
+
+                            if self.debug:
+                                scipy.misc.imsave('image%i.jpg' % (j + 1), conv / np.max(conv) * 255)
+                                self.writeFITSfile(conv, 'afterconv%i.fits' % (j + 1))
+
+                            self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
+
+                            #overlay the convolved image on the image
+                            self.overlayToCCD(conv, obj)
+
+                    else:
+                        #not on the screen
+                        self.log.info('Object %i was outside the detector area' % (j + 1))
+
+        else:
+            #loop over exposures
+            for i in xrange(self.information['exposures']):
+                #loop over the number of objects
+                for j, obj in enumerate(self.objects):
+
+                    stype = obj[3]
+
+                    if self.objectOnDetector(obj):
+                        visible += 1
+                        if stype == 0:
+                            #point source, apply PSF
+                            txt = "Star: " + str(j+1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                            print txt
+                            self.log.info(txt)
+
+                            data = self.finemap[stype].copy()
+
+                            #map the data to new grid aligned with the centre of the object and scale
+                            #def shift_func(output_coords):
+                            #    return output_coords[0] - (obj[0] % 1), output_coords[1] - (obj[1] % 1)
+                            #data = ndimage.geometric_transform(data, shift_func, order=0)
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+                            if self.information['psfoversampling'] != 1.0:
+                                data = scipy.ndimage.zoom(data, 1./self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers, renormalise and scale with the intscale
+                            data[data < 0.0] = 0.0
+                            sum = np.sum(data)
+                            sca = intscales[j] / sum
+                            data = ne.evaluate("data * sca")
+
+                            self.log.info('Maximum value of the data added is %.2f electrons' % np.max(data))
+
+                            #overlay the scaled PSF on the image
+                            self.overlayToCCD(data, obj)
+                        else:
+                            #extended source, rename finemap
+                            data = self.finemap[stype].copy()
+
+                            #map the data to new grid aligned with the centre of the object
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+
+                            #size scaling relation and random draw
+                            sbig = np.e**(-1.145-0.269*(obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                            rshift = np.random.normal(sbig, 0.2)  #gaussian random draw to mimic the spread
+                            if rshift > 0.15:  #no negative numbers or tiny tiny galaxies
+                                sbig = rshift
+
+                            #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                            #so convert to arc seconds prior to scaling
+                            smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                            sbig /= smin
+
+                            txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
+                                  " intscale=" + str(intscales[j]) + " FWHM=" + str(sbig*smin) + " arc sec"
+                            print txt
+                            self.log.info(txt)
+
+                            #rotate the image using interpolation
+                            if math.fabs(obj[4]) > 1e-5:
+                                data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                            #scale the size of the galaxy before convolution
+                            if sbig != 1.0:
+                                data = scipy.ndimage.zoom(data, self.information['psfoversampling']*sbig, order=0,
+                                                          cval=0.0)
+                                data[data < 0.0] = 0.0
+
+                            if self.debug:
+                                self.writeFITSfile(data, 'beforeconv%i.fits' % (j+1))
+
+                            if self.information['variablePSF']:
+                                sys.exit('Spatially variable PSF not implemented yet!')
+                            else:
+                                #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
+                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+
+                            #scale the galaxy image size with the inverse of the PSF over sampling factor
+                            if self.information['psfoversampling'] != 1.0:
+                                conv = scipy.ndimage.zoom(conv, 1./self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers
+                            conv[conv < 0.0] = 0.0
+
+                            #renormalise and scale to the right magnitude
+                            sum = np.sum(conv)
+                            sca = intscales[j] / sum
+                            conv = ne.evaluate("conv * sca")
+
+                            #tiny galaxies sometimes end up with completely zero array
+                            #checking this costs time, so perhaps this could be removed
+                            if np.isnan(np.sum(conv)):
+                                continue
+
+                            if self.debug:
+                                scipy.misc.imsave('image%i.jpg' % (j+1), conv/np.max(conv)*255)
+                                self.writeFITSfile(conv, 'afterconv%i.fits' % (j+1))
+
+                            self.log.info('Maximum value of the data added is %.3f electrons' % np.max(conv))
+
+                            #overlay the convolved image on the image
+                            self.overlayToCCD(conv, obj)
+
+                    else:
+                        #not on the screen
+                        self.log.info('Object %i was outside the detector area' % (j+1))
 
         self.log.info('%i objects were place on the detector' % visible)
         print '%i objects were place on the detector' % visible
@@ -1586,6 +1713,41 @@ class VISsimulator():
         self.writeOutputs()
 
 
+class Test(unittest.TestCase):
+    """
+    Unit tests for the shape class.
+    """
+    def setUp(self):
+        class dummy:
+            pass
+        opts = dummy() #ugly hack...
+        opts.quadrant = '0'
+        opts.xCCD = '0'
+        opts.yCCD = '0'
+        opts.configfile = 'data/test.config'
+        opts.section = 'TESTSCIENCE1X'
+        opts.debug = False
+        opts.testing = True
+        self.simulate = VISsimulator(opts)
+
+
+    def test(self):
+        """
+        Runs a test case and compares it the previously calculated results.
+
+        :return: None
+        """
+        #run simulator
+        self.simulate.simulate()
+        #load generated file
+        new = pf.open('nonoisenocrQ0_00_00testscience.fits')[1].data
+        #load test file
+        expected = pf.open('data/nonoisenocrQ0_00_00testscience.fits')[1].data
+        #assert
+        print 'Asserting...'
+        np.testing.assert_array_almost_equal(new, expected, decimal=7, err_msg='', verbose=True)
+
+
 def processArgs(printHelp=False):
     """
     Processes command line arguments.
@@ -1596,8 +1758,16 @@ def processArgs(printHelp=False):
                       help="Name of the configuration file", metavar="string")
     parser.add_option('-s', '--section', dest='section',
                       help="Name of the section of the config file [SCIENCE]", metavar="string")
+    parser.add_option('-q', '--quadrant', dest='quadrant', help='CCD quadrant to simulate [0, 1, 2, 3]',
+                      metavar='int')
+    parser.add_option('-x', '--xCCD', dest='xCCD', help='CCD number in X-direction within the FPA matrix',
+                      metavar='int')
+    parser.add_option('-y', '--yCCD', dest='yCCD', help='CCD number in Y-direction within the FPA matrix',
+                      metavar='int')
     parser.add_option('-d', '--debug', dest='debug', action='store_true',
                       help='Debugging mode on')
+    parser.add_option('-t', '--test', dest='test', action='store_true',
+                      help='Run unittest')
     if printHelp:
         parser.print_help()
     else:
@@ -1607,13 +1777,25 @@ def processArgs(printHelp=False):
 if __name__ == '__main__':
     opts, args = processArgs()
 
+    #run unittest and exit
+    if opts.test is not None:
+        suite = unittest.TestLoader().loadTestsFromTestCase(Test)
+        unittest.TextTestRunner(verbosity=3).run(suite)
+        sys.exit(1)
+
+    #no input file, exti
     if opts.configfile is None:
         processArgs(True)
         sys.exit(1)
 
-    if opts.section is None:
-        simulate = VISsimulator(opts.configfile, opts.debug)
-    else:
-        simulate = VISsimulator(opts.configfile, opts.debug, opts.section)
+    #set defaults if not given
+    if opts.quadrant is None:
+        opts.quadrant = '0'
+    if opts.xCCD is None:
+        opts.xCCD = '0'
+    if opts.yCCD is None:
+        opts.yCCD = '0'
 
+    #run the simulator
+    simulate = VISsimulator(opts)
     simulate.simulate()

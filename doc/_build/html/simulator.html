@@ -217,10 +217,12 @@ Python 3.x.</p>
 <h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
 <p>Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
-please run the SCIENCE section from the test.config as follows:</p>
-<div class="highlight-python"><pre>python simulator.py -c data/test.config -s TESTSCIENCE1X</pre>
+please run the unittest as follows:</p>
+<div class="highlight-python"><pre>python simulator.py -t</pre>
 </div>
-<p>This will produce an image representing VIS lower left (0th) quadrant. Because
+<p>This will run the unittest and compare the result to a previously calculated image.
+Please inspect the standard output for results.</p>
+<p>Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.</p>
 <p>In the data subdirectory there is a file called &#8220;nonoisenocrQ0_00_00testscience.fits&#8221;,
@@ -233,12 +235,12 @@ float64).</p>
 <div class="section" id="benchmarking">
 <h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
 <p>A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:</p>
-<div class="highlight-python"><pre>Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
-6798 objects were place on the detector
+<div class="highlight-python"><pre>Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+6791 objects were place on the detector
 
-real        4m14.008s
-user        3m59.609s
-sys         0m4.728s</pre>
+real        2m19.378s
+user        2m13.237s
+sys         0m4.394s</pre>
 </div>
 <p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
 64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
@@ -281,7 +283,7 @@ as follows:</p>
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
 1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
-     deriving the Poisson noise.</pre>
+     deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -289,14 +291,9 @@ as follows:</p>
 <div class="admonition-todo admonition" id="index-0">
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
-<li>test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)</li>
-<li>check that the size distribution of galaxies is suitable (now the scaling is before convolution!)</li>
 <li>objects.dat is now hard coded into the code, this should be read from the config file</li>
 <li>implement spatially variable PSF</li>
-<li>implement CCD offsets (for focal plane simulations)</li>
 <li>test that the WCS is correctly implemented and allows CCD offsets</li>
-<li>implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit</li>
-<li>centering of an object depends on the centering of the postage stamp (should recalculate the centroid)</li>
 <li>charge injection line positions are now hardcoded to the code, read from the config file</li>
 <li>include rotation in metrology</li>
 <li>implement optional dithered offsets</li>
@@ -320,7 +317,7 @@ as follows:</p>
 </div>
 <dl class="class">
 <dt id="simulator.simulator.VISsimulator">
-<em class="property">class </em><tt class="descclassname">simulator.simulator.</tt><tt class="descname">VISsimulator</tt><big>(</big><em>configfile</em>, <em>debug</em>, <em>section='SCIENCE'</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><tt class="descclassname">simulator.simulator.</tt><tt class="descname">VISsimulator</tt><big>(</big><em>opts</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Euclid Visible Instrument Image Simulator</p>
 <p>The image that is being build is in:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">image</span>
@@ -330,12 +327,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>configfile</strong> (<em>string</em>) &#8211; name of the configuration file</li>
-<li><strong>debug</strong> (<em>boolean</em>) &#8211; debugging mode on/off</li>
-<li><strong>section</strong> (<em>string</em>) &#8211; name of the section of the configuration file to process</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>opts</strong> (<em>OptionParser instance</em>) &#8211; OptionParser instance</td>
 </tr>
 </tbody>
 </table>
@@ -363,7 +355,10 @@ as follows:</p>
 <tt class="descname">addObjects</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add objects from the object list to the CCD image (self.image).</p>
 <p>Scale the object&#8217;s brightness in electrons and size using the input catalog magnitude.
-The size scaling is a crude fit to Massey et al. plot.</p>
+The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+Appendix &#8220;prior distributions&#8221;). The spread is estimated from Figure 1 to be around 0&#8221;.1 (1 sigma).
+A random draw from a Gaussian distribution with spread of 0&#8221;.1 arc sec is performed so that galaxies
+of the same brightness would not be exactly the same size.</p>
 </dd></dl>
 
 <dl class="method">
@@ -522,11 +517,6 @@ defined by the argument max.</p>
 <dt id="simulator.simulator.VISsimulator.generateFinemaps">
 <tt class="descname">generateFinemaps</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.generateFinemaps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates finely sampled images of the input data.</p>
-<div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">This should be rewritten. Now a direct conversion from FORTRAN, and thus
-not probably very effective. Assumes the PSF sampling for other finemaps.</p>
-</div>
 </dd></dl>
 
 <dl class="method">
@@ -574,6 +564,8 @@ not probably very effective. Assumes the PSF sampling for other finemaps.</p>
 <span class="n">quadrant</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">CCDx</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">CCDy</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDxgap</span> <span class="o">=</span> <span class="mf">1.643</span>
+<span class="n">CCDygap</span> <span class="o">=</span> <span class="mf">8.116</span>
 <span class="n">xsize</span> <span class="o">=</span> <span class="mi">2048</span>
 <span class="n">ysize</span> <span class="o">=</span> <span class="mi">2066</span>
 <span class="n">prescanx</span> <span class="o">=</span> <span class="mi">50</span>

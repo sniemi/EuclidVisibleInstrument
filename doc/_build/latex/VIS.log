@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.4)  10 MAY 2013 15:48
+This is pdfTeX, Version 3.1415926-2.4-1.40.13 (TeX Live 2012) (format=pdflatex 2013.4.4)  17 MAY 2013 15:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -905,7 +905,7 @@ pdfTeX warning (ext4): destination with the same identifier (name{page.i}) has
 been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.32 ...rity I: Calibration}{37}{subsection.6.2.3}
+l.32 ...t Field Calibration}{35}{subsection.6.2.2}
                                                    [1
 
 ])
@@ -931,8 +931,8 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
 ]
 Chapter 1.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 142.
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 151.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 145.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 154.
 (/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [3] [4
@@ -940,37 +940,37 @@ File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ]
 Chapter 2.
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 197.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 200.
 [5]
-Underfull \hbox (badness 10000) in paragraph at lines 229--229
+Underfull \hbox (badness 10000) in paragraph at lines 232--232
 \T1/ptm/m/it/10.95 pli-tude\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (10.30403pt too wide) in paragraph at lines 229--229
+Overfull \hbox (10.30403pt too wide) in paragraph at lines 232--232
 \T1/ptm/m/it/10.95 phase=0.49\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (5.62823pt too wide) in paragraph at lines 229--229
+Overfull \hbox (5.62823pt too wide) in paragraph at lines 232--232
 \T1/ptm/m/it/10.95 multi=1.5\T1/pcr/m/n/10.95 ) 
  []
 
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 234.
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 237.
 
 (/usr/local/texlive/2012/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 ) [6]
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 349.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 352.
  [7]
-Underfull \hbox (badness 10000) in paragraph at lines 390--390
+Underfull \hbox (badness 10000) in paragraph at lines 393--393
 []\T1/ptm/m/it/10.95 values\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 work_queue\T1
 /ptm/m/n/10.95 , \T1/ptm/m/it/10.95 re-
  []
 
 
-Overfull \hbox (79.49942pt too wide) in paragraph at lines 434--436
+Overfull \hbox (79.49942pt too wide) in paragraph at lines 437--439
 []\T1/ptm/m/n/10.95 sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_t
 r,[xdim,ydim,zdim]) 
  []
@@ -980,14 +980,14 @@ Chapter 3.
 [13
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 989--989
+Underfull \hbox (badness 10000) in paragraph at lines 992--992
 []\T1/ptm/m/it/10.95 info\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ex-p-time=565.0
 \T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ex-po-sures=1\T1/ptm/m/n/10.95 , \T1/ptm
 /m/it/10.95 dig-i-noise=False\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1024--1024
+Underfull \hbox (badness 10000) in paragraph at lines 1027--1027
 []\T1/ptm/m/it/10.95 info\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 mag-ni-tude\T1/
 ptm/m/n/10.95 , \T1/ptm/m/it/10.95 snr=10.0\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.
 95 ex-po-sures=3\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 fudge=0.7\T1/ptm/m/n/10.
@@ -995,7 +995,7 @@ ptm/m/n/10.95 , \T1/ptm/m/it/10.95 snr=10.0\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.
  []
 
 
-Underfull \hbox (badness 6141) in paragraph at lines 1066--1066
+Underfull \hbox (badness 6141) in paragraph at lines 1069--1069
 []\T1/ptm/m/it/10.95 info\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 exp=565\T1/ptm/
 m/n/10.95 , \T1/ptm/m/it/10.95 snr=10.0\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 e
 x-po-sures=3\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 fudge=0.7\T1/ptm/m/n/10.95 ,
@@ -1007,688 +1007,694 @@ x-po-sures=3\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 fudge=0.7\T1/ptm/m/n/10.95 ,
 ]
 Chapter 4.
 
-Overfull \hbox (49.32982pt too wide) in paragraph at lines 1149--1149
+Overfull \hbox (49.32982pt too wide) in paragraph at lines 1152--1152
 []\T1/ptm/m/it/10.95 cpdf\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (35.33585pt too wide) in paragraph at lines 1149--1149
+Overfull \hbox (35.33585pt too wide) in paragraph at lines 1152--1152
 \T1/ptm/m/it/10.95 x\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (50.23877pt too wide) in paragraph at lines 1149--1149
+Overfull \hbox (50.23877pt too wide) in paragraph at lines 1152--1152
 \T1/ptm/m/it/10.95 num-
  []
 
 
-Overfull \hbox (49.15459pt too wide) in paragraph at lines 1149--1149
+Overfull \hbox (49.15459pt too wide) in paragraph at lines 1152--1152
 \T1/ptm/m/it/10.95 ber\T1/pcr/m/n/10.95 ) 
  []
 
 [17]
-Underfull \hbox (badness 10000) in paragraph at lines 1200--1200
+Underfull \hbox (badness 10000) in paragraph at lines 1220--1220
 []\T1/ptm/m/it/10.95 stars=400\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 xmax=2048\
 T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 []\T1/ptm/m/it/10.95 stars=400\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 xmax=2048\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 ymax=2066\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 mag=18\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 ran-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 dom=True\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1208--1208
+Underfull \hbox (badness 10000) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 per-grid=51\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (58.5711pt too wide) in paragraph at lines 1208--1208
+Overfull \hbox (58.5711pt too wide) in paragraph at lines 1228--1228
 \T1/ptm/m/it/10.95 out='starsSameMag.dat'\T1/pcr/m/n/10.95 ) 
  []
 
-<Distributions.pdf, id=420, 578.16pt x 433.62pt>
+
+Underfull \hbox (badness 10000) in paragraph at lines 1262--1262
+[]\T1/ptm/m/it/10.95 filename\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cat-a-log\T
+1/ptm/m/n/10.95 ,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1262--1262
+\T1/ptm/m/it/10.95 maglimit=22.0\T1/ptm/m/n/10.95 ,
+ []
+
+[18] <Distributions.pdf, id=438, 578.16pt x 433.62pt>
 File: Distributions.pdf Graphic file (type pdf)
  <use Distributions.pdf>
-Package pdftex.def Info: Distributions.pdf used on input line 1217.
+Package pdftex.def Info: Distributions.pdf used on input line 1292.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Distributions.pdf Graphic file (type pdf)
 
 <use Distributions.pdf>
-Package pdftex.def Info: Distributions.pdf used on input line 1217.
+Package pdftex.def Info: Distributions.pdf used on input line 1292.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- [18] [19 <./Distributions.pdf>] [20
+ [19 <./Distributions.pdf>] [20
 
 ]
 Chapter 5.
 [21]
-Underfull \hbox (badness 10000) in paragraph at lines 1353--1354
+Underfull \hbox (badness 10000) in paragraph at lines 1428--1429
 
  []
 
 [22] [23] [24]
-Underfull \hbox (badness 10000) in paragraph at lines 1630--1631
+Underfull \hbox (badness 10000) in paragraph at lines 1687--1688
 
  []
 
 [25] [26]
-Underfull \hbox (badness 10000) in paragraph at lines 1784--1785
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1830--1831
+Underfull \hbox (badness 10000) in paragraph at lines 1882--1883
 \T1/ptm/m/n/10.95 Processes con-fig-u-ra-tion in-for-ma-tion and save the in-fo
 r-ma-tion to a dic-tio-nary
  []
 
-[27] [28] [29] <simu.pdf, id=594, 2304.61pt x 1050.92625pt>
+[27] [28] [29] <simu.pdf, id=599, 2304.61pt x 1050.92625pt>
 File: simu.pdf Graphic file (type pdf)
  <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 2119.
+Package pdftex.def Info: simu.pdf used on input line 2173.
 (pdftex.def)             Requested size: 2304.6044pt x 1050.9237pt.
 File: simu.pdf Graphic file (type pdf)
 
 <use simu.pdf>
-Package pdftex.def Info: simu.pdf used on input line 2119.
+Package pdftex.def Info: simu.pdf used on input line 2173.
 (pdftex.def)             Requested size: 452.96788pt x 206.55743pt.
  [30 <./simu.pdf>]
 Chapter 6.
 [31
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2274--2274
+Underfull \hbox (badness 10000) in paragraph at lines 2328--2328
 []\T1/ptm/m/it/10.95 data\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 read-noise=4.5\
 T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 gain=3.5\T1/ptm/m/n/10.95 ,
  []
 
 [32]
-Underfull \hbox (badness 10000) in paragraph at lines 2305--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2359--2359
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2305--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2359--2359
 \T1/ptm/m/it/10.95 over-sam-ple=12.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2305--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2359--2359
 \T1/ptm/m/it/10.95 psfs=4000\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2305--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2359--2359
 \T1/ptm/m/it/10.95 sigma=0.36\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 it-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2305--2305
+Underfull \hbox (badness 10000) in paragraph at lines 2359--2359
 \T1/ptm/m/it/10.95 er-a-tions=5\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 de-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 \T1/ptm/m/it/10.95 file='data/psf12x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 \T1/ptm/m/it/10.95 over-sam-ple=12.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 \T1/ptm/m/it/10.95 psfs=4000\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2319--2319
+Underfull \hbox (badness 10000) in paragraph at lines 2373--2373
 \T1/ptm/m/it/10.95 sigma=0.36\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 it-er-a-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2355--2355
+Underfull \hbox (badness 10000) in paragraph at lines 2409--2409
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 timeS-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2374--2374
+Underfull \hbox (badness 10000) in paragraph at lines 2428--2428
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqe=3e-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2374--2374
+Underfull \hbox (badness 10000) in paragraph at lines 2428--2428
 \T1/ptm/m/it/10.95 05\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqr2=0.0001\T1/ptm
 /m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2374--2374
+Underfull \hbox (badness 10000) in paragraph at lines 2428--2428
 \T1/ptm/m/it/10.95 shift=0.1\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 timeS-
  []
 
 [33]
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 floor=995\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 xsize=2048\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 ysize=2066\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 or-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 der=3\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 bi-ases=15\T1/pt
 m/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 sur-faces=100\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 file='psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 psfs=500\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ps-f-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 s-cale=1000.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2402--2402
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2456
 \T1/ptm/m/it/10.95 de-bug=False\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 floor=3500\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 xsize=2048\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 ysize=2066\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 or-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 der=3\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 bi-ases=15\T1/pt
 m/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 sur-faces=100\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 file='psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 psfs=500\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ps-f-s-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 cale=100000.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 gain=3.5\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 de-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2432--2432
+Underfull \hbox (badness 10000) in paragraph at lines 2486--2486
 \T1/ptm/m/it/10.95 bug=False\T1/ptm/m/n/10.95 ,
  []
 
 [34] [35]
-Underfull \hbox (badness 10000) in paragraph at lines 2509--2509
+Underfull \hbox (badness 10000) in paragraph at lines 2563--2563
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2509--2509
+Underfull \hbox (badness 10000) in paragraph at lines 2563--2563
 \T1/ptm/m/it/10.95 file='data/psf4x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2509--2509
+Underfull \hbox (badness 10000) in paragraph at lines 2563--2563
 \T1/ptm/m/it/10.95 over-sam-ple=4.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2509--2509
+Underfull \hbox (badness 10000) in paragraph at lines 2563--2563
 \T1/ptm/m/it/10.95 psfs=1000\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 it-er-a-
  []
 
 
-Overfull \hbox (50.0846pt too wide) in paragraph at lines 2518--2518
+Overfull \hbox (50.0846pt too wide) in paragraph at lines 2572--2572
 []\T1/ptm/m/it/10.95 files='Q0*flatfield*.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 com-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 bine=77\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 lamp-
  []
 
 
-Overfull \hbox (110.48404pt too wide) in paragraph at lines 2518--2518
+Overfull \hbox (110.48404pt too wide) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 file='data/VIScalibrationUnitflux.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 ref-er-
  []
 
 
-Overfull \hbox (112.15929pt too wide) in paragraph at lines 2518--2518
+Overfull \hbox (112.15929pt too wide) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 ence='data/VISFlatField1percent.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 plots=False\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2518--2518
+Underfull \hbox (badness 10000) in paragraph at lines 2572--2572
 \T1/ptm/m/it/10.95 de-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2568--2568
+Underfull \hbox (badness 10000) in paragraph at lines 2622--2622
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqe=3e-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2568--2568
+Underfull \hbox (badness 10000) in paragraph at lines 2622--2622
 \T1/ptm/m/it/10.95 05\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqr2=0.0001\T1/ptm
 /m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2568--2568
+Underfull \hbox (badness 10000) in paragraph at lines 2622--2622
 \T1/ptm/m/it/10.95 shift=0.1\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 out-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2568--2568
+Underfull \hbox (badness 10000) in paragraph at lines 2622--2622
 \T1/ptm/m/it/10.95 dir='results'\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 timeS-
  []
 
 [36]
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2602
+Underfull \hbox (badness 10000) in paragraph at lines 2656--2656
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 flats\T1/ptm/m/n
 /10.95 , \T1/ptm/m/it/10.95 sur-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2602
+Underfull \hbox (badness 10000) in paragraph at lines 2656--2656
 \T1/ptm/m/it/10.95 faces=100\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2602
+Underfull \hbox (badness 10000) in paragraph at lines 2656--2656
 \T1/ptm/m/it/10.95 file='data/psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2602
+Underfull \hbox (badness 10000) in paragraph at lines 2656--2656
 \T1/ptm/m/it/10.95 psfs=500\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2602
+Underfull \hbox (badness 10000) in paragraph at lines 2656--2656
 \T1/ptm/m/it/10.95 sigma=0.75\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 it-er-a-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2613--2613
+Underfull \hbox (badness 10000) in paragraph at lines 2667--2667
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (33.999pt too wide) in paragraph at lines 2613--2613
+Overfull \hbox (33.999pt too wide) in paragraph at lines 2667--2667
 \T1/ptm/m/it/10.95 file='data/psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2613--2613
+Underfull \hbox (badness 10000) in paragraph at lines 2667--2667
 \T1/ptm/m/it/10.95 over-sam-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2613--2613
+Underfull \hbox (badness 10000) in paragraph at lines 2667--2667
 \T1/ptm/m/it/10.95 ple=1.0\T1/ptm/m/n/10.95 ,
  []
 
 [37]
-Underfull \hbox (badness 10000) in paragraph at lines 2661--2661
+Underfull \hbox (badness 10000) in paragraph at lines 2715--2715
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqe=3e-05\T
 1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2661--2661
+Underfull \hbox (badness 10000) in paragraph at lines 2715--2715
 \T1/ptm/m/it/10.95 reqr2=0.0001\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 out-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2661--2661
+Underfull \hbox (badness 10000) in paragraph at lines 2715--2715
 \T1/ptm/m/it/10.95 dir='results'\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 timeS-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 over-sam-ple=12.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 sigma=0.75\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 phs=0.98\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 phases=None\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 mul-ti-plier=1.5\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 minerror=-5.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2689--2689
+Underfull \hbox (badness 10000) in paragraph at lines 2743--2743
 \T1/ptm/m/it/10.95 maxerror=-1\T1/ptm/m/n/10.95 ,
  []
 
 [38]
-Underfull \hbox (badness 7168) in paragraph at lines 2726--2727
+Underfull \hbox (badness 7168) in paragraph at lines 2780--2781
 []\T1/ptm/b/n/10.95 minerror \T1/ptm/m/n/10.95 (\T1/ptm/m/it/10.95 float\T1/ptm
 /m/n/10.95 ) -- the min-i-mum er-ror to be cov-ered, given in
  []
 
 
-Underfull \hbox (badness 6094) in paragraph at lines 2729--2730
+Underfull \hbox (badness 6094) in paragraph at lines 2783--2784
 []\T1/ptm/b/n/10.95 maxerror \T1/ptm/m/n/10.95 (\T1/ptm/m/it/10.95 float\T1/ptm
 /m/n/10.95 ) -- the max-i-mum er-ror to be cov-ered, given in
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2790--2790
+Underfull \hbox (badness 10000) in paragraph at lines 2844--2844
 \T1/ptm/m/it/10.95 er-a-tions=4\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 xcen=1900
 \T1/ptm/m/n/10.95 ,
  []
 
 [39]
-Underfull \hbox (badness 10000) in paragraph at lines 2873--2873
+Underfull \hbox (badness 10000) in paragraph at lines 2927--2927
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqe=3e-05\T
 1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2873--2873
+Underfull \hbox (badness 10000) in paragraph at lines 2927--2927
 \T1/ptm/m/it/10.95 reqr2=0.0001\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 out-dir='
 results'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (14.28902pt too wide) in paragraph at lines 2901--2901
+Overfull \hbox (14.28902pt too wide) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 file='data/psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 over-sam-ple=1.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 sigma=0.75\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 psfs=20000\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 scale=1000.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 min=1e-05\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 max=50\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 lev-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 els=15\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cov-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2901--2901
+Underfull \hbox (badness 10000) in paragraph at lines 2955--2955
 \T1/ptm/m/it/10.95 er-ing=1.4\T1/ptm/m/n/10.95 ,
  []
 
 [40]
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (66.84895pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (66.84895pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 file='data/psf1x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 over-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 sam-
  []
 
 
-Overfull \hbox (12.3736pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (12.3736pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 ple=1.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (30.62714pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (30.62714pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 sigma=0.75\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (24.24323pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (24.24323pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 psfs=2000\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (37.91972pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (37.91972pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 scale=1000.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (31.8427pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (31.8427pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 min=0.0001\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (28.18544pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (28.18544pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 max=100.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 lev-
  []
 
 
-Overfull \hbox (2.94556pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (2.94556pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 els=9\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 cov-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 er-
  []
 
 
-Overfull \hbox (12.98686pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (12.98686pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 ing=2.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (28.39317pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (28.39317pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 stars=1850\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2950--2950
+Underfull \hbox (badness 10000) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 sin-
  []
 
 
-Overfull \hbox (26.02794pt too wide) in paragraph at lines 2950--2950
+Overfull \hbox (26.02794pt too wide) in paragraph at lines 3004--3004
 \T1/ptm/m/it/10.95 gle=False\T1/pcr/m/n/10.95 ) 
  []
 
 [41]
-Underfull \hbox (badness 10000) in paragraph at lines 3025--3025
+Underfull \hbox (badness 10000) in paragraph at lines 3079--3079
 \T1/ptm/m/it/10.95 ps-f-s-cale=100000\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 max
 dis-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3025--3025
+Underfull \hbox (badness 10000) in paragraph at lines 3079--3079
 \T1/ptm/m/it/10.95 tance=100\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 over-sam-ple
 =4.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3025--3025
+Underfull \hbox (badness 10000) in paragraph at lines 3079--3079
 \T1/ptm/m/it/10.95 psfs=1000\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 it-er-a-tion
 s=6\T1/ptm/m/n/10.95 ,
  []
 
 [42]
-Underfull \hbox (badness 10000) in paragraph at lines 3068--3068
+Underfull \hbox (badness 10000) in paragraph at lines 3122--3122
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 file-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3068--3068
+Underfull \hbox (badness 10000) in paragraph at lines 3122--3122
 \T1/ptm/m/it/10.95 name='data/psf4x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3068--3068
+Underfull \hbox (badness 10000) in paragraph at lines 3122--3122
 \T1/ptm/m/it/10.95 tance=100\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 in-ner=8\T1/
 ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3068--3068
+Underfull \hbox (badness 10000) in paragraph at lines 3122--3122
 \T1/ptm/m/it/10.95 outer=60\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 over-sam-
  []
 
@@ -1697,272 +1703,272 @@ Underfull \hbox (badness 10000) in paragraph at lines 3068--3068
 ]
 Chapter 7.
 [45] [46] [47]
-Underfull \hbox (badness 10000) in paragraph at lines 3512--3514
+Underfull \hbox (badness 10000) in paragraph at lines 3566--3568
 []\T1/ptm/m/n/10.95 photometry, er-ror_in_photometry, el-lip-tic-ity, re-fined_
 x_pos, re-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3535--3536
+Underfull \hbox (badness 10000) in paragraph at lines 3589--3590
 
  []
 
 [48]
-Underfull \hbox (badness 10000) in paragraph at lines 3684--3686
+Underfull \hbox (badness 10000) in paragraph at lines 3738--3740
 []\T1/ptm/m/n/10.95 photometry, er-ror_in_photometry, el-lip-tic-ity, re-fined_
 x_pos, re-
  []
 
 [49]
-Underfull \hbox (badness 10000) in paragraph at lines 3707--3708
+Underfull \hbox (badness 10000) in paragraph at lines 3761--3762
 
  []
 
 [50]
-Underfull \hbox (badness 10000) in paragraph at lines 3865--3865
+Underfull \hbox (badness 10000) in paragraph at lines 3919--3919
 []\T1/ptm/m/it/10.95 files\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 gaus-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3865--3865
+Underfull \hbox (badness 10000) in paragraph at lines 3919--3919
 \T1/ptm/m/it/10.95 el-val-ues=False\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3865--3865
+Underfull \hbox (badness 10000) in paragraph at lines 3919--3919
 \T1/ptm/m/it/10.95 bessel=True\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3917--3917
+Underfull \hbox (badness 10000) in paragraph at lines 3971--3971
 []\T1/ptm/m/it/10.95 ydata\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 xdata=None\T1/
 ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ini-
  []
 
 [51]
-Underfull \hbox (badness 10000) in paragraph at lines 3946--3946
+Underfull \hbox (badness 10000) in paragraph at lines 4000--4000
 []\T1/ptm/m/it/10.95 radius=1.5\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 over-sam-
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3946--3946
+Underfull \hbox (badness 10000) in paragraph at lines 4000--4000
 \T1/ptm/m/it/10.95 ple=500\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 size=1000\T1/p
 tm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3946--3946
+Underfull \hbox (badness 10000) in paragraph at lines 4000--4000
 \T1/ptm/m/it/10.95 cx=None\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cy=None\T1/ptm
 /m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4022--4022
+Underfull \hbox (badness 10000) in paragraph at lines 4076--4076
 []\T1/ptm/m/it/10.95 data\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 ker-nel\T1/ptm/
 m/n/10.95 , \T1/ptm/m/it/10.95 re-qular-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4022--4022
+Underfull \hbox (badness 10000) in paragraph at lines 4076--4076
 \T1/ptm/m/it/10.95 iza-tion=0.01\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 nor-mal-
 
  []
 
 [52] [53]
-Underfull \hbox (badness 10000) in paragraph at lines 4177--4177
+Underfull \hbox (badness 10000) in paragraph at lines 4231--4231
 []\T1/ptm/m/it/10.95 data\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cut\T1/ptm/m/n/
 10.95 , \T1/ptm/m/it/10.95 out-folder\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 com
 -po-
  []
 
 
-Overfull \hbox (72.76715pt too wide) in paragraph at lines 4181--4182
+Overfull \hbox (72.76715pt too wide) in paragraph at lines 4235--4236
 [][][]\T1/ptm/m/n/10.95 http://scikit-learn.org/stable/modules/generated/sklear
 n.decomposition.fastica.html#sklearn.decomposition.fastica[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4188--4188
+Underfull \hbox (badness 10000) in paragraph at lines 4242--4242
 []\T1/ptm/m/it/10.95 data\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cut\T1/ptm/m/n/
 10.95 , \T1/ptm/m/it/10.95 out-folder\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 com
 -po-
  []
 
 
-Underfull \hbox (badness 7012) in paragraph at lines 4192--4194
+Underfull \hbox (badness 7012) in paragraph at lines 4246--4248
 []\T1/ptm/m/n/10.95 Information about PCA can be found from the scikit-learn we
 b-site: [][]http://scikit-
  []
 
 
-Overfull \hbox (4.87904pt too wide) in paragraph at lines 4192--4194
+Overfull \hbox (4.87904pt too wide) in paragraph at lines 4246--4248
 \T1/ptm/m/n/10.95 learn.org/stable/modules/generated/sklearn.decomposition.PCA.
 html#sklearn.decomposition.PCA[][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4225--4225
+Underfull \hbox (badness 10000) in paragraph at lines 4279--4279
 \T1/ptm/m/it/10.95 com-po-nents=10\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 7012) in paragraph at lines 4229--4231
+Underfull \hbox (badness 7012) in paragraph at lines 4283--4285
 []\T1/ptm/m/n/10.95 Information about PCA can be found from the scikit-learn we
 b-site: [][]http://scikit-
  []
 
 
-Overfull \hbox (115.58238pt too wide) in paragraph at lines 4229--4231
+Overfull \hbox (115.58238pt too wide) in paragraph at lines 4283--4285
 \T1/ptm/m/n/10.95 learn.org/stable/modules/generated/sklearn.decomposition.Rand
 omizedPCA.html#sklearn.decomposition.RandomizedPCA[][] 
  []
 
 [54]
-Underfull \hbox (badness 10000) in paragraph at lines 4283--4283
+Underfull \hbox (badness 10000) in paragraph at lines 4337--4337
 []\T1/ptm/m/it/10.95 files\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 out-put\T1/ptm
 /m/n/10.95 , \T1/ptm/m/it/10.95 out-put-folder\T1/ptm/m/n/10.95 ,
  []
 
 [55] [56] [57]
-Underfull \hbox (badness 5711) in paragraph at lines 4588--4588
+Underfull \hbox (badness 5711) in paragraph at lines 4642--4642
 []\T1/ptm/m/it/10.95 image\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 cen-ter=None\T
 1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 std-dev=False\T1/ptm/m/n/10.95 , \T1/ptm/m
 /it/10.95 re-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4588--4588
+Underfull \hbox (badness 10000) in paragraph at lines 4642--4642
 \T1/ptm/m/it/10.95 turn-radii=False\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 re-tu
 rn_nr=False\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 bin-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4588--4588
+Underfull \hbox (badness 10000) in paragraph at lines 4642--4642
 \T1/ptm/m/it/10.95 size=0.5\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 weights=None\
 T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 steps=False\T1/ptm/m/n/10.95 ,
  []
 
 [58]
-Underfull \hbox (badness 10000) in paragraph at lines 4763--4763
+Underfull \hbox (badness 10000) in paragraph at lines 4817--4817
 []\T1/ptm/m/it/10.95 results\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqe=3.5e-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4763--4763
+Underfull \hbox (badness 10000) in paragraph at lines 4817--4817
 \T1/ptm/m/it/10.95 05\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 reqr2=0.00035\T1/pt
 m/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4763--4763
+Underfull \hbox (badness 10000) in paragraph at lines 4817--4817
 \T1/ptm/m/it/10.95 out-dir='results'\T1/ptm/m/n/10.95 , \T1/ptm/m/it/10.95 time
 S-
  []
 
 [59]
-Overfull \hbox (18.07864pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (18.07864pt too wide) in paragraph at lines 4845--4845
 []\T1/ptm/m/it/10.95 log\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (98.60391pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (98.60391pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 file='data/psf12x.fits'\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (24.2324pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (24.2324pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 over-
  []
 
 
-Overfull \hbox (22.74324pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (22.74324pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 sam-
  []
 
 
-Overfull \hbox (44.12856pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (44.12856pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 ple=12.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (56.9071pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (56.9071pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 sigma=0.75\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (50.5232pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (50.5232pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 psfs=5000\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (45.65063pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (45.65063pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 amps=12\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (21.5278pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (21.5278pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 mul-
  []
 
 
-Overfull \hbox (11.19095pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (11.19095pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 ti-
  []
 
 
-Overfull \hbox (45.95699pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (45.95699pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 plier=1.5\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (51.54134pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (51.54134pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 minerror=-
  []
 
 
-Overfull \hbox (17.88162pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (17.88162pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 5.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (53.35907pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (53.35907pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 maxerror=-
  []
 
 
-Overfull \hbox (17.88162pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (17.88162pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 1.0\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (59.6446pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (59.6446pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 lowflux=500\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (24.57193pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (24.57193pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 high-
  []
 
 
-Overfull \hbox (60.24704pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (60.24704pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 flux=180000\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (75.42303pt too wide) in paragraph at lines 4791--4791
+Overfull \hbox (75.42303pt too wide) in paragraph at lines 4845--4845
 \T1/ptm/m/it/10.95 linspace=False\T1/pcr/m/n/10.95 ) 
  []
 
 
-Underfull \hbox (badness 7168) in paragraph at lines 4828--4829
+Underfull \hbox (badness 7168) in paragraph at lines 4882--4883
 []\T1/ptm/b/n/10.95 minerror \T1/ptm/m/n/10.95 (\T1/ptm/m/it/10.95 float\T1/ptm
 /m/n/10.95 ) -- the min-i-mum er-ror to be cov-ered, given in
  []
 
 
-Underfull \hbox (badness 6094) in paragraph at lines 4831--4832
+Underfull \hbox (badness 6094) in paragraph at lines 4885--4886
 []\T1/ptm/b/n/10.95 maxerror \T1/ptm/m/n/10.95 (\T1/ptm/m/it/10.95 float\T1/ptm
 /m/n/10.95 ) -- the max-i-mum er-ror to be cov-ered, given in
  []
@@ -1979,25 +1985,25 @@ Chapter 9.
 
 ]
 Chapter 10.
-<Magnitudes15.pdf, id=891, 578.16pt x 433.62pt>
+<Magnitudes15.pdf, id=895, 578.16pt x 433.62pt>
 File: Magnitudes15.pdf Graphic file (type pdf)
  <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 4896.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 4950.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: Magnitudes15.pdf Graphic file (type pdf)
 
 <use Magnitudes15.pdf>
-Package pdftex.def Info: Magnitudes15.pdf used on input line 4896.
+Package pdftex.def Info: Magnitudes15.pdf used on input line 4950.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
- <magnitudes.pdf, id=892, 578.16pt x 433.62pt>
+ <magnitudes.pdf, id=896, 578.16pt x 433.62pt>
 File: magnitudes.pdf Graphic file (type pdf)
 
 <use magnitudes.pdf>
-Package pdftex.def Info: magnitudes.pdf used on input line 4903.
+Package pdftex.def Info: magnitudes.pdf used on input line 4957.
 (pdftex.def)             Requested size: 578.15858pt x 433.61894pt.
 File: magnitudes.pdf Graphic file (type pdf)
  <use magnitudes.pdf>
-Package pdftex.def Info: magnitudes.pdf used on input line 4903.
+Package pdftex.def Info: magnitudes.pdf used on input line 4957.
 (pdftex.def)             Requested size: 452.96788pt x 339.72418pt.
  [67] [68 <./Magnitudes15.pdf>]
 [69 <./magnitudes.pdf>] [70
@@ -2007,17 +2013,17 @@ Chapter 11.
 [71] [72
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 4928--4929
+Underfull \hbox (badness 10000) in paragraph at lines 4982--4983
 []\T1/pcr/m/n/10.95 analysis.analyseSpotMeasurements\T1/ptm/m/n/10.95 ,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4934--4935
+Underfull \hbox (badness 10000) in paragraph at lines 4988--4989
 []\T1/pcr/m/n/10.95 analysis.nonlinearityCalibration\T1/ptm/m/n/10.95 ,
  []
 
 
-Overfull \hbox (4.63329pt too wide) in paragraph at lines 4935--4936
+Overfull \hbox (4.63329pt too wide) in paragraph at lines 4989--4990
 []\T1/pcr/m/n/10.95 analysis.nonlinearityModelTransfer\T1/ptm/m/n/10.95 ,
  []
 
@@ -2426,207 +2432,207 @@ Underfull \hbox (badness 10000) in paragraph at lines 101--102
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 102--103
-[]\T1/ptm/m/n/10.95 generateBessel() (in mod-ule anal-y-
+[]\T1/ptm/m/n/10.95 generaPostageStamps() (in mod-ule
  []
 
 [76]
 Underfull \hbox (badness 10000) in paragraph at lines 103--104
+[]\T1/ptm/m/n/10.95 generateBessel() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 104--105
 []\T1/ptm/m/n/10.95 generateCatalog() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 104--105
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
 []\T1/ptm/m/n/10.95 generateCTImap() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 104--105
+Underfull \hbox (badness 10000) in paragraph at lines 105--106
 \T1/ptm/m/n/10.95 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 105--106
+Underfull \hbox (badness 10000) in paragraph at lines 106--107
 []\T1/ptm/m/n/10.95 generateFakeData (class in sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 106--107
+Underfull \hbox (badness 10000) in paragraph at lines 107--108
 []\T1/ptm/m/n/10.95 generateFinemaps() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 106--107
+Underfull \hbox (badness 10000) in paragraph at lines 107--108
 \T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 107--108
+Underfull \hbox (badness 10000) in paragraph at lines 108--109
 []\T1/ptm/m/n/10.95 generateMovie() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 108--110
+Underfull \hbox (badness 10000) in paragraph at lines 109--111
 []\T1/ptm/m/n/10.95 generateOutput() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 108--110
+Underfull \hbox (badness 10000) in paragraph at lines 109--111
 \T1/ptm/m/n/10.95 sis.sourceFinder.sourceFinder method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 110--111
+Underfull \hbox (badness 10000) in paragraph at lines 111--112
 []\T1/ptm/m/n/10.95 generatePlots() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 5403) in paragraph at lines 111--112
+Underfull \hbox (badness 5403) in paragraph at lines 112--113
 []\T1/ptm/m/n/10.95 generateResidualFlatField() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 112--114
+Underfull \hbox (badness 10000) in paragraph at lines 113--115
 []\T1/ptm/m/n/10.95 getCenterOfMass() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 112--114
+Underfull \hbox (badness 10000) in paragraph at lines 113--115
 \T1/ptm/m/n/10.95 sis.sourceFinder.sourceFinder method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 115--116
+Underfull \hbox (badness 10000) in paragraph at lines 116--117
 []\T1/ptm/m/n/10.95 getFluxes() (anal-y-sis.sourceFinder.sourceFinder
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--117
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
 []\T1/ptm/m/n/10.95 getSizes() (anal-y-sis.sourceFinder.sourceFinder
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 126--127
+Underfull \hbox (badness 10000) in paragraph at lines 127--128
 []\T1/ptm/m/n/10.95 loadFITS() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 126--127
+Underfull \hbox (badness 10000) in paragraph at lines 127--128
 \T1/ptm/m/n/10.95 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 130--131
+Underfull \hbox (badness 10000) in paragraph at lines 131--132
 []\T1/ptm/m/n/10.95 maskCrazyValues() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 130--131
+Underfull \hbox (badness 10000) in paragraph at lines 131--132
 \T1/ptm/m/n/10.95 tor.generateGalaxies.generateFakeData
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 131--132
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
 []\T1/ptm/m/n/10.95 measureChars() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 132--133
+Underfull \hbox (badness 10000) in paragraph at lines 133--134
 []\T1/ptm/m/n/10.95 measureEllipticity() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 132--133
+Underfull \hbox (badness 10000) in paragraph at lines 133--134
 \T1/ptm/m/n/10.95 sis.analyse.analyseVISdata method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 133--134
+Underfull \hbox (badness 10000) in paragraph at lines 134--135
 []\T1/ptm/m/n/10.95 measureRefinedEllipticity() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 133--134
+Underfull \hbox (badness 10000) in paragraph at lines 134--135
 \T1/ptm/m/n/10.95 sis.shape.shapeMeasurement method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
 []\T1/ptm/m/n/10.95 objectOnDetector() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
 \T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 138--139
+Underfull \hbox (badness 10000) in paragraph at lines 139--140
 []\T1/ptm/m/n/10.95 overlayToCCD() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 138--139
+Underfull \hbox (badness 10000) in paragraph at lines 139--140
 \T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 144--145
+Underfull \hbox (badness 10000) in paragraph at lines 145--146
 []\T1/ptm/m/n/10.95 peakFraction() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 145--146
+Underfull \hbox (badness 10000) in paragraph at lines 146--147
 []\T1/ptm/m/n/10.95 pistonKnowledge() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 146--147
+Underfull \hbox (badness 10000) in paragraph at lines 147--148
 []\T1/ptm/m/n/10.95 plot() (anal-y-sis.sourceFinder.sourceFinder
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 149--150
+[]\T1/ptm/m/n/10.95 plotCatalog() (in mod-ule
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 151--152
 []\T1/ptm/m/n/10.95 plotDeltaEs() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 150--151
+Underfull \hbox (badness 10000) in paragraph at lines 152--153
 []\T1/ptm/m/n/10.95 plotDistributionFunction() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 151--152
+Underfull \hbox (badness 10000) in paragraph at lines 153--154
 []\T1/ptm/m/n/10.95 plotEllipticityDistribution() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 151--152
+Underfull \hbox (badness 10000) in paragraph at lines 153--154
 \T1/ptm/m/n/10.95 sis.analyse.analyseVISdata method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 152--153
+Underfull \hbox (badness 10000) in paragraph at lines 154--155
 []\T1/ptm/m/n/10.95 plotEncircledEnergy() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
+Underfull \hbox (badness 10000) in paragraph at lines 156--157
 []\T1/ptm/m/n/10.95 plotGaussianResults() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 155--156
+Underfull \hbox (badness 10000) in paragraph at lines 157--158
 []\T1/ptm/m/n/10.95 plotNumberOfFrames() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 159--160
-[]\T1/ptm/m/n/10.95 plotResults() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 160--161
-[]\T1/ptm/m/n/10.95 plotResults() (in mod-ule anal-y-
  []
 
 
@@ -2639,232 +2645,242 @@ Underfull \hbox (badness 10000) in paragraph at lines 162--163
 []\T1/ptm/m/n/10.95 plotResults() (in mod-ule anal-y-
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 163--164
+[]\T1/ptm/m/n/10.95 plotResults() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 164--165
+[]\T1/ptm/m/n/10.95 plotResults() (in mod-ule anal-y-
+ []
+
 [77]
-Underfull \hbox (badness 10000) in paragraph at lines 168--169
+Underfull \hbox (badness 10000) in paragraph at lines 170--171
 []\T1/ptm/m/n/10.95 processConfigs() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 168--169
+Underfull \hbox (badness 10000) in paragraph at lines 170--171
 \T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 176--177
+Underfull \hbox (badness 10000) in paragraph at lines 178--179
 []\T1/ptm/m/n/10.95 radiateFullCCD() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 176--177
+Underfull \hbox (badness 10000) in paragraph at lines 178--179
 \T1/ptm/m/n/10.95 proc.postprocessing.PostProcessing
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 177--178
-[]\T1/ptm/m/n/10.95 readConfigs() (sim-u-la-tor.simulator.VISsimulator
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 178--179
-[]\T1/ptm/m/n/10.95 readCosmicRayInformation() (sim-u-la-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 178--179
-\T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 179--180
+[]\T1/ptm/m/n/10.95 readConfigs() (sim-u-la-tor.simulator.VISsimulator
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--181
+[]\T1/ptm/m/n/10.95 readCosmicRayInformation() (sim-u-la-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--181
+\T1/ptm/m/n/10.95 tor.simulator.VISsimulator method),
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 181--182
 []\T1/ptm/m/n/10.95 readData() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 184--185
+Underfull \hbox (badness 10000) in paragraph at lines 186--187
 []\T1/ptm/m/n/10.95 readPSFs() (sim-u-la-tor.simulator.VISsimulator
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 185--186
+Underfull \hbox (badness 10000) in paragraph at lines 187--188
 []\T1/ptm/m/n/10.95 readSources() (anal-y-sis.analyse.analyseVISdata
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 188--189
+Underfull \hbox (badness 10000) in paragraph at lines 190--191
 []\T1/ptm/m/n/10.95 run() (post-proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 189--190
+Underfull \hbox (badness 10000) in paragraph at lines 191--192
 []\T1/ptm/m/n/10.95 runAll() (anal-y-sis.sourceFinder.sourceFinder
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 192--193
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
 []\T1/ptm/m/n/10.95 runAll() (sim-u-la-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 192--193
+Underfull \hbox (badness 10000) in paragraph at lines 194--195
 \T1/ptm/m/n/10.95 tor.generateGalaxies.generateFakeData
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 197--198
+Underfull \hbox (badness 10000) in paragraph at lines 199--200
 []\T1/ptm/m/n/10.95 simulate() (sim-u-la-tor.simulator.VISsimulator
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 204--205
+Underfull \hbox (badness 10000) in paragraph at lines 207--208
 []\T1/ptm/m/n/10.95 starCatalog() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 205--206
+Underfull \hbox (badness 10000) in paragraph at lines 208--209
 []\T1/ptm/m/n/10.95 starCatalogFixedMagnitude() (in mod-ule
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 206--207
+Underfull \hbox (badness 10000) in paragraph at lines 209--210
 []\T1/ptm/m/n/10.95 subtractBias() (re-duc-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 206--207
+Underfull \hbox (badness 10000) in paragraph at lines 209--210
 \T1/ptm/m/n/10.95 tion.reduceVISdata.reduceVISdata
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 212--213
-[]\T1/ptm/m/n/10.95 testBiasCalibrationDelta() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 213--214
-[]\T1/ptm/m/n/10.95 testBiasCalibrationSigma() (in mod-ule anal-y-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 214--215
-[]\T1/ptm/m/n/10.95 testCosmicrayRejection() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 215--216
-[]\T1/ptm/m/n/10.95 testCosmicrayRejectionMultiPSF() (in mod-ule
+[]\T1/ptm/m/n/10.95 testBiasCalibrationDelta() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 216--217
-[]\T1/ptm/m/n/10.95 testCTIcorrection() (in mod-ule anal-y-
+[]\T1/ptm/m/n/10.95 testBiasCalibrationSigma() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 217--218
-[]\T1/ptm/m/n/10.95 testFlatCalibration() (in mod-ule anal-y-
+[]\T1/ptm/m/n/10.95 testCosmicrayRejection() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 218--219
-[]\T1/ptm/m/n/10.95 testNoFlatfieldingEffects() (in mod-ule anal-y-
+[]\T1/ptm/m/n/10.95 testCosmicrayRejectionMultiPSF() (in mod-ule
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 219--220
-[]\T1/ptm/m/n/10.95 testNonlinearity() (in mod-ule anal-y-
+[]\T1/ptm/m/n/10.95 testCTIcorrection() (in mod-ule anal-y-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 220--221
+[]\T1/ptm/m/n/10.95 testFlatCalibration() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 221--222
+[]\T1/ptm/m/n/10.95 testNoFlatfieldingEffects() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
+[]\T1/ptm/m/n/10.95 testNonlinearity() (in mod-ule anal-y-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 223--224
 []\T1/ptm/m/n/10.95 testNonLinearity() (in mod-ule sup-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 230--231
+Underfull \hbox (badness 10000) in paragraph at lines 233--234
 []\T1/ptm/m/n/10.95 VISinformation() (in mod-ule sup-
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 233--234
+[78]
+Underfull \hbox (badness 10000) in paragraph at lines 236--237
 []\T1/ptm/m/n/10.95 visualiseBasisSets() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 237--238
+Underfull \hbox (badness 10000) in paragraph at lines 240--241
 []\T1/ptm/m/n/10.95 weinerFilter() (in mod-ule anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 238--239
+Underfull \hbox (badness 10000) in paragraph at lines 241--242
 []\T1/ptm/m/n/10.95 writeFITS() (anal-y-sis.shape.shapeMeasurement
  []
 
-[78]
-Underfull \hbox (badness 10000) in paragraph at lines 239--240
+
+Underfull \hbox (badness 10000) in paragraph at lines 242--243
 []\T1/ptm/m/n/10.95 writeFITSfile() (post-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 239--240
+Underfull \hbox (badness 10000) in paragraph at lines 242--243
 \T1/ptm/m/n/10.95 proc.postprocessing.PostProcessing
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 240--241
+Underfull \hbox (badness 10000) in paragraph at lines 243--244
 []\T1/ptm/m/n/10.95 writeFITSfile() (post-proc.tileCCD.tileCCD
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 241--242
+Underfull \hbox (badness 10000) in paragraph at lines 244--245
 []\T1/ptm/m/n/10.95 writeFITSfile() (post-proc.tileFPA.tileFPA
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 242--243
+Underfull \hbox (badness 10000) in paragraph at lines 245--246
 []\T1/ptm/m/n/10.95 writeFITSfile() (re-duc-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 242--243
+Underfull \hbox (badness 10000) in paragraph at lines 245--246
 \T1/ptm/m/n/10.95 tion.reduceVISdata.reduceVISdata
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--246
+Underfull \hbox (badness 10000) in paragraph at lines 248--249
 []\T1/ptm/m/n/10.95 writePhotometry() (anal-y-
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--246
+Underfull \hbox (badness 10000) in paragraph at lines 248--249
 \T1/ptm/m/n/10.95 sis.sourceFinder.sourceFinder method),
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 246--247
+Underfull \hbox (badness 10000) in paragraph at lines 249--250
 []\T1/ptm/m/n/10.95 writeResults() (anal-y-sis.analyse.analyseVISdata
  []
 
 [79
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4962.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4962.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 5017.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 5017.
  (./VIS.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4962.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4962.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 5017.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 5017.
 
 Package rerunfilecheck Info: File `VIS.out' has not changed.
-(rerunfilecheck)             Checksum: 3B3C172E9791E07610125F8687EF41EC;3852.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4962.
+(rerunfilecheck)             Checksum: 3EF3FD13A8C250E5C79CF31F627E5006;3930.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 5017.
  ) 
 Here is how much of TeX's memory you used:
- 9581 strings out of 493481
- 140467 string characters out of 3140966
- 232829 words of memory out of 3000000
- 12319 multiletter control sequences out of 15000+200000
+ 9585 strings out of 493481
+ 140689 string characters out of 3140966
+ 232060 words of memory out of 3000000
+ 12324 multiletter control sequences out of 15000+200000
  59796 words of font info for 74 fonts, out of 3000000 for 9000
  958 hyphenation exceptions out of 8191
- 38i,12n,51p,494b,569s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,12n,51p,494b,627s stack positions out of 5000i,500n,10000p,200000b,50000s
 {/usr/local/texlive/2012/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/te
 xlive/2012/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/tex
@@ -2879,10 +2895,10 @@ e1/urw/helvetic/uhvbo8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw
 /helvetic/uhvr8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/
 utmb8a.pfb></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmr8a.pfb
 ></usr/local/texlive/2012/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on VIS.pdf (83 pages, 1739317 bytes).
+Output written on VIS.pdf (83 pages, 1733331 bytes).
 PDF statistics:
- 1355 PDF objects out of 1440 (max. 8388607)
- 1196 compressed objects within 12 object streams
- 375 named destinations out of 1000 (max. 500000)
- 453 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1364 PDF objects out of 1440 (max. 8388607)
+ 1204 compressed objects within 13 object streams
+ 374 named destinations out of 1000 (max. 500000)
+ 461 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -57,6 +57,12 @@
 
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Generating Object Catalogue</a></li>
+<li><a class="reference internal" href="#generating-postage-stamp-images">Generating Postage Stamp Images</a></li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="ETC.html"
                         title="previous chapter">Exposure Time Calculator</a></p>
@@ -102,7 +108,7 @@ place the script to an empty directory and either copy or link to the data direc
 </tr>
 <tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -147,6 +153,23 @@ realistic number density functions.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="sources.createObjectCatalogue.plotCatalog">
+<tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">plotCatalog</tt><big>(</big><em>catalog</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.plotCatalog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the number of objects in the generated catalog. Will generate both cumulative and normal
+distributions for galaxies and stars separately.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>catalog</strong> (<em>str</em>) &#8211; name of the catalogue file</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="sources.createObjectCatalogue.plotDistributionFunction">
 <tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">plotDistributionFunction</tt><big>(</big><em>datax</em>, <em>datay</em>, <em>fitx</em>, <em>fity</em>, <em>output</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.plotDistributionFunction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a simple plot showing the observed data points and the fit
@@ -163,6 +186,53 @@ that was generated based on these data.</p>
 <dt id="sources.createObjectCatalogue.starCatalogFixedMagnitude">
 <tt class="descclassname">sources.createObjectCatalogue.</tt><tt class="descname">starCatalogFixedMagnitude</tt><big>(</big><em>stars=400</em>, <em>xmax=2048</em>, <em>ymax=2066</em>, <em>mag=18</em>, <em>random=True</em>, <em>pergrid=51</em>, <em>out='starsSameMag.dat'</em><big>)</big><a class="headerlink" href="#sources.createObjectCatalogue.starCatalogFixedMagnitude" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-sources.generatePostageStamps"></span><div class="section" id="generating-postage-stamp-images">
+<h1>Generating Postage Stamp Images<a class="headerlink" href="#generating-postage-stamp-images" title="Permalink to this headline">¶</a></h1>
+<p>This simple script can be used to generate postage stamp images from a larger mosaic.
+These images can then be used in the VIS simulator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VIS-PP</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="sources.generatePostageStamps.generaPostageStamps">
+<tt class="descclassname">sources.generatePostageStamps.</tt><tt class="descname">generaPostageStamps</tt><big>(</big><em>filename</em>, <em>catalog</em>, <em>maglimit=22.0</em>, <em>output='galaxy'</em><big>)</big><a class="headerlink" href="#sources.generatePostageStamps.generaPostageStamps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates postage stamp images from an input file given the input catalog position.
+The output files are saved to FITS files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211; name of the FITS file from which the postage stamps are extracted</li>
+<li><strong>catalog</strong> (<em>str</em>) &#8211; name of the catalogue with x and y positions and magnitudes</li>
+<li><strong>maglimit</strong> (<em>float</em>) &#8211; brighter galaxies than the given magnitude limit are extracted</li>
+<li><strong>output</strong> (<em>str</em>) &#8211; name of the postage stamp prefix (will add a running number to this)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

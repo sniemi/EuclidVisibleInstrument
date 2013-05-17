@@ -13,7 +13,7 @@ place the script to an empty directory and either copy or link to the data direc
 :requires: matplotlib
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import numpy as np
 import scipy.interpolate as interpolate
@@ -55,6 +55,44 @@ def plotDistributionFunction(datax, datay, fitx, fity, output):
     plt.savefig(output)
 
 
+def plotCatalog(catalog):
+    """
+    Plot the number of objects in the generated catalog. Will generate both cumulative and normal
+    distributions for galaxies and stars separately.
+
+    :param catalog: name of the catalogue file
+    :type catalog: str
+
+    :return: None
+    """
+    data = np.loadtxt(catalog)
+    mag = data[:, 2]
+    type = data[:, 3]
+    stars = type < 1
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hist(mag[~stars], bins=20, label='Galaxies', alpha=0.3)
+    ax.hist(mag[stars], bins=20, label='Stars', alpha=0.5)
+    ax.semilogy()
+    ax.set_xlabel('R+I Magnitude')
+    ax.set_ylabel('# objects')
+    plt.legend(fancybox=True, shadow=True, numpoints=1, loc=2)
+    plt.savefig(catalog + 'counts.pdf')
+    plt.close()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.hist(mag[~stars], bins=20, label='Galaxies', cumulative=True, alpha=0.3)
+    ax.hist(mag[stars], bins=20, label='Stars', cumulative=True, alpha=0.5)
+    ax.semilogy()
+    ax.set_xlabel('R+I Magnitude')
+    ax.set_ylabel('# objects')
+    plt.legend(fancybox=True, shadow=True, numpoints=1, loc=2)
+    plt.savefig(catalog + 'countsCum.pdf')
+    plt.close()
+
+
 def generateCatalog(**kwargs):
     """
     Generate a catalogue of stars and galaxies that follow
@@ -74,7 +112,9 @@ def generateCatalog(**kwargs):
     d = np.loadtxt(settings['galaxies'], usecols=(0, 1))
     gmags = d[:, 0]
     gcounts = d[:, 1]
-    nums = int(np.max(gcounts) / 3600. * settings['fudge'] * settings['fov'])
+    #nums = int(np.max(gcounts) / 3600. * settings['fudge'] * settings['fov'])  #3600=from sq deg to sq arcsec
+    nums = int(np.max(gcounts) / 3600. / 3600. * settings['nx'] * settings['ny'] / 10. / 10.)
+
     z = np.polyfit(gmags, np.log10(gcounts), 4)
     p = np.poly1d(z)
     galaxymags = np.arange(10.0, 30.2, 0.2)
@@ -121,8 +161,10 @@ def generateCatalog(**kwargs):
 
         cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
         starcounts /=  3600. #convert to square arcseconds
-        nstars = int(np.max(starcounts) * settings['fudge'] * sfudge * settings['fov'])
+        nstars = int(np.max(starcounts) * settings['fudge'] * sfudge * settings['fov'] *
+                     settings['nx'] * settings['ny'] / 4096. / 4132.)
 
+    print '%i stars and %i galaxies' % (nstars, nums)
 
     for n in range(settings['ncatalogs']):
         #open output
@@ -212,8 +254,14 @@ def starCatalogFixedMagnitude(stars=400, xmax=2048, ymax=2066, mag=18, random=Tr
 
 
 if __name__ == '__main__':
-    settings = dict(besancon=False, deg=30)
+    #settings = dict(besancon=False, deg=30)
+    #generateCatalog(**settings)
+
+    #full FoV
+    settings = dict(besancon=False, deg=30, nx=60000, ny=60000, outputprefix='fullFoV',
+                    types=np.arange(17, 103))
     generateCatalog(**settings)
+    plotCatalog('fullFoV0.dat')
 
     #create 100 catalogs at deg=30
     #settings = dict(besancon=False, deg=30, ncatalogs=500)

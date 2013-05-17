@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{May 10, 2013}
+\date{May 17, 2013}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -120,11 +120,14 @@ Sami-Matias Niemi
 \item[{Contact}] \leavevmode
 \href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
+\item[{issue}] \leavevmode
+1.0
+
 \item[{version}] \leavevmode
-1.1
+1.2
 
 \item[{date}] \leavevmode
-May 10, 2013
+May 17, 2013
 
 \end{description}\end{quote}
 
@@ -1140,7 +1143,7 @@ matplotlib
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
 \index{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)}
@@ -1185,6 +1188,23 @@ realistic number density functions.
 
 \end{fulllineitems}
 
+\index{plotCatalog() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.plotCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{plotCatalog}}{\emph{catalog}}{}
+Plot the number of objects in the generated catalog. Will generate both cumulative and normal
+distributions for galaxies and stars separately.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{catalog} (\emph{str}) -- name of the catalogue file
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{plotDistributionFunction() (in module sources.createObjectCatalogue)}
 
 \begin{fulllineitems}
@@ -1207,6 +1227,61 @@ Generate a catalog with stars at random positions.
 \begin{fulllineitems}
 \phantomsection\label{sources:sources.createObjectCatalogue.starCatalogFixedMagnitude}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalogFixedMagnitude}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{mag=18}, \emph{random=True}, \emph{pergrid=51}, \emph{out='starsSameMag.dat'}}{}
 Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.
+
+\end{fulllineitems}
+
+\phantomsection\label{sources:module-sources.generatePostageStamps}\index{sources.generatePostageStamps (module)}
+
+\section{Generating Postage Stamp Images}
+\label{sources:generating-postage-stamp-images}
+This simple script can be used to generate postage stamp images from a larger mosaic.
+These images can then be used in the VIS simulator.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+VIS-PP
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
+
+\item[{version}] \leavevmode
+0.1
+
+\end{description}\end{quote}
+\index{generaPostageStamps() (in module sources.generatePostageStamps)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.generatePostageStamps.generaPostageStamps}\pysiglinewithargsret{\code{sources.generatePostageStamps.}\bfcode{generaPostageStamps}}{\emph{filename}, \emph{catalog}, \emph{maglimit=22.0}, \emph{output='galaxy'}}{}
+Generates postage stamp images from an input file given the input catalog position.
+The output files are saved to FITS files.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{filename} (\emph{str}) -- name of the FITS file from which the postage stamps are extracted
+
+\item {} 
+\textbf{catalog} (\emph{str}) -- name of the catalogue with x and y positions and magnitudes
+
+\item {} 
+\textbf{maglimit} (\emph{float}) -- brighter galaxies than the given magnitude limit are extracted
+
+\item {} 
+\textbf{output} (\emph{str}) -- name of the postage stamp prefix (will add a running number to this)
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -1386,13 +1461,16 @@ Python 3.x.
 \label{simulator:testing}
 Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
-please run the SCIENCE section from the test.config as follows:
+please run the unittest as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -c data/test.config -s TESTSCIENCE1X
+python simulator.py -t
 \end{Verbatim}
 
-This will produce an image representing VIS lower left (0th) quadrant. Because
+This will run the unittest and compare the result to a previously calculated image.
+Please inspect the standard output for results.
+
+Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
@@ -1409,12 +1487,12 @@ float64).
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
-6798 objects were place on the detector
+Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+6791 objects were place on the detector
 
-real        4m14.008s
-user        3m59.609s
-sys         0m4.728s
+real        2m19.378s
+user        2m13.237s
+sys         0m4.394s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -1461,7 +1539,7 @@ Version and change logs:
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
 1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
-     deriving the Poisson noise.
+     deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
 \end{Verbatim}
 
 
@@ -1470,28 +1548,13 @@ Version and change logs:
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
-test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)
-
-\item {} 
-check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
-
-\item {} 
 objects.dat is now hard coded into the code, this should be read from the config file
 
 \item {} 
 implement spatially variable PSF
 
 \item {} 
-implement CCD offsets (for focal plane simulations)
-
-\item {} 
 test that the WCS is correctly implemented and allows CCD offsets
-
-\item {} 
-implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
-
-\item {} 
-centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
 
 \item {} 
 charge injection line positions are now hardcoded to the code, read from the config file
@@ -1521,7 +1584,7 @@ Sami-Matias Niemi
 \index{VISsimulator (class in simulator.simulator)}
 
 \begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{configfile}, \emph{debug}, \emph{section='SCIENCE'}}{}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{opts}}{}
 Euclid Visible Instrument Image Simulator
 
 The image that is being build is in:
@@ -1530,17 +1593,8 @@ The image that is being build is in:
 \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{image}
 \end{Verbatim}
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{configfile} (\emph{string}) -- name of the configuration file
-
-\item {} 
-\textbf{debug} (\emph{boolean}) -- debugging mode on/off
-
-\item {} 
-\textbf{section} (\emph{string}) -- name of the section of the configuration file to process
-
-\end{itemize}
+\item[{Parameters}] \leavevmode
+\textbf{opts} (\emph{OptionParser instance}) -- OptionParser instance
 
 \end{description}\end{quote}
 \index{addChargeInjection() (simulator.simulator.VISsimulator method)}
@@ -1576,7 +1630,10 @@ Include flux from the calibration source.
 Add objects from the object list to the CCD image (self.image).
 
 Scale the object's brightness in electrons and size using the input catalog magnitude.
-The size scaling is a crude fit to Massey et al. plot.
+The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+Appendix ``prior distributions''). The spread is estimated from Figure 1 to be around 0''.1 (1 sigma).
+A random draw from a Gaussian distribution with spread of 0''.1 arc sec is performed so that galaxies
+of the same brightness would not be exactly the same size.
 
 \end{fulllineitems}
 
@@ -1778,11 +1835,6 @@ Convert from electrons to ADUs using the value read from the configuration file.
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.generateFinemaps}\pysiglinewithargsret{\bfcode{generateFinemaps}}{}{}
 Generates finely sampled images of the input data.
 
-\begin{notice}{warning}{Warning:}
-This should be rewritten. Now a direct conversion from FORTRAN, and thus
-not probably very effective. Assumes the PSF sampling for other finemaps.
-\end{notice}
-
 \end{fulllineitems}
 
 \index{objectOnDetector() (simulator.simulator.VISsimulator method)}
@@ -1836,6 +1888,8 @@ The configuration file may look as follows:
 \PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
 \PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
 \PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDxgap} \PYG{o}{=} \PYG{l+m+mf}{1.643}
+\PYG{n}{CCDygap} \PYG{o}{=} \PYG{l+m+mf}{8.116}
 \PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
 \PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
 \PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
@@ -4954,6 +5008,7 @@ and an average background, but without any radiation damage to the CCD.}\end{fig
 \item {\texttt{simulator.generateGalaxies}}, \pageref{simulator:module-simulator.generateGalaxies}
 \item {\texttt{simulator.simulator}}, \pageref{simulator:module-simulator.simulator}
 \item {\texttt{sources.createObjectCatalogue}}, \pageref{sources:module-sources.createObjectCatalogue}
+\item {\texttt{sources.generatePostageStamps}}, \pageref{sources:module-sources.generatePostageStamps}
 \item {\texttt{support.VISinstrumentModel}}, \pageref{instrument:module-support.VISinstrumentModel}
 \end{theindex}
 

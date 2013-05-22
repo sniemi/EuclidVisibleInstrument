@@ -11,7 +11,7 @@ size, dark current, gain, zeropoint, and sky background.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.5
+:version: 0.6
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)
@@ -35,25 +35,25 @@ def VISinformation():
          apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
          aperture_size: 132.73228961416876 - derived (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
          beta: 0.6 - CDM03 (Short et al. 2010)
-         bias: 1000.0 - ROE spec
+         bias: 1000.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
          cosmic_bkgd: 0.172 - derived  (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
          dark: 0.001 - CCD spec EUCL-EST-RS-6-002
          diameter: 1.3 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
          dob: 0 - CDM03 (Short et al. 2010)
-         e_adu: 3.1 - ROE spec
+         e_adu: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
          fullwellcapacity: 200000 - CCD spec (for simulator)
          fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
-         gain: 3.1 - ROE spec
+         gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
          galaxy_fraction: 0.836 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
          magzero: 15182880871.225231 - derived, see belowCDM (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
-         ovrscanx: 20 - ROE spec (req: CalCD-B)
+         ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
          peak_fraction: 0.261179 - derived
          pixel_size: 0.1 - CCD spec EUCL-EST-RS-6-002
          prescanx: 50 - CCD spec EUCL-EST-RS-6-002 (also in CalCD-B)
          rdose: 30000000000.0 - derived (above the PLM requirement)
          readnoise: 4.5 - WL requirement (PERD R-VIS-P-021)
          readout: 4.5 - WL requirement (PERD R-VIS-P-021)
-         readtime: 88.0 - derived
+         readtime: 88.0 - derived; ROE Requirements Specification (EUCL-MSS-RD-6-009)
          sfwc: 730000.0 - CDM03 (Short et al. 2010), see also the CCD spec EUCL-EST-RS-6-002
          sky_background: 22.3203 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
          sky_high: 21.7206 - radiometric_model_reference_phase4_JA110415_2_MSSL_version

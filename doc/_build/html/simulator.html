@@ -359,6 +359,16 @@ The size-magnitude scaling relation is taken to be the equation B1 from Miller e
 Appendix &#8220;prior distributions&#8221;). The spread is estimated from Figure 1 to be around 0&#8221;.1 (1 sigma).
 A random draw from a Gaussian distribution with spread of 0&#8221;.1 arc sec is performed so that galaxies
 of the same brightness would not be exactly the same size.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.</p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+simulate several dithers. The random dispersion can be turned off by setting random=no in
+the configuration file so that dithers can be simulated and co-added correctly.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -598,6 +608,7 @@ defined by the argument max.</p>
 <span class="n">overscans</span> <span class="o">=</span> <span class="n">yes</span>
 <span class="n">bleeding</span> <span class="o">=</span> <span class="n">yes</span>
 <span class="n">flatfieldM</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">random</span> <span class="o">=</span> <span class="n">yes</span>
 </pre></div>
 </div>
 <p>For explanation of each field, see /data/test.config. Note that if an input field does not exist,

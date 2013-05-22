@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{May 10, 2013}
+\date{May 21, 2013}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -120,23 +120,31 @@ Sami-Matias Niemi
 \item[{Contact}] \leavevmode
 \href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
+\item[{issue}] \leavevmode
+1.0
+
 \item[{version}] \leavevmode
-1.1
+1.2
+
+\item[{date}] \leavevmode
+May 21, 2013
 
 \end{description}\end{quote}
 
-This Python package provides subpackages and methods related to generating mock data and reducing it, the main
-consideration being the visible instrument (VIS) that is being developed for the
-the Euclid telescope. The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
+This Python package VIS-PP provides subpackages and methods related to generating mock data and reducing it, the main
+consideration being the visible instrument (VIS) that is being developed for the Euclid telescope.
+The subpackages include methods to e.g. generate object catalogues, simulate VIS images,
 study radiation damage effects and fit new trap species, reduce and analyse data, and to include instrumental
 characteristics such as readout noise and CTI to ``pristine'' images generated with e.g. the GREAT10 photon
 shooting code. In addition, an algorithm to measure ellipticities of galaxies is also provided. Thus,
 this package tries to provide an end-to-end simulation chain for the VIS instrument.
 
+The documentation is also available in PDF format, please download the \href{https://www.mssl.ucl.ac.uk/~smn2/Manual.pdf}{VIS Python Package Manual}.
+
 
 \chapter{Installation}
-\label{index:installation}\label{index:welcome-to-euclid-visible-instrument-vis-python-package-documentation}
-The VIS Python package is held in a GIT repository. You can download or fork the repository
+\label{index:welcome-to-euclid-visible-instrument-vis-python-package-vis-pp-documentation}\label{index:installation}
+The VIS Python Package (VIS-PP) is held in a GIT repository. You can download or fork the repository
 \href{https://bitbucket.org/niemi/vissim-python/overview}{here}. The package contains a mixture of classes
 and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
 installation instructions yet. To get most scripts working you should place
@@ -180,10 +188,10 @@ numexpr
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.5
+0.6
 
 \end{description}\end{quote}
 \index{CCDnonLinearityModel() (in module support.VISinstrumentModel)}
@@ -254,47 +262,47 @@ ndarray
 
 \begin{fulllineitems}
 \phantomsection\label{instrument:support.VISinstrumentModel.VISinformation}\pysiglinewithargsret{\code{support.VISinstrumentModel.}\bfcode{VISinformation}}{}{}
-Returns a dictionary describing VIS. The following information is provided:
+Returns a dictionary describing VIS. The following information is provided (id: value - reference):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-'apCorrection': 0.925969,
-'aperture\_size': 132.73228961416876,
-'beta': 0.6,
-'bias': 1000.0,
-'cosmic\_bkgd': 0.172,
-'dark': 0.001,
-'diameter': 1.3,
-'dob': 0,
-'e\_adu': 3.1,
-'fullwellcapacity': 200000,
-'fwc': 175000,
-'gain': 3.1,
-'galaxy\_fraction': 0.836,
-'magzero': 15182880871.225231,
-'ovrscanx': 20,
-'peak\_fraction': 0.261179,
-'pixel\_size': 0.1,
-'prescanx': 50,
-'rdose': 30000000000.0,
-'readnoise': 4.5,
-'readout': 4.5,
-'readtime': 88.0,
-'sfwc': 730000.0,
-'sky\_background': 22.3203,
-'sky\_high': 21.7206,
-'sky\_low': 22.9207,
-'st': 5e-06,
-'star\_fraction': 0.928243,
-'svg': 1e-10,
-'t': 0.01024,
-'trapfile': 'cdm\_euclid.dat',
-'vg': 6e-11,
-'vth': 11680000.0,
-'xsize': 2048,
-'ysize': 2066,
-'zeropoint': 25.45338546114,
-'zeropointNoObscuration': 25.57991044453,
-'zodiacal': 22.55
+apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
+aperture\_size: 132.73228961416876 - derived (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
+beta: 0.6 - CDM03 (Short et al. 2010)
+bias: 1000.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
+cosmic\_bkgd: 0.172 - derived  (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
+dark: 0.001 - CCD spec EUCL-EST-RS-6-002
+diameter: 1.3 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+dob: 0 - CDM03 (Short et al. 2010)
+e\_adu: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
+fullwellcapacity: 200000 - CCD spec (for simulator)
+fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
+gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
+galaxy\_fraction: 0.836 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+magzero: 15182880871.225231 - derived, see belowCDM (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
+ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
+peak\_fraction: 0.261179 - derived
+pixel\_size: 0.1 - CCD spec EUCL-EST-RS-6-002
+prescanx: 50 - CCD spec EUCL-EST-RS-6-002 (also in CalCD-B)
+rdose: 30000000000.0 - derived (above the PLM requirement)
+readnoise: 4.5 - WL requirement (PERD R-VIS-P-021)
+readout: 4.5 - WL requirement (PERD R-VIS-P-021)
+readtime: 88.0 - derived; ROE Requirements Specification (EUCL-MSS-RD-6-009)
+sfwc: 730000.0 - CDM03 (Short et al. 2010), see also the CCD spec EUCL-EST-RS-6-002
+sky\_background: 22.3203 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+sky\_high: 21.7206 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+sky\_low: 22.9207 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+st: 5e-06 - CDM03 (Short et al. 2010)
+star\_fraction: 0.928243 -  derived using VIS system PSF (see EUCL-MSS-RP-6-001)
+svg: 1e-10 - CDM03 (Short et al. 2010)
+t: 0.01024 - CDM03 (Short et al. 2010)
+trapfile: cdm\_euclid.dat - CDM03 (derived, refitted to CCD204 data)
+vg: 6e-11 - CDM03 (Short et al. 2010)
+vth: 11680000.0 - CDM03 (Short et al. 2010)
+xsize: 2048 - CCD spec EUCL-EST-RS-6-002
+ysize: 2066 - CCD spec EUCL-EST-RS-6-002
+zeropoint: 25.45338546114 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+zeropointNoObscuration: 25.57991044453 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+zodiacal: 22.55 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
 \end{Verbatim}
 
 The magzero was calculated as follows:
@@ -302,6 +310,16 @@ The magzero was calculated as follows:
 \begin{Verbatim}[commandchars=\\\{\}]
 \PYG{l+m+mf}{1.}\PYG{o}{/}\PYG{l+m+mi}{10}\PYG{o}{*}\PYG{o}{*}\PYG{p}{(}\PYG{o}{-}\PYG{l+m+mf}{0.4}\PYG{o}{*}\PYG{p}{(}\PYG{l+m+mf}{25.45338546114}\PYG{p}{)}\PYG{p}{)} \PYG{o}{=} \PYG{l+m+mf}{15182880871.225231}
 \end{Verbatim}
+
+The throughput input values are derived from two Excel Spreadsheets namely:
+\begin{enumerate}
+\item {} 
+110413\_EUC\_TN\_00051\_SYS\_PERF\_REF\_iss4.xlsx
+
+\item {} 
+radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+
+\end{enumerate}
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 instrument model parameters
@@ -922,7 +940,7 @@ matplotlib
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
 \index{SNR() (in module ETC.ETC)}
@@ -985,8 +1003,11 @@ Calculates the relation between the signal-to-noise ratio and the electrons in t
 \textbf{exposures} (\emph{int}) -- number of exposures {[}default = 1{]}
 
 \item {} 
-\textbf{diginoise} (\emph{boolean}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
+\textbf{diginoise} (\emph{bool}) -- if the readout noise is undersampled or poorly resolved then the effective readout noise
 should be used {[}default = False{]}
+
+\item {} 
+\textbf{server} (\emph{bool}) -- whether to save the figure in a PNG or PDF format (the former can be used together with the WWW server)
 
 \end{itemize}
 
@@ -1122,7 +1143,7 @@ matplotlib
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
 \index{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)}
@@ -1167,6 +1188,23 @@ realistic number density functions.
 
 \end{fulllineitems}
 
+\index{plotCatalog() (in module sources.createObjectCatalogue)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.createObjectCatalogue.plotCatalog}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{plotCatalog}}{\emph{catalog}}{}
+Plot the number of objects in the generated catalog. Will generate both cumulative and normal
+distributions for galaxies and stars separately.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode
+\textbf{catalog} (\emph{str}) -- name of the catalogue file
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{plotDistributionFunction() (in module sources.createObjectCatalogue)}
 
 \begin{fulllineitems}
@@ -1189,6 +1227,61 @@ Generate a catalog with stars at random positions.
 \begin{fulllineitems}
 \phantomsection\label{sources:sources.createObjectCatalogue.starCatalogFixedMagnitude}\pysiglinewithargsret{\code{sources.createObjectCatalogue.}\bfcode{starCatalogFixedMagnitude}}{\emph{stars=400}, \emph{xmax=2048}, \emph{ymax=2066}, \emph{mag=18}, \emph{random=True}, \emph{pergrid=51}, \emph{out='starsSameMag.dat'}}{}
 Generate a catalog with stars of a given magnitude either at random positions or in a rectangular grid.
+
+\end{fulllineitems}
+
+\phantomsection\label{sources:module-sources.generatePostageStamps}\index{sources.generatePostageStamps (module)}
+
+\section{Generating Postage Stamp Images}
+\label{sources:generating-postage-stamp-images}
+This simple script can be used to generate postage stamp images from a larger mosaic.
+These images can then be used in the VIS simulator.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+NumPy
+
+\item[{requires}] \leavevmode
+PyFITS
+
+\item[{requires}] \leavevmode
+VIS-PP
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
+
+\item[{version}] \leavevmode
+0.1
+
+\end{description}\end{quote}
+\index{generaPostageStamps() (in module sources.generatePostageStamps)}
+
+\begin{fulllineitems}
+\phantomsection\label{sources:sources.generatePostageStamps.generaPostageStamps}\pysiglinewithargsret{\code{sources.generatePostageStamps.}\bfcode{generaPostageStamps}}{\emph{filename}, \emph{catalog}, \emph{maglimit=22.0}, \emph{output='galaxy'}}{}
+Generates postage stamp images from an input file given the input catalog position.
+The output files are saved to FITS files.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{filename} (\emph{str}) -- name of the FITS file from which the postage stamps are extracted
+
+\item {} 
+\textbf{catalog} (\emph{str}) -- name of the catalogue with x and y positions and magnitudes
+
+\item {} 
+\textbf{maglimit} (\emph{float}) -- brighter galaxies than the given magnitude limit are extracted
+
+\item {} 
+\textbf{output} (\emph{str}) -- name of the postage stamp prefix (will add a running number to this)
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -1368,13 +1461,16 @@ Python 3.x.
 \label{simulator:testing}
 Before trying to run the code, please make sure that you have compiled the
 cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
-please run the SCIENCE section from the test.config as follows:
+please run the unittest as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -c data/test.config -s TESTSCIENCE1X
+python simulator.py -t
 \end{Verbatim}
 
-This will produce an image representing VIS lower left (0th) quadrant. Because
+This will run the unittest and compare the result to a previously calculated image.
+Please inspect the standard output for results.
+
+Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
 outputs but we must rely on the outputs that are free from random effects.
 
@@ -1391,12 +1487,12 @@ float64).
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 intscale=177.489159281 size=0.0353116000387
-6798 objects were place on the detector
+Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+6791 objects were place on the detector
 
-real        4m14.008s
-user        3m59.609s
-sys         0m4.728s
+real        2m19.378s
+user        2m13.237s
+sys         0m4.394s
 \end{Verbatim}
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
@@ -1443,7 +1539,7 @@ Version and change logs:
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
 1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
-     deriving the Poisson noise.
+     deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
 \end{Verbatim}
 
 
@@ -1452,28 +1548,13 @@ Version and change logs:
 \begin{notice}{note}{Todo}
 \begin{enumerate}
 \item {} 
-test that the cosmic rays are correctly implemented (looks like there are too many long trails and too few short)
-
-\item {} 
-check that the size distribution of galaxies is suitable (now the scaling is before convolution!)
-
-\item {} 
 objects.dat is now hard coded into the code, this should be read from the config file
 
 \item {} 
 implement spatially variable PSF
 
 \item {} 
-implement CCD offsets (for focal plane simulations)
-
-\item {} 
 test that the WCS is correctly implemented and allows CCD offsets
-
-\item {} 
-implement a Gaussian random draw for the size-magnitude distribution rather than a straight fit
-
-\item {} 
-centering of an object depends on the centering of the postage stamp (should recalculate the centroid)
 
 \item {} 
 charge injection line positions are now hardcoded to the code, read from the config file
@@ -1503,7 +1584,7 @@ Sami-Matias Niemi
 \index{VISsimulator (class in simulator.simulator)}
 
 \begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{configfile}, \emph{debug}, \emph{section='SCIENCE'}}{}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator}\pysiglinewithargsret{\strong{class }\code{simulator.simulator.}\bfcode{VISsimulator}}{\emph{opts}}{}
 Euclid Visible Instrument Image Simulator
 
 The image that is being build is in:
@@ -1512,17 +1593,8 @@ The image that is being build is in:
 \PYG{n+nb+bp}{self}\PYG{o}{.}\PYG{n}{image}
 \end{Verbatim}
 \begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{configfile} (\emph{string}) -- name of the configuration file
-
-\item {} 
-\textbf{debug} (\emph{boolean}) -- debugging mode on/off
-
-\item {} 
-\textbf{section} (\emph{string}) -- name of the section of the configuration file to process
-
-\end{itemize}
+\item[{Parameters}] \leavevmode
+\textbf{opts} (\emph{OptionParser instance}) -- OptionParser instance
 
 \end{description}\end{quote}
 \index{addChargeInjection() (simulator.simulator.VISsimulator method)}
@@ -1558,7 +1630,20 @@ Include flux from the calibration source.
 Add objects from the object list to the CCD image (self.image).
 
 Scale the object's brightness in electrons and size using the input catalog magnitude.
-The size scaling is a crude fit to Massey et al. plot.
+The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+Appendix ``prior distributions''). The spread is estimated from Figure 1 to be around 0''.1 (1 sigma).
+A random draw from a Gaussian distribution with spread of 0''.1 arc sec is performed so that galaxies
+of the same brightness would not be exactly the same size.
+
+\begin{notice}{note}{Note:}
+scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+\end{notice}
+
+\begin{notice}{warning}{Warning:}
+If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+simulate several dithers. The random dispersion can be turned off by setting random=no in
+the configuration file so that dithers can be simulated and co-added correctly.
+\end{notice}
 
 \end{fulllineitems}
 
@@ -1760,11 +1845,6 @@ Convert from electrons to ADUs using the value read from the configuration file.
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.generateFinemaps}\pysiglinewithargsret{\bfcode{generateFinemaps}}{}{}
 Generates finely sampled images of the input data.
 
-\begin{notice}{warning}{Warning:}
-This should be rewritten. Now a direct conversion from FORTRAN, and thus
-not probably very effective. Assumes the PSF sampling for other finemaps.
-\end{notice}
-
 \end{fulllineitems}
 
 \index{objectOnDetector() (simulator.simulator.VISsimulator method)}
@@ -1818,6 +1898,8 @@ The configuration file may look as follows:
 \PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
 \PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
 \PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
+\PYG{n}{CCDxgap} \PYG{o}{=} \PYG{l+m+mf}{1.643}
+\PYG{n}{CCDygap} \PYG{o}{=} \PYG{l+m+mf}{8.116}
 \PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
 \PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
 \PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
@@ -1826,10 +1908,10 @@ The configuration file may look as follows:
 \PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
 \PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
 \PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
-\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.182}
+\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.182758225257}
 \PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.1}
 \PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
-\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{1.7059e10}
+\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{15182880871.225231}
 \PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
 \PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
 \PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
@@ -1850,9 +1932,13 @@ The configuration file may look as follows:
 \PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{random} \PYG{o}{=} \PYG{n}{yes}
 \end{Verbatim}
 
-For explanation of each field, see /data/test.config.
+For explanation of each field, see /data/test.config. Note that if an input field does not exist,
+then the values are taken from the default instrument model as described in
+support.VISinstrumentModel.VISinformation(). Any of the defaults can be overwritten by providing
+a config file with a correct field name.
 
 \end{fulllineitems}
 
@@ -2095,9 +2181,24 @@ Run all methods sequentially.
 \centering
 \capstart
 
-\includegraphics{simu.pdf}
-\caption{An example image generated with the reference simulator. The image shows a part of a single
-CCD.}\end{figure}
+\includegraphics{VISpartOfCCDlogscale.png}
+\caption{An example image generated with the VIS simulator. The image shows a part of a single
+CCD. The image is on a logarithmic stretch.}\end{figure}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{noisecomparison.png}
+\caption{A simulated image with no noise (left) and with noise (right). The simulated image with noise
+includes: Zodiacal background, scattered light, readout and Poisson noise, CTI, etc. Both images
+are on logarithmic stretch.}\end{figure}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{VISImage.png}
+\caption{Full focal plane of VIS with zoom-in sections. The data were generated with the VIS simulator. The data
+are on log-scale.}\end{figure}
 
 
 \chapter{Data reduction}
@@ -4933,6 +5034,7 @@ and an average background, but without any radiation damage to the CCD.}\end{fig
 \item {\texttt{simulator.generateGalaxies}}, \pageref{simulator:module-simulator.generateGalaxies}
 \item {\texttt{simulator.simulator}}, \pageref{simulator:module-simulator.simulator}
 \item {\texttt{sources.createObjectCatalogue}}, \pageref{sources:module-sources.createObjectCatalogue}
+\item {\texttt{sources.generatePostageStamps}}, \pageref{sources:module-sources.generatePostageStamps}
 \item {\texttt{support.VISinstrumentModel}}, \pageref{instrument:module-support.VISinstrumentModel}
 \end{theindex}
 

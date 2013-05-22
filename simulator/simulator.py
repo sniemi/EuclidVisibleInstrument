@@ -226,9 +226,9 @@ class VISsimulator():
             self.debug = opts.debug
 
         try:
-            self.testing = opts.testing
+            self.random = opts.testing
         except:
-            self.testing = False
+            self.random = False
 
         #load instrument model
         self.information = VISinstrumentModel.VISinformation()
@@ -318,6 +318,7 @@ class VISsimulator():
             overscans = yes
             bleeding = yes
             flatfieldM = yes
+            random = yes
 
         For explanation of each field, see /data/test.config. Note that if an input field does not exist,
         then the values are taken from the default instrument model as described in
@@ -383,6 +384,11 @@ class VISsimulator():
             self.postages = self.config.getboolean(self.section, 'postageStamps')
         except:
             self.postages = True
+        try:
+            self.random = self.config.getboolean(self.section, 'random')
+        except:
+            self.random = False
+
 
         self.information['variablePSF'] = False
 
@@ -397,7 +403,8 @@ class VISsimulator():
                              radiationDamage=self.radiationDamage,
                              addsources=self.addsources,
                              bleeding=self.bleeding,
-                             overscans=self.overscans)
+                             overscans=self.overscans,
+                             random=self.random)
 
         if self.debug:
             pprint.pprint(self.information)
@@ -972,7 +979,11 @@ class VISsimulator():
         A random draw from a Gaussian distribution with spread of 0".1 arc sec is performed so that galaxies
         of the same brightness would not be exactly the same size.
 
-        .. Note: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+        .. Note:: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+
+        .. Warning:: If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+                     simulate several dithers. The random dispersion can be turned off by setting random=no in
+                     the configuration file so that dithers can be simulated and co-added correctly.
         """
         #total number of objects in the input catalogue and counter for visible objects
         n_objects = self.objects.shape[0]
@@ -984,7 +995,8 @@ class VISsimulator():
         #calculate the scaling factors from the magnitudes
         intscales = 10.0**(-0.4 * self.objects[:, 2]) * self.information['magzero'] * self.information['exptime']
 
-        if self.testing:
+        if ~self.random:
+            self.log.info('Using a fixed size-magnitude relation (equation B1 from Miller et al. 2012 (1210.8201v1).')
             #testin mode will bypass the small random scaling in the size-mag relation
             #loop over exposures
             for i in xrange(self.information['exposures']):
@@ -1030,9 +1042,11 @@ class VISsimulator():
                             xi = xind.astype(np.float) + (obj[1] % 1)
                             data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
 
-                            #size scaling along the minor axes
+                            #size-magnitude scaling
+                            sbig = np.e ** (-1.145 - 0.269 * (obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                            #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                            #so convert to arc seconds prior to scaling
                             smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
-                            sbig = np.e**(-1.145-0.269*(obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
                             sbig /= smin
 
                             txt = "Galaxy: " +str(j+1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
@@ -1091,6 +1105,8 @@ class VISsimulator():
 
         else:
             #loop over exposures
+            self.log.info('Using equation B1 from Miller et al. 2012 (1210.8201v1) '
+                          'for scale-magnitude relation with Gaussian random dispersion.')
             for i in xrange(self.information['exposures']):
                 #loop over the number of objects
                 for j, obj in enumerate(self.objects):

@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{May 17, 2013}
+\date{May 21, 2013}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -127,7 +127,7 @@ Sami-Matias Niemi
 1.2
 
 \item[{date}] \leavevmode
-May 17, 2013
+May 21, 2013
 
 \end{description}\end{quote}
 
@@ -188,10 +188,10 @@ numexpr
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:smn2@mssl.ucl.ac.uk}{smn2@mssl.ucl.ac.uk}
+\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.5
+0.6
 
 \end{description}\end{quote}
 \index{CCDnonLinearityModel() (in module support.VISinstrumentModel)}
@@ -268,25 +268,25 @@ Returns a dictionary describing VIS. The following information is provided (id: 
 apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
 aperture\_size: 132.73228961416876 - derived (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
 beta: 0.6 - CDM03 (Short et al. 2010)
-bias: 1000.0 - ROE spec
+bias: 1000.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
 cosmic\_bkgd: 0.172 - derived  (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
 dark: 0.001 - CCD spec EUCL-EST-RS-6-002
 diameter: 1.3 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
 dob: 0 - CDM03 (Short et al. 2010)
-e\_adu: 3.1 - ROE spec
+e\_adu: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
 fullwellcapacity: 200000 - CCD spec (for simulator)
 fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
-gain: 3.1 - ROE spec
+gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
 galaxy\_fraction: 0.836 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
 magzero: 15182880871.225231 - derived, see belowCDM (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
-ovrscanx: 20 - ROE spec (req: CalCD-B)
+ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
 peak\_fraction: 0.261179 - derived
 pixel\_size: 0.1 - CCD spec EUCL-EST-RS-6-002
 prescanx: 50 - CCD spec EUCL-EST-RS-6-002 (also in CalCD-B)
 rdose: 30000000000.0 - derived (above the PLM requirement)
 readnoise: 4.5 - WL requirement (PERD R-VIS-P-021)
 readout: 4.5 - WL requirement (PERD R-VIS-P-021)
-readtime: 88.0 - derived
+readtime: 88.0 - derived; ROE Requirements Specification (EUCL-MSS-RD-6-009)
 sfwc: 730000.0 - CDM03 (Short et al. 2010), see also the CCD spec EUCL-EST-RS-6-002
 sky\_background: 22.3203 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
 sky\_high: 21.7206 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
@@ -1635,6 +1635,16 @@ Appendix ``prior distributions''). The spread is estimated from Figure 1 to be a
 A random draw from a Gaussian distribution with spread of 0''.1 arc sec is performed so that galaxies
 of the same brightness would not be exactly the same size.
 
+\begin{notice}{note}{Note:}
+scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+\end{notice}
+
+\begin{notice}{warning}{Warning:}
+If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+simulate several dithers. The random dispersion can be turned off by setting random=no in
+the configuration file so that dithers can be simulated and co-added correctly.
+\end{notice}
+
 \end{fulllineitems}
 
 \index{addPreOverScans() (simulator.simulator.VISsimulator method)}
@@ -1922,6 +1932,7 @@ The configuration file may look as follows:
 \PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
+\PYG{n}{random} \PYG{o}{=} \PYG{n}{yes}
 \end{Verbatim}
 
 For explanation of each field, see /data/test.config. Note that if an input field does not exist,
@@ -2170,9 +2181,24 @@ Run all methods sequentially.
 \centering
 \capstart
 
-\includegraphics{simu.pdf}
-\caption{An example image generated with the reference simulator. The image shows a part of a single
-CCD.}\end{figure}
+\includegraphics{VISpartOfCCDlogscale.png}
+\caption{An example image generated with the VIS simulator. The image shows a part of a single
+CCD. The image is on a logarithmic stretch.}\end{figure}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{noisecomparison.png}
+\caption{A simulated image with no noise (left) and with noise (right). The simulated image with noise
+includes: Zodiacal background, scattered light, readout and Poisson noise, CTI, etc. Both images
+are on logarithmic stretch.}\end{figure}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\includegraphics{VISImage.png}
+\caption{Full focal plane of VIS with zoom-in sections. The data were generated with the VIS simulator. The data
+are on log-scale.}\end{figure}
 
 
 \chapter{Data reduction}

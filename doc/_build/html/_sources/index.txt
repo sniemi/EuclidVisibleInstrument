@@ -134,14 +134,31 @@ For more detailed documentation, please see:
 
    simulator
 
-.. figure:: figs/simu.*
-     :width: 800 px
+.. figure:: figs/VISpartOfCCDlogscale.png
+     :width: 1000 px
      :align: center
      :figclass: align-center
 
-     An example image generated with the reference simulator. The image shows a part of a single
-     CCD.
+     An example image generated with the VIS simulator. The image shows a part of a single
+     CCD. The image is on a logarithmic stretch.
 
+.. figure:: figs/noisecomparison.png
+     :width: 1000 px
+     :align: center
+     :figclass: align-center
+
+     A simulated image with no noise (left) and with noise (right). The simulated image with noise
+     includes: Zodiacal background, scattered light, readout and Poisson noise, CTI, etc. Both images
+     are on logarithmic stretch.
+
+
+.. figure:: figs/VISImage.png
+     :width: 1200 px
+     :align: center
+     :figclass: align-center
+
+     Full focal plane of VIS with zoom-in sections. The data were generated with the VIS simulator. The data
+     are on log-scale.
 
 
 Data reduction

@@ -13,7 +13,7 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.3
+:version: 0.4
 """
 import math, os, datetime, unittest
 import numpy as np
@@ -57,7 +57,10 @@ class shapeMeasurement():
                              pixelSize=12.0,
                              sigma=0.75,
                              weighted=True,
-                             debug=False)
+                             debug=False,
+                             fixedPosition=False,
+                             fixedX=None,
+                             fixedY=None)
         self.settings.update(kwargs)
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
@@ -68,7 +71,7 @@ class shapeMeasurement():
         Derive quadrupole moments and ellipticity from the input image.
 
         :param img: input image data
-        :type ig: ndarray
+        :type img: ndarray
 
         :return: quadrupoles, centroid, and ellipticity (also the projected components e1, e2)
         :rtype: dict
@@ -162,6 +165,9 @@ class shapeMeasurement():
         exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
         Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
 
+        #normalize to unity
+        Gaussian /= np.max(Gaussian)
+
         output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
 
         return output
@@ -202,6 +208,9 @@ class shapeMeasurement():
         exponent = (sigx * (Gxmesh - x)**2 + sigy * (Gymesh - y)**2)
         Gaussian = np.exp(-exponent) / (2. * math.pi * sigmax*sigmay)
 
+        #normalize to unity
+        Gaussian /= np.max(Gaussian)
+
         output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
 
         return output
@@ -209,10 +218,11 @@ class shapeMeasurement():
 
     def measureRefinedEllipticity(self):
         """
-        Derive a refined iterated ellipticity measurement for a given object.
+        Derive a refined iterated polarisability/ellipticity measurement for a given object.
 
-        By default ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
-        If self.settings['weigted'] is False then no weighting scheme is used.
+        By default polarisability/ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
+        If self.settings['weighted'] is False then no weighting scheme is used.
+
         The number of iterations is defined in self.settings['iterations'].
 
         :return centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
@@ -223,8 +233,12 @@ class shapeMeasurement():
 
         self.log.info('Sample sigma used for weighting = %f' % self.settings['sampleSigma'])
 
-        self.log.info('The intial estimate for the mean values are taken from the unweighted quadrupole moments.')
-        quad = self.quadrupoles(self.data.copy())
+        if self.settings['fixedPosition']:
+            self.log.info('Using a fixed ')
+            quad = dict(centreX=self.settings['fixedX'], centreY=self.settings['fixedY'])
+        else:
+            self.log.info('The initial estimate for the mean values are taken from the unweighted quadrupole moments.')
+            quad = self.quadrupoles(self.data.copy())
 
         for x in range(self.settings['iterations']):
             if self.settings['weighted']:
@@ -387,6 +401,7 @@ class TestShape(unittest.TestCase):
         self.assertAlmostEqual(R2exp, actual['R2'],
                                msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=10*self.tolerance)
 
+
     def test_PSF(self):
         expected = 0.045437
         R2exp = 4.959904
@@ -397,6 +412,14 @@ class TestShape(unittest.TestCase):
         self.assertAlmostEqual(R2exp, actual['R2'],
                                msg='exp=%f, got=%f' % (R2exp, actual['R2']), delta=10*self.tolerance)
 
+
+    def test_gaussian_weighting(self):
+        settings = dict(debug=True)
+        data = pf.getdata(self.psffile)
+        data /= np.max(data)
+        _ = shapeMeasurement(data, self.log, **settings).measureRefinedEllipticity()
+        gweighted = pf.getdata('GaussianWeighted.fits')
+        self.assertAlmostEqual(np.max(data), np.max(gweighted))
 
 
 if __name__ == '__main__':

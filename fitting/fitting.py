@@ -206,24 +206,27 @@ def linearregression(x, y,
     upper = lower_b1 * x + upper_b0
 
     if show_plots:
-        P.figure(1000)
-        P.title('My Linear Regression')
-        P.xlabel('x')
-        P.ylabel('y')
-        P.grid()
-        P.plot(x, y, 'bo', label='data')
-        P.plot(x, y_hat, 'r.-', label='linear fit')
-        P.plot(x, lower, 'c-')
-        P.plot(x, upper, 'c-')
-        P.legend(loc='best', numpoints=3)
+        import matplotlib.pylab as plt
+
+        plt.figure(1000)
+        plt.title('My Linear Regression')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.grid()
+        plt.plot(x, y, 'bo', label='data')
+        plt.plot(x, y_hat, 'r.-', label='linear fit')
+        plt.plot(x, lower, 'c-')
+        plt.plot(x, upper, 'c-')
+        plt.legend(loc='best', numpltoints=3)
         # are the residuals normally distributed?
-        P.figure(1001)
-        P.title('Residuals of fit')
-        P.xlabel('x')
-        P.ylabel('Residuals')
-        P.grid()
-        P.plot(x, y - y_hat, 'mo')
-        P.show()
+        plt.figure(1001)
+        plt.title('Residuals of fit')
+        plt.xlabel('x')
+        plt.ylabel('Residuals')
+        plt.grid()
+        plt.plot(x, y - y_hat, 'mo')
+        plt.show()
+
     return b1, moe_b1, b0, lower_b1, upper_b1, lower_b0, upper_b0, R2, R
 
 

@@ -723,9 +723,9 @@ def testNoFlatfieldingEffects(log, file='data/psf1x.fits', oversample=1.0, psfs=
 
 
 if __name__ == '__main__':
-    run = False
+    run = True
     debug = False
-    plots = False
+    plots = True
     error = True
 
     #start the script
@@ -733,8 +733,8 @@ if __name__ == '__main__':
     log.info('Testing flat fielding calibration...')
 
     if error:
-        #res = findTolerableError(log)
-        #fileIO.cPickleDumpDictionary(res, 'errors/residuals.pk')
+        res = findTolerableError(log)
+        fileIO.cPickleDumpDictionary(res, 'errors/residuals.pk')
         res = cPickle.load(open('errors/residuals.pk'))
         plotTolerableErrorE(res, output='FlatFieldingTolerableErrorE.pdf')
         plotTolerableErrorR2(res, output='FlatFieldingTolerableErrorR2.pdf')

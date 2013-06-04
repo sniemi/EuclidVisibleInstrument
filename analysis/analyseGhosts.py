@@ -9,7 +9,7 @@ This scripts can be used to study the impact of ghost images on the weak lensing
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.1
+:version: 0.2
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -26,7 +26,7 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
-import pprint
+import pprint, cPickle, os, glob, shutil
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
@@ -156,7 +156,8 @@ def analyseInFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, maxdi
 
 
 def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, maxdistance=100,
-                            inner=8, outer=60, oversample=4.0, psfs=1000, iterations=6, sigma=0.75):
+                            inner=8, outer=60, oversample=4.0, psfs=2000, iterations=5, sigma=0.75,
+                            lowghost=-7, highghost=-2, samples=9):
     """
     Calculates PSF size and ellipticity when including an out-of-focus doughnut of a given contrast level.
     The dougnut pixel values are all scaled to a given scaling value (requirement 5e-5).
@@ -171,6 +172,9 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
     :param psfs: number of PSFs to analyse (number of ghosts in random locations)
     :param iterations: number of iterations in the shape measurement
     :param sigma: size of the Gaussian weighting function
+    :param lowghost: log of the highest ghost contrast ratio to study
+    :param highghost: log of the lowest ghost contrast ratio to study
+    :param samples: number of points for the contrast ratio to study
 
     :return: results
     :rtype: dict
@@ -180,7 +184,8 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
 
     #place it a larger canvas with zero padding around
     ys, xs = data.shape
-    canvas = np.pad(data, xs+maxdistance+outer, mode='constant', constant_values=0)  #requires numpy >= 1.7.0
+    canvas = np.pad(data, int(maxdistance*oversample + xs + outer),
+                    mode='constant', constant_values=0)  #requires numpy >= 1.7.0
     ys, xs = canvas.shape
     xcen = int(np.round(xs/2., 0))
     ycen = int(np.round(ys/2., 0))
@@ -197,11 +202,11 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
     settings = dict(sampling=1.0 / oversample, itereations=iterations, sigma=sigma)
 
     #positions
-    x = np.round((np.random.rand(psfs)-0.5)*maxdistance, 0).astype(np.int)
-    y = np.round((np.random.rand(psfs)-0.5)*maxdistance, 0).astype(np.int)
+    x = np.round((np.random.rand(psfs)-0.5)*maxdistance*oversample, 0).astype(np.int)
+    y = np.round((np.random.rand(psfs)-0.5)*maxdistance*oversample, 0).astype(np.int)
 
     #ghost level
-    ghosts = np.logspace(-7, -2, 10)[::-1] #largest first
+    ghosts = np.logspace(lowghost, highghost, samples)[::-1] #largest first
     tot = ghosts.size
     res = {}
     for i, scale in enumerate(ghosts):
@@ -246,8 +251,9 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
     return res
 
 
-def ghostContributionToStar(log, filename='data/psf4x.fits', psfscale=100000, distance=750,
-                            inner=8, outer=60, oversample=4.0, iterations=10, sigma=0.75):
+def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=100, distance=750,
+                            inner=8, outer=60, oversample=12.0, iterations=20, sigma=0.75,
+                            scale=5e-5, fixedPosition=True):
     #set sampling etc. for shape measurement
     settings = dict(sampling=1.0 / oversample, itereations=iterations, sigma=sigma, debug=True)
 
@@ -255,7 +261,8 @@ def ghostContributionToStar(log, filename='data/psf4x.fits', psfscale=100000, di
     data = pf.getdata(filename)
 
     #place it a larger canvas with zero padding around
-    canvas = np.pad(data, distance + outer + 1, mode='constant', constant_values=0)  #requires numpy >= 1.7.0
+    canvas = np.pad(data, int(distance*oversample + outer + 1),
+                    mode='constant', constant_values=0)  #requires numpy >= 1.7.0
     ys, xs = canvas.shape
     xcen = int(np.round(xs / 2., 0))
     ycen = int(np.round(ys / 2., 0))
@@ -277,21 +284,32 @@ def ghostContributionToStar(log, filename='data/psf4x.fits', psfscale=100000, di
 
     #positions (shift respect to the centring of the star)
     xc = 0
-    yc = distance
+    yc = distance * oversample
 
     #indices range
     xm = xcen + xc
     ym = ycen + yc
 
     #ghost level
-    scale = 5e-5
     #scale the doughtnut pixel values, note that all pixels have the same value...
+    img /= np.max(img)
     scaled = img.copy() * scale * psfscale
     fileIO.writeFITS(scaled, 'ghostImage.fits', int=False)
 
     tmp = canvas.copy()
-    tmp[ym - yd:ym + yd, xm - xd:xm + xd] += scaled
+
+    if oversample % 2 == 0:
+        tmp[ym - yd:ym + yd, xm - xd:xm + xd] += scaled
+    else:
+        tmp[ym - yd:ym + yd + 1, xm - xd:xm + xd + 1] += scaled
+
     fileIO.writeFITS(tmp, 'originalPlusGhost.fits', int=False)
+
+    #use fixed positions
+    if fixedPosition:
+        settings['fixedPosition'] = True
+        settings['fixedX'] = reference['centreX']
+        settings['fixedY'] = reference['centreY']
 
     #measure e and R2 from the postage stamp image
     sh = shape.shapeMeasurement(tmp, log, **settings)
@@ -313,7 +331,7 @@ def ghostContributionToStar(log, filename='data/psf4x.fits', psfscale=100000, di
     return results
 
 
-def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4):
+def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4, ghostlevel=5e-5):
     fig = plt.figure()
     plt.title(title)
     ax = fig.add_subplot(111)
@@ -342,11 +360,12 @@ def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4):
     ran = np.linspace(ks.min() * 0.99, ks.max() * 1.01)
     ax.fill_between(ran, np.ones(ran.size) * reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Level')
+    ax.axvline(x=ghostlevel, c='r', ls='--', label='Ghost Requirement')
 
     ax.set_yscale('log')
     ax.set_xscale('log')
-    ax.set_ylim(1e-7, 1e-2)
-    ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
+    ax.set_ylim(1e-6, 1e-1)
+    ax.set_xlim(ks.min() * 0.9, ks.max() * 1.01)
     ax.set_xlabel('Ghost Contrast Ratio')
     ax.set_ylabel(r'$\sigma (e_{i})\ , \ \ \ i \in [1,2]$')
 
@@ -377,11 +396,12 @@ def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4):
     ran = np.linspace(ks.min() * 0.99, ks.max() * 1.01)
     ax.fill_between(ran, np.ones(ran.size) * reqR2, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqR2, c='g', ls='--', label='Level')
+    ax.axvline(x=ghostlevel, c='r', ls='--', label='Ghost Requirement')
 
     ax.set_yscale('log')
     ax.set_xscale('log')
-    ax.set_ylim(1e-7, 1e-2)
-    ax.set_xlim(ks.min() * 0.99, ks.max() * 1.01)
+    ax.set_ylim(1e-6, 1e-1)
+    ax.set_xlim(ks.min() * 0.9, ks.max() * 1.01)
     ax.set_xlabel('Ghost Contrast Ratio')
     ax.set_ylabel(r'$\frac{\sigma (R^{2})}{R_{ref}^{2}}$')
 
@@ -390,29 +410,68 @@ def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4):
     plt.close()
 
 
+def deleteAndMove(dir, files='*.fits'):
+    """
+
+    :param dir:
+    :param files:
+    :return:
+    """
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    else:
+        for f in glob.glob(dir + '/' + files):
+            os.remove(f)
+
+    for f in glob.glob(files):
+        shutil.move(f, './'+dir+'/'+f)
+
+
 if __name__ == '__main__':
-    debug = True
+    run = True
+    debug = False
+    focus = False
+    star = False
 
     #start the script
     log = lg.setUpLogger('ghosts.log')
     log.info('Analysing the impact of ghost images...')
 
     if debug:
-        #focus
+        #out of focus ghosts
+        res = analyseOutofFocusImpact(log, filename='data/psf1x.fits', maxdistance=100, samples=7,
+                                      inner=8, outer=60, oversample=1.0, psfs=1000, iterations=5, sigma=0.75)
+        fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
+        res = cPickle.load(open('OutofFocusResultsDebug.pk'))
+        plotResults(res, 'OutofFocusGhostsDebug', 'VIS Ghosts: Out of Focus Analysis')
+
+
+    if focus:
+        #if the ghosts were in focus
         res = analyseInFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
                                    oversample=2.0, psfs=200, iterations=4, sigma=0.75)
         fileIO.cPickleDumpDictionary(res, 'InfocusResultsDebug.pk')
         plotResults(res, 'InfocusGhosts', 'VIS Ghosts: In Focus Analysis')
 
-        #out of focus
-        res = analyseOutofFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
-                                      inner=8, outer=60, oversample=2.0, psfs=200, iterations=4, sigma=0.75)
-        fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
+    if run:
+        #real run
+        res = analyseOutofFocusImpact(log)
+        fileIO.cPickleDumpDictionary(res, 'OutofFocusResults.pk')
+        res = cPickle.load(open('OutofFocusResults.pk'))
         plotResults(res, 'OutofFocusGhosts', 'VIS Ghosts: Out of Focus Analysis')
 
-        ghostContributionToStar(log)
+    if star:
+        print '\n\n\n\nWith Fixed Position:'
+        ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0)
+        deleteAndMove('psf1xFixed')
 
+        print '\n\n\n\nNo Fixed Position:'
+        ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0, fixedPosition=False)
+        deleteAndMove('psf1x')
 
+        print '\n\n\n\n2 Times Oversampled Fixed Position:'
+        ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
+        deleteAndMove('psf2xFixed')
 
 
     log.info('Run finished...\n\n\n')

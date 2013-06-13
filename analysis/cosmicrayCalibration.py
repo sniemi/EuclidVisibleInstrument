@@ -21,7 +21,7 @@ direction.
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.3
+:version: 0.4
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -79,7 +79,7 @@ def testCosmicrayRejection(log, file='data/psf1x.fits', oversample=1.0, sigma=0.
     out = {}
     #loop over all the amplitudes to be studied
     for level in np.logspace(np.log10(min), np.log10(max), levels):
-        print 'Deposited Energy of Cosmic Rays: %i electrons' % level
+        print 'Deposited Energy of Cosmic Rays: %e electrons' % level
 
         de1 = []
         de2 = []
@@ -94,7 +94,7 @@ def testCosmicrayRejection(log, file='data/psf1x.fits', oversample=1.0, sigma=0.
             print'Run %i / %i' % (i + 1, psfs)
 
             #add cosmic rays to the scaled image
-            cosmics = cosmicrays.cosmicrays(log, scaled, crInfo=crInfo)
+            cosmics = cosmicrays.cosmicrays(log, scaled.copy(), crInfo=crInfo)
             #newdata = cosmics.addCosmicRays(limit=level)
             if single:
                 newdata = cosmics.addSingleEvent(limit=level)
@@ -451,7 +451,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
 if __name__ == '__main__':
     run = True
-    multi = True
+    multi = False
     plot = True
     debug = False
     file = 'CosmicrayResults.pk'
@@ -465,19 +465,19 @@ if __name__ == '__main__':
 
     if run:
         if multi:
-            resM = testCosmicrayRejectionMultiPSF(log, stars=1000, psfs=200)
-            fileIO.cPickleDumpDictionary(resM, file.replace('.pk', 'Multi1000.pk'))
+            resM = testCosmicrayRejectionMultiPSF(log, stars=2000, psfs=500)
+            fileIO.cPickleDumpDictionary(resM, file.replace('.pk', 'Multi2000.pk'))
 
-        #res = testCosmicrayRejection(log)
-        #fileIO.cPickleDumpDictionary(res, file)
+        res = testCosmicrayRejection(log)
+        fileIO.cPickleDumpDictionary(res, file)
 
     if plot:
         if not run:
             if multi:
-                resM = cPickle.load(open(file.replace('.pk', 'Multi1000.pk')))
-            #res = cPickle.load(open(file))
+                resM = cPickle.load(open(file.replace('.pk', 'Multi2000.pk')))
+            res = cPickle.load(open(file))
 
-        #plotResults(res, outdir='results')
-        plotResults(resM, outdir='small1000')
+        plotResults(res, outdir='results')
+        plotResults(resM, outdir='resultsMulti')
 
     log.info('Run finished...\n\n\n')

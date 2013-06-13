@@ -25,7 +25,7 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.95
+:version: 0.96
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -54,7 +54,7 @@ from support import files as fileIO
 
 
 def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='data/VIScalibrationUnitflux.fits',
-                              reference='data/VISFlatField1percent.fits', plots=False, debug=False):
+                              reference='data/VISFlatField1percent.fits', gain=3.5, plots=False, debug=False):
     """
     Generate a median combined flat field residual from given input files.
 
@@ -72,6 +72,8 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     :type lampfile: str
     :param reference: name of the reference pixel-to-pixel flat field FITS file
     :type reference: str
+    :param gain: gain factor [e/ADU]
+    :type gain: float
     :param plots: whether or not to generate plots
     :type plots: boolean
     :param debug: whether or not to produce output FITS files
@@ -93,10 +95,10 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load data and scale to electrons
     data = fileIO.readFITSDataExcludeScanRegions(files)
-    data *= 3.5
+    data *= gain
 
     #check that the sizes match and median combine
-    if len(set(x.shape for x in data))  > 1:
+    if len(set(x.shape for x in data)) > 1:
         sys.exit('ERROR -- files are not the same shape, cannot median combine!')
     else:
         medianCombined = np.median(data, axis=0)
@@ -189,8 +191,8 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
     return res
 
 
-def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=500,
-                        sigma=0.75, iterations=10, plot=False, debug=False):
+def testFlatCalibration(log, flats, surfaces=10, file='data/psf1x.fits', psfs=5000,
+                        sigma=0.75, iterations=7, weighting=True, plot=False, debug=False):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
     and a given number of flat fields median combined.
@@ -201,10 +203,10 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
     #read in PSF and rescale to avoid rounding or truncation errors
     data = pf.getdata(file)
     data /= np.max(data)
-    data *= 1.e5
+    data *= 300. #SNR about 10 for star...
 
     #derive reference values
-    settings = dict(sigma=sigma, iterations=iterations, weighted=False)
+    settings = dict(sigma=sigma, iterations=iterations, weighted=weighting)
     sh = shape.shapeMeasurement(data.copy(), log, **settings)
     reference = sh.measureRefinedEllipticity()
 
@@ -232,6 +234,8 @@ def testFlatCalibration(log, flats, surfaces=100, file='data/psf1x.fits', psfs=5
             print 'Random Realisations: %i / %i' % (b+1, surfaces)
 
             residual = generateResidualFlatField(combine=a, plots=plot, debug=debug)
+
+            print 'Average residual = %e' % (np.mean(residual) - 1.)
 
             # generate 2D plot
             if b == 0 and plot:
@@ -343,10 +347,13 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     f = interpolate.interp1d(frames[srt], values[srt], kind='cubic')
     vals = f(x)
     ax.plot(x, vals, ':', c='0.2', zorder=20)
-    msk = vals < reqe
-    minn = np.min(x[msk])
-    plt.text(np.mean(frames), 8e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
-             ha='center', va='center', fontsize=11)
+    try:
+        msk = vals < reqe
+        minn = np.min(x[msk])
+        plt.text(np.mean(frames), 8e-6, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+                 ha='center', va='center', fontsize=11)
+    except:
+        pass
 
     ax.fill_between(np.arange(maxx+10), np.ones(maxx+10)*reqe, 1.0, facecolor='red', alpha=0.08)
     ax.axhline(y=reqe, c='g', ls='--', label='Requirement')
@@ -402,10 +409,13 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
     f = interpolate.interp1d(frames[srt], values[srt], kind='cubic')
     vals = f(x)
     ax.plot(x, vals, ':', c='0.2', zorder=10)
-    msk = vals < reqr2
-    minn = np.min(x[msk])
-    plt.text(np.mean(frames), 2e-5, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
-             fontsize=11, ha='center', va='center')
+    try:
+        msk = vals < reqr2
+        minn = np.min(x[msk])
+        plt.text(np.mean(frames), 2e-5, r'Flats Required $\raise-.5ex\hbox{$\buildrel>\over\sim$}$ %i' % np.ceil(minn),
+                 fontsize=11, ha='center', va='center')
+    except:
+        pass
 
     #show the requirement
     ax.fill_between(np.arange(maxx+10), np.ones(maxx+10)*reqr2, 1.0, facecolor='red', alpha=0.08)
@@ -491,7 +501,7 @@ def plotNumberOfFrames(results, reqe=3e-5, reqr2=1e-4, shift=0.1, outdir='result
         plt.close()
 
 
-def findTolerableError(log, file='data/psf4x.fits', oversample=4.0, psfs=1000, iterations=7, sigma=0.75):
+def findTolerableError(log, file='data/psf4x.fits', oversample=4.0, psfs=10000, iterations=7, sigma=0.75):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
     pixel-to-pixel variations.
@@ -501,13 +511,13 @@ def findTolerableError(log, file='data/psf4x.fits', oversample=4.0, psfs=1000, i
     data /= np.max(data)
 
     #PSF scalings for the peak pixel, in electrons
-    scales = np.random.random_integers(3e2, 1e5, psfs)
+    scales = np.random.random_integers(1e2, 2e5, psfs)
 
     #set the scale for shape measurement
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
 
     #residual from a perfect no pixel-to-pixel non-uniformity
-    residuals = np.logspace(-7, -1.6, 10)[::-1] #largest first
+    residuals = np.logspace(-7, -1.6, 9)[::-1] #largest first
     tot = residuals.size
     res = {}
     for i, residual in enumerate(residuals):
@@ -726,7 +736,7 @@ if __name__ == '__main__':
     run = True
     debug = False
     plots = True
-    error = True
+    error = False
 
     #start the script
     log = lg.setUpLogger('flatfieldCalibration.log')
@@ -734,23 +744,22 @@ if __name__ == '__main__':
 
     if error:
         res = findTolerableError(log)
+
         fileIO.cPickleDumpDictionary(res, 'errors/residuals.pk')
         res = cPickle.load(open('errors/residuals.pk'))
-        plotTolerableErrorE(res, output='FlatFieldingTolerableErrorE.pdf')
-        plotTolerableErrorR2(res, output='FlatFieldingTolerableErrorR2.pdf')
 
+        plotTolerableErrorE(res, output='errors/FlatFieldingTolerableErrorE.pdf')
+        plotTolerableErrorR2(res, output='errors/FlatFieldingTolerableErrorR2.pdf')
+
+    if run:
+        results = testFlatCalibration(log, flats=np.arange(5, 100, 9))
+        fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
+
+    if debug:
         #calculate RMS on image with x frames combined together
         combined = generateResidualFlatField(combine=30, plots=True, debug=True)
         print np.std(combined), np.std(combined[500:561, 500:561]), np.std(combined[300:361, 300:361])
 
-    if run:
-        results = testFlatCalibration(log, flats=np.arange(11, 91, 10), sigma=15., iterations=20,
-                                      surfaces=5, psfs=500, file='data/psf1x.fits')
-        #results = testFlatCalibration(log, flats=np.arange(5, 105, 5), surfaces=200, psfs=1000, file='psf1xhighe.fits')
-        fileIO.cPickleDumpDictionary(results, 'flatfieldResults.pk')
-
-    if debug:
-        residual = generateResidualFlatField(combine=30, plots=True, debug=True)
         results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
         plotNumberOfFrames(results)
 

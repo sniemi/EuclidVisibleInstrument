@@ -66,7 +66,7 @@
 <li><a class="reference internal" href="#module-analysis.biasCalibration">VIS data reduction studies</a><ul>
 <li><a class="reference internal" href="#bias-calibration">Bias Calibration</a></li>
 <li><a class="reference internal" href="#flat-field-calibration">Flat Field Calibration</a></li>
-<li><a class="reference internal" href="#non-linearity-i-calibration">Non-linearity I: Calibration</a></li>
+<li><a class="reference internal" href="#non-linearity-i-detection-chain">Non-linearity I: Detection Chain</a></li>
 <li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
 <li><a class="reference internal" href="#cosmic-ray-rejection">Cosmic Ray Rejection</a></li>
 <li><a class="reference internal" href="#impact-of-ghost-images">Impact of Ghost Images</a></li>
@@ -213,7 +213,7 @@ the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 </table>
 <dl class="function">
 <dt id="analysis.biasCalibration.addReadoutNoise">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">addReadoutNoise</tt><big>(</big><em>data</em>, <em>readnoise=4.5</em>, <em>gain=3.5</em>, <em>number=1</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.addReadoutNoise" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">addReadoutNoise</tt><big>(</big><em>data</em>, <em>readnoise=4.5</em>, <em>gain=3.1</em>, <em>number=1</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.addReadoutNoise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add readout noise to the input data. The readout noise is the median of the number of frames.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -239,7 +239,7 @@ the local PSF R2 shall not exceed 1x10-4 (one sigma).</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorPiston">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorPiston</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>samples=12</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorPiston" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias offset.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -254,7 +254,7 @@ bias offset.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.findTolerableErrorSlope">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">findTolerableErrorSlope</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>samples=12</em>, <em>psfs=4000</em>, <em>sigma=0.36</em>, <em>iterations=5</em>, <em>pixels=60</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.findTolerableErrorSlope" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 bias slope.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -345,7 +345,7 @@ the surface that also affect the results, however, to a lesser degree.</p>
 
 <dl class="function">
 <dt id="analysis.biasCalibration.testBiasCalibrationSigma">
-<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=3500</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=100000.0</em>, <em>gain=3.5</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationSigma</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=3500</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=100000.0</em>, <em>gain=3.1</em>, <em>debug=False</em>, <em>plots=True</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationSigma" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of biases median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>
@@ -394,7 +394,7 @@ takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.95</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.96</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -404,14 +404,14 @@ takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than
 </table>
 <dl class="function">
 <dt id="analysis.FlatfieldCalibration.findTolerableError">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">findTolerableError</tt><big>(</big><em>log</em>, <em>file='data/psf4x.fits'</em>, <em>oversample=4.0</em>, <em>psfs=1000</em>, <em>iterations=7</em>, <em>sigma=0.75</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.findTolerableError" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">findTolerableError</tt><big>(</big><em>log</em>, <em>file='data/psf4x.fits'</em>, <em>oversample=4.0</em>, <em>psfs=10000</em>, <em>iterations=7</em>, <em>sigma=0.75</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.findTolerableError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate ellipticity and size for PSFs of different scaling when there is a residual
 pixel-to-pixel variations.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="analysis.FlatfieldCalibration.generateResidualFlatField">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">generateResidualFlatField</tt><big>(</big><em>files='Q0*flatfield*.fits'</em>, <em>combine=77</em>, <em>lampfile='data/VIScalibrationUnitflux.fits'</em>, <em>reference='data/VISFlatField1percent.fits'</em>, <em>plots=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.generateResidualFlatField" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">generateResidualFlatField</tt><big>(</big><em>files='Q0*flatfield*.fits'</em>, <em>combine=77</em>, <em>lampfile='data/VIScalibrationUnitflux.fits'</em>, <em>reference='data/VISFlatField1percent.fits'</em>, <em>gain=3.5</em>, <em>plots=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.generateResidualFlatField" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a median combined flat field residual from given input files.</p>
 <p>Randomly draws a given number (kw combine) of files from the file list identified using the files kw.
 Median combine all files before the lamp profile given by lampfile kw is being divided out. This
@@ -427,6 +427,7 @@ that was derived.</p>
 <li><strong>combine</strong> (<em>int</em>) &#8211; number of files to median combine</li>
 <li><strong>lampfile</strong> (<em>str</em>) &#8211; name of the calibration unit flux profile FITS file</li>
 <li><strong>reference</strong> (<em>str</em>) &#8211; name of the reference pixel-to-pixel flat field FITS file</li>
+<li><strong>gain</strong> (<em>float</em>) &#8211; gain factor [e/ADU]</li>
 <li><strong>plots</strong> (<em>boolean</em>) &#8211; whether or not to generate plots</li>
 <li><strong>debug</strong> (<em>boolean</em>) &#8211; whether or not to produce output FITS files</li>
 </ul>
@@ -478,7 +479,7 @@ flat field can be correctly calculated.</p>
 
 <dl class="function">
 <dt id="analysis.FlatfieldCalibration.testFlatCalibration">
-<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibration</tt><big>(</big><em>log</em>, <em>flats</em>, <em>surfaces=100</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=500</em>, <em>sigma=0.75</em>, <em>iterations=10</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibration" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.FlatfieldCalibration.</tt><tt class="descname">testFlatCalibration</tt><big>(</big><em>log</em>, <em>flats</em>, <em>surfaces=10</em>, <em>file='data/psf1x.fits'</em>, <em>psfs=5000</em>, <em>sigma=0.75</em>, <em>iterations=7</em>, <em>weighting=True</em>, <em>plot=False</em>, <em>debug=False</em><big>)</big><a class="headerlink" href="#analysis.FlatfieldCalibration.testFlatCalibration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
 and a given number of flat fields median combined.</p>
 <p>This function is to derive the the actual values so that the knowledge (variance) can be studied.</p>
@@ -491,8 +492,8 @@ and a given number of flat fields median combined.</p>
 </dd></dl>
 
 </div>
-<span class="target" id="module-analysis.nonlinearityCalibration"></span><div class="section" id="non-linearity-i-calibration">
-<h2>Non-linearity I: Calibration<a class="headerlink" href="#non-linearity-i-calibration" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-analysis.nonlinearityCalibration"></span><div class="section" id="non-linearity-i-detection-chain">
+<h2>Non-linearity I: Detection Chain<a class="headerlink" href="#non-linearity-i-detection-chain" title="Permalink to this headline">¶</a></h2>
 <p>This simple script can be used to study the error in the non-linearity correction that can be tolerated given the
 requirements.</p>
 <p>The following requirements related to the non-linearity have been taken from GDPRD.</p>
@@ -518,7 +519,7 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -678,7 +679,7 @@ direction.</p>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -784,7 +785,7 @@ direction.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
 </tr>
 <tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -824,7 +825,7 @@ direction.</p>
 
 <dl class="function">
 <dt id="analysis.analyseGhosts.analyseOutofFocusImpact">
-<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">analyseOutofFocusImpact</tt><big>(</big><em>log</em>, <em>filename='data/psf4x.fits'</em>, <em>psfscale=100000</em>, <em>maxdistance=100</em>, <em>inner=8</em>, <em>outer=60</em>, <em>oversample=4.0</em>, <em>psfs=1000</em>, <em>iterations=6</em>, <em>sigma=0.75</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.analyseOutofFocusImpact" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">analyseOutofFocusImpact</tt><big>(</big><em>log</em>, <em>filename='data/psf4x.fits'</em>, <em>psfscale=100000</em>, <em>maxdistance=100</em>, <em>inner=8</em>, <em>outer=60</em>, <em>oversample=4.0</em>, <em>psfs=5000</em>, <em>iterations=5</em>, <em>sigma=0.75</em>, <em>lowghost=-7</em>, <em>highghost=-2</em>, <em>samples=9</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.analyseOutofFocusImpact" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates PSF size and ellipticity when including an out-of-focus doughnut of a given contrast level.
 The dougnut pixel values are all scaled to a given scaling value (requirement 5e-5).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -842,6 +843,9 @@ The dougnut pixel values are all scaled to a given scaling value (requirement 5e
 <li><strong>psfs</strong> &#8211; number of PSFs to analyse (number of ghosts in random locations)</li>
 <li><strong>iterations</strong> &#8211; number of iterations in the shape measurement</li>
 <li><strong>sigma</strong> &#8211; size of the Gaussian weighting function</li>
+<li><strong>lowghost</strong> &#8211; log of the highest ghost contrast ratio to study</li>
+<li><strong>highghost</strong> &#8211; log of the lowest ghost contrast ratio to study</li>
+<li><strong>samples</strong> &#8211; number of points for the contrast ratio to study</li>
 </ul>
 </td>
 </tr>
@@ -849,6 +853,26 @@ The dougnut pixel values are all scaled to a given scaling value (requirement 5e
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.deleteAndMove">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">deleteAndMove</tt><big>(</big><em>dir</em>, <em>files='*.fits'</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.deleteAndMove" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dir</strong> &#8211; </li>
+<li><strong>files</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
 </td>
 </tr>
 </tbody>

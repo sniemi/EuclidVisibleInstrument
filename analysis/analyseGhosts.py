@@ -156,7 +156,7 @@ def analyseInFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, maxdi
 
 
 def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, maxdistance=100,
-                            inner=8, outer=60, oversample=4.0, psfs=2000, iterations=5, sigma=0.75,
+                            inner=8, outer=60, oversample=4.0, psfs=5000, iterations=5, sigma=0.75,
                             lowghost=-7, highghost=-2, samples=9):
     """
     Calculates PSF size and ellipticity when including an out-of-focus doughnut of a given contrast level.
@@ -251,7 +251,7 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
     return res
 
 
-def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=100, distance=750,
+def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=2e5, distance=750,
                             inner=8, outer=60, oversample=12.0, iterations=20, sigma=0.75,
                             scale=5e-5, fixedPosition=True):
     #set sampling etc. for shape measurement

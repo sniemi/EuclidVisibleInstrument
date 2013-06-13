@@ -1,6 +1,6 @@
 """
-Non-linearity I: Calibration
-============================
+Non-linearity I: Detection Chain
+================================
 
 This simple script can be used to study the error in the non-linearity correction that can be tolerated given the
 requirements.
@@ -22,7 +22,7 @@ error sigma(R**2)/R**2 on the determination of the local PSF R**2 shall not exce
 :version: 0.97
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)
@@ -126,6 +126,7 @@ def testNonlinearity(log, file='data/psf12x.fits', oversample=12.0, sigma=0.75, 
                 #apply nonlinearity model to the scaled PSF
                 scaled = data.copy() * scale
                 newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(scaled, amp, phase=phase, multi=multiplier)
+                newdata[newdata < 0.] = 0.
 
                 #measure e and R2 from the postage stamp image
                 sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
@@ -347,7 +348,7 @@ def plotResults(results, reqe=3e-5, reqr2=1e-4, outdir='results', timeStamp=Fals
 
 
 def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
-                          scale=2e5, amp=0.1, phase=0.98, multiplier=1.5, outdir='.'):
+                          scale=2e5, amp=1e-3, phase=0.98, multiplier=1.5, outdir='.'):
     #read in PSF and renormalize it to norm
     data = pf.getdata(file)
     data /= np.max(data)
@@ -361,10 +362,7 @@ def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
 
     #apply nonlinearity model to the scaled PSF
     newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(data.copy(), amp, phase=phase, multi=multiplier)
-
-    fileIO.writeFITS(data, outdir+'/scaledPSF.fits')
-    fileIO.writeFITS(newdata, outdir+'nonlinearData.fits')
-    fileIO.writeFITS(newdata/data, outdir+'nonlinearRatio.fits')
+    newdata[newdata < 0.] = 0.
 
     #measure e and R2 from the postage stamp image
     sh = shape.shapeMeasurement(newdata.copy(), log, **settings)
@@ -373,10 +371,14 @@ def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
 
     print reference['ellipticity'] - results['ellipticity'], reference['R2'] - results['R2']
 
+    fileIO.writeFITS(data, outdir + '/scaledPSF.fits', int=False)
+    fileIO.writeFITS(newdata, outdir + '/nonlinearData.fits', int=False)
+    fileIO.writeFITS(newdata / data, outdir + '/nonlinearRatio.fits', int=False)
+
 
 if __name__ == '__main__':
     run = True
-    debug = True
+    debug = False
     plot = True
 
     #different runs
@@ -389,6 +391,7 @@ if __name__ == '__main__':
             'run7': dict(phase=0.98, multiplier=4.0)}
 
     for key, value in runs.iteritems():
+        print key
         if not os.path.exists(key):
             os.makedirs(key)
 
@@ -401,7 +404,7 @@ if __name__ == '__main__':
         if run:
             if debug:
                 testNonlinearityModel(phase=value['phase'], outdir=key)
-                res = testNonlinearity(log, psfs=1000, file='data/psf1x.fits', oversample=1.0, phs=value['phase'])
+                res = testNonlinearity(log, psfs=2000, file='data/psf1x.fits', oversample=1.0, phs=value['phase'])
             else:
                 res = testNonlinearity(log)
 

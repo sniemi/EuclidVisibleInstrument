@@ -241,7 +241,7 @@ def testBiasCalibrationDelta(log, numdata=2066, floor=995, xsize=2048, ysize=206
 
 
 def testBiasCalibrationSigma(log, numdata=2066, floor=3500, xsize=2048, ysize=2066, order=3, biases=15, surfaces=100,
-                             file='psf1x.fits', psfs=500, psfscale=1e5, gain=3.5,
+                             file='psf1x.fits', psfs=500, psfscale=1e5, gain=3.1,
                              debug=False, plots=True):
     """
     Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
@@ -723,7 +723,7 @@ def plotNumberOfFramesSigma(results, reqe=3e-5, reqr2=1e-4, shift=0.1, timeStamp
     plt.close()
 
 
-def addReadoutNoise(data, readnoise=4.5, gain=3.5, number=1):
+def addReadoutNoise(data, readnoise=4.5, gain=3.1, number=1):
     """
     Add readout noise to the input data. The readout noise is the median of the number of frames.
 
@@ -751,7 +751,7 @@ def addReadoutNoise(data, readnoise=4.5, gain=3.5, number=1):
     return data + bias
 
 
-def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
+def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0, samples=12,
                              psfs=4000, sigma=0.36, iterations=5, debug=False):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
@@ -775,7 +775,7 @@ def findTolerableErrorPiston(log, file='data/psf12x.fits', oversample=12.0,
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
 
     #residual from a perfectly flat surface, pistons are in electrons
-    pistons = np.logspace(-5, 1, 12)
+    pistons = np.logspace(-5, 1, samples)
     tot = pistons.size
     res = {}
     for i, piston in enumerate(pistons):
@@ -859,8 +859,7 @@ def pistonKnowledge(log, file='data/psf2x.fits', oversample=2.0, psfs=1000, sigm
     return res
 
 
-
-def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
+def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0, samples=12,
                             psfs=4000, sigma=0.36, iterations=5, pixels=60):
     """
     Calculate ellipticity and size for PSFs of different scaling when there is a residual
@@ -884,7 +883,7 @@ def findTolerableErrorSlope(log, file='data/psf12x.fits', oversample=12.0,
     settings = dict(sampling=1.0/oversample, itereations=iterations, sigma=sigma)
 
     #the slope is in electrons
-    slopes = np.logspace(-4, 0.5, 12)
+    slopes = np.logspace(-4, 0.5, samples)
     tot = slopes.size
     res = {}
     for i, slope in enumerate(slopes):
@@ -1023,8 +1022,8 @@ def plotTolerableErrorE(res, title, output, req=3e-5):
 
 
 if __name__ == '__main__':
-    run = False
-    plot = False
+    run = True
+    plot = True
     error = True
     debug = False
 
@@ -1032,40 +1031,39 @@ if __name__ == '__main__':
     log = lg.setUpLogger('biasCalibration.log')
     log.info('Testing bias level calibration...')
 
-    res = pistonKnowledge(log)
-    plotTolerableErrorE(res, r'VIS Bias Calibration: Piston', output='BiasCalibrationEPistonKnowledge.pdf')
-    plotTolerableErrorR2(res, r'VIS Bias Calibration: Piston', output='BiasCalibrationR2PistonKnowledge.pdf')
+    if error:
+        if debug:
+            resPiston = findTolerableErrorPiston(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=500,
+                                                 samples=8)
+            resSlope = findTolerableErrorSlope(log, file='data/psf1x.fits', oversample=1.0, iterations=4, psfs=500,
+                                               samples=8)
+        else:
+            resPiston = findTolerableErrorPiston(log)
+            resSlope = findTolerableErrorSlope(log)
 
-    # if error:
-    #     if debug:
-    #         resPiston = findTolerableErrorPiston(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
-    #         resSlope = findTolerableErrorSlope(log, file='data/psf2x.fits', oversample=2.0, iterations=4, psfs=2000)
-    #     else:
-    #         resPiston = findTolerableErrorPiston(log)
-    #         resSlope = findTolerableErrorSlope(log)
-    #
-    #     fileIO.cPickleDumpDictionary(resPiston, 'piston.pk')
-    #     plotTolerableErrorE(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorEPiston.pdf')
-    #     plotTolerableErrorR2(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorR2Piston.pdf')
-    #
-    #     fileIO.cPickleDumpDictionary(resSlope, 'slope.pk')
-    #     plotTolerableErrorE(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorESlope.pdf')
-    #     plotTolerableErrorR2(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorR2Slope.pdf')
-    #
-    # if run:
-    #     print '\nSigma run:'
-    #     resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=1000, surfaces=200,
-    #                                             file='psf1xhighe.fits', plots=False)
-    #     fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
-    #     print '\nDelta run:'
-    #     resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=1000, surfaces=200, plots=False, file='psf1xhighe.fits')
-    #     fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
-    #
-    # if plot:
-    #     if not run:
-    #         resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
-    #         resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
-    #     plotNumberOfFramesSigma(resultsSigma)
-    #     plotNumberOfFramesDelta(resultsDelta)
+        fileIO.cPickleDumpDictionary(resPiston, 'piston.pk')
+        plotTolerableErrorE(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorEPiston.pdf')
+        plotTolerableErrorR2(resPiston, r'VIS Bias Calibration: Piston', output='BiasCalibrationTolerableErrorR2Piston.pdf')
+
+        fileIO.cPickleDumpDictionary(resSlope, 'slope.pk')
+        plotTolerableErrorE(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorESlope.pdf')
+        plotTolerableErrorR2(resSlope, r'VIS Bias Calibration: Tilt', output='BiasCalibrationTolerableErrorR2Slope.pdf')
+
+    if run:
+        print '\nSigma run:'
+        resultsSigma = testBiasCalibrationSigma(log, biases=10, psfs=5000, surfaces=100,
+                                                file='psf1xhighe.fits', plots=False)
+        fileIO.cPickleDumpDictionary(resultsSigma, 'biasResultsSigma.pk')
+        print '\nDelta run:'
+        resultsDelta = testBiasCalibrationDelta(log, biases=2, psfs=5000, surfaces=100,
+                                                plots=False, file='psf1xhighe.fits')
+        fileIO.cPickleDumpDictionary(resultsDelta, 'biasResultsDelta.pk')
+
+    if plot:
+        if not run:
+            resultsDelta = cPickle.load(open('biasResultsDelta.pk'))
+            resultsSigma = cPickle.load(open('biasResultsSigma.pk'))
+        plotNumberOfFramesSigma(resultsSigma)
+        plotNumberOfFramesDelta(resultsDelta)
 
     log.info('Run finished...\n\n\n')

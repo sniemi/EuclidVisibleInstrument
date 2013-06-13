@@ -16,10 +16,11 @@ class cosmicrays():
     def __init__(self, log, image, crInfo=None, information=None):
         """
 
-        :param log:
-        :param image:
-        :param crInfo:
-        :param information:
+        :param log: logger instance
+        :param image: image to which cosmic rays are added to (a copy is made not to change the original numpy array)
+        :param crInfo: column information (cosmic ray file)
+        :param information: cosmic ray track information (file containing track length and energy information) and
+                            exposure time.
         :return:
         """
         #setup logger
@@ -63,7 +64,7 @@ class cosmicrays():
         :param l: lengths of the cosmic ray tracks
         :param phi: orientation angles of the cosmic ray tracks
 
-        :return: map
+        :return: cosmic ray map (image)
         :rtype: nd-array
         """
         #create empty array
@@ -124,8 +125,8 @@ class cosmicrays():
 
             #check if no intercepts were found
             if n < 1:
-                i = np.floor(x0[cosmics])
-                j = np.floor(y0[cosmics])
+                i = int(np.floor(x0[cosmics]))
+                j = int(np.floor(y0[cosmics]))
                 crImage[j, i] += lum[cosmics]
 
             #Find the arguments that sort the intersections along the track.
@@ -142,8 +143,8 @@ class cosmicrays():
             #Decide which cell each interval traverses, and the path length.
             for i in xrange(1, n - 1):
                 w = u[i + 1] - u[i]
-                cx = 1 + np.floor((x[i + 1] + x[i]) / 2.0)
-                cy = 1 + np.floor((y[i + 1] + y[i]) / 2.0)
+                cx = int(1 + np.floor((x[i + 1] + x[i]) / 2.))
+                cy = int(1 + np.floor((y[i + 1] + y[i]) / 2.))
 
                 if cx >= 0 and cx < self.xsize and cy >= 0 and cy < self.ysize:
                     crImage[cy, cx] += (w * lum[cosmics])
@@ -226,10 +227,10 @@ class cosmicrays():
 
         #draw the length of the tracks
         ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
-        self.cr['cr_l'] = np.asarray([ius(luck),])
+        self.cr['cr_l'] = ius(luck)
 
         #set the energy directly to the limit
-        self.cr['cr_e'] = np.asarray([limit,])
+        self.cr['cr_e'] = np.asarray([limit, ]*cr_n)
 
         #Choose the properties such as positions and an angle from a random Uniform dist
         cr_x = self.xsize * np.random.rand(int(np.floor(cr_n)))
@@ -267,7 +268,7 @@ class cosmicrays():
 
             #draw the length of the tracks
             ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
-            self.cr['cr_l'] = np.asarray([ius(luck),])
+            self.cr['cr_l'] = ius(luck)
 
             #set the energy directly to the limit
             self.cr['cr_e'] = np.asarray([limit,])
@@ -283,10 +284,12 @@ class cosmicrays():
             #count the covering factor
             area_cr = np.count_nonzero(self.cosmicrayMap)
             covering = 100.*area_cr / (self.xsize*self.ysize)
-            text = 'The cosmic ray covering factor is %i pixels i.e. %.3f per cent' \
-                   % (area_cr, covering)
+
+            text = 'The cosmic ray covering factor is %i pixels i.e. %.3f per cent' % (area_cr, covering)
             self.log.info(text)
-            if verbose: print text
+
+            if verbose:
+                print text
 
 
     def addCosmicRays(self, limit=None):

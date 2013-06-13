@@ -13,7 +13,7 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.4
+:version: 0.45
 """
 import math, os, datetime, unittest
 import numpy as np
@@ -57,11 +57,14 @@ class shapeMeasurement():
                              pixelSize=12.0,
                              sigma=0.75,
                              weighted=True,
+                             conservePeak=True,
                              debug=False,
                              fixedPosition=False,
                              fixedX=None,
                              fixedY=None)
+
         self.settings.update(kwargs)
+
         for key, value in self.settings.iteritems():
             self.log.info('%s = %s' % (key, value))
 
@@ -165,8 +168,9 @@ class shapeMeasurement():
         exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
         Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
 
-        #normalize to unity
-        Gaussian /= np.max(Gaussian)
+        if self.settings['conservePeak']:
+            #normalize to unity
+            Gaussian /= np.max(Gaussian)
 
         output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
 
@@ -208,8 +212,9 @@ class shapeMeasurement():
         exponent = (sigx * (Gxmesh - x)**2 + sigy * (Gymesh - y)**2)
         Gaussian = np.exp(-exponent) / (2. * math.pi * sigmax*sigmay)
 
-        #normalize to unity
-        Gaussian /= np.max(Gaussian)
+        if self.settings['conservePeak']:
+            #normalize to unity
+            Gaussian /= np.max(Gaussian)
 
         output = dict(GaussianXmesh=Gxmesh, GaussianYmesh=Gymesh, Gaussian=Gaussian)
 
@@ -255,6 +260,7 @@ class shapeMeasurement():
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2
 
         if self.settings['debug']:
+            self.writeFITS(gaussian['Gaussian'], 'GaussianWeightingFunction.fits')
             self.writeFITS(GaussianWeighted, 'GaussianWeighted.fits')
 
         out = dict(centreX=quad['centreX']+1, centreY=quad['centreY']+1,

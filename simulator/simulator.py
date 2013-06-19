@@ -153,6 +153,7 @@ Version and change logs::
          being underestimated due to the fact that it was included as a variance not standard deviation.
     1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
          deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
+    1.21: included an option to exclude cosmic background; separated dark current from background.
 
 
 Future Work
@@ -167,6 +168,7 @@ Future Work
     #. include rotation in metrology
     #. implement optional dithered offsets
     #. try to further improve the convolution speed (look into fftw package)
+    #. CCD273 has 4 pixel row gap between the top and bottom half, this is not taken into account in coordinate shifts
 
 
 Contact Information
@@ -191,7 +193,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.2
+__version__ = 1.21
 
 
 class VISsimulator():
@@ -319,6 +321,7 @@ class VISsimulator():
             bleeding = yes
             flatfieldM = yes
             random = yes
+            background = yes
 
         For explanation of each field, see /data/test.config. Note that if an input field does not exist,
         then the values are taken from the default instrument model as described in
@@ -388,6 +391,14 @@ class VISsimulator():
             self.random = self.config.getboolean(self.section, 'random')
         except:
             self.random = False
+        try:
+            self.background = self.config.getboolean(self.section, 'background')
+        except:
+            self.background = True
+        try:
+            self.intscale = self.config.getboolean(self.section, 'intscale')
+        except:
+            self.intscale = True
 
 
         self.information['variablePSF'] = False
@@ -404,7 +415,9 @@ class VISsimulator():
                              addsources=self.addsources,
                              bleeding=self.bleeding,
                              overscans=self.overscans,
-                             random=self.random)
+                             random=self.random,
+                             background=self.background,
+                             intscale=self.intscale)
 
         if self.debug:
             pprint.pprint(self.information)
@@ -1329,23 +1342,40 @@ class VISsimulator():
         self.writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
 
 
-    def applyDarkCurrentAndCosmicBackground(self):
+    def applyDarkCurrent(self):
         """
-        Apply dark current and the cosmic background.
-        Scales dark and background with the exposure time.
+        Apply dark current. Scales the dark with the exposure time.
 
         Additionally saves the image without noise to a FITS file.
         """
         #save no noise image
         self.writeFITSfile(self.image, 'nonoise' + self.information['output'])
 
-        #add dark and background
-        noise = self.information['exptime'] * (self.information['dark'] + self.information['cosmic_bkgd'])
-        self.image += noise
-        self.log.info('Added dark noise and cosmic background = %f' % noise)
+        #add dark
+        dark = self.information['exptime'] * self.information['dark']
+        self.image += dark
+        self.log.info('Added dark current = %f' % dark)
 
         if self.cosmicRays:
-            self.imagenoCR += noise
+            self.imagenoCR += dark
+
+
+    def applyCosmicBackground(self):
+        """
+        Apply dark the cosmic background. Scales the background with the exposure time.
+
+        Additionally saves the image without noise to a FITS file.
+        """
+        #save no noise image
+        self.writeFITSfile(self.image, 'nobackground' + self.information['output'])
+
+        #add background
+        bcgr = self.information['exptime'] * self.information['cosmic_bkgd']
+        self.image += bcgr
+        self.log.info('Added cosmic background = %f' % bcgr)
+
+        if self.cosmicRays:
+            self.imagenoCR += bcgr
 
 
     def applyScatteredLight(self):
@@ -1610,8 +1640,9 @@ class VISsimulator():
         hdu = pf.ImageHDU(data=self.image)
 
         #convert to unsigned 16bit
-        hdu.scale('int16', '', bzero=32768)
-        hdu.header.add_history('Scaled to unsigned 16bit integer!')
+        if self.intscale:
+            hdu.scale('int16', '', bzero=32768)
+            hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #add WCS to the header
         hdu.header.update('WCSAXES', 2)
@@ -1652,7 +1683,7 @@ class VISsimulator():
                 key = key[:7]
             hdu.header.update(key.upper(), str(value), 'Boolean Flags')
 
-        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
         hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
                                                                            datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
@@ -1694,7 +1725,10 @@ class VISsimulator():
             self.applyBleeding()
 
         if self.noise:
-            self.applyDarkCurrentAndCosmicBackground()
+            self.applyDarkCurrent()
+
+        if self.background:
+            self.applyCosmicBackground()
 
         if self.scatteredlight:
             self.applyScatteredLight()
@@ -1724,7 +1758,8 @@ class VISsimulator():
         else:
             self.applyBias()
 
-        self.discretise()
+        if self.intscale:
+            self.discretise()
 
         self.writeOutputs()
 

@@ -106,6 +106,80 @@ def testCTIcorrection(log, files, sigma=0.75, iterations=4, xcen=1900, ycen=1900
     return results
 
 
+def testCTIcorrectionNonoise(log, files, sigma=0.75, iterations=4, xcen=1900, ycen=1900, side=20):
+    """
+    Calculates PSF properties such as ellipticity and size from data without CTI and with CTI.
+
+    :param log: python logger instance
+    :type log: instance
+    :param files: a list of files to be processed
+    :type files: list
+    :param sigma: size of the Gaussian weighting function
+    :type sigma: float
+    :param iterations: the number of iterations for the moment based shape estimator
+    :type iterations: int
+    :param xcen: x-coordinate of the object centre
+    :type xcen: int
+    :param ycen: y-coordinate of the object centre
+    :type ycen: int
+    :param side: size of the cutout around the centre (+/- side)
+    :type side: int
+
+    :return: ellipticity and size
+    :rtype: dict
+    """
+    settings = dict(sigma=sigma, iterations=iterations)
+
+    eclean = []
+    e1clean = []
+    e2clean = []
+    R2clean = []
+    ereduced = []
+    e1reduced = []
+    e2reduced = []
+    R2reduced = []
+    for file in files:
+        #load no cti data
+        nocti = pf.getdata(file.replace('reduced', 'nocti'))[ycen-side:ycen+side, xcen-side:xcen+side]
+        #subtract background
+        nocti -= 27.765714285714285
+        nocti[nocti < 0.] = 0.  #remove negative numbers
+
+        #load reduced data
+        reduced = pf.getdata(file)[ycen-side:ycen+side, xcen-side:xcen+side]
+        reduced[reduced < 0.] = 0. #remove negative numbers
+
+        sh = shape.shapeMeasurement(nocti, log, **settings)
+        results = sh.measureRefinedEllipticity()
+
+        eclean.append(results['ellipticity'])
+        e1clean.append(results['e1'])
+        e2clean.append(results['e2'])
+        R2clean.append(results['R2'])
+
+        sh = shape.shapeMeasurement(reduced, log, **settings)
+        results = sh.measureRefinedEllipticity()
+
+        ereduced.append(results['ellipticity'])
+        e1reduced.append(results['e1'])
+        e2reduced.append(results['e2'])
+        R2reduced.append(results['R2'])
+
+    results = {'eclean' : np.asarray(eclean),
+               'e1clean' : np.asarray(e1clean),
+               'e2clean' : np.asarray(e2clean),
+               'R2clean' : np.asarray(R2clean),
+               'ereduced' : np.asarray(ereduced),
+               'e1reduced' : np.asarray(e1reduced),
+               'e2reduced' : np.asarray(e2reduced),
+               'R2reduced' : np.asarray(R2reduced)}
+
+    #save to a file
+    fileIO.cPickleDumpDictionary(results, 'results.pk')
+
+    return results
+
+
 def plotResults(results):
     """
     Plot the CTI correction algorithm results.
@@ -146,4 +220,7 @@ if __name__ == '__main__':
     log = lg.setUpLogger('testShapeMeasurement.log')
 
     results = testCTIcorrection(log, g.glob('reducedQ0_00_00stars*'), iterations=8, side=25)
+    plotResults(results)
+
+    results = testCTIcorrection(log, g.glob('Q0_00_00stars*'), iterations=8, side=25)
     plotResults(results)

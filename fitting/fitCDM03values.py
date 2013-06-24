@@ -2,14 +2,14 @@
 Simple script to fit CDM03 CTI model parameters to measurements.
 
 :requires: SciPy
-:requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
+:requires: CDM03 (FORTRAN code, f2py -c -m cdm03bidir cdm03bidir.f90)
 :requires: NumPy
 :requires: matplotlib
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@ucl.ac.uk
 
-:version: 0.1
+:version: 0.2
 """
 import matplotlib
 matplotlib.use('PDF')
@@ -21,82 +21,52 @@ matplotlib.rcParams['xtick.labelsize'] = 'large'
 matplotlib.rcParams['ytick.labelsize'] = 'large'
 matplotlib.rcParams['legend.fontsize'] = 11
 import scipy.optimize
-import cdm03
+import cdm03bidir
 import numpy as np
 from matplotlib import pyplot as plt
 import support.logger as lg
 
 
-def applyRadiationDamage(data, nt, sigma, taur, iquadrant=0, rdose=3e10):
+def applyRadiationDamageBiDir(data, nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, iquadrant=0, rdose=1.6e10):
     """
-    Apply radian damage based on FORTRAN CDM03 model. The method assumes that
-    input data covers only a single quadrant defined by the iquadrant integer.
-
-    :param data: imaging data to which the CDM03 model will be applied to.
-    :type data: ndarray
-
-
-
-    :param iquandrant: number of the quadrant to process:
-    :type iquandrant: int
-
-    cdm03 - Function signature:
-      sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[xdim,ydim,zdim])
-    Required arguments:
-      sinp : input rank-2 array('f') with bounds (xdim,ydim)
-      iflip : input int
-      jflip : input int
-      dob : input float
-      rdose : input float
-      in_nt : input rank-1 array('d') with bounds (zdim)
-      in_sigma : input rank-1 array('d') with bounds (zdim)
-      in_tr : input rank-1 array('d') with bounds (zdim)
-    Optional arguments:
-      xdim := shape(sinp,0) input int
-      ydim := shape(sinp,1) input int
-      zdim := len(in_nt) input int
-    Return objects:
-      sout : rank-2 array('f') with bounds (xdim,ydim)
-
-    :Note: Because Python/NumPy arrays are different row/column based, one needs
-           to be extra careful here. NumPy.asfortranarray will be called to get
-           an array laid out in Fortran order in memory.
-
 
     :return: image that has been run through the CDM03 model
     :rtype: ndarray
     """
-    #call Fortran routine
-    CTIed = cdm03.cdm03(np.asfortranarray(data),
-                        iquadrant % 2, iquadrant / 2,
-                        0.0, rdose,
-                        nt, sigma, taur,
-                        [data.shape[0], data.shape[1], len(nt)])
 
-    return CTIed
+    #read in trap information
+    CTIed = cdm03bidir.cdm03(data,
+                        iquadrant%2, iquadrant/2,
+                        0.0, rdose,
+                        nt_p, sigma_p, taur_p,
+                        nt_s, sigma_s, taur_s,
+                        [data.shape[0], data.shape[1], len(nt_p), len(nt_p)])
+    return np.asanyarray(CTIed)
 
 
 def fitfunc(p, x):
     """
     Functional form to be fitted.
     """
+    #serial fixed
+    nt_s = [20, 10, 2.]
+    sigma_s = [6e-20, 1.13e-14, 5.2e016]
+    taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
+
     #keep sigma and taur fixed
-    nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
-    sigma = [2.2e-13, 2.2e-13, 4.72e-15, 1.37e-16, 2.78e-17, 1.93e-17, 6.39e-18]
-    taur = [0.00000082, 0.0003, 0.002, 0.025, 0.124, 16.7, 496.0]
+    nt_p = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
+    sigma_p = [2.2e-13, 2.2e-13, 4.72e-15, 1.37e-16, 2.78e-17, 1.93e-17, 6.39e-18]
+    taur_p = [0.00000082, 0.0003, 0.002, 0.025, 0.124, 16.7, 496.0]
 
     #params that are being fit
-    #nt = p[:7]
-    nt[1:4] = p#[:3]
-    #taur = p[7:]
-    #taur[:3] = p[3:]
+    nt_p[1:4] = p#[:3]
 
-    y = applyRadiationDamage(x.transpose(), nt, sigma, taur).transpose()[1063:1090, 0]
+    y = applyRadiationDamageBiDir(x.transpose(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s).transpose()[1063:1090, 0]
 
     return y
 
 
-def plotPosition(values, profile, fits, xstart=1060, len=13, output='StartingPosition.pdf'):
+def plotPosition(values, profile, fits, xstart=1060, len=15, output='StartingPosition.pdf'):
     """
     Simple plotting script.
     """
@@ -118,14 +88,21 @@ def plotPosition(values, profile, fits, xstart=1060, len=13, output='StartingPos
 
 
 if __name__ == '__main__':
-    electrons = 44000.
+    electrons = 43500.
 
     #set up logger
     log = lg.setUpLogger('fitting.log')
 
-    #input measurement values (taken from an Excel spreadsheet)
-    values = np.loadtxt('CTIdata.txt')
-    values = values / np.max(values) * electrons
+    #input measurement values
+    datafolder = '/Users/smn2/EUCLID/CTItesting/data/'
+    gain1 = 1.17
+
+    tmp = np.loadtxt(datafolder + 'CCD204_05325-03-02_Hopkinson_EPER_data_200kHz_one-output-mode_1.6e10-50MeV.txt',
+                     usecols=(0, 6)) #6 = 152.55K
+    ind = tmp[:, 0]
+    values = tmp[:, 1]
+    values = values[ind > 0.]
+    values *= gain1
     vals = np.ones((2066, 1)) * 4.0
     ln = len(values)
     vals[1063:1063+ln, 0] = values
@@ -137,31 +114,31 @@ if __name__ == '__main__':
     data = np.zeros((2066, 2048))
     data[1053:1064, :] = electrons
 
-    #Values that were in the CDM03 model prior May 9th 2012
-    nt = [5.0, 0.22, 0.2, 0.1, 0.043, 0.39, 1.0]
-    sigma = [2.2e-13,2.2e-13,4.72e-15,1.37e-16,2.78e-17,1.93e-17,6.39e-18]
-    taur = [0.00000082, 0.0003, 0.002, 0.025, 0.124, 16.7, 496.0]
+    #Initial CTI values
+    f1 = 'cdm_euclid_parallel.dat'
+    trapdata = np.loadtxt(f1)
+    nt_p = trapdata[:, 0]
+    sigma_p = trapdata[:, 1]
+    taur_p = trapdata[:, 2]
+    f2 = 'cdm_euclid_serial.dat'
+    trapdata = np.loadtxt(f2)
+    nt_s = trapdata[:, 0]
+    sigma_s = trapdata[:, 1]
+    taur_s = trapdata[:, 2]
 
     #get the starting profile and plot it
-    profile1 = applyRadiationDamage(data.transpose(), nt, sigma, taur).transpose()
-    plotPosition(vals, profile1, dict(nt=nt, sigma=sigma, taur=taur))
-
-    #get the starting profile and plot it
-    #profile2 = applyRadiationDamage(data.transpose()/10., nt, sigma, taur).transpose()
-    #plotPosition(vals/10., profile2, dict(nt=nt, sigma=sigma, taur=taur), output='LowElectrons.pdf')
-
-    #initial guesses for trap densities
-    nt = [5.0, 0.25, 0.24, 0.14, 0.043, 0.39, 1.]
+    profile1 = applyRadiationDamageBiDir(data.transpose(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s).transpose()
+    plotPosition(vals, profile1, dict(nt=nt_p, sigma=sigma_p, taur=taur_p))
 
     #write these to the log file
     log.info('Initial Guess Values:')
-    log.info('nt='+str(nt))
-    log.info('sigma='+str(sigma))
-    log.info('taur='+str(taur))
+    log.info('nt='+str(nt_p))
+    log.info('sigma='+str(sigma_p))
+    log.info('taur='+str(taur_p))
 
     #combine to a single Python list
     #params = nt + taur
-    params = nt[1:4] #+ taur[:3]
+    params = nt_p[1:4] #+ taur[:3]
 
     #even/uneven weighting scheme
     weights = np.arange(27.)*0.01 + 0.095
@@ -173,30 +150,30 @@ if __name__ == '__main__':
     log.info(str(weights))
 
     #fitting with SciPy
-    errfuncE = lambda p, x, y, errors: (fitfunc(p, x) - y)  / errors
+    errfuncE = lambda p, x, y, errors: (fitfunc(p, x) - y) / errors
     out = scipy.optimize.leastsq(errfuncE, params[:], args=(data, vals, weights), full_output=True,
                                  maxfev=10000000, ftol=1e-16, xtol=1e-16)
     print out
 
     #new params
     #newnt = out[0][:7]
-    newnt = list(nt)
-    newnt[1:4] = out[0]#[:3]
+    newnt_p = list(nt_p)
+    newnt_p[1:4] = out[0]#[:3]
     #newtaur = out[0][7:]
-    newtaur = list(taur)
+    newtaur_p = list(taur_p)
     #newtaur[:3] = out[0][3:]
     #newtaur = np.asarray(taur)
     #nt[:3] = out[0]
     print
-    print newnt / np.asarray(nt)
+    print newnt_p / np.asarray(nt_p)
     print
-    print newtaur / np.asarray(taur)
-    profile = applyRadiationDamage(data.transpose(), newnt, sigma, newtaur).transpose()
-    plotPosition(vals, profile, dict(nt=newnt, sigma=sigma, taur=newtaur), output='EndPosition.pdf')
+    print newtaur_p / np.asarray(taur_p)
+    profile = applyRadiationDamageBiDir(data.transpose(), newnt_p, sigma_p, newtaur_p, nt_s, sigma_s, taur_s).transpose()
+    plotPosition(vals, profile, dict(nt=newnt_p, sigma=sigma_p, taur=newtaur_p), output='EndPosition.pdf')
 
     #write the numbers to a log
     log.info('Final Values:')
-    log.info('nt='+str(nt))
-    log.info('sigma='+str(sigma))
-    log.info('taur='+str(taur))
+    log.info('nt='+str(nt_p))
+    log.info('sigma='+str(sigma_p))
+    log.info('taur='+str(taur_p))
     log.info('Finished!')

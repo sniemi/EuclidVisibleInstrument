@@ -125,7 +125,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.2
+:version: 1.25
 
 Version and change logs::
 
@@ -154,6 +154,7 @@ Version and change logs::
     1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
          deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
     1.21: included an option to exclude cosmic background; separated dark current from background.
+    1.25: changed to a bidirectional CDM03.
 
 
 Future Work
@@ -193,7 +194,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.21
+__version__ = 1.25
 
 
 class VISsimulator():
@@ -232,7 +233,7 @@ class VISsimulator():
         except:
             self.random = False
 
-        #load instrument model
+        #load instrument model, these values are also stored in the FITS header
         self.information = VISinstrumentModel.VISinformation()
 
         #update settings with defaults
@@ -256,13 +257,15 @@ class VISsimulator():
                                      magzero=15182880871.225231,
                                      exposures=1,
                                      exptime=565.0,
+                                     rdose=8.0e9,
                                      ra=123.0,
                                      dec=45.0,
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
                                      cosmicraydistance='data/cdf_cr_total.dat',
                                      flatfieldfile='data/VISFlatField2percent.fits',
-                                     trapfile='data/cdm_euclid.dat'))
+                                     parallelTrapfile='data/cdm_euclid_parallel.dat',
+                                     serialTrapfile='data/cdm_euclid_serial.dat'))
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -302,11 +305,13 @@ class VISsimulator():
             magzero = 15182880871.225231
             exposures = 1
             exptime = 565.0
+            rdose = 8.0e9
             RA = 145.95
             DEC = -38.16
             sourcelist = data/source_test.dat
             PSFfile = data/interpolated_psf.fits
-            trapfile = data/cdm_euclid.dat
+            parallelTrapfile = data/cdm_euclid_parallel.dat
+            serialTrapfil e= data/cdm_euclid_serial.dat
             cosmeticsFile = data/cosmetics.dat
             flatfieldfile = data/VISFlatField2percent.fits
             output = test.fits
@@ -1433,7 +1438,9 @@ class VISsimulator():
 
         self.log.debug('Starting to apply radiation damage model...')
         #at this point we can give fake data...
-        cti = CTI.CDM03(dict(trapfile=(self.information['trapfile'])), [-1,], log=self.log)
+        cti = CTI.CDM03bidir(dict(parallelTrapfile=self.information['parallelTrapfile'],
+                                  serialTrapfile=self.information['serialTrapfile'],
+                                  rdose=self.information['rdose']), [-1,], log=self.log)
         #here we need the right input data
         self.image = cti.applyRadiationDamage(self.image, iquadrant=self.information['quadrant'])
         self.log.info('Radiation damage added.')

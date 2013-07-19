@@ -8,7 +8,7 @@ This script can be used to test the CTI correction algorithm performance.
 :requires: PyFITS
 :requires: matplotlib
 
-:version: 0.2
+:version: 0.3
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -27,10 +27,21 @@ import glob as g
 import pyfits as pf
 import numpy as np
 import cPickle, os, datetime, shutil
+from multiprocessing import Pool
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
-from CTI import CTItesting
+from CTI import CTI
+
+
+def ThibautsCDM03params():
+    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.62E+07,
+                t=2.10E-02, vg=7.20E-11, st=5.00E-06, sfwc=1450000., svg=3.00E-10)
+
+
+def MSSLCDM03params():
+    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.168e7,
+                t=20.48e-3, vg=6.e-11, st=5.0e-6, sfwc=730000., svg=1.20E-10)
 
 
 def testCTIcorrection(log, files, sigma=0.75, iterations=4, xcen=1900, ycen=1900, side=20):
@@ -262,7 +273,7 @@ def plotResults(results):
     plt.close()
 
 
-def plotResultsNoNoise(inputfile, bins=10):
+def plotResultsNoNoise(inputfile, title, bins=10):
     """
     Plot the CTI correction algorithm results.
 
@@ -274,7 +285,10 @@ def plotResultsNoNoise(inputfile, bins=10):
 
     results = cPickle.load(open(inputfile))
     #copy input to the path
-    shutil.copy2(inputfile, path+inputfile)
+    try:
+        shutil.copy2(inputfile, path+inputfile)
+    except:
+        pass
 
     print '\n\n\n\nFitted centre:'
 
@@ -284,17 +298,24 @@ def plotResultsNoNoise(inputfile, bins=10):
     x = results['xclean'] - results['xCTI']
     y = results['yclean'] - results['yCTI']
     r2 = (results['R2clean'] - results['R2CTI']) / results['R2clean']
+    meane = np.mean(e)
+    meane1 = np.mean(e1)
+    meane2 = np.mean(e2)
+    meanx = np.mean(x)
+    meany = np.mean(y)
+    meanr2 = np.mean(r2)
 
-    print 'Delta e, e_1, e_2:', np.mean(e), np.mean(e1), np.mean(e2)
+    print 'Delta e, e_1, e_2:', meane, meane1, meane2
     #print 'std e, e_1, e_2:', np.std(e), np.std(e1), np.std(e2)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(e, bins=bins, color='b', label='$e$', alpha=0.5)
-    ax.hist(e1, bins=bins, color='r', label='$e_{2}$', alpha=0.5)
-    ax.hist(e2, bins=bins, color='g', label='$e_{1}$', alpha=0.5)
-    ax.axvline(x=np.mean(e), color='b')
-    ax.axvline(x=np.mean(e1), color='r')
-    ax.axvline(x=np.mean(e2), color='g')
+    ax.hist(e1, bins=bins, color='r', label='$e_{1}$', alpha=0.5)
+    ax.hist(e2, bins=bins, color='g', label='$e_{2}$', alpha=0.5)
+    ax.axvline(x=meane, color='b', label='%.2e' % meane)
+    ax.axvline(x=meane1, color='r', label='%.2e' % meane1)
+    ax.axvline(x=meane2, color='g', label='%.2e' % meane2)
     ax.set_xlabel(r'$\delta e$ [w/o - w/ CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'ellipticityDeltaFittedCentre.pdf')
@@ -302,38 +323,55 @@ def plotResultsNoNoise(inputfile, bins=10):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(e1, e2, s=6, color='r', marker='o', alpha=0.5, label='w/o - w/ CTI')
+    ax.set_title(title)
+    ax.scatter(e1, e2, s=8, color='r', marker='o', alpha=0.5, label='w/o - w/ CTI')
     ax.set_xlabel(r'$\delta e_{1}$')
     ax.set_ylabel(r'$\delta e_{2}$')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'ellipticityFittedCentre.pdf')
     plt.close()
 
-    print 'delta R2 / R2: mean, std ', np.mean(r2), np.std(r2)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
+    ax.scatter(results['e1clean'], results['e2clean'], s=8, color='k', marker='s', alpha=0.1, label='no CTI')
+    ax.scatter(results['e1CTI'], results['e2CTI'], s=8, color='r', marker='o', alpha=0.4, label='CTI')
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    ax.set_xlabel(r'$e_{1}$')
+    ax.set_ylabel(r'$e_{2}$')
+    plt.legend(shadow=True, fancybox=True)
+    plt.savefig(path+'e1vse2FittedCentre.pdf')
+    plt.close()
+
+    print 'delta R2 / R2: mean, std ', meanr2, np.std(r2)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(r2, bins=bins, color='b', label='$R^{2}$')
-    ax.axvline(x=np.mean(r2),color='b')
+    ax.axvline(x=meanr2,color='b', label='%.2e' % meanr2)
     ax.set_xlabel(r'$\frac{\delta R^{2}}{R^{2}_{ref}}$ [w/o - w CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'sizeDeltaFittedCentre.pdf')
     plt.close()
 
-    print 'delta x: mean, std ', np.mean(x), np.std(x)
+    print 'delta x: mean, std ', meanx, np.std(x)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(x, bins=bins, color='b', label='X Centre')
-    ax.axvline(x=np.mean(x),color='b')
+    ax.axvline(x=meanx,color='b', label='%.2e' % meanx)
     ax.set_xlabel(r'$\delta X - X_{CTI}$ [w/o - w CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'xDeltaFittedCentre.pdf')
     plt.close()
 
-    print 'delta y: mean, std ', np.mean(y), np.std(y)
+    print 'delta y: mean, std ', meany, np.std(y)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(y, bins=bins, color='b', label='Y Centre')
-    ax.axvline(x=np.mean(y),color='b')
+    ax.axvline(x=meany,color='b', label='%.2e' % meany)
     ax.set_xlabel(r'$\delta Y - Y_{CTI}$ [w/o - w CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'yDeltaFittedCentre.pdf')
@@ -341,6 +379,7 @@ def plotResultsNoNoise(inputfile, bins=10):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.scatter(x, y, s=15, color='k', marker='s', alpha=0.5, label='w/o - w/ CTI')
     ax.set_xlabel(r'$\delta X$')
     ax.set_ylabel(r'$\delta Y$')
@@ -356,17 +395,24 @@ def plotResultsNoNoise(inputfile, bins=10):
     x = results['xclean'] - results['xCTIfixed']
     y = results['yclean'] - results['yCTIfixed']
     r2 = (results['R2clean'] - results['R2CTIfixed']) / results['R2clean']
+    meane = np.mean(e)
+    meane1 = np.mean(e1)
+    meane2 = np.mean(e2)
+    meanx = np.mean(x)
+    meany = np.mean(y)
+    meanr2 = np.mean(r2)
 
-    print 'Delta e, e_1, e_2:', np.mean(e), np.mean(e1), np.mean(e2)
+    print 'Delta e, e_1, e_2:', meane, meane1, meane2
     #print 'std e, e_1, e_2:', np.std(e), np.std(e1), np.std(e2)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(e, bins=bins, color='b', label='$e$', alpha=0.5)
-    ax.hist(e1, bins=bins, color='r', label='$e_{2}$', alpha=0.5)
-    ax.hist(e2, bins=bins, color='g', label='$e_{1}$', alpha=0.5)
-    ax.axvline(x=np.mean(e), color='b')
-    ax.axvline(x=np.mean(e1), color='r')
-    ax.axvline(x=np.mean(e2), color='g')
+    ax.hist(e1, bins=bins, color='r', label='$e_{1}$', alpha=0.5)
+    ax.hist(e2, bins=bins, color='g', label='$e_{2}$', alpha=0.5)
+    ax.axvline(x=meane, color='b', label='%.2e' % meane)
+    ax.axvline(x=meane1, color='r', label='%.2e' % meane1)
+    ax.axvline(x=meane2, color='g', label='%.2e' % meane2)
     ax.set_xlabel(r'$\delta e$ [w/o - w/ CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'ellipticityDeltaFixedCentre.pdf')
@@ -374,38 +420,55 @@ def plotResultsNoNoise(inputfile, bins=10):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.scatter(e1, e2, s=6, color='r', marker='o', alpha=0.5, label='w/o - w/ CTI')
+    ax.set_title(title)
+    ax.scatter(e1, e2, s=8, color='r', marker='o', alpha=0.5, label='w/o - w/ CTI')
     ax.set_xlabel(r'$\delta e_{1}$')
     ax.set_ylabel(r'$\delta e_{2}$')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'ellipticityFixedCentre.pdf')
     plt.close()
 
-    print 'delta R2 / R2: mean, std ', np.mean(r2), np.std(r2)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
+    ax.scatter(results['e1clean'], results['e2clean'], s=8, color='k', marker='s', alpha=0.1, label='no CTI')
+    ax.scatter(results['e1CTIfixed'], results['e2CTIfixed'], s=8, color='r', marker='o', alpha=0.4, label='CTI')
+    ax.set_xlabel(r'$e_{1}$')
+    ax.set_ylabel(r'$e_{2}$')
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    plt.legend(shadow=True, fancybox=True)
+    plt.savefig(path+'e1vse2FixedCentre.pdf')
+    plt.close()
+
+    print 'delta R2 / R2: mean, std ', meanr2, np.std(r2)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(r2, bins=bins, color='b', label='$R^{2}$')
-    ax.axvline(x=np.mean(r2), color='b')
+    ax.axvline(x=meanr2, color='b', label='%.2e' % meanr2)
     ax.set_xlabel(r'$\frac{\delta R^{2}}{R^{2}_{ref}}$ [w/o - w CTI]')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'sizeDeltaFixedCentre.pdf')
     plt.close()
 
-    print 'delta x: mean, std ', np.mean(x), np.std(x)
+    print 'delta x: mean, std ', meanx, np.std(x)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(x, bins=bins, color='b', label='X Centre')
-    ax.axvline(x=np.mean(r2), color='b')
+    ax.axvline(x=meanx, color='b', label='%.2e' % meanx)
     ax.set_xlabel(r'$X - X_{CTI}$')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'xDeltaFixedCentre.pdf')
     plt.close()
 
-    print 'delta y: mean, std ', np.mean(y), np.std(y)
+    print 'delta y: mean, std ', meany, np.std(y)
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.hist(y, bins=bins, color='b', label='Y Centre')
-    ax.axvline(x=np.mean(y), color='b')
+    ax.axvline(x=meany, color='b', label='%.2e' % meany)
     ax.set_xlabel(r'$Y - Y_{CTI}$')
     plt.legend(shadow=True, fancybox=True)
     plt.savefig(path+'yDeltaFixedCentre.pdf')
@@ -413,6 +476,7 @@ def plotResultsNoNoise(inputfile, bins=10):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    ax.set_title(title)
     ax.scatter(x, y, s=15, color='k', marker='s', alpha=0.5, label='w/o - w/ CTI')
     ax.set_xlabel(r'$\delta X$')
     ax.set_ylabel(r'$\delta Y$')
@@ -457,8 +521,9 @@ def cutoutRegions(files, xcen=1900, ycen=1900, side=140):
         fh.writeto('CUT' + f, clobber=True)
 
 
-def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies=1000,
-                    datadir='/Users/smn2/EUCLID/CTItesting/uniform/', thibautCDM03=False):
+def useThibautsData(log, output, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies=1000,
+                    datadir='/Users/smn2/EUCLID/CTItesting/uniform/',
+                    thibautCDM03=False, beta=False, serial=1, parallel=1):
     """
     Test the impact of CTI in case of no noise and no correction.
 
@@ -480,19 +545,17 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
     if thibautCDM03:
         f1 = '/Users/smn2/EUCLID/vissim-python/data/cdm_thibaut_parallel.dat'
         f2 = '/Users/smn2/EUCLID/vissim-python/data/cdm_thibaut_serial.dat'
+        params = ThibautsCDM03params()
+        params.update(dict(parallelTrapfile=f1, serialTrapfile=f2, rdose=8.0e9, serial=serial, parallel=parallel))
     else:
         f1 = '/Users/smn2/EUCLID/vissim-python/data/cdm_euclid_parallel.dat'
         f2 = '/Users/smn2/EUCLID/vissim-python/data/cdm_euclid_serial.dat'
+        params = MSSLCDM03params()
+        params.update(dict(parallelTrapfile=f1, serialTrapfile=f2, rdose=8.0e9, serial=serial, parallel=parallel))
+        if beta:
+            params.update(dict(beta_p=0.6, beta_s=0.6))
 
-    trapdata = np.loadtxt(f1)
-    nt_p = trapdata[:, 0]
-    sigma_p = trapdata[:, 1]
-    taur_p = trapdata[:, 2]
-
-    trapdata = np.loadtxt(f2)
-    nt_s = trapdata[:, 0]
-    sigma_s = trapdata[:, 1]
-    taur_s = trapdata[:, 2]
+    print f1, f2
 
     #store shapes
     eclean = []
@@ -514,7 +577,11 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
     xCTIfixed = []
     yCTIfixed = []
 
-    fh = open('resultsNoNoiseThibautsData.csv', 'w')
+    fh = open(output.replace('.pk', '.csv'), 'w')
+    fh.write('#files: %s and %s\n' % (f1, f2))
+    for key in params:
+        print key, params[key]
+        fh.write('# %s = %s\n' % (key, str(params[key])))
     fh.write('#file, delta_e, delta_e1, delta_e2, delta_R2, delta_x, delta_y\n')
     for f in files:
         print 'Processing: ', f
@@ -537,12 +604,13 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
         tmp += bcgr
 
         #run CDM03
-        tmp = CTItesting.applyRadiationDamageBiDir2(tmp, nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=8.0e9)
+        c = CTI.CDM03bidir(params, [])
+        tmp = c.applyRadiationDamage(tmp.copy().transpose()).transpose()
 
         #remove background and make a cutout
-        CTI = tmp[loc-ysize:loc+ysize, loc-xsize:loc+xsize]
-        CTI -= bcgr
-        CTI[CTI < 0.] = 0.
+        CTIdata = tmp[loc-ysize:loc+ysize, loc-xsize:loc+xsize]
+        CTIdata -= bcgr
+        CTIdata[CTIdata < 0.] = 0.
 
         #write files
         #fileIO.writeFITS(nocti, f.replace('.fits', 'noCTI.fits'), int=False)
@@ -563,7 +631,7 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
         yclean.append(results['centreY'])
 
         #CTI, fitted centroid
-        sh = shape.shapeMeasurement(CTI.copy(), log, **settings)
+        sh = shape.shapeMeasurement(CTIdata.copy(), log, **settings)
         results2 = sh.measureRefinedEllipticity()
 
         eCTI.append(results2['ellipticity'])
@@ -578,7 +646,7 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
         settings['fixedX'] = results['centreX']
         settings['fixedY'] = results['centreY']
         settings['iterations'] = 1
-        sh = shape.shapeMeasurement(CTI.copy(), log, **settings)
+        sh = shape.shapeMeasurement(CTIdata.copy(), log, **settings)
         results3 = sh.measureRefinedEllipticity()
 
         eCTIfixed.append(results3['ellipticity'])
@@ -618,10 +686,7 @@ def useThibautsData(log, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, galaxies
                'yCTIfixed': np.asarray(yCTIfixed)}
 
     #save to a file
-    if thibautCDM03:
-        fileIO.cPickleDumpDictionary(results, 'resultsNoNoiseThibautsDataThibautsCDM03.pk')
-    else:
-        fileIO.cPickleDumpDictionary(results, 'resultsNoNoiseThibautsData.pk')
+    fileIO.cPickleDumpDictionary(results, output)
 
     return results
 
@@ -630,10 +695,19 @@ if __name__ == '__main__':
     log = lg.setUpLogger('CTItesting.log')
 
     #use Thibaut's input galaxies
-    #thibaut = useThibautsData(log)
-    #plotResultsNoNoise('resultsNoNoiseThibautsData.pk')
-    thibaut = useThibautsData(log, thibautCDM03=True)
-    plotResultsNoNoise('resultsNoNoiseThibautsDataThibautsCDM03.pk')
+    galaxies = 800
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDataP.pk', galaxies=galaxies, serial=-1)
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDatab6P.pk', beta=True, galaxies=galaxies, serial=-1)
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDataThibautsCDM03P.pk', thibautCDM03=True, galaxies=galaxies, serial=-1)
+    #plotResultsNoNoise('resultsNoNoiseThibautsDataP.pk', 'MSSL CDM03 Parameters (beta=0.29, 0.12) (parallel only)')
+    #plotResultsNoNoise('resultsNoNoiseThibautsDatab6P.pk', 'MSSL CDM03 Parameters (beta=0.6, 0.6) (parallel only)')
+    #plotResultsNoNoise('resultsNoNoiseThibautsDataThibautsCDM03P.pk', 'Thibaut CDM03 Parameters (parallel only)')
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsData.pk', galaxies=galaxies)
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDatab6.pk', beta=True, galaxies=galaxies)
+    #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDataThibautsCDM03.pk', thibautCDM03=True, galaxies=galaxies)
+    plotResultsNoNoise('resultsNoNoiseThibautsData.pk', 'MSSL CDM03 Parameters (beta=0.29, 0.12)')
+    plotResultsNoNoise('resultsNoNoiseThibautsDatab6.pk', 'MSSL CDM03 Parameters (beta=0.6, 0.6)')
+    plotResultsNoNoise('resultsNoNoiseThibautsDataThibautsCDM03.pk', 'Thibaut CDM03 Parameters')
 
     #cut out regions
     #cutoutRegions(g.glob('Q0_00_00stars*.fits'))
@@ -649,5 +723,3 @@ if __name__ == '__main__':
 
     #results = testCTIcorrection(log, g.glob('CTIQ0_00_00stars*'), iterations=8, side=25)
     #plotResults(results)
-
-

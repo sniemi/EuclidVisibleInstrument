@@ -5,10 +5,12 @@ from scipy.misc import lena
 from numpy import ones
 import numpy
 
-from numba.decorators import jit
-from numba import int32
+#from numba.decorators import jit
+#from numba import int32
+from numba import autojit
 
-@jit(argtypes=[int32[:,:], int32[:,:]], restype=int32[:,:])
+#@jit(argtypes=[int32[:,:], int32[:,:]], restype=int32[:,:])
+@autojit
 def filter2d(image, filt):
     M, N = image.shape
     Mf, Nf = filt.shape

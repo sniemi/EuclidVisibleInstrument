@@ -169,8 +169,9 @@ class tileCCD():
                 hdu.header.add_history('{0:>s} = {1:d}'.format(key, value))
 
         #update and verify the header
-        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (smn2 at mssl.ucl.ac.uk).')
-        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' % datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
+        hdu.header.add_history('This file has been created with the VISsim Python Package at %s' \
+                               % datetime.datetime.isoformat(datetime.datetime.now()))
         hdu.verify('fix')
 
         ofd.append(hdu)
@@ -187,7 +188,6 @@ class tileCCD():
         self.readData()
         self.tileCCD()
         self.writeFITSfile()
-
 
 
 def processArgs(printHelp=False):
@@ -236,7 +236,8 @@ if __name__ == '__main__':
     files = g.glob(opts.files)
     files.sort()
     if len(files) / 4. > 1.0 or len(files) == 0:
-        print 'Detected %i input files, but the current version does not support anything but tiling four files...' % len(files)
+        print 'Detected %i input files, but the current version does not support anything but tiling four files...' \
+              % len(files)
         sys.exit(9)
 
     #write to the log what files were used

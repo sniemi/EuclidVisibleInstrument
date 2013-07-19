@@ -90,9 +90,9 @@ def VISinformation():
                xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969,
                zeropointNoObscuration=25.57991044453)
 
-    out.update({'dob' : 0, 'rdose' : 8.0e9, 'parallelTrapfile' : 'cdm_euclid_parallel.dat',
-                'serialTrapfile' : 'cdm_euclid_serial.dat',
-                'beta' : 0.6, 'fwc' : 200000, 'vth' : 1.168e7, 't' : 20.48e-3, 'vg' : 6.e-11,
+    out.update({'dob' : 0, 'rdose' : 8.0e9,
+                'parallelTrapfile' : 'cdm_euclid_parallel.dat', 'serialTrapfile' : 'cdm_euclid_serial.dat',
+                'beta_s' : 0.6, 'beta_p': 0.6, 'fwc' : 200000, 'vth' : 1.168e7, 't' : 20.48e-3, 'vg' : 6.e-11,
                 'st' : 5.0e-6, 'sfwc' : 730000., 'svg' : 1.0e-10})
 
     apsize = math.pi * (out['diameter']/2./out['pixel_size'])**2

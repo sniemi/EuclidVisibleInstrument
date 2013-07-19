@@ -258,10 +258,15 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
 
     #full FoV
-    settings = dict(besancon=False, deg=30, nx=60000, ny=60000, outputprefix='fullFoV',
+    #settings = dict(besancon=False, deg=30, nx=60000, ny=60000, outputprefix='fullFoV',
+    #                types=np.arange(17, 103))
+    #generateCatalog(**settings)
+    #plotCatalog('fullFoV0.dat')
+
+    #single CCD
+    settings = dict(besancon=False, deg=30, nx=5000, ny=5000, outputprefix='CCDcatalogue',
                     types=np.arange(17, 103))
     generateCatalog(**settings)
-    plotCatalog('fullFoV0.dat')
 
     #create 100 catalogs at deg=30
     #settings = dict(besancon=False, deg=30, ncatalogs=500)

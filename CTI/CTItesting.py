@@ -15,7 +15,8 @@ import numpy as np
 import pyfits as pf
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-import cdm03bidir
+from CTI import cdm03bidir
+from CTI import CTI
 
 
 def parallelMeasurements(filename='CCD204_05325-03-02_Hopkinson_EPER_data_200kHz_one-output-mode_1.6e10-50MeV.txt',
@@ -62,178 +63,14 @@ def serialMeasurements(filename='CCD204_05325-03-02_Hopkinson-serial-EPER-data_2
         return values
 
 
-def radiateFullCCD(fullCCD, quads=(0,1,2,3), xsize=2048, ysize=2066, bidir=True):
-    """
-    This routine allows the whole CCD to be run through a radiation damage mode.
-    The routine takes into account the fact that the amplifiers are in the corners
-    of the CCD. The routine assumes that the CCD is using four amplifiers.
-
-    :param fullCCD: image of containing the whole CCD
-    :type fullCCD: ndarray
-    :param file: name of the CDM03 parameter file
-    :type file: str
-    :param quads: quadrants, numbered from lower left
-    :type quads: list
-
-    :return: radiation damaged image
-    :rtype: ndarray
-    """
-    ydim, xdim = fullCCD.shape
-    out = np.zeros((xdim, ydim))
-
-    #transpose the data, because Python has different convention
-    #than Fortran
-    data = fullCCD.transpose().copy()
-
-    for quad in quads:
-        if quad == 0:
-            d = data[:xsize, :ysize].copy()
-            print 'Q0', d.shape
-            if bidir:
-                tmp = applyRadiationDamageBiDir(d, iquadrant=quad).copy()
-            else:
-                tmp = applyRadiationDamage(d, iquadrant=quad).copy()
-            out[:xsize, :ysize] = tmp
-        elif quad == 1:
-            d = data[xsize:, :ysize].copy()
-            print 'Q1', d.shape
-            if bidir:
-                tmp = applyRadiationDamageBiDir(d, iquadrant=quad).copy()
-            else:
-                tmp = applyRadiationDamage(d, iquadrant=quad).copy()
-            out[xsize:, :ysize] = tmp
-        elif quad == 2:
-            d = data[:xsize, ysize:].copy()
-            print 'Q2', d.shape
-            if bidir:
-                tmp = applyRadiationDamageBiDir(d, iquadrant=quad).copy()
-            else:
-                tmp = applyRadiationDamage(d, iquadrant=quad).copy()
-            out[:xsize, ysize:] = tmp
-        elif quad == 3:
-            d = data[xsize:, ysize:].copy()
-            print 'Q3', d.shape
-            if bidir:
-                tmp = applyRadiationDamageBiDir(d, iquadrant=quad).copy()
-            else:
-                tmp = applyRadiationDamage(d, iquadrant=quad).copy()
-            out[xsize:, ysize:] = tmp
-
-        else:
-            print 'ERROR -- too many quadrants!!'
-
-    return out.transpose()
+def ThibautsCDM03params():
+    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.62E+07,
+                t=2.10E-02, vg=7.20E-11, st=5.00E-06, sfwc=1450000., svg=3.00E-10)
 
 
-def applyRadiationDamage(data, file='cdm_euclid.dat', iquadrant=0, rdose=1.6e10):
-    """
-    Apply radian damage based on FORTRAN CDM03 model. The method assumes that
-    input data covers only a single quadrant defined by the iquadrant integer.
-
-    :param data: imaging data to which the CDM03 model will be applied to.
-    :type data: ndarray
-    :param file: name of the CDM03 parameter file
-    :type file: str
-    :param iquandrant: number of the quadrant to process
-    :type iquandrant: int
-
-
-    cdm03 - Function signature:
-      sout = cdm03(sinp,iflip,jflip,dob,rdose,in_nt,in_sigma,in_tr,[xdim,ydim,zdim])
-    Required arguments:
-      sinp : input rank-2 array('f') with bounds (xdim,ydim)
-      iflip : input int
-      jflip : input int
-      dob : input float
-      rdose : input float
-      in_nt : input rank-1 array('d') with bounds (zdim)
-      in_sigma : input rank-1 array('d') with bounds (zdim)
-      in_tr : input rank-1 array('d') with bounds (zdim)
-    Optional arguments:
-      xdim := shape(sinp,0) input int
-      ydim := shape(sinp,1) input int
-      zdim := len(in_nt) input int
-    Return objects:
-      sout : rank-2 array('f') with bounds (xdim,ydim)
-
-    :Note: Because Python/NumPy arrays are different row/column based, one needs
-           to be extra careful here. NumPy.asfortranarray will be called to get
-           an array laid out in Fortran order in memory. Before returning the
-           array will be laid out in memory in C-style (row-major order).
-
-    :return: image that has been run through the CDM03 model
-    :rtype: ndarray
-    """
-    import cdm03
-
-    #read in trap information
-    print 'Trap file = ', file
-    trapdata = np.loadtxt(file)
-    nt = trapdata[:, 0]
-    sigma = trapdata[:, 1]
-    taur = trapdata[:, 2]
-
-    #CTIed = cdm03.cdm03(np.asfortranarray(data),
-    CTIed = cdm03.cdm03(data,
-                        iquadrant%2, iquadrant/2,
-                        0.0, rdose,
-                        nt, sigma, taur,
-                        [data.shape[0], data.shape[1], len(nt)])
-    return np.asanyarray(CTIed)
-
-
-def applyRadiationDamageBiDir(data, f1='cdm_euclid_parallel.dat', f2='cdm_euclid_serial.dat',
-                              iquadrant=0, rdose=1.6e10, sdob=0.0):
-    """
-    Note: no transpose
-
-    :return: image that has been run through the CDM03 model
-    :rtype: ndarray
-    """
-    #read in trap information
-    print 'Trap files = %s and %s' % (f1, f2)
-    trapdata = np.loadtxt(f1)
-    nt_p = trapdata[:, 0]
-    sigma_p = trapdata[:, 1]
-    taur_p = trapdata[:, 2]
-
-    trapdata = np.loadtxt(f2)
-    nt_s = trapdata[:, 0]
-    sigma_s = trapdata[:, 1]
-    taur_s = trapdata[:, 2]
-
-    CTIed = cdm03bidir.cdm03(data,
-                             iquadrant%2, iquadrant/2,
-                             sdob, rdose,
-                             nt_p, sigma_p, taur_p,
-                             nt_s, sigma_s, taur_s,
-                             [data.shape[0], data.shape[1], len(nt_p), len(nt_s)])
-    return np.asanyarray(CTIed)
-
-
-def applyRadiationDamageBiDir2(data, nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, iquadrant=0, rdose=1.6e10, sdob=0.0):
-    """
-
-    :param data:
-    :param nt_p:
-    :param sigma_p:
-    :param taur_p:
-    :param nt_s:
-    :param sigma_s:
-    :param taur_s:
-    :param iquadrant:
-    :param rdose:
-
-    :return:
-    """
-    #read in trap information
-    CTIed = cdm03bidir.cdm03(data.transpose(),
-                             iquadrant%2, iquadrant/2,
-                             sdob, rdose,
-                             nt_p, sigma_p, taur_p,
-                             nt_s, sigma_s, taur_s,
-                             [data.shape[1], data.shape[0], len(nt_p), len(nt_s)])
-    return CTIed.transpose()
+def MSSLCDM03params():
+    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.168e7,
+                t=20.48e-3, vg=6.e-11, st=5.0e-6, sfwc=730000., svg=1.20E-10)
 
 
 def writeFITSfile(data, output, unsigned16bit=True):
@@ -437,7 +274,7 @@ def plotTestData(datafolder='/Users/smn2/EUCLID/CTItesting/data/', gain1=1.17):
     plt.close()
 
 
-def currentValues(chargeInjection=43500.):
+def currentValues(parallel='cdm_euclid_parallel.dat', serial='cdm_euclid_serial.dat', chargeInjection=43500.):
     #set up the charge injection chargeInjection positions
     lines = dict(xstart1=577, xstop1=588, ystart1=1064, ystop1=1075,
                  xstart2=4096 - 588, xstop2=4096 - 577, ystart2=4132 - 1075, ystop2=4132 - 1064)
@@ -459,8 +296,10 @@ def currentValues(chargeInjection=43500.):
     writeFITSfile(CCDver, 'ChargeInjectionsVertical.fits', unsigned16bit=False)
 
     #radiate the CCDs
-    CCDCTIhor = radiateFullCCD(CCDhor)
-    CCDCTIver = radiateFullCCD(CCDver)
+    params = MSSLCDM03params()
+    params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10))
+    CCDCTIhor = CTI.CDM03bidir(params, CCDhor).radiateFullCCD()
+    CCDCTIver = CTI.CDM03bidir(params, CCDver).radiateFullCCD()
 
     #write output files
     writeFITSfile(CCDCTIhor, 'ChargeInjectionsHorizontalCTI.fits', unsigned16bit=False)
@@ -520,7 +359,8 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
         return tmp
 
     #likelihood function, note that an inverse weighting has been applied... this could be something else too
-    y = pymc.distributions.Normal('y', mu=model, tau=1./values**2, value=values, observed=True, trace=False)
+    #y = pymc.distributions.Normal('y', mu=model, tau=1./values**2, value=values, observed=True, trace=False)
+    y = pymc.distributions.Poisson('y', mu=model, value=values, observed=True, trace=False)
 
     #store the model to a dictionary
     d = {'nt1': nt1,
@@ -545,10 +385,14 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
     start = time.time()
     R = pymc.MCMC(d)
 
+    #map for good starting point
+    map_ = pymc.MAP(d)
+    map_.fit()
+
     if test:
-        R.sample(100)
+        R.sample(1000)
     else:
-        R.sample(iter=20000, burn=5000, thin=5)
+        R.sample(iter=10000, burn=1000, thin=2)
 
     R.write_csv("parallel.csv", variables=['nt1', 'nt2', 'nt3', 'nt4', 'nt5',
                                            'sigma1', 'sigma2', 'sigma3', 'sigma4', 'sigma5',
@@ -697,10 +541,14 @@ def fitSerialBayesian(lines, chargeInjection=43500., test=False):
     start = time.time()
     R = pymc.MCMC(d)
 
+    #map for good starting point
+    map_ = pymc.MAP(d)
+    map_.fit()
+
     if test:
-        R.sample(100)
+        R.sample(1000)
     else:
-        R.sample(iter=5000, burn=100, thin=1)
+        R.sample(iter=10000, burn=1000, thin=2)
 
     R.write_csv("parallel.csv", variables=['nt1', 'nt2', 'nt3', 'nt4', 'nt5',
                                            'sigma1', 'sigma2', 'sigma3', 'sigma4', 'sigma5',
@@ -940,7 +788,7 @@ def fitSerialLSQ(lines, chargeInjection=43500.):
 
 
 def deriveTrails(parallel, serial, chargeInjection=44500.,
-                 lines=dict(ystart1=1064, ystop1=1075, xstart1=577, xstop1=588), thibaut=False):
+                 lines=dict(ystart1=1064, ystop1=1075, xstart1=577, xstop1=588), thibaut=False, beta=False):
     """
     Derive CTI trails in both parallel and serial direction separately given the input data files
 
@@ -953,22 +801,8 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
     :return:
     """
 
-    trapdata = np.loadtxt(parallel)
-    nt_p = trapdata[:, 0]
-    sigma_p = trapdata[:, 1]
-    taur_p = trapdata[:, 2]
-
-    trapdata = np.loadtxt(serial)
-    nt_s = trapdata[:, 0]
-    sigma_s = trapdata[:, 1]
-    taur_s = trapdata[:, 2]
-
-    if thibaut:
-        sigma_p *= 10000.  #thibault's values in m**2
-        sigma_s *= 10000.
-
     #create a quadrant
-    CCD = np.zeros((2066, 2048), dtype=np.float32)
+    CCD = np.zeros((2066, 2048), dtype=np.float64)
 
     #add horizontal charge injection lines
     CCD[lines['ystart1']:lines['ystop1'], :] = chargeInjection
@@ -979,17 +813,32 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
 
     #radiate CTI to plot initial set trails
     if thibaut:
-        CCDCTIhor = applyRadiationDamageBiDir2(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=8.e9,
-                                               sdob=0.0)#sdob=17.74)
+        params = ThibautsCDM03params()
+        params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=8.0e9,
+                           serial=0))
+        c = CTI.CDM03bidir(params, [])
+        CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
         writeFITSfile(CCDCTIhor, 'CTIHT.fits', unsigned16bit=False)
     else:
-        CCDCTIhor = applyRadiationDamageBiDir2(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=1.6e10)
-        writeFITSfile(CCDCTIhor, 'CTIH.fits', unsigned16bit=False)
+        if beta:
+            params = MSSLCDM03params()
+            params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
+                               beta_s=0.6, beta_p=0.6, serial=0))
+            c = CTI.CDM03bidir(params, [])
+            CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+            writeFITSfile(CCDCTIhor, 'CTIH2.fits', unsigned16bit=False)
+        else:
+            params = MSSLCDM03params()
+            params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
+                               serial=0))
+            c = CTI.CDM03bidir(params, [])
+            CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+            writeFITSfile(CCDCTIhor, 'CTIH.fits', unsigned16bit=False)
 
     profileParallel = np.average(CCDCTIhor, axis=1)
 
     #now serial
-    CCD = np.zeros((2066, 2048), dtype=np.float32)
+    CCD = np.zeros((2066, 2048), dtype=np.float64)
 
     #add horizontal charge injection lines
     CCD[:, lines['xstart1']:lines['xstop1']] = chargeInjection
@@ -1000,12 +849,27 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
 
     #radiate CTI to plot initial set trails
     if thibaut:
-        CCDCTI = applyRadiationDamageBiDir2(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=8.e9,
-                                            sdob=0.0)#sdob=17.74)
+        params = ThibautsCDM03params()
+        params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=8.0e9,
+                           parallel=0))
+        c = CTI.CDM03bidir(params, [])
+        CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
         writeFITSfile(CCDCTI, 'CTIVT.fits', unsigned16bit=False)
     else:
-        CCDCTI = applyRadiationDamageBiDir2(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=1.6e10)
-        writeFITSfile(CCDCTI, 'CTIV.fits', unsigned16bit=False)
+        if beta:
+            params = MSSLCDM03params()
+            params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
+                               beta_p=0.6, beta_s=0.6, parallel=0))
+            c = CTI.CDM03bidir(params, [])
+            CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+            writeFITSfile(CCDCTI, 'CTIV2.fits', unsigned16bit=False)
+        else:
+            params = MSSLCDM03params()
+            params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
+                               parallel=0))
+            c = CTI.CDM03bidir(params, [])
+            CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+            writeFITSfile(CCDCTI, 'CTIV.fits', unsigned16bit=False)
 
     #plot trails
     profileSerial = np.average(CCDCTI, axis=0)
@@ -1030,13 +894,18 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
     parallelValues = parallelValues[mskp][:100]
     serialValues = serialValues[msks][:250]
 
-    #rescale
+    #rescale indeces
     indp += 185
     inds += 10
 
     if derive:
-        parallelT, serialT = deriveTrails('cdm_thibaut_parallel.dat', 'cdm_thibaut_serial.dat', thibaut=True)
-        parallel, serial = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat')
+        print 'Deriving trails...'
+        parallelT, serialT = deriveTrails('cdm_thibaut_parallel.dat', 'cdm_thibaut_serial.dat', thibaut=True,
+                                          lines=lines)
+        parallel, serial = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat',
+                                        lines=lines)
+        parallel2, serial2 = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat', beta=True,
+                                          lines=lines)
     else:
         tmp = pf.getdata('CTIHT.fits')
         parallelT = np.average(tmp, axis=1)
@@ -1046,13 +915,20 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
         parallel = np.average(tmp, axis=1)
         tmp = pf.getdata('CTIV.fits')
         serial = np.average(tmp, axis=0)
+        tmp = pf.getdata('CTIH2.fits')
+        parallel2 = np.average(tmp, axis=1)
+        tmp = pf.getdata('CTIV2.fits')
+        serial2 = np.average(tmp, axis=0)
+
 
     #cutout right region
     shift = 5
     profileParallel = parallelT[lines['ystop1']- shift:lines['ystop1']- shift + len(indp)]
     profileParallelM = parallel[lines['ystop1'] - shift:lines['ystop1'] - shift + len(indp)]
+    profileParallelM2 = parallel2[lines['ystop1'] - shift:lines['ystop1'] - shift + len(indp)]
     profileSerial = serialT[lines['xstop1'] - shift: lines['xstop1'] - shift + len(inds)]
     profileSerialM = serial[lines['xstop1'] - shift: lines['xstop1'] - shift + len(inds)]
+    profileSerialM2 = serial2[lines['xstop1'] - shift: lines['xstop1'] - shift + len(inds)]
 
     #set up the charge injection chargeInjection positions
     fig = plt.figure()
@@ -1066,11 +942,15 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
 
     ax1.semilogy(indp, parallelValues, 'bo', ms=3, label='152.55K')
     ax1.semilogy(indp, profileParallel, 'r-', label='Thibaut')
-    ax1.semilogy(indp, profileParallelM, 'y-', label='MSSL')
+    #ax1.semilogy(indp, profileSerial[:len(indp)], 'r-', label='Thibaut')
+    ax1.semilogy(indp, profileParallelM, 'y-', label='MSSL beta=0.29')
+    ax1.semilogy(indp, profileParallelM2, 'm-', label='MSSL beta=0.6')
 
     ax2.semilogy(inds, serialValues, 'bs', ms=3, label='152.5K')
     ax2.semilogy(inds, profileSerial, 'r-', label='Thibaut')
-    ax2.semilogy(inds, profileSerialM, 'y-', label='MSSL')
+    #ax2.semilogy(inds[:len(profileParallel)], profileParallel, 'r-', label='Thibaut')
+    ax2.semilogy(inds, profileSerialM, 'y-', label='MSSL beta=0.12')
+    ax2.semilogy(inds, profileSerialM2, 'm-', label='MSSL beta=0.6')
 
     ax1.set_ylim(1., 60000)
     ax2.set_ylim(1., 60000)
@@ -1087,15 +967,138 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
     plt.close()
 
 
+def testPythonCDM03(parallel='cdm_euclid_parallel.dat', serial='cdm_euclid_serial.dat',
+                    chargeInjection=44500., lines=dict(ystart1=1064, ystop1=1075, xstart1=577, xstop1=588)):
+    from CTI import CTI
+
+    trapdata = np.loadtxt(parallel)
+    nt_p = trapdata[:, 0]
+    sigma_p = trapdata[:, 1]
+    taur_p = trapdata[:, 2]
+
+    trapdata = np.loadtxt(serial)
+    nt_s = trapdata[:, 0]
+    sigma_s = trapdata[:, 1]
+    taur_s = trapdata[:, 2]
+
+    #create a quadrant
+    CCD = np.zeros((2066, 2048), dtype=np.float32)
+
+    #add horizontal charge injection lines
+    CCD[lines['ystart1']:lines['ystop1'], :] = chargeInjection
+    writeFITSfile(CCD.copy(), 'ChargeHtest.fits', unsigned16bit=False)
+
+    #radiate CTI to plot initial set trails
+    c = CTI.CDM03Python({}, [])
+    CCDCTIhor = c.applyRadiationDamage(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=1.6e10)
+    writeFITSfile(CCDCTIhor, 'CTIHtest.fits', unsigned16bit=False)
+
+    parallel = np.average(CCDCTIhor, axis=1)
+
+    #now serial
+    CCD = np.zeros((2066, 2048), dtype=np.float32)
+
+    #add horizontal charge injection lines
+    CCD[:, lines['xstart1']:lines['xstop1']] = chargeInjection
+    writeFITSfile(CCD, 'ChargeVtest.fits', unsigned16bit=False)
+
+    #radiate CTI to plot initial set trails
+    c = CTI.CDM03Python({}, [])
+    CCDCTI = c.applyRadiationDamage(CCD.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, rdose=1.6e10)
+    writeFITSfile(CCDCTI, 'CTIVtest.fits', unsigned16bit=False)
+
+    #plot trails
+    serial = np.average(CCDCTI, axis=0)
+
+    #get parallel measurements
+    indp, parallelValues = parallelMeasurements(returnScale=True)
+    inds, serialValues = serialMeasurements(returnScale=True)
+
+    #mask out irrelevant values
+    mskp = indp > -5
+    msks = inds > -5
+    indp = indp[mskp][:100]
+    inds = inds[msks][:250]
+    parallelValues = parallelValues[mskp][:100]
+    serialValues = serialValues[msks][:250]
+
+    #rescale
+    indp += 185
+    inds += 10
+
+
+    #cutout right region
+    shift = 5
+    profileParallelM = parallel[lines['ystop1'] - shift:lines['ystop1'] - shift + len(indp)]
+    profileSerialM = serial[lines['xstop1'] - shift: lines['xstop1'] - shift + len(inds)]
+
+    #set up the charge injection chargeInjection positions
+    fig = plt.figure()
+    fig.suptitle('CCD204 05325-03-02 Hopkinson EPER at 200kHz, with 20.48ms, 8e9 at 10MeV')
+    fig.subplots_adjust(bottom=0.1, right=0.8, top=0.9)
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+
+    ax1.set_title('Parallel CTI')
+    ax2.set_title('Serial CTI')
+
+    ax1.semilogy(indp, parallelValues, 'bo', ms=3, label='152.55K')
+    ax1.semilogy(indp, profileParallelM, 'y-', label='MSSL')
+
+    ax2.semilogy(inds, serialValues, 'bs', ms=3, label='152.5K')
+    ax2.semilogy(inds, profileSerialM, 'y-', label='MSSL')
+
+    ax1.set_ylim(1., 60000)
+    ax2.set_ylim(1., 60000)
+
+    ax1.set_xlim(180, 250)
+    ax2.set_xlim(0, 220)
+
+    ax2.set_xlabel('Pixels')
+    ax1.set_ylabel('Photoelectrons')
+    ax2.set_ylabel('Photoelectrons')
+    ax1.legend(fancybox=True, shadow=True, numpoints=1)
+    ax2.legend(fancybox=True, shadow=True, numpoints=1)
+    plt.savefig('PythonCDM03.pdf')
+    plt.close()
+
+
+
+def applyRadiationDamageBiDir2(data, nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s, iquadrant=0, rdose=1.6e10, sdob=0.0):
+    """
+
+    :param data:
+    :param nt_p:
+    :param sigma_p:
+    :param taur_p:
+    :param nt_s:
+    :param sigma_s:
+    :param taur_s:
+    :param iquadrant:
+    :param rdose:
+
+    :return:
+    """
+    p = MSSLCDM03params()
+    params = [p['beta_p'], p['beta_s'], p['fwc'], p['vth'], p['vg'], p['t'], p['sfwc'], p['svg'], p['st'], 2., 2.]
+
+    #read in trap information
+    CTIed = cdm03bidir.cdm03(data.transpose(),
+                        iquadrant%2, iquadrant/2,
+                        sdob, rdose,
+                        nt_p, sigma_p, taur_p,
+                        nt_s, sigma_s, taur_s,
+                        params,
+                        [data.shape[1], data.shape[0], len(nt_p), len(nt_s), len(params)])
+    return CTIed.transpose()
+
+
 if __name__ == '__main__':
     #locations of the charge injection lines
     lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
 
     #compare MSSL and Thibaut's charge trails
-    #parallelT, serialT = deriveTrails('cdm_thibaut_parallel.dat', 'cdm_thibaut_serial.dat', thibaut=True, lines=lines)
-    #on may need to change cdm03 model for this
-    #parallel, serial = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat', lines=lines)
-    #testThibautResults(lines=lines)
+    #testThibautResults(lines=lines, derive=True)
 
     #plot EPER test data
     #plotTestData()
@@ -1106,7 +1109,7 @@ if __name__ == '__main__':
 
     fitParallelBayesian(lines)
     #fitParallelBayesian(lines, test=True)
-    fitSerialBayesian(lines)
+    #fitSerialBayesian(lines)
     #fitSerialBayesian(lines, test=True)
 
     #plot the current trails

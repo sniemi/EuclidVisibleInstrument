@@ -60,9 +60,9 @@ Dependencies
 This script depends on the following packages:
 
 :requires: PyFITS (tested with 3.0.6)
-:requires: NumPy (tested with 1.6.1)
+:requires: NumPy (tested with 1.6.1 and 1.7.1)
 :requires: numexpr (tested with 2.0.1)
-:requires: SciPy (tested with 0.10.1)
+:requires: SciPy (tested with 0.10.1 and 0.12)
 :requires: vissim-python package
 
 .. Note:: This class is not Python 3 compatible. For example, xrange does not exist
@@ -75,7 +75,8 @@ Testing
 -------
 
 Before trying to run the code, please make sure that you have compiled the
-cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
+cdm03bidir.f90 Fortran code using f2py (f2py -c -m cdm03bidir cdm03bidir.f90) and the the .so is present in
+the CTI folder. For testing,
 please run the unittest as follows::
 
     python simulator.py -t
@@ -109,7 +110,7 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
 
 
 These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+64-bit Python 2.7.3 installation. Further speed testing can be performed using the cProfile module
 as follows::
 
     python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
@@ -154,7 +155,8 @@ Version and change logs::
     1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
          deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
     1.21: included an option to exclude cosmic background; separated dark current from background.
-    1.25: changed to a bidirectional CDM03.
+    1.25: changed to a bidirectional CDM03 model. This allows different CTI parameters to be used in parallel
+          and serial directions.
 
 
 Future Work
@@ -260,6 +262,7 @@ class VISsimulator():
                                      rdose=8.0e9,
                                      ra=123.0,
                                      dec=45.0,
+                                     injection=45000.0,
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
                                      cosmicraydistance='data/cdf_cr_total.dat',
@@ -1269,13 +1272,10 @@ class VISsimulator():
         Add either horizontal or vertical charge injection line to the image.
         """
         if self.chargeInjectionx:
-            #self.image[self.information['ysize']/2self.information['ysize']/2-10:self.information['ysize']/2, :] = self.information['injection']
             self.image[1500:1511, :] = self.information['injection']
             self.log.info('Adding vertical charge injection line')
         if self.chargeInjectiony:
-            #self.image[:, self.information['xsize']/2-10:self.information['xsize']/2] = self.information['injection']
             self.image[:, 1500:1511] = self.information['injection']
-            #self.image[:, 1950:1961] = self.information['injection']
             self.log.info('Adding horizontal charge injection line')
 
 
@@ -1438,17 +1438,16 @@ class VISsimulator():
 
         self.log.debug('Starting to apply radiation damage model...')
         #at this point we can give fake data...
-        cti = CTI.CDM03bidir(dict(parallelTrapfile=self.information['parallelTrapfile'],
-                                  serialTrapfile=self.information['serialTrapfile'],
-                                  rdose=self.information['rdose']), [-1,], log=self.log)
+        cti = CTI.CDM03bidir(self.information, [], log=self.log)
         #here we need the right input data
-        self.image = cti.applyRadiationDamage(self.image, iquadrant=self.information['quadrant'])
+        self.image = cti.applyRadiationDamage(self.image.copy().transpose(),
+                                              iquadrant=self.information['quadrant']).transpose()
         self.log.info('Radiation damage added.')
 
         if self.cosmicRays:
             self.log.info('Adding radiation damage to the no cosmic rays image...')
-            self.imagenoCR = cti.applyRadiationDamage(self.imagenoCR,
-                                                      iquadrant=self.information['quadrant'])
+            self.imagenoCR = cti.applyRadiationDamage(self.imagenoCR.transpose(),
+                                                      iquadrant=self.information['quadrant']).transpose()
 
 
     def applyNonlinearity(self):

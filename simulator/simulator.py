@@ -169,7 +169,7 @@ Future Work
 .. todo::
 
     #. objects.dat is now hard coded into the code, this should be read from the config file
-    #. implement spatially variable PSF
+    #. implement spatially variable PSF and ghost model
     #. test that the WCS is correctly implemented and allows CCD offsets
     #. charge injection line positions are now hardcoded to the code, read from the config file
     #. include rotation in metrology
@@ -1055,7 +1055,8 @@ class VISsimulator():
                         visible += 1
                         if stype == 0:
                             #point source, apply PSF
-                            txt = "Star: " + str(j + 1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                            txt = "Star: " + str(j + 1) + "/" + str(n_objects) + \
+                                  " mag=" +str(obj[2]) + " intscale=" + str(intscales[j])
                             print txt
                             self.log.info(txt)
 
@@ -1144,7 +1145,6 @@ class VISsimulator():
 
                             #overlay the convolved image on the image
                             self.overlayToCCD(conv, obj)
-
                     else:
                         #not on the screen
                         self.log.info('Object %i was outside the detector area' % (j + 1))

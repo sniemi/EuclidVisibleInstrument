@@ -14,6 +14,19 @@ import scipy.optimize
 import numpy as np
 
 
+def chi2(data, predicted, uncertainties):
+    """
+    Classical chi**2 goodness-of-fit estimator.
+
+    :param data: input data
+    :param predicted: predicted values
+    :param uncertainties: errors of the data
+
+    :return: chi**2
+    """
+    return np.sqrt(np.sum(((data-predicted)/uncertainties)**2,axis=-1))
+
+
 def polynomial5(x, p0, p1, p2, p3, p4):
     """
     5th order polynomial

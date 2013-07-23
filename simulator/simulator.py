@@ -30,6 +30,7 @@ The approximate sequence of events in the simulator is as follows:
               convolve with the PSF, and finally overlay onto the detector according to its position.
             * if object is a star, scale counts according to the derived
               scaling (first step), and finally overlay onto the detector according to its position.
+            * add a ghost of image of the object (scaled to the peak pixel of the object) [optional].
 
       #. Apply calibration unit flux to mimic flat field exposures [optional].
       #. Apply a multiplicative flat-field map to emulate pixel-to-pixel non-uniformity [optional].
@@ -115,7 +116,7 @@ as follows::
 
     python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
 
-and then analysing the results with e.g. RunSnakeRun.
+and then analysing the results with e.g. snakeviz or RunSnakeRun.
 
 .. Note: The result above was obtained with nominally sampled PSF, however, that is only good for
          testing purposes. If instead one uses say three times over sampled PSF (TESTSCIENCE3x) then the
@@ -126,7 +127,7 @@ and then analysing the results with e.g. RunSnakeRun.
 Change Log
 ----------
 
-:version: 1.25
+:version: 1.26
 
 Version and change logs::
 
@@ -157,6 +158,9 @@ Version and change logs::
     1.21: included an option to exclude cosmic background; separated dark current from background.
     1.25: changed to a bidirectional CDM03 model. This allows different CTI parameters to be used in parallel
           and serial directions.
+    1.26: an option to include ghosts from the dichroic. The ghost model is simple and does not take into account
+          the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
+          (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
 
 
 Future Work
@@ -196,7 +200,7 @@ from support import logger as lg
 from support import VISinstrumentModel
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.25
+__version__ = 1.26
 
 
 class VISsimulator():
@@ -263,12 +267,14 @@ class VISsimulator():
                                      ra=123.0,
                                      dec=45.0,
                                      injection=45000.0,
+                                     ghostCutoff=20.0,
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
                                      cosmicraydistance='data/cdf_cr_total.dat',
                                      flatfieldfile='data/VISFlatField2percent.fits',
                                      parallelTrapfile='data/cdm_euclid_parallel.dat',
-                                     serialTrapfile='data/cdm_euclid_serial.dat'))
+                                     serialTrapfile='data/cdm_euclid_serial.dat',
+                                     ghostfile='data/ghost800nm.fits'))
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -330,6 +336,7 @@ class VISsimulator():
             flatfieldM = yes
             random = yes
             background = yes
+            ghosts = no
 
         For explanation of each field, see /data/test.config. Note that if an input field does not exist,
         then the values are taken from the default instrument model as described in
@@ -407,7 +414,10 @@ class VISsimulator():
             self.intscale = self.config.getboolean(self.section, 'intscale')
         except:
             self.intscale = True
-
+        try:
+            self.ghosts = self.config.getboolean(self.section, 'ghosts')
+        except:
+            self.ghosts = False
 
         self.information['variablePSF'] = False
 
@@ -543,6 +553,21 @@ class VISsimulator():
         return crImage
 
 
+    def _loadGhostModel(self):
+        """
+        Reads in ghost model from a FITS file and stores the data to self.ghostModel.
+
+        Currently assumes that the ghost model has already been properly scaled and that the pixel
+        scale of the input data corresponds to the nominal VIS pixel scale. Futhermore, assumes that the
+        distance to the ghost from y=0 is appropriate (given current knowledge, about 395 VIS pixels).
+        """
+        self.log.info('Loading ghost model from %s' % self.information['ghostfile'])
+
+        self.ghostModel = pf.getdata(self.information['ghostfile'])
+        self.ghostOffset = self.ghostModel.shape[0] / 2 + 10  #this line may require modification, if input changes
+        self.ghostMax = np.max(self.ghostModel)
+
+
     def readCosmicRayInformation(self):
         """
         Reads in the cosmic ray track information from two input files.
@@ -639,8 +664,8 @@ class VISsimulator():
         :type obj: list
         """
         #object centre x and y coordinates (only in full pixels, fractional has been taken into account already)
-        xt = np.floor(obj[0])
-        yt = np.floor(obj[1])
+        xt = np.floor(obj[0]) - 1  #zero indexing
+        yt = np.floor(obj[1]) - 1  #zero indexing
 
         #input array size
         nx = data.shape[1]
@@ -1245,6 +1270,472 @@ class VISsimulator():
         print '%i objects were place on the detector' % visible
 
 
+    def addObjectsAndGhosts(self):
+        """
+        Add objects from the object list and associated ghost images to the CCD image (self.image).
+
+        Scale the object's brightness in electrons and size using the input catalog magnitude.
+        The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+        Appendix "prior distributions"). The spread is estimated from Figure 1 to be around 0".1 (1 sigma).
+        A random draw from a Gaussian distribution with spread of 0".1 arc sec is performed so that galaxies
+        of the same brightness would not be exactly the same size.
+
+        .. Note:: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+
+        .. Warning:: If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+                     simulate several dithers. The random dispersion can be turned off by setting random=no in
+                     the configuration file so that dithers can be simulated and co-added correctly.
+        """
+        #total number of objects in the input catalogue and counter for visible objects
+        n_objects = self.objects.shape[0]
+        visible = 0
+
+        self.log.info('Number of CCD transits = %i' % self.information['exposures'])
+        self.log.info('Total number of objects in the input catalog = %i' % n_objects)
+        self.log.info('Will also include optical ghosts')
+
+        #calculate the scaling factors from the magnitudes
+        intscales = 10.0 ** (-0.4 * self.objects[:, 2]) * self.information['magzero'] * self.information['exptime']
+
+        if ~self.random:
+            self.log.info(
+                'Using a fixed size-magnitude relation (equation B1 from Miller et al. 2012 (1210.8201v1).')
+            #testin mode will bypass the small random scaling in the size-mag relation
+            #loop over exposures
+            for i in xrange(self.information['exposures']):
+                #loop over the number of objects
+                for j, obj in enumerate(self.objects):
+
+                    stype = obj[3]
+
+                    if self.objectOnDetector(obj):
+                        visible += 1
+                        if stype == 0:
+                            #point source, apply PSF
+                            txt = "Star: " + str(j + 1) + "/" + str(n_objects) + \
+                                  " mag=" +str(obj[2]) + " intscale=" + str(intscales[j])
+                            print txt
+                            self.log.info(txt)
+
+                            data = self.finemap[stype].copy()
+
+                            #map the data to new grid aligned with the centre of the object and scale
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+                            if self.information['psfoversampling'] != 1.0:
+                                data = scipy.ndimage.zoom(data, 1. / self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers, renormalise and scale with the intscale
+                            data[data < 0.0] = 0.0
+                            sum = np.sum(data)
+                            sca = intscales[j] / sum
+                            data = ne.evaluate("data * sca")
+
+                            #overlay the scaled PSF on the image
+                            self.overlayToCCD(data.copy(), obj)
+
+                            #maximum data value, will be used to scale the ghost
+                            mx = np.max(data)
+                            self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                            #scale the ghost
+                            tmp = self.ghostModel.copy() * mx
+
+                            #add the ghost
+                            self.overlayToCCD(tmp, [obj[0], obj[1]+self.ghostOffset])
+                        else:
+                            #extended source, rename finemap
+                            data = self.finemap[stype].copy()
+                            #map the data to new grid aligned with the centre of the object
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+
+                            #size-magnitude scaling
+                            sbig = np.e ** (-1.145 - 0.269 * (obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                            #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                            #so convert to arc seconds prior to scaling
+                            smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                            sbig /= smin
+
+                            txt = "Galaxy: " + str(j + 1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
+                                  " intscale=" + str(intscales[j]) + " FWHM=" + str(sbig * smin) + " arc sec"
+                            print txt
+                            self.log.info(txt)
+
+                            #rotate the image using interpolation and suppress negative values
+                            if math.fabs(obj[4]) > 1e-5:
+                                data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                            #scale the size of the galaxy before convolution
+                            if sbig != 1.0:
+                                data = scipy.ndimage.zoom(data, self.information['psfoversampling'] * sbig, order=0)
+                                data[data < 0.0] = 0.0
+
+                            if self.debug:
+                                self.writeFITSfile(data, 'beforeconv%i.fits' % (j + 1))
+
+                            if self.information['variablePSF']:
+                                sys.exit('Spatially variable PSF not implemented yet!')
+                            else:
+                                #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
+                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+
+                            #scale the galaxy image size with the inverse of the PSF over sampling factor
+                            if self.information['psfoversampling'] != 1.0:
+                                conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers
+                            conv[conv < 0.0] = 0.0
+
+                            #renormalise and scale to the right magnitude
+                            sum = np.sum(conv)
+                            sca = intscales[j] / sum
+                            conv = ne.evaluate("conv * sca")
+
+                            #tiny galaxies sometimes end up with completely zero array
+                            #checking this costs time, so perhaps this could be removed
+                            if np.isnan(np.sum(conv)):
+                                continue
+
+                            if self.debug:
+                                scipy.misc.imsave('image%i.jpg' % (j + 1), conv / np.max(conv) * 255)
+                                self.writeFITSfile(conv, 'afterconv%i.fits' % (j + 1))
+
+                            #overlay the convolved image on the image
+                            self.overlayToCCD(conv.copy(), obj)
+
+                            if obj[2] < self.information['ghostCutoff']:
+                                #maximum data value, will be used to scale the ghost
+                                mx = np.max(conv)
+                                self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                                #convolve the ghost with the galaxy image and scale
+                                tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                tmp /= np.max(tmp)
+                                tmp *= (self.ghostMax * mx)
+
+                                #add the ghost
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                    else:
+                        #object not on the screen, however its ghost image can be...
+                        self.log.info('Object %i was outside the detector area' % (j + 1))
+
+                        if obj[0] < self.information['xsize'] + 200 and obj[0] > -200. and \
+                           obj[1] < self.information['ysize'] and obj[1] > -self.information['ysize']:
+                            #ghost can enter the image if it is only a quadrant below (hence - ysize)
+                            if stype == 0:
+                                #point source
+                                data = self.finemap[stype].copy()
+
+                                if self.information['psfoversampling'] != 1.0:
+                                    #this scaling could be outside the loop given that
+                                    #no subpixel centroiding is applied...
+                                    data = scipy.ndimage.zoom(data, 1. / self.information['psfoversampling'], order=1)
+
+                                #suppress negative numbers, renormalise and scale with the intscale
+                                data[data < 0.0] = 0.0
+                                sum = np.sum(data)
+                                sca = intscales[j] / sum
+                                data = ne.evaluate("data * sca")
+
+                                #scale the ghost
+                                tmp = self.ghostModel.copy() * np.max(data)
+
+                                #add the ghost
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                            else:
+                                if obj[2] < self.information['ghostCutoff']:
+                                    #galaxy
+                                    data = self.finemap[stype].copy()
+
+                                    #map the data to new grid aligned with the centre of the object
+                                    yind, xind = np.indices(data.shape)
+                                    yi = yind.astype(np.float) + (obj[0] % 1)
+                                    xi = xind.astype(np.float) + (obj[1] % 1)
+                                    data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+
+                                    #size scaling relation and random draw
+                                    sbig = np.e ** (-1.145 - 0.269 * (obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                                    rshift = np.random.normal(sbig, 0.2)  #gaussian random draw to mimic the spread
+                                    if rshift > 0.15:  #no negative numbers or tiny tiny galaxies
+                                        sbig = rshift
+
+                                    #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                                    #so convert to arc seconds prior to scaling
+                                    smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                                    sbig /= smin
+
+                                    #rotate the image using interpolation
+                                    if math.fabs(obj[4]) > 1e-5:
+                                        data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                                    #scale the size of the galaxy before convolution
+                                    if sbig != 1.0:
+                                        data = scipy.ndimage.zoom(data, self.information['psfoversampling'] * sbig, order=0,
+                                                                  cval=0.0)
+                                        data[data < 0.0] = 0.0
+
+                                    conv = signal.fftconvolve(data, self.PSF, mode='full')
+
+                                    #scale the galaxy image size with the inverse of the PSF over sampling factor
+                                    if self.information['psfoversampling'] != 1.0:
+                                        conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
+
+                                    #suppress negative numbers
+                                    conv[conv < 0.0] = 0.0
+
+                                    #renormalise and scale to the right magnitude
+                                    sum = np.sum(conv)
+                                    sca = intscales[j] / sum
+                                    conv = ne.evaluate("conv * sca")
+
+                                    #tiny galaxies sometimes end up with completely zero array
+                                    #checking this costs time, so perhaps this could be removed
+                                    if np.isnan(np.sum(conv)):
+                                        continue
+
+                                    #maximum data value, will be used to scale the ghost
+                                    mx = np.max(conv)
+                                    self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                                    #convolve the ghost with the galaxy image and scale
+                                    tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    tmp /= np.max(tmp)
+                                    tmp *= (self.ghostMax * mx)
+
+                                    #add the ghost
+                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+        else:
+            #loop over exposures
+            self.log.info('Using equation B1 from Miller et al. 2012 (1210.8201v1) '
+                          'for scale-magnitude relation with Gaussian random dispersion.')
+            for i in xrange(self.information['exposures']):
+                #loop over the number of objects
+                for j, obj in enumerate(self.objects):
+
+                    stype = obj[3]
+
+                    if self.objectOnDetector(obj):
+                        visible += 1
+                        if stype == 0:
+                            #point source, apply PSF
+                            txt = "Star: " + str(j + 1) + "/" + str(n_objects) + " intscale=" + str(intscales[j])
+                            print txt
+                            self.log.info(txt)
+
+                            data = self.finemap[stype].copy()
+
+                            #map the data to new grid aligned with the centre of the object and scale
+                            #def shift_func(output_coords):
+                            #    return output_coords[0] - (obj[0] % 1), output_coords[1] - (obj[1] % 1)
+                            #data = ndimage.geometric_transform(data, shift_func, order=0)
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+                            if self.information['psfoversampling'] != 1.0:
+                                data = scipy.ndimage.zoom(data, 1. / self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers, renormalise and scale with the intscale
+                            data[data < 0.0] = 0.0
+                            sum = np.sum(data)
+                            sca = intscales[j] / sum
+                            data = ne.evaluate("data * sca")
+
+                            #overlay the scaled PSF on the image
+                            self.overlayToCCD(data.copy(), obj)
+
+                            #maximum data value, will be used to scale the ghost
+                            mx = np.max(data)
+                            self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                            #scale the ghost
+                            tmp = self.ghostModel.copy() * mx
+
+                            #add the ghost
+                            self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                        else:
+                            #extended source, rename finemap
+                            data = self.finemap[stype].copy()
+
+                            #map the data to new grid aligned with the centre of the object
+                            yind, xind = np.indices(data.shape)
+                            yi = yind.astype(np.float) + (obj[0] % 1)
+                            xi = xind.astype(np.float) + (obj[1] % 1)
+                            data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+
+                            #size scaling relation and random draw
+                            sbig = np.e ** (-1.145 - 0.269 * (obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                            rshift = np.random.normal(sbig, 0.2)  #gaussian random draw to mimic the spread
+                            if rshift > 0.15:  #no negative numbers or tiny tiny galaxies
+                                sbig = rshift
+
+                            #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                            #so convert to arc seconds prior to scaling
+                            smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                            sbig /= smin
+
+                            txt = "Galaxy: " + str(j + 1) + "/" + str(n_objects) + " magnitude=" + str(obj[2]) + \
+                                  " intscale=" + str(intscales[j]) + " FWHM=" + str(sbig * smin) + " arc sec"
+                            print txt
+                            self.log.info(txt)
+
+                            #rotate the image using interpolation
+                            if math.fabs(obj[4]) > 1e-5:
+                                data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                            #scale the size of the galaxy before convolution
+                            if sbig != 1.0:
+                                data = scipy.ndimage.zoom(data, self.information['psfoversampling'] * sbig, order=0,
+                                                          cval=0.0)
+                                data[data < 0.0] = 0.0
+
+                            if self.debug:
+                                self.writeFITSfile(data, 'beforeconv%i.fits' % (j + 1))
+
+                            if self.information['variablePSF']:
+                                sys.exit('Spatially variable PSF not implemented yet!')
+                            else:
+                                #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
+                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+
+                            #scale the galaxy image size with the inverse of the PSF over sampling factor
+                            if self.information['psfoversampling'] != 1.0:
+                                conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
+
+                            #suppress negative numbers
+                            conv[conv < 0.0] = 0.0
+
+                            #renormalise and scale to the right magnitude
+                            sum = np.sum(conv)
+                            sca = intscales[j] / sum
+                            conv = ne.evaluate("conv * sca")
+
+                            #tiny galaxies sometimes end up with completely zero array
+                            #checking this costs time, so perhaps this could be removed
+                            if np.isnan(np.sum(conv)):
+                                continue
+
+                            if self.debug:
+                                scipy.misc.imsave('image%i.jpg' % (j + 1), conv / np.max(conv) * 255)
+                                self.writeFITSfile(conv, 'afterconv%i.fits' % (j + 1))
+
+                            #overlay the convolved image on the image
+                            self.overlayToCCD(conv.copy(), obj)
+
+                            if obj[2] < self.information['ghostCutoff']:
+                                #maximum data value, will be used to scale the ghost
+                                mx = np.max(conv)
+                                self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                                #convolve the ghost with the galaxy image and scale
+                                tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                tmp /= np.max(tmp)
+                                tmp *= (self.ghostMax * mx)
+
+                                #add the ghost
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+
+                    else:
+                        #object not on the screen, however its ghost image can be...
+                        self.log.info('Object %i was outside the detector area' % (j + 1))
+
+                        if obj[0] < self.information['xsize'] + 200 and obj[0] > -200. and \
+                           obj[1] < self.information['ysize'] and obj[1] > -self.information['ysize']:
+                            #ghost can enter the image if it is only a quadrant below (hence - ysize)
+                            if stype == 0:
+                                #point source
+                                data = self.finemap[stype].copy()
+
+                                if self.information['psfoversampling'] != 1.0:
+                                    #this scaling could be outside the loop given that
+                                    #no subpixel centroiding is applied...
+                                    data = scipy.ndimage.zoom(data, 1. / self.information['psfoversampling'], order=1)
+
+                                #suppress negative numbers, renormalise and scale with the intscale
+                                data[data < 0.0] = 0.0
+                                sum = np.sum(data)
+                                sca = intscales[j] / sum
+                                data = ne.evaluate("data * sca")
+
+                                #scale the ghost
+                                tmp = self.ghostModel.copy() * np.max(data)
+
+                                #add the ghost
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                            else:
+                                #galaxy
+                                if obj[2] < self.information['ghostCutoff']:
+                                    data = self.finemap[stype].copy()
+
+                                    #map the data to new grid aligned with the centre of the object
+                                    yind, xind = np.indices(data.shape)
+                                    yi = yind.astype(np.float) + (obj[0] % 1)
+                                    xi = xind.astype(np.float) + (obj[1] % 1)
+                                    data = ndimage.map_coordinates(data, [yi, xi], order=1, mode='nearest')
+
+                                    #size scaling relation and random draw
+                                    sbig = np.e ** (-1.145 - 0.269 * (obj[2] - 23.))  #from Miller et al. 2012 (1210.8201v1)
+                                    rshift = np.random.normal(sbig, 0.2)  #gaussian random draw to mimic the spread
+                                    if rshift > 0.15:  #no negative numbers or tiny tiny galaxies
+                                        sbig = rshift
+
+                                    #take into account the size of the finemap galaxy -- the shape tensor is in pixels
+                                    #so convert to arc seconds prior to scaling
+                                    smin = float(min(self.shapex[stype], self.shapey[stype])) / 10.  #1 pix = 0".1
+                                    sbig /= smin
+
+                                    #rotate the image using interpolation
+                                    if math.fabs(obj[4]) > 1e-5:
+                                        data = ndimage.interpolation.rotate(data, obj[4], reshape=False)
+
+                                    #scale the size of the galaxy before convolution
+                                    if sbig != 1.0:
+                                        data = scipy.ndimage.zoom(data, self.information['psfoversampling'] * sbig, order=0,
+                                                                  cval=0.0)
+                                        data[data < 0.0] = 0.0
+
+                                    conv = signal.fftconvolve(data, self.PSF, mode='full')
+
+                                    #scale the galaxy image size with the inverse of the PSF over sampling factor
+                                    if self.information['psfoversampling'] != 1.0:
+                                        conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
+
+                                    #suppress negative numbers
+                                    conv[conv < 0.0] = 0.0
+
+                                    #renormalise and scale to the right magnitude
+                                    sum = np.sum(conv)
+                                    sca = intscales[j] / sum
+                                    conv = ne.evaluate("conv * sca")
+
+                                    #tiny galaxies sometimes end up with completely zero array
+                                    #checking this costs time, so perhaps this could be removed
+                                    if np.isnan(np.sum(conv)):
+                                        continue
+
+                                    #maximum data value, will be used to scale the ghost
+                                    mx = np.max(conv)
+                                    self.log.info('Maximum value of the data added is %.2f electrons' % mx)
+
+                                    #convolve the ghost with the galaxy image and scale
+                                    tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    tmp /= np.max(tmp)
+                                    tmp *= (self.ghostMax * mx)
+
+                                    #add the ghost
+                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+
+        self.log.info('%i objects were place on the detector' % visible)
+        print '%i objects were place on the detector' % visible
+
+
     def addLampFlux(self):
         """
         Include flux from the calibration source.
@@ -1713,7 +2204,11 @@ class VISsimulator():
         self.generateFinemaps()
 
         if self.addsources:
-            self.addObjects()
+            if self.ghosts:
+                self._loadGhostModel()
+                self.addObjectsAndGhosts()
+            else:
+                self.addObjects()
 
         if self.lampFlux:
             self.addLampFlux()

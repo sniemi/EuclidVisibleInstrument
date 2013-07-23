@@ -67,7 +67,7 @@ class tileCCD():
             except:
                 overscan = 'False'
 
-            if 'True' in overscan:
+            if 'True' in overscan and 'nonoise' not in file:
                 self.log.info('Subtracting pre- and overscan regions')
                 prescanx = hdu['PRESCANX']
                 overscanx = hdu['OVRSCANX']

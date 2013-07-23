@@ -3,7 +3,7 @@ This script can be used to test the CDM03 CTI model.
 
 :requires: PyFITS
 :requires: NumPy
-:requires: CDM03 (FORTRAN code, f2py -c -m cdm03 cdm03.f90)
+:requires: CDM03 (FORTRAN code, f2py -c -m cdm03bidir cdm03bidir.f90)
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -131,8 +131,8 @@ def plotTrail(data, measurements, parallel=True, output='CTItest.pdf'):
     else:
         ax1.set_title('Serial CTI')
 
-    ax1.semilogy(np.arange(len(data))-5, data, ls='-', c='g', label='Simulation')
-    ax1.semilogy(np.arange(len(measurements))-4, measurements, 'rs', ms=2, label='Measurements')
+    ax1.semilogy(np.arange(len(measurements))-4, measurements, 'rs', ms=3, label='Measurements')
+    ax1.semilogy(np.arange(len(data))-5, data, ls='-', c='g', marker='x', label='Simulation')
     ax1.axvline(x=0, ls='--', c='k')
 
     ax1.set_ylim(0.1, 60000)
@@ -316,6 +316,7 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
     :return:
     """
     import pymc
+    #lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
 
     #measurements
     values = parallelMeasurements()
@@ -327,39 +328,39 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
     CCDhor[lines['ystart1']:lines['ystop1'], :] = chargeInjection
 
     nt1 = pymc.distributions.Uniform('nt1', 0.0, 100.0, value=40.)
-    nt2 = pymc.distributions.Uniform('nt2', 0.0, 100.0, value=1.2)
-    nt3 = pymc.distributions.Uniform('nt3', 0.0, 100.0, value=1.)
-    nt4 = pymc.distributions.Uniform('nt4', 0.0, 100.0, value=1.)
-    nt5 = pymc.distributions.Uniform('nt5', 0.0, 100.0, value=0.2)
-    sigma1 = pymc.distributions.Uniform('sigma1', 1.0e-20, 1.0e-5, value=2.0e-13)
-    sigma2 = pymc.distributions.Uniform('sigma2', 1.0e-20, 1.0e-5, value=2.0e-13)
-    sigma3 = pymc.distributions.Uniform('sigma3', 1.0e-20, 1.0e-5, value=5.0e-15)
-    sigma4 = pymc.distributions.Uniform('sigma4', 1.0e-20, 1.0e-5, value=1.0e-16)
-    sigma5 = pymc.distributions.Uniform('sigma5', 1.0e-20, 1.0e-5, value=1.0e-18)
-    tau1 = pymc.distributions.Uniform('tau1', 1.0e-8, 1.0e3, value=8.0e-7)
-    tau2 = pymc.distributions.Uniform('tau2', 1.0e-8, 1.0e3, value=3.0e-4)
-    tau3 = pymc.distributions.Uniform('tau3', 1.0e-8, 1.0e3, value=2.0e-3)
-    tau4 = pymc.distributions.Uniform('tau4', 1.0e-8, 1.0e3, value=2.0e-2)
-    tau5 = pymc.distributions.Uniform('tau5', 1.0e-8, 1.0e3, value=1.0)
+    nt2 = pymc.distributions.Uniform('nt2', 0.0, 10.0, value=1.2)
+    nt3 = pymc.distributions.Uniform('nt3', 0.0, 10.0, value=1.)
+    nt4 = pymc.distributions.Uniform('nt4', 0.0, 10.0, value=1.)
+    nt5 = pymc.distributions.Uniform('nt5', 0.0, 10.0, value=0.2)
+    sigma1 = pymc.distributions.Uniform('sigma1', 1.0e-20, 1.0e-10, value=2.0e-13)
+    sigma2 = pymc.distributions.Uniform('sigma2', 1.0e-20, 1.0e-10, value=2.0e-13)
+    sigma3 = pymc.distributions.Uniform('sigma3', 1.0e-20, 1.0e-10, value=5.0e-15)
+    sigma4 = pymc.distributions.Uniform('sigma4', 1.0e-20, 1.0e-10, value=1.0e-16)
+    sigma5 = pymc.distributions.Uniform('sigma5', 1.0e-20, 1.0e-10, value=1.0e-18)
+    tau1 = pymc.distributions.Uniform('tau1', 1.0e-8, 1.0e2, value=8.0e-7)
+    tau2 = pymc.distributions.Uniform('tau2', 1.0e-8, 1.0e2, value=3.0e-4)
+    tau3 = pymc.distributions.Uniform('tau3', 1.0e-8, 1.0e2, value=2.0e-3)
+    tau4 = pymc.distributions.Uniform('tau4', 1.0e-8, 1.0e2, value=2.0e-2)
+    tau5 = pymc.distributions.Uniform('tau5', 1.0e-8, 1.0e2, value=1.0)
 
     @pymc.deterministic(plot=False, trace=False)
     def model(x=CCDhor, nt1=nt1, nt2=nt2, nt3=nt3, nt4=nt4, nt5=nt5,
               sigma1=sigma1, sigma2=sigma2, sigma3=sigma3, sigma4=sigma4, sigma5=sigma5,
               tau1=tau1, tau2=tau2, tau3=tau3, tau4=tau4, tau5=tau5):
         #serial fixed
-        nt_s = [20, 10, 2.]
-        sigma_s = [6e-20, 1.13e-14, 5.2e016]
+        nt_s = [20., 10., 2.]
+        sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
         taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
         #parallel fit values
         sigma_p = [sigma1, sigma2, sigma3, sigma4, sigma5]
         taur_p = [tau1, tau2, tau3, tau4, tau5]
         nt_p = [nt1, nt2, nt3, nt4, nt5]
 
-        tmp = applyRadiationDamageBiDir2(x.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s)[1245:1350, 0]
+        #the slice below assumes lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
+        tmp = applyRadiationDamageBiDir2(x.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s)[1244:1349, 0]
         return tmp
 
-    #likelihood function, note that an inverse weighting has been applied... this could be something else too
-    #y = pymc.distributions.Normal('y', mu=model, tau=1./values**2, value=values, observed=True, trace=False)
+    #likelihood function, not sure if Poisson is correct, was the data binned??
     y = pymc.distributions.Poisson('y', mu=model, value=values, observed=True, trace=False)
 
     #store the model to a dictionary
@@ -383,16 +384,17 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
 
     print 'Will start running a chain...'
     start = time.time()
+
     R = pymc.MCMC(d)
 
-    #map for good starting point
-    map_ = pymc.MAP(d)
-    map_.fit()
-
     if test:
-        R.sample(1000)
+        R.sample(200)
     else:
-        R.sample(iter=10000, burn=1000, thin=2)
+        #map for good starting point
+        map_ = pymc.MAP(d)
+        map_.fit()
+        #and then sample
+        R.sample(iter=10000, burn=2000, thin=2)
 
     R.write_csv("parallel.csv", variables=['nt1', 'nt2', 'nt3', 'nt4', 'nt5',
                                            'sigma1', 'sigma2', 'sigma3', 'sigma4', 'sigma5',
@@ -442,8 +444,8 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
     nt = [Rs['nt1']['mean'], Rs['nt2']['mean'], Rs['nt3']['mean'], Rs['nt4']['mean'], Rs['nt5']['mean']]
     sigma = [Rs['sigma1']['mean'], Rs['sigma2']['mean'], Rs['sigma3']['mean'], Rs['sigma4']['mean'], Rs['sigma5']['mean']]
     taur = [Rs['tau1']['mean'], Rs['tau2']['mean'], Rs['tau3']['mean'], Rs['tau4']['mean'], Rs['tau5']['mean']]
-    nt_s = [20, 10, 2.]
-    sigma_s = [6e-20, 1.13e-14, 5.2e016]
+    nt_s = [20., 10., 2.]
+    sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
     taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
 
     CCD = np.zeros((2066, 5), dtype=np.float32)
@@ -598,8 +600,8 @@ def fitSerialBayesian(lines, chargeInjection=43500., test=False):
     nt_s = [Rs['nt1']['mean'], Rs['nt2']['mean'], Rs['nt3']['mean'], Rs['nt4']['mean'], Rs['nt5']['mean']]
     sigma_s = [Rs['sigma1']['mean'], Rs['sigma2']['mean'], Rs['sigma3']['mean'], Rs['sigma4']['mean'], Rs['sigma5']['mean']]
     taur_s = [Rs['tau1']['mean'], Rs['tau2']['mean'], Rs['tau3']['mean'], Rs['tau4']['mean'], Rs['tau5']['mean']]
-    nt_p = [20, 10, 2.]
-    sigma_p = [6e-20, 1.13e-14, 5.2e016]
+    nt_p = [20., 10., 2.]
+    sigma_p = [6.e-20, 1.13e-14, 5.2e-16]
     taur_p = [2.38e-2, 1.7e-6, 2.2e-4]
 
     CCD = np.zeros((2066, 5), dtype=np.float32)
@@ -630,8 +632,8 @@ def fitParallelLSQ(lines, chargeInjection=43500.):
     """
     def fitparallel(x, nt1, nt2, nt3, nt4, nt5, nt6, nt7):
         #serial fixed
-        nt_s = [20, 10, 2.]
-        sigma_s = [6e-20, 1.13e-14, 5.2e016]
+        nt_s = [20., 10., 2.]
+        sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
         taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
 
         #keep sigma and taur fixed for parallel
@@ -641,7 +643,7 @@ def fitParallelLSQ(lines, chargeInjection=43500.):
         #params that are being fit
         nt_p = np.abs(np.asarray([nt1, nt2, nt3, nt4, nt5, nt6, nt7]))
 
-        tmp = applyRadiationDamageBiDir2(x.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s)[1245:1350, 0]
+        tmp = applyRadiationDamageBiDir2(x.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s)[1244:1349, 0]
 
         return tmp
 
@@ -655,8 +657,8 @@ def fitParallelLSQ(lines, chargeInjection=43500.):
     sigma_p = trapdata[:, 1]
     taur_p = trapdata[:, 2]
 
-    nt_s = [20, 10, 2.]
-    sigma_s = [6e-20, 1.13e-14, 5.2e016]
+    nt_s = [20., 10., 2.]
+    sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
     taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
 
     #create a quadrant

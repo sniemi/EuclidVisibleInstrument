@@ -263,8 +263,8 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
     #plotCatalog('fullFoV0.dat')
 
-    #single CCD
-    settings = dict(besancon=False, deg=30, nx=5000, ny=5000, outputprefix='CCDcatalogue',
+    #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
+    settings = dict(besancon=False, deg=30, nx=10000, ny=10000, outputprefix='CCDcatalogue',
                     types=np.arange(17, 103))
     generateCatalog(**settings)
 

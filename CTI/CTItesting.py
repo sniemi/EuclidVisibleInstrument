@@ -20,7 +20,7 @@ from CTI import CTI
 
 
 def parallelMeasurements(filename='CCD204_05325-03-02_Hopkinson_EPER_data_200kHz_one-output-mode_1.6e10-50MeV.txt',
-                         datafolder='/Users/smn2/EUCLID/CTItesting/data/', gain1=1.17, limit=105, returnScale=False):
+                         datafolder='/Users/sammy/EUCLID/CTItesting/data/', gain1=1.17, limit=105, returnScale=False):
     """
 
     :param filename:
@@ -42,7 +42,7 @@ def parallelMeasurements(filename='CCD204_05325-03-02_Hopkinson_EPER_data_200kHz
 
 
 def serialMeasurements(filename='CCD204_05325-03-02_Hopkinson-serial-EPER-data_200kHz_one-output-mode_1.6e10-50MeV.txt',
-        datafolder='/Users/smn2/EUCLID/CTItesting/data/', gain1=1.17, limit=105, returnScale=False):
+        datafolder='/Users/sammy/EUCLID/CTItesting/data/', gain1=1.17, limit=105, returnScale=False):
     """
 
     :param filename:
@@ -192,7 +192,7 @@ def plotProfiles(vertical, horizontal, lines, len=200, width=9, xsize=2048, ysiz
     #measurements
     #plt.semilogy([4,5,6,7,8,9,10], [50, 27, 16, 11, 9, 8, 7.5], 'y*', label='Alex parallel')
     #plt.semilogy([2,160], [10,1], 'k--', lw=2.5, label='Alex serial')
-    datafolder = '/Users/smn2/EUCLID/CTItesting/data/'
+    datafolder = '/Users/sammy/EUCLID/CTItesting/data/'
     gain1 = 1.17
     parallel1 = np.loadtxt(
         datafolder + 'CCD204_05325-03-02_Hopkinson_EPER_data_200kHz_one-output-mode_1.6e10-50MeV.txt',
@@ -228,7 +228,7 @@ def plotProfiles(vertical, horizontal, lines, len=200, width=9, xsize=2048, ysiz
     plt.close()
 
 
-def plotTestData(datafolder='/Users/smn2/EUCLID/CTItesting/data/', gain1=1.17):
+def plotTestData(datafolder='/Users/sammy/EUCLID/CTItesting/data/', gain1=1.17):
     """
 
     :return:
@@ -309,11 +309,22 @@ def currentValues(parallel='cdm_euclid_parallel.dat', serial='cdm_euclid_serial.
     plotProfiles(CCDCTIver, CCDCTIhor, lines)
 
 
-def fitParallelBayesian(lines, chargeInjection=43500., test=False):
+def fitParallelBayesian(lines, chargeInjection=43500., outpost="parallel.csv", test=False):
     """
+    Finds new parameter values for the trap species that recover the experimental EPER data.
+    Uses Bayesian inference and Markov Chain Monte Carlo algorithm to explore the posterior.
+    Saves the posterior confidence levels to outpost and
 
-    :param chargeInjection:
-    :return:
+    :param lines: charge injection line position in parellel direction (ystart1, ystop1)
+    :type lines: dict
+    :param chargeInjection: number of electrons to place to the charge injection line
+    :type chargeInjection: float
+    :param outpost: name of the output file to which the posterior confidence levels are written to
+    :type outpost: str
+    :param test: a quicker run with less samples
+    :type test: bool
+
+    :return: None
     """
     import pymc
     #lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
@@ -327,123 +338,74 @@ def fitParallelBayesian(lines, chargeInjection=43500., test=False):
     #add horizontal charge injection lines
     CCDhor[lines['ystart1']:lines['ystop1'], :] = chargeInjection
 
-    nt1 = pymc.distributions.Uniform('nt1', 0.0, 100.0, value=40.)
-    nt2 = pymc.distributions.Uniform('nt2', 0.0, 10.0, value=1.2)
-    nt3 = pymc.distributions.Uniform('nt3', 0.0, 10.0, value=1.)
-    nt4 = pymc.distributions.Uniform('nt4', 0.0, 10.0, value=1.)
-    nt5 = pymc.distributions.Uniform('nt5', 0.0, 10.0, value=0.2)
-    sigma1 = pymc.distributions.Uniform('sigma1', 1.0e-20, 1.0e-10, value=2.0e-13)
-    sigma2 = pymc.distributions.Uniform('sigma2', 1.0e-20, 1.0e-10, value=2.0e-13)
-    sigma3 = pymc.distributions.Uniform('sigma3', 1.0e-20, 1.0e-10, value=5.0e-15)
-    sigma4 = pymc.distributions.Uniform('sigma4', 1.0e-20, 1.0e-10, value=1.0e-16)
-    sigma5 = pymc.distributions.Uniform('sigma5', 1.0e-20, 1.0e-10, value=1.0e-18)
-    tau1 = pymc.distributions.Uniform('tau1', 1.0e-8, 1.0e2, value=8.0e-7)
-    tau2 = pymc.distributions.Uniform('tau2', 1.0e-8, 1.0e2, value=3.0e-4)
-    tau3 = pymc.distributions.Uniform('tau3', 1.0e-8, 1.0e2, value=2.0e-3)
-    tau4 = pymc.distributions.Uniform('tau4', 1.0e-8, 1.0e2, value=2.0e-2)
-    tau5 = pymc.distributions.Uniform('tau5', 1.0e-8, 1.0e2, value=1.0)
+    #random variables, to be fit
+    nt = pymc.Uniform('nt', 0.0, 100.0, value=[40., 1.2, 1., 1., 0.2], size=5)
+    sigma = pymc.Uniform('sigma', 1.0e-20, 1.0e-10, value=[2.e-13, 2.e-13, 5.e-15, 1.e-16, 1.e-18], size=5)
+    tau = pymc.Uniform('tau', 1.0e-8, 1.0e2, value=[8.e-7, 3.e-4, 2.e-3, 2.e-2, 1.], size=5)
+    #nt = pymc.Uniform('nt', 0.0, 100.0, size=3)
+    #sigma = pymc.Uniform('sigma', 1.0e-20, 1.0e-10, size=3)
+    #tau = pymc.Uniform('tau', 1.0e-8, 1.0e2, size=3)
 
+    #serial values are kept fixed
+    nt_s = [20., 10., 2.]
+    sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
+    tau_s = [2.38e-2, 1.7e-6, 2.2e-4]
+
+    #model
     @pymc.deterministic(plot=False, trace=False)
-    def model(x=CCDhor, nt1=nt1, nt2=nt2, nt3=nt3, nt4=nt4, nt5=nt5,
-              sigma1=sigma1, sigma2=sigma2, sigma3=sigma3, sigma4=sigma4, sigma5=sigma5,
-              tau1=tau1, tau2=tau2, tau3=tau3, tau4=tau4, tau5=tau5):
-        #serial fixed
-        nt_s = [20., 10., 2.]
-        sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
-        taur_s = [2.38e-2, 1.7e-6, 2.2e-4]
-        #parallel fit values
-        sigma_p = [sigma1, sigma2, sigma3, sigma4, sigma5]
-        taur_p = [tau1, tau2, tau3, tau4, tau5]
-        nt_p = [nt1, nt2, nt3, nt4, nt5]
-
+    def model(nt_p=nt, sigma_p=sigma, tau_p=tau):
         #the slice below assumes lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
-        tmp = applyRadiationDamageBiDir2(x.copy(), nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_s)[1244:1349, 0]
+        tmp = applyRadiationDamageBiDir2(CCDhor.copy(), nt_p, sigma_p, tau_p, nt_s, sigma_s, tau_s)[1244:1349, 0]
         return tmp
 
     #likelihood function, not sure if Poisson is correct, was the data binned??
-    y = pymc.distributions.Poisson('y', mu=model, value=values, observed=True, trace=False)
+    y = pymc.Poisson('y', mu=model, value=values, observed=True, trace=False)
 
     #store the model to a dictionary
-    d = {'nt1': nt1,
-         'nt2': nt2,
-         'nt3': nt3,
-         'nt4': nt4,
-         'nt5': nt5,
-         'sigma1': sigma1,
-         'sigma2': sigma2,
-         'sigma3': sigma3,
-         'sigma4': sigma4,
-         'sigma5': sigma5,
-         'tau1': tau1,
-         'tau2': tau2,
-         'tau3': tau3,
-         'tau4': tau4,
-         'tau5': tau5,
+    d = {'nt': nt,
+         'sigma': sigma,
+         'tau': tau,
          'f': model,
          'y': y}
+
+    R = pymc.MCMC(d)
+
+    #good starting position
+    print 'Finding the maximum a-posterior...'
+    map_ = pymc.MAP(d)
+    map_.fit()#method='fmin_powell'
+    print nt.value
+    print sigma.value
+    print tau.value
 
     print 'Will start running a chain...'
     start = time.time()
 
-    R = pymc.MCMC(d)
-
+    #and then sample
     if test:
-        R.sample(200)
+        R.sample(1000)
     else:
-        #map for good starting point
-        map_ = pymc.MAP(d)
-        map_.fit()
-        #and then sample
-        R.sample(iter=10000, burn=2000, thin=2)
+        R.sample(iter=200000, burn=50000, thin=5)
 
-    R.write_csv("parallel.csv", variables=['nt1', 'nt2', 'nt3', 'nt4', 'nt5',
-                                           'sigma1', 'sigma2', 'sigma3', 'sigma4', 'sigma5',
-                                           'tau1', 'tau2', 'tau3', 'tau4', 'tau5'])
-
-    R.nt1.summary()
-    R.nt2.summary()
-    R.nt3.summary()
-    R.nt4.summary()
-    R.nt5.summary()
-    R.sigma1.summary()
-    R.sigma2.summary()
-    R.sigma3.summary()
-    R.sigma4.summary()
-    R.sigma5.summary()
-    R.tau1.summary()
-    R.tau2.summary()
-    R.tau3.summary()
-    R.tau4.summary()
-    R.tau5.summary()
-
-    #generate plots
-    pymc.Matplot.plot(R)
-    pymc.Matplot.summary_plot(R)
-
-    Rs = R.stats()
+    R.write_csv(outpost)
     print 'Finished MCMC in %e seconds' % (time.time() - start)
 
-    #output mean values
-    print Rs['nt1']['mean']
-    print Rs['nt2']['mean']
-    print Rs['nt3']['mean']
-    print Rs['nt4']['mean']
-    print Rs['nt5']['mean']
-    print Rs['sigma1']['mean']
-    print Rs['sigma2']['mean']
-    print Rs['sigma3']['mean']
-    print Rs['sigma4']['mean']
-    print Rs['sigma5']['mean']
-    print Rs['tau1']['mean']
-    print Rs['tau2']['mean']
-    print Rs['tau3']['mean']
-    print Rs['tau4']['mean']
-    print Rs['tau5']['mean']
+    #print out summaries
+    R.nt.summary()
+    R.sigma.summary()
+    R.tau.summary()
+
+    #generate plots
+    pymc.Matplot.plot(R, common_scale=False)
+    pymc.Matplot.summary_plot(R)
+
+    #rename stats
+    Rs = R.stats()
 
     #show results
-    nt = [Rs['nt1']['mean'], Rs['nt2']['mean'], Rs['nt3']['mean'], Rs['nt4']['mean'], Rs['nt5']['mean']]
-    sigma = [Rs['sigma1']['mean'], Rs['sigma2']['mean'], Rs['sigma3']['mean'], Rs['sigma4']['mean'], Rs['sigma5']['mean']]
-    taur = [Rs['tau1']['mean'], Rs['tau2']['mean'], Rs['tau3']['mean'], Rs['tau4']['mean'], Rs['tau5']['mean']]
+    nt = Rs['nt']['mean']
+    sigma = Rs['sigma']['mean']
+    taur = Rs['tau']['mean']
     nt_s = [20., 10., 2.]
     sigma_s = [6.e-20, 1.13e-14, 5.2e-16]
     taur_s = [2.38e-2, 1.7e-6, 2.2e-4]

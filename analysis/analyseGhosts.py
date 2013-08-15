@@ -339,7 +339,7 @@ def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4, ghostlevel=5e-5):
     vals = []
     for key in res.keys():
         e1 = np.std(res[key]['e1'])
-        e2 = np.std(res[key]['e'])
+        e2 = np.std(res[key]['e2'])
         e = np.std(res[key]['e'])
 
         vals.append(e)
@@ -431,7 +431,7 @@ if __name__ == '__main__':
     run = True
     debug = False
     focus = False
-    star = False
+    star = True
 
     #start the script
     log = lg.setUpLogger('ghosts.log')

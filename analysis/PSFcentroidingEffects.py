@@ -332,7 +332,7 @@ def testCentroidingImpactSingleDirection(log, psf='/Users/sammy/EUCLID/vissim-py
     xres = []
     print 'X shifts'
     for x in range(ran):
-        tmp = data.copy()[canvas:-canvas, canvas-x:-canvas-x]
+        tmp = data.copy()[canvas:-canvas+1, canvas-x:-canvas-x+1]
 
         if interpolation:
             if gaussian:
@@ -341,6 +341,7 @@ def testCentroidingImpactSingleDirection(log, psf='/Users/sammy/EUCLID/vissim-py
                 size = tmp.shape[0] / 12
                 psf = frebin(tmp, size, nlout=size, total=True)
         else:
+            print tmp.shape
             psf = ndimage.zoom(tmp, 1.0/zoom, order=0)
 
         if save:
@@ -360,7 +361,7 @@ def testCentroidingImpactSingleDirection(log, psf='/Users/sammy/EUCLID/vissim-py
     yres = []
     print 'Y shifts'
     for y in range(ran):
-        tmp = data.copy()[canvas-y:-canvas-y, canvas:-canvas]
+        tmp = data.copy()[canvas-y:-canvas-y+1, canvas:-canvas+1]
 
         if interpolation:
             if gaussian:
@@ -369,10 +370,6 @@ def testCentroidingImpactSingleDirection(log, psf='/Users/sammy/EUCLID/vissim-py
                 size = tmp.shape[0] / 12
                 psf = frebin(tmp, size, nlout=size, total=True)
         else:
-            #yind, xind = np.indices(tmp.shape)
-            #yind += y
-            #tmp = ndimage.map_coordinates(tmp.copy(), [yind, xind], order=1)
-
             psf = ndimage.zoom(tmp, 1.0/zoom, order=0)
 
         sh = shape.shapeMeasurement(psf, log, **settings)
@@ -413,7 +410,7 @@ def plotCentroidsSingle(results, output='X', title='Nominal'):
                label=r'$\Delta e = \sqrt{(\Delta e_{1})^{2} + (\Delta e_{2})^{2}}$')
 
     ax.set_xlim(-0.1, 12.1)
-    ax.set_ylim(-0.002, 0.002)
+    ax.set_ylim(-0.001, 0.001)
 
     ax.set_xlabel('Centroid Offset [1/12 pixels]')
     ax.set_ylabel(r'$e_{i} - \bar{e}_{i}\ , \ \ \ i \in [1,2]$')
@@ -441,7 +438,7 @@ def plotCentroidsSingle(results, output='X', title='Nominal'):
     ax.scatter(d, dr, c='m', marker='*', label=r'$R^{2}$')
 
     ax.set_xlim(-0.1, 12.1)
-    ax.set_ylim(-0.1, 0.1)
+    ax.set_ylim(-0.005, 0.005)
 
     ax.set_xlabel('Centroid Offset [1/12 pixels]')
     ax.set_ylabel(r'$R^{2} - \bar{R}^{2} \quad$ [pixels$^{2}$]')

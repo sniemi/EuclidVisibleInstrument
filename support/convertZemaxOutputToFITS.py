@@ -12,37 +12,38 @@ Copies the meta to the header.
 """
 import numpy as np
 import pyfits as pf
-import datetime, codecs
+import datetime, codecs, glob
 
 
 def convertToFITS(filename, output, overwrite=True):
     """
+    Converts Zemax output TXT file to FITS format. Stores the
+    extra information from the Zemax output to the FITS header.
 
-    :param filename:
-    :param output:
-    :return:
+    :param filename: name of the Zemax output txt file
+    :type filename: str
+    :param output:  name of the output FITS file
+    :type output: str
+    :param overwrite: whether or not to overwrite the output file if exists
+    :type overwrite: bool
+
+    :return: None
     """
-    f = codecs.open(filename, 'rb', 'utf-16')
-    d = f.read().strip().encode('ascii','ignore').split()
-    f.close()
-
-    print d[:14]
-
-    tmp = []
+    d= []
     lines = []
-    for l in d:
-        if 3 < len(l) < 50:
-            lines.append(l.strip().encode('ascii','ignore'))
-        else:
-            tmp.append(l)
+    for tmp in codecs.open(filename, 'rb', 'utf16'):
 
-    print tmp
+        tmp = tmp.encode('ascii','ignore').strip()
+
+        if 3 < len(tmp) < 100:
+            lines.append(tmp)
+        elif len(tmp) > 100:
+            d.append([float(x) for x in tmp.strip().split()])
+
 
     #recode to ascii and split before converting to numpy array
-    data = np.asarray(tmp, dtype=np.float32)
-    print data.shape
-
-    f.close()
+    data = np.asarray(d, dtype=np.float32)
+    print 'Shape:', data.shape
 
     #create a new FITS file, using HDUList instance
     ofd = pf.HDUList(pf.PrimaryHDU())
@@ -53,6 +54,7 @@ def convertToFITS(filename, output, overwrite=True):
     #write the info to the header
     for line in lines:
         hdu.header.add_history(line)
+        print line
 
     hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
     hdu.header.add_history('Created at %s' % (datetime.datetime.isoformat(datetime.datetime.now())))
@@ -63,4 +65,6 @@ def convertToFITS(filename, output, overwrite=True):
 
 
 if __name__ == "__main__":
-    convertToFITS('PSFfft.TXT', 'PSFfft.fits')
+    for f in glob.glob('*.TXT'):
+        print '\n\nConverting %s' % f
+        convertToFITS(f, f.replace('TXT', 'fits'))

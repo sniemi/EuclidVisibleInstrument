@@ -196,88 +196,6 @@ def simpleFourierTest2D(N=2048):
     print 'CUDA time', cudatime
 
 
-def simpleConvolutionTest(N=1024, test=True):
-    """
-    Note that the CUDA result differs. There is a complication with zero-padding.
-
-
-    :param N:
-    :param test:
-    :return:
-    """
-    import pyfits as pf
-    from scipy import signal
-    from pyfft.cuda import Plan
-    import pycuda.driver as cuda
-    from pycuda.tools import make_default_context
-    import pycuda.gpuarray as gpuarray
-    import time
-
-    np.random.seed(1)
-
-    in1 = np.random.random((N, N))
-
-    if test:
-        in2 = np.random.random((N, N))
-    else:
-        in2 = pf.getdata('/Users/sammy/EUCLID/vissim-python/data/psf12x.fits')
-
-    in1 = in1.astype(np.complex64)
-    in2 = in2.astype(np.complex64)
-
-    #scipy
-    start = time.time()
-    conv1 = signal.fftconvolve(in1, in2, mode='full').real
-    end = time.time()
-    scipytime = end - start
-
-    #numpy with zero padding
-    r1, c1 = in1.shape
-    r2, c2 = in2.shape
-    r = 2*max(r1, r2)
-    c = 2*max(c1, c2)
-    pr2 = int(np.log(r)/np.log(2.) + 1.)
-    pc2 = int(np.log(c)/np.log(2.) + 1.)
-    rOrig = r
-    cOrig = c
-    r = 2**pr2
-    c = 2**pc2
-    start = time.time()
-    fftimage = np.fft.fft2(in1, s=(r,c)) * np.fft.fft2(in2, s=(r,c))
-    conv2 = np.fft.ifft2(fftimage)[:rOrig-1, :cOrig-1].real
-    end = time.time()
-    numpytime = end - start
-
-    print 'Scipy %f and Numpy %f seconds' % (scipytime, numpytime)
-    print np.testing.assert_allclose(conv1, conv2, rtol=1e-1)
-
-    #CUDA
-    fftimage = np.fft.fft2(in1) * np.fft.fft2(in2)
-    conv3 = np.fft.ifft2(fftimage).real
-
-    start = time.time()
-
-    cuda.init()
-    context = make_default_context()
-
-    plan = Plan(in1.shape, dtype=np.complex64)
-
-    x_gpu1 = gpuarray.to_gpu(in1)
-    x_gpu2 = gpuarray.to_gpu(in2)
-    plan.execute(x_gpu1)
-    plan.execute(x_gpu2)
-    tmp = x_gpu1 * x_gpu2
-    plan.execute(tmp, inverse=True)
-    result = tmp.get()[:rOrig-1, :cOrig-1].real
-    context.pop()
-
-    end = time.time()
-    cudatime = end - start
-
-    print 'CUDA %f' % cudatime
-    print np.testing.assert_allclose(conv3, result, rtol=1e-1)
-
-
 def simpleConvolution(mode='valid'):
     """
     Simple convolution test with random data. Tests if the GPU convolution
@@ -403,11 +321,11 @@ def galaxyConvolution(mode='same'):
     x_gpu = cua.to_gpu(x)
 
     sx = x.shape
-    csf = (5,5)
-    overlap = 0.5
+    #csf = (5,5)  #affects needed memory
+    csf = (2,2)
+    overlap = 0.2
 
     fs = np.tile(kernel, (np.prod(csf), 1, 1))
-    fs_gpu = cua.to_gpu(fs)
 
     winaux = imagetools.win2winaux(sx, csf, overlap)
 
@@ -423,9 +341,10 @@ def galaxyConvolution(mode='same'):
     print "Time elapsed: %.4f" % (time.clock()-start)
 
     #other way around
-    X = ola.OlaGPU(x_gpu, kernel.shape, mode=mode, winaux=winaux)
-    yX_gpu = X.cnv(fs_gpu)
-    result2 = yX_gpu.get()
+    #fs_gpu = cua.to_gpu(fs)
+    #X = ola.OlaGPU(x_gpu, kernel.shape, mode=mode, winaux=winaux)
+    #yX_gpu = X.cnv(fs_gpu)
+    #result2 = yX_gpu.get()
 
     print "-------------------"
     print "SciPy FFT convolution "
@@ -546,10 +465,10 @@ def Test2DFFTmultiprocessing():
 
 
 if __name__ == "__main__":
-    #deviceInfo()
+    deviceInfo()
+
     #firstExample()
     #fromSourceFile()
     #simpleFourierTest2D()
-
     #simpleConvolution()
-    galaxyConvolution()
+    #galaxyConvolution()

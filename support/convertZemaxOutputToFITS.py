@@ -43,6 +43,11 @@ def convertToFITS(filename, output, overwrite=True):
 
     #recode to ascii and split before converting to numpy array
     data = np.asarray(d, dtype=np.float32)
+
+    if 'FFT' in lines[0]:
+        #for some reason FFT output is flipped
+        lines.append('Output rotated 180 with numpy.rot90(img, k=2)')
+        data = np.rot90(data, k=2)
     print 'Shape:', data.shape
 
     #create a new FITS file, using HDUList instance

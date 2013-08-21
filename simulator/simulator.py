@@ -1381,7 +1381,7 @@ class VISsimulator():
                             if self.information['variablePSF']:
                                 sys.exit('Spatially variable PSF not implemented yet!')
                             else:
-                                #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
+                                #conv = ndimage.convolve(data, self.PSF, mode='constant') #not full output
                                 #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
                                 conv = signal.fftconvolve(data, self.PSF, mode='full')
 

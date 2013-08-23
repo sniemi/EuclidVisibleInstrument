@@ -72,6 +72,11 @@ This script depends on the following packages:
           Python 3.x.
 
 
+.. Note:: CUDA acceleration requires an NVIDIA GPU that supports CUDA and PyFFT and PyCUDA packages.
+          Note that the CUDA acceleration does not speed up the computations unless oversampled PSF
+          is being used. If > 2GB of memory is available on the GPU, speed up up to a factor of 50 is
+          possible.
+
 Testing
 -------
 
@@ -118,16 +123,26 @@ as follows::
 
 and then analysing the results with e.g. snakeviz or RunSnakeRun.
 
-.. Note: The result above was obtained with nominally sampled PSF, however, that is only good for
-         testing purposes. If instead one uses say three times over sampled PSF (TESTSCIENCE3x) then the
-         execution time rises significantly (to about 20 minutes). This is mostly due to the fact that convolution
-         becomes rather expensive when done in the finely sampled PSF domain.
+The result above was obtained with nominally sampled PSF, however, that is only good for
+testing purposes. If instead one uses say four times over sampled PSF (TESTSCIENCE4x) then the
+execution time may increases substantially. This is mostly due to the fact that convolution
+becomes rather expensive when done in the finely sampled PSF domain. If the four times oversampled case
+is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is::
+
+
+
+
+Instead if we use an NVIDIA GPU for the convolution (and code that has not been fully optimised), the run time is::
+
+    real	12m41.819s
+    user	12m27.140s
+    sys	0m12.721s
 
 
 Change Log
 ----------
 
-:version: 1.26
+:version: 1.27
 
 Version and change logs::
 
@@ -161,6 +176,7 @@ Version and change logs::
     1.26: an option to include ghosts from the dichroic. The ghost model is simple and does not take into account
           the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
           (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
+    1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available.
 
 
 Future Work
@@ -199,8 +215,20 @@ from CTI import CTI
 from support import logger as lg
 from support import VISinstrumentModel
 
+#use CUDA for convolutions if available, otherwise fall back to scipy.signal.fftconvolve
+try:
+    from support import GPUconvolution
+    convolution = GPUconvolution.convolve
+    info = 'CUDA acceleration available...'
+    CUDA = True
+except:
+    from scipy.signal import fftconvolve
+    convolution = fftconvolve
+    info = 'No CUDA detected, using SciPy for convolution'
+
+
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.26
+__version__ = 1.27
 
 
 class VISsimulator():
@@ -222,6 +250,8 @@ class VISsimulator():
         :param opts: OptionParser instance
         :type opts: OptionParser instance
         """
+        print info
+
         self.configfile = opts.configfile
 
         if opts.section is None:
@@ -278,6 +308,7 @@ class VISsimulator():
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
+        self.log.info(info)
 
 
     def readConfigs(self):
@@ -946,7 +977,8 @@ class VISsimulator():
                 else:
                     data = self.objectMapping[stype]['data']
 
-                #suppress background
+                #suppress background, the value is fairly arbitrary but works well for galaxies
+                #from HST as the input values are in photons/s
                 data[data < 7e-5] = 0.0
 
                 #calculate shape tensor -- used later for size scaling
@@ -1024,8 +1056,6 @@ class VISsimulator():
         Appendix "prior distributions"). The spread is estimated from Figure 1 to be around 0".1 (1 sigma).
         A random draw from a Gaussian distribution with spread of 0".1 arc sec is performed so that galaxies
         of the same brightness would not be exactly the same size.
-
-        .. Note:: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
 
         .. Warning:: If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
                      simulate several dithers. The random dispersion can be turned off by setting random=no in
@@ -1118,9 +1148,12 @@ class VISsimulator():
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
                                 #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                conv = convolution(data, self.PSF, mode='full')
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
+                            #one could argue that the first scaling above is not needed
+                            #
                             if self.information['psfoversampling'] != 1.0:
                                 conv = scipy.ndimage.zoom(conv, 1. / self.information['psfoversampling'], order=1)
 
@@ -1234,7 +1267,8 @@ class VISsimulator():
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
                                 #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                conv = convolution(data, self.PSF, mode='full')
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             if self.information['psfoversampling'] != 1.0:
@@ -1279,8 +1313,6 @@ class VISsimulator():
         Appendix "prior distributions"). The spread is estimated from Figure 1 to be around 0".1 (1 sigma).
         A random draw from a Gaussian distribution with spread of 0".1 arc sec is performed so that galaxies
         of the same brightness would not be exactly the same size.
-
-        .. Note:: scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
 
         .. Warning:: If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
                      simulate several dithers. The random dispersion can be turned off by setting random=no in
@@ -1383,7 +1415,8 @@ class VISsimulator():
                             else:
                                 #conv = ndimage.convolve(data, self.PSF, mode='constant') #not full output
                                 #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                conv = convolution(data, self.PSF, mode='full')
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             if self.information['psfoversampling'] != 1.0:
@@ -1415,7 +1448,8 @@ class VISsimulator():
                                 self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                 #convolve the ghost with the galaxy image and scale
-                                tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                tmp = convolution(self.ghostModel.copy(), conv, mode='full')
                                 tmp /= np.max(tmp)
                                 tmp *= (self.ghostMax * mx)
 
@@ -1480,7 +1514,8 @@ class VISsimulator():
                                                                   cval=0.0)
                                         data[data < 0.0] = 0.0
 
-                                    conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                    #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                    conv = convolution(data, self.PSF, mode='full')
 
                                     #scale the galaxy image size with the inverse of the PSF over sampling factor
                                     if self.information['psfoversampling'] != 1.0:
@@ -1504,7 +1539,8 @@ class VISsimulator():
                                     self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                     #convolve the ghost with the galaxy image and scale
-                                    tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    tmp  = convolution(self.ghostModel.copy(), conv, mode='full')
                                     tmp /= np.max(tmp)
                                     tmp *= (self.ghostMax * mx)
 
@@ -1603,7 +1639,9 @@ class VISsimulator():
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
                                 #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                conv = convolution(data, self.PSF, mode='full')
+
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             if self.information['psfoversampling'] != 1.0:
@@ -1635,7 +1673,8 @@ class VISsimulator():
                                 self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                 #convolve the ghost with the galaxy image and scale
-                                tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                tmp = convolution(self.ghostModel.copy(), conv, mode='full')
                                 tmp /= np.max(tmp)
                                 tmp *= (self.ghostMax * mx)
 
@@ -1701,7 +1740,8 @@ class VISsimulator():
                                                                   cval=0.0)
                                         data[data < 0.0] = 0.0
 
-                                    conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                    #conv = signal.fftconvolve(data, self.PSF, mode='full')
+                                    conv = convolution(data, self.PSF, mode='full')
 
                                     #scale the galaxy image size with the inverse of the PSF over sampling factor
                                     if self.information['psfoversampling'] != 1.0:
@@ -1725,7 +1765,8 @@ class VISsimulator():
                                     self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                     #convolve the ghost with the galaxy image and scale
-                                    tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
+                                    tmp = convolution(self.ghostModel.copy(), conv, mode='full')
                                     tmp /= np.max(tmp)
                                     tmp *= (self.ghostMax * mx)
 
@@ -2297,7 +2338,10 @@ class Test(unittest.TestCase):
         expected = pf.open('data/nonoisenocrQ0_00_00testscience.fits')[1].data
         #assert
         print 'Asserting...'
-        np.testing.assert_array_almost_equal(new, expected, decimal=7, err_msg='', verbose=True)
+        if CUDA:
+            np.testing.assert_array_almost_equal(new, expected, decimal=1, err_msg='', verbose=True)   #32bit
+        else:
+            np.testing.assert_array_almost_equal(new, expected, decimal=7, err_msg='', verbose=True)  #64bit
 
 
 def processArgs(printHelp=False):
@@ -2347,6 +2391,8 @@ if __name__ == '__main__':
         opts.xCCD = '0'
     if opts.yCCD is None:
         opts.yCCD = '0'
+
+    opts.info = info
 
     #run the simulator
     simulate = VISsimulator(opts)

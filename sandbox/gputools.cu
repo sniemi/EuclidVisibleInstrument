@@ -19,6 +19,7 @@ __global__ void zeroPadKernel(float *dx, int m, int n, float *dy, int p, int q, 
   }
 }
 
+
 __global__ void zeroPadComplexKernel(cufftComplex *dx, int m, int n, float *dy, int p, int q, int s, int t){
   int i = blockIdx.y*blockDim.y + threadIdx.y;
   int j = blockIdx.x*blockDim.x + threadIdx.x;
@@ -46,6 +47,7 @@ __global__ void crop_Kernel(float *dx, int m, int n, float *dy, int p, int q, in
     }
   }
 }
+
 
 __global__ void crop_ComplexKernel(float *dx, int m, int n, cufftComplex *dy, int p, int q, int s, int t){
   int i = blockIdx.y*blockDim.y + threadIdx.y;

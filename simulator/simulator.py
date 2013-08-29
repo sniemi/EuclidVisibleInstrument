@@ -129,20 +129,21 @@ execution time may increases substantially. This is mostly due to the fact that 
 becomes rather expensive when done in the finely sampled PSF domain. If the four times oversampled case
 is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is::
 
-
-
+    real	22m48.456s
+    user	21m58.730s
+    sys	        0m50.171s
 
 Instead if we use an NVIDIA GPU for the convolution (and code that has not been fully optimised), the run time is::
 
     real	12m41.819s
     user	12m27.140s
-    sys	0m12.721s
+    sys	        0m12.721s
 
 
 Change Log
 ----------
 
-:version: 1.27
+:version: 1.28
 
 Version and change logs::
 
@@ -176,7 +177,15 @@ Version and change logs::
     1.26: an option to include ghosts from the dichroic. The ghost model is simple and does not take into account
           the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
           (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
-    1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available.
+    1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available. Convolution mode
+          is now controlled using a single parameter. Change from 'full' to 'same' as full provides no valid information
+          over 'same'. In principle the 'valid' mode would give all valid information, but in practise it leads to
+          truncated convolved galaxy images if the image and the kernel are of similar size.
+    1.28: Moved the cosmic ray event generation to a separate class for easier management. Updated the code to
+          generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
+          to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
+          given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
+          the CCD, while cosmic rays can come from any direction and penetrate to any depth).
 
 
 Future Work
@@ -190,7 +199,6 @@ Future Work
     #. charge injection line positions are now hardcoded to the code, read from the config file
     #. include rotation in metrology
     #. implement optional dithered offsets
-    #. try to further improve the convolution speed (look into fftw package)
     #. CCD273 has 4 pixel row gap between the top and bottom half, this is not taken into account in coordinate shifts
 
 
@@ -204,19 +212,19 @@ import os, sys, datetime, math, pprint, unittest
 import ConfigParser
 from optparse import OptionParser
 import scipy
-from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.ndimage import interpolation
 from scipy import ndimage
-from scipy import signal
 import pyfits as pf
 import numpy as np
 import numexpr as ne
 from CTI import CTI
 from support import logger as lg
+from support import cosmicrays
 from support import VISinstrumentModel
 
 #use CUDA for convolutions if available, otherwise fall back to scipy.signal.fftconvolve
 try:
+    #NOCUDA
     from support import GPUconvolution
     convolution = GPUconvolution.convolve
     info = 'CUDA acceleration available...'
@@ -225,10 +233,11 @@ except:
     from scipy.signal import fftconvolve
     convolution = fftconvolve
     info = 'No CUDA detected, using SciPy for convolution'
+    CUDA = False
 
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.27
+__version__ = 1.28
 
 
 class VISsimulator():
@@ -298,13 +307,15 @@ class VISsimulator():
                                      dec=45.0,
                                      injection=45000.0,
                                      ghostCutoff=20.0,
+                                     coveringFraction=1.4,  #1.4 is for 565s exposure
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
                                      cosmicraydistance='data/cdf_cr_total.dat',
                                      flatfieldfile='data/VISFlatField2percent.fits',
                                      parallelTrapfile='data/cdm_euclid_parallel.dat',
                                      serialTrapfile='data/cdm_euclid_serial.dat',
-                                     ghostfile='data/ghost800nm.fits'))
+                                     ghostfile='data/ghost800nm.fits',
+                                     mode='same'))
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -486,102 +497,26 @@ class VISsimulator():
         self.image = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
 
-    def cosmicRayIntercepts(self, lum, x0, y0, l, phi):
+    def smoothingWithChargeDiffusion(self, image, sigma=(0.32, 0.32)):
         """
-        Derive cosmic ray streak intercept points.
+        Smooths a given image with a gaussian kernel with widths given as sigmas.
+        This smoothing can be used to mimic charge diffusion within the CCD.
 
-        :param lum: luminosities of the cosmic ray tracks
-        :param x0: central positions of the cosmic ray tracks in x-direction
-        :param y0: central positions of the cosmic ray tracks in y-direction
-        :param l: lengths of the cosmic ray tracks
-        :param phi: orientation angles of the cosmic ray tracks
+        The default values are from Table 8-2 of CCD_273_Euclid_secification_1.0.130812.pdf converted
+        to sigmas (FWHM / (2sqrt(2ln2)) and rounded up to the second decimal.
 
-        :return: map
-        :rtype: nd-array
+        .. Note:: This method should not be called for the full image if the charge spreading
+                  has already been taken into account in the system PSF to avoid double counting.
+
+        :param image: image array which is smoothed with the kernel
+        :type image: ndarray
+        :param sigma: widths of the gaussian kernel that approximates the charge diffusion [0.32, 0.32].
+        :param sigma: tuple
+
+        :return: smoothed image array
+        :rtype: ndarray
         """
-        #create empty array
-        crImage = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
-
-        #this is very slow way to do this
-        for cosmics in xrange(0, len(l)):
-            #delta x and y
-            dx = l[cosmics] * np.cos(phi[cosmics])
-            dy = l[cosmics] * np.sin(phi[cosmics])
-
-            #pixels in x-direction
-            ilo = np.floor(x0[cosmics] - l[cosmics])
-
-            if ilo < 1.:
-                ilo = 1
-
-            ihi = 1 + np.floor(x0[cosmics] + l[cosmics])
-
-            if ihi > self.information['xsize']:
-                ihi = self.information['xsize']
-
-            #pixels in y-directions
-            jlo = np.floor(y0[cosmics] - l[cosmics])
-
-            if jlo < 1.:
-                jlo = 1
-
-            jhi = 1 + np.floor(y0[cosmics] + l[cosmics])
-            if jhi > self.information['ysize']:
-                jhi = self.information['ysize']
-
-            u = []
-            x = []
-            y = []
-
-            n = 0  # count the intercepts
-
-            #Compute X intercepts on the pixel grid
-            if dx > 0.:
-                for j in xrange(int(ilo), int(ihi)):
-                    ok = (j - x0[cosmics]) / dx
-                    if np.abs(ok) <= 0.5:
-                        n += 1
-                        u.append(ok)
-                        x.append(j)
-                        y.append(y0[cosmics] + ok * dy)
-
-            #Compute Y intercepts on the pixel grid
-            if dy > 0.:
-                for j in xrange(int(jlo), int(jhi)):
-                    ok = (j - y0[cosmics]) / dy
-                    if np.abs(ok) <= 0.5:
-                        n += 1
-                        u.append(ok)
-                        x.append(x0[cosmics] + ok * dx)
-                        y.append(j)
-
-            #check if no intercepts were found
-            if n < 1:
-                i = np.floor(x0[cosmics])
-                j = np.floor(y0[cosmics])
-                crImage[j, i] += lum[cosmics]
-
-            #Find the arguments that sort the intersections along the track.
-            u = np.asarray(u)
-            x = np.asarray(x)
-            y = np.asarray(y)
-
-            args = np.argsort(u)
-
-            u = u[args]
-            x = x[args]
-            y = y[args]
-
-            #Decide which cell each interval traverses, and the path length.
-            for i in xrange(1, n - 1):
-                w = u[i + 1] - u[i]
-                cx = 1 + np.floor((x[i + 1] + x[i]) / 2.0)
-                cy = 1 + np.floor((y[i + 1] + y[i]) / 2.0)
-
-                if cx >= 0 and cx < self.information['xsize'] and cy >= 0 and cy < self.information['ysize']:
-                    crImage[cy, cx] += (w * lum[cosmics])
-
-        return crImage
+        return ndimage.filters.gaussian_filter(image, sigma)
 
 
     def _loadGhostModel(self):
@@ -1147,9 +1082,9 @@ class VISsimulator():
                                 sys.exit('Spatially variable PSF not implemented yet!')
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                conv = convolution(data, self.PSF, mode='full')
+                                #conv = signal.convolve2d(data, self.PSF, self.information['mode']) #slow!
+                                #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                conv = convolution(data, self.PSF, self.information['mode'])
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             #one could argue that the first scaling above is not needed
@@ -1266,9 +1201,9 @@ class VISsimulator():
                                 sys.exit('Spatially variable PSF not implemented yet!')
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                conv = convolution(data, self.PSF, mode='full')
+                                #conv = signal.convolve2d(data, self.PSF, self.information['mode']) #slow!
+                                #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                conv = convolution(data, self.PSF, self.information['mode'])
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             if self.information['psfoversampling'] != 1.0:
@@ -1414,9 +1349,9 @@ class VISsimulator():
                                 sys.exit('Spatially variable PSF not implemented yet!')
                             else:
                                 #conv = ndimage.convolve(data, self.PSF, mode='constant') #not full output
-                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                conv = convolution(data, self.PSF, mode='full')
+                                #conv = signal.convolve2d(data, self.PSF, self.information['mode']) #slow!
+                                #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                conv = convolution(data, self.PSF, self.information['mode'])
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
                             if self.information['psfoversampling'] != 1.0:
@@ -1448,8 +1383,8 @@ class VISsimulator():
                                 self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                 #convolve the ghost with the galaxy image and scale
-                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
-                                tmp = convolution(self.ghostModel.copy(), conv, mode='full')
+                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, self.information['mode'])
+                                tmp = convolution(self.ghostModel.copy(), conv, self.information['mode'])
                                 tmp /= np.max(tmp)
                                 tmp *= (self.ghostMax * mx)
 
@@ -1514,8 +1449,8 @@ class VISsimulator():
                                                                   cval=0.0)
                                         data[data < 0.0] = 0.0
 
-                                    #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                    conv = convolution(data, self.PSF, mode='full')
+                                    #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                    conv = convolution(data, self.PSF, self.information['mode'])
 
                                     #scale the galaxy image size with the inverse of the PSF over sampling factor
                                     if self.information['psfoversampling'] != 1.0:
@@ -1539,8 +1474,8 @@ class VISsimulator():
                                     self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                     #convolve the ghost with the galaxy image and scale
-                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
-                                    tmp  = convolution(self.ghostModel.copy(), conv, mode='full')
+                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, self.information['mode'])
+                                    tmp  = convolution(self.ghostModel.copy(), conv, self.information['mode'])
                                     tmp /= np.max(tmp)
                                     tmp *= (self.ghostMax * mx)
 
@@ -1638,9 +1573,9 @@ class VISsimulator():
                                 sys.exit('Spatially variable PSF not implemented yet!')
                             else:
                                 #conv = ndimage.filters.convolve(data, self.PSF) #would need manual padding?
-                                #conv = signal.convolve2d(data, self.PSF, mode='full') #slow!
-                                #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                conv = convolution(data, self.PSF, mode='full')
+                                #conv = signal.convolve2d(data, self.PSF, self.information['mode']) #slow!
+                                #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                conv = convolution(data, self.PSF, self.information['mode'])
 
 
                             #scale the galaxy image size with the inverse of the PSF over sampling factor
@@ -1673,8 +1608,8 @@ class VISsimulator():
                                 self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                 #convolve the ghost with the galaxy image and scale
-                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
-                                tmp = convolution(self.ghostModel.copy(), conv, mode='full')
+                                #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, self.information['mode'])
+                                tmp = convolution(self.ghostModel.copy(), conv, self.information['mode'])
                                 tmp /= np.max(tmp)
                                 tmp *= (self.ghostMax * mx)
 
@@ -1740,8 +1675,8 @@ class VISsimulator():
                                                                   cval=0.0)
                                         data[data < 0.0] = 0.0
 
-                                    #conv = signal.fftconvolve(data, self.PSF, mode='full')
-                                    conv = convolution(data, self.PSF, mode='full')
+                                    #conv = signal.fftconvolve(data, self.PSF, self.information['mode'])
+                                    conv = convolution(data, self.PSF, self.information['mode'])
 
                                     #scale the galaxy image size with the inverse of the PSF over sampling factor
                                     if self.information['psfoversampling'] != 1.0:
@@ -1765,8 +1700,8 @@ class VISsimulator():
                                     self.log.info('Maximum value of the data added is %.2f electrons' % mx)
 
                                     #convolve the ghost with the galaxy image and scale
-                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, mode='full')
-                                    tmp = convolution(self.ghostModel.copy(), conv, mode='full')
+                                    #tmp = signal.fftconvolve(self.ghostModel.copy(), conv, self.information['mode'])
+                                    tmp = convolution(self.ghostModel.copy(), conv, self.information['mode'])
                                     tmp /= np.max(tmp)
                                     tmp *= (self.ghostMax * mx)
 
@@ -1814,46 +1749,30 @@ class VISsimulator():
     def addCosmicRays(self):
         """
         Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
-
         Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
+        For details, see the documentation for the cosmicrays class in the support package.
         """
         self.readCosmicRayInformation()
+        self.cr['exptime'] = self.information['exptime']  #to scale the number of cosmics with exposure time
 
-        #estimate the number of cosmics
-        cr_n = self.information['xsize'] * self.information['ysize'] * 0.014 / 43.263316 * 2.
-        #scale with exposure time, the above numbers are for the nominal 565s exposure
-        cr_n *= (self.information['exptime'] / 565.0)
+        #cosmic ray image
+        crImage = np.zeros((self.information['ysize'], self.information['xsize']), dtype=np.float64)
 
-        #assume a power-law intensity distribution for tracks
-        fit = dict(cr_lo=1.0e3, cr_hi=1.0e5, cr_q=2.0e0)
-        fit['q1'] = 1.0e0 - fit['cr_q']
-        fit['en1'] = fit['cr_lo'] ** fit['q1']
-        fit['en2'] = fit['cr_hi'] ** fit['q1']
+        #cosmic ray instance
+        cosmics = cosmicrays.cosmicrays(self.log, crImage, crInfo=self.cr)
 
-        #choose the length of the tracks
-        #pseudo-random number taken from a uniform distribution between 0 and 1
-        luck = np.random.rand(int(np.floor(cr_n)))
+        #add cosmic rays up to the covering fraction
+        CCD_cr = cosmics.addUpToFraction(self.information['coveringFraction'], limit=None)
 
-        if self.cr['cr_cdfn'] > 1:
-            ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
-            self.cr['cr_l'] = ius(luck)
-        else:
-            self.cr['cr_l'] = np.sqrt(1.0 - luck ** 2) / luck
+        #debug
+        #effected = np.count_nonzero(CCD_cr)
+        #print effected, effected*100./(CCD_cr.shape[0]*CCD_cr.shape[1])
 
-        if self.cr['cr_cden'] > 1:
-            ius = InterpolatedUnivariateSpline(self.cr['cr_cde'], self.cr['cr_v'])
-            self.cr['cr_e'] = ius(luck)
-        else:
-            self.cr['cr_e'] = (fit['en1'] + (fit['en2'] - fit['en1']) *
-                                        np.random.rand(int(np.floor(cr_n)))) ** (1.0 / fit['q1'])
-
-        #Choose the properties such as positions and an angle from a random Uniform dist
-        cr_x = self.information['xsize'] * np.random.rand(int(np.floor(cr_n)))
-        cr_y = self.information['ysize'] * np.random.rand(int(np.floor(cr_n)))
-        cr_phi = np.pi * np.random.rand(int(np.floor(cr_n)))
-
-        #find the intercepts
-        CCD_cr = self.cosmicRayIntercepts(self.cr['cr_e'], cr_x, cr_y, self.cr['cr_l'], cr_phi)
+        #smooth the cosmic rays with the charge diffusion kernel
+        #CCD_cr = self.smoothingWithChargeDiffusion(CCD_cr)
+        #turned off: the cosmic ray particles are substantially smaller than a pixel, so
+        #it is not really correct to convolve the pixels with the kernel, one would need
+        #to oversample to a super fine grid before convolution to get the effect right...
 
         #save image without cosmics rays
         if self.nonlinearity:

@@ -1,6 +1,19 @@
 """
+Cosmic Rays
+===========
 
-:version: 0.1
+This simple class can be used to include cosmic ray events to an image.
+By default the cosmic ray events are drawn from distributions describing
+the length and energy of the events. Such distributions can be generated
+for example using Stardust code (http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=04636917).
+The energy of the cosmic ray events can also be set to constant for
+testing purposes. The class can be used to draw a single cosmic ray
+event or up to a covering fraction.
+
+:requires: NumPy
+:requires: SciPy
+
+:version: 0.2
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -11,17 +24,25 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 
 class cosmicrays():
     """
+    Cosmic ray generation class. Can either draw events from distributions or
+    set the energy of the events to a constant.
 
+    :param log: logger instance
+    :param image: image to which cosmic rays are added to (a copy is made not to change the original numpy array)
+    :param crInfo: column information (cosmic ray file)
+    :param information: cosmic ray track information (file containing track length and energy information) and
+                        exposure time.
     """
     def __init__(self, log, image, crInfo=None, information=None):
         """
+        Cosmic ray generation class. Can either draw events from distributions or
+        set the energy of the events to a constant.
 
         :param log: logger instance
         :param image: image to which cosmic rays are added to (a copy is made not to change the original numpy array)
         :param crInfo: column information (cosmic ray file)
         :param information: cosmic ray track information (file containing track length and energy information) and
                             exposure time.
-        :return:
         """
         #setup logger
         self.log = log
@@ -30,14 +51,17 @@ class cosmicrays():
         self.image = image.copy()
         self.ysize, self.xsize = self.image.shape
 
-        #set up the information dictionary
-        self.information = (dict(cosmicraylengths='data/cdf_cr_length.dat', cosmicraydistance='data/cdf_cr_total.dat',
+        #set up the information dictionary, first with defaults and then overwrite with inputs if given
+        self.information = (dict(cosmicraylengths='data/cdf_cr_length.dat',
+                                 cosmicraydistance='data/cdf_cr_total.dat',
                                  exptime=565))
         if information is not None:
             self.information.update(information)
 
         if crInfo is not None:
             self.cr = crInfo
+        else:
+            self._readCosmicrayInformation()
 
 
     def _readCosmicrayInformation(self):
@@ -70,66 +94,87 @@ class cosmicrays():
         #create empty array
         crImage = np.zeros((self.ysize, self.xsize), dtype=np.float64)
 
-        #this is very slow way to do this
-        for cosmics in xrange(0, len(l)):
-            #delta x and y
-            dx = l[cosmics] * np.cos(phi[cosmics])
-            dy = l[cosmics] * np.sin(phi[cosmics])
+        #x and y shifts
+        dx = l * np.cos(phi) / 2.
+        dy = l * np.sin(phi) / 2.
+        mskdx = np.abs(dx) < 1e-8
+        mskdy = np.abs(dy) < 1e-8
+        dx[mskdx] = 0.
+        dy[mskdy] = 0.
 
-            #pixels in x-direction
-            ilo = np.floor(x0[cosmics] - l[cosmics])
+        #pixels in x-direction
+        ilo = np.round(x0.copy() - dx)
+        msk = ilo < 0.
+        ilo[msk] = 0
+        ilo = ilo.astype(np.int)
 
-            if ilo < 1.:
-                ilo = 1
+        ihi = 1 + np.round(x0.copy() + dx)
+        msk = ihi > self.xsize
+        ihi[msk] = self.xsize
+        ihi = ihi.astype(np.int)
 
-            ihi = 1 + np.floor(x0[cosmics] + l[cosmics])
+        #pixels in y-directions
+        jlo = np.round(y0.copy() - dy)
+        msk = jlo < 0.
+        jlo[msk] = 0
+        jlo = jlo.astype(np.int)
 
-            if ihi > self.xsize:
-                ihi = self.xsize
+        jhi = 1 + np.round(y0.copy() + dy)
+        msk = jhi > self.ysize
+        jhi[msk] = self.ysize
+        jhi = jhi.astype(np.int)
 
-            #pixels in y-directions
-            jlo = np.floor(y0[cosmics] - l[cosmics])
-
-            if jlo < 1.:
-                jlo = 1
-
-            jhi = 1 + np.floor(y0[cosmics] + l[cosmics])
-            if jhi > self.ysize:
-                jhi = self.ysize
+        #loop over the individual events
+        for i, luminosity in enumerate(lum):
+            n = 0  # count the intercepts
 
             u = []
             x = []
             y = []
 
-            n = 0  # count the intercepts
-
             #Compute X intercepts on the pixel grid
-            if dx > 0.:
-                for j in xrange(int(ilo), int(ihi)):
-                    ok = (j - x0[cosmics]) / dx
+            if ilo[i] < ihi[i]:
+                for xcoord in xrange(ilo[i], ihi[i]):
+                    ok = (xcoord - x0[i]) / dx[i]
                     if np.abs(ok) <= 0.5:
                         n += 1
                         u.append(ok)
-                        x.append(j)
-                        y.append(y0[cosmics] + ok * dy)
+                        x.append(xcoord)
+                        y.append(y0[i] + ok * dy[i])
+            else:
+                for xcoord in xrange(ihi[i], ilo[i]):
+                    ok = (xcoord - x0[i]) / dx[i]
+                    if np.abs(ok) <= 0.5:
+                        n += 1
+                        u.append(ok)
+                        x.append(xcoord)
+                        y.append(y0[i] + ok * dy[i])
 
             #Compute Y intercepts on the pixel grid
-            if dy > 0.:
-                for j in xrange(int(jlo), int(jhi)):
-                    ok = (j - y0[cosmics]) / dy
+            if jlo[i] < jhi[i]:
+                for ycoord in xrange(jlo[i], jhi[i]):
+                    ok = (ycoord - y0[i]) / dy[i]
                     if np.abs(ok) <= 0.5:
                         n += 1
                         u.append(ok)
-                        x.append(x0[cosmics] + ok * dx)
-                        y.append(j)
+                        x.append(x0[i] + ok * dx[i])
+                        y.append(ycoord)
+            else:
+                for ycoord in xrange(jhi[i], jlo[i]):
+                    ok = (ycoord - y0[i]) / dy[i]
+                    if np.abs(ok) <= 0.5:
+                        n += 1
+                        u.append(ok)
+                        x.append(x0[i] + ok * dx[i])
+                        y.append(ycoord)
 
             #check if no intercepts were found
             if n < 1:
-                i = int(np.floor(x0[cosmics]))
-                j = int(np.floor(y0[cosmics]))
-                crImage[j, i] += lum[cosmics]
+                xc = int(np.floor(x0[i]))
+                yc = int(np.floor(y0[i]))
+                crImage[yc, xc] += luminosity
 
-            #Find the arguments that sort the intersections along the track.
+            #Find the arguments that sort the intersections along the track
             u = np.asarray(u)
             x = np.asarray(x)
             y = np.asarray(y)
@@ -140,14 +185,14 @@ class cosmicrays():
             x = x[args]
             y = y[args]
 
-            #Decide which cell each interval traverses, and the path length.
+            #Decide which cell each interval traverses, and the path length
             for i in xrange(1, n - 1):
                 w = u[i + 1] - u[i]
                 cx = int(1 + np.floor((x[i + 1] + x[i]) / 2.))
                 cy = int(1 + np.floor((y[i + 1] + y[i]) / 2.))
 
-                if cx >= 0 and cx < self.xsize and cy >= 0 and cy < self.ysize:
-                    crImage[cy, cx] += (w * lum[cosmics])
+                if 0 <= cx < self.xsize and 0 <= cy < self.ysize:
+                    crImage[cy, cx] += (w * luminosity)
 
         return crImage
 
@@ -254,14 +299,21 @@ class cosmicrays():
 
         :param coveringFraction: covering fraction of cosmic rya events in per cent of total number of pixels
         :type coveringFraction: float
-        :param limit: limiting energy for the cosmic ray event
-        :type limit: float
+        :param limit: limiting energy for the cosmic ray event [None = draw from distribution]
+        :type limit: None or float
+        :param verbose: print out information to stdout
+        :type verbose: bool
+
 
         :return: None
         """
         self.cosmicrayMap = np.zeros((self.ysize, self.xsize))
-        cr_n = 1
+
+        #how many events to draw at once, too large number leads to exceeding the covering fraction
+        cr_n = int(295 * self.information['exptime'] / 565. * coveringFraction / 1.4)
+
         covering = 0.0
+
         while covering < coveringFraction:
             #pseudo-random numbers taken from a uniform distribution between 0 and 1
             luck = np.random.rand(cr_n)
@@ -270,8 +322,12 @@ class cosmicrays():
             ius = InterpolatedUnivariateSpline(self.cr['cr_cdf'], self.cr['cr_u'])
             self.cr['cr_l'] = ius(luck)
 
-            #set the energy directly to the limit
-            self.cr['cr_e'] = np.asarray([limit,])
+            if limit is None:
+                ius = InterpolatedUnivariateSpline(self.cr['cr_cde'], self.cr['cr_v'])
+                self.cr['cr_e'] = ius(luck)
+            else:
+                #set the energy directly to the limit
+                self.cr['cr_e'] = np.asarray([limit,])
 
             #Choose the properties such as positions and an angle from a random Uniform dist
             cr_x = self.xsize * np.random.rand(int(np.floor(cr_n)))
@@ -324,11 +380,14 @@ class cosmicrays():
 
     def addUpToFraction(self, coveringFraction, limit=None, verbose=False):
         """
+        Add cosmic ray events up to the covering Fraction.
 
         :param coveringFraction: covering fraction of cosmic rya events in per cent of total number of pixels
         :type coveringFraction: float
-        :param limit: limiting energy for the cosmic ray event
-        :type limit: float
+        :param limit: limiting energy for the cosmic ray event [None = draw from distribution]
+        :type limit: None or float
+        :param verbose: print out information to stdout
+        :type verbose: bool
 
         :return: image with cosmic rays
         :rtype: ndarray
@@ -339,3 +398,27 @@ class cosmicrays():
         self.image += self.cosmicrayMap
 
         return self.image
+
+
+if __name__ == "__main__":
+    from support import logger as lg
+    from support import files as fileIO
+
+    #set up logger
+    log = lg.setUpLogger('VISsim.log')
+
+    #test section
+    crImage = np.zeros((2066, 2048), dtype=np.float64)
+
+    #cosmic ray instance
+    cosmics = cosmicrays(log, crImage)
+
+    #add cosmic rays up to the covering fraction
+    CCD_cr = cosmics.addUpToFraction(1.4, limit=None, verbose=True)
+
+    effected = np.count_nonzero(CCD_cr)
+    print effected, effected*100./(CCD_cr.shape[0]*CCD_cr.shape[1])
+
+    #save to FITS
+    fileIO.writeFITS(CCD_cr, 'cosmicrayTest.fits', int=False)
+

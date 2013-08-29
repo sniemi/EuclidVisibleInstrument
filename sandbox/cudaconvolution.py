@@ -28,8 +28,8 @@ except ImportError, e:
 cubin = compile(open('/Users/sammy/EUCLID/vissim-python/sandbox/gputools.cu').read(), keep=True)
 
 
-def example(mode='same'):
-    print 'Convlution mode =', mode
+def example(mode='same', saveMemory=False):
+    print 'Convolution mode =', mode
 
     memory = pycuda.driver.mem_get_info()
     print 'Free Memory = %.1f MB and Total = %.1f MB\n\n' % (memory[0] / 1.049e+6, memory[1] / 1.049e+6)
@@ -47,7 +47,7 @@ def example(mode='same'):
     scipy.misc.imsave('original.jpg', np.log10(image))
 
     #kernel
-    kernel = pf.getdata('/Users/sammy/EUCLID/vissim-python/data/psf4x.fits')
+    kernel = pf.getdata('/Users/sammy/EUCLID/vissim-python/data/psf12x.fits')
     kernel /= np.sum(kernel)
     kernel = kernel.astype(np.float32)
     scipy.misc.imsave('kernel.jpg', np.log10(kernel))
@@ -56,11 +56,12 @@ def example(mode='same'):
     sw = np.array(image.shape)
     sf = np.array(kernel.shape)
 
-    #nominal
-    sfft = sw + sf - 1
-
-    #save memory
-    #sfft = [max(sw[0], sf[0]) + 1, max(sw[1], sf[1]) + 1]  #to save memory
+    #this is to save memory for the outputs that are not so large
+    if saveMemory:
+        sfft = [max(sw[0], sf[0]) - 1, max(sw[1], sf[1]) - 1]
+    else:
+        #nominal
+        sfft = sw + sf - 1
 
     sfft_gpu = (2 ** np.ceil(np.log2(sfft)))
     sfft_gpu = (int(sfft_gpu[0]), int(sfft_gpu[1]))
@@ -72,7 +73,10 @@ def example(mode='same'):
     #output dimension
     sx = np.array(image.shape)
     if mode == 'valid':
-        sy = sx - sf + 1
+        if (sx > sf).all():
+            sy = sx - sf + 1
+        else:
+            sy = sf - sx + 1
     elif mode == 'same':
         sy = sx
     elif mode == 'full':
@@ -145,6 +149,8 @@ def example(mode='same'):
     r = result.copy()
     neg = r < 0.
     r[neg] *= -1.
+    zer = r == 0.
+    r[zer] = 1e-8
     scipy.misc.imsave('cuda%s.jpg' % mode, np.log10(r))
     scipy.misc.imsave('scipy%s.jpg' % mode, np.log10(conv))
 
@@ -267,5 +273,6 @@ def zeropadToGPU(array, size, offset=(0, 0), dtype='real', block_size=(32, 32, 1
 
 
 if __name__ == "__main__":
-    example()
+    example(saveMemory=True)
     example(mode='full')
+    #example(mode='valid', saveMemory=True)

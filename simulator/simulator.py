@@ -92,15 +92,9 @@ Please inspect the standard output for results.
 
 Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
-outputs but we must rely on the outputs that are free from random effects.
-
-In the data subdirectory there is a file called "nonoisenocrQ0_00_00testscience.fits",
-which is the comparison image without any noise or cosmic rays. To test the functionality,
-please divide your nonoise and no cosmic ray track output image with the on in the data
-folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
-float64).
-
+outputs but we must rely on the outputs that are free from random effects. The data subdirectory
+contains a file named "nonoisenocrQ0_00_00testscience.fits", which is the comparison image without
+any noise or cosmic rays.
 
 Benchmarking
 ------------
@@ -108,14 +102,14 @@ Benchmarking
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file::
 
     Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
-    6791 objects were place on the detector
+    7091 objects were place on the detector
 
-    real	2m19.378s
-    user	2m13.237s
-    sys	        0m4.394s
+    real	1m40.464s
+    user	1m38.389s
+    sys	        0m1.749s
 
 
-These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
+These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
 64-bit Python 2.7.3 installation. Further speed testing can be performed using the cProfile module
 as follows::
 
@@ -133,11 +127,11 @@ is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is
     user	21m58.730s
     sys	        0m50.171s
 
-Instead if we use an NVIDIA GPU for the convolution (and code that has not been fully optimised), the run time is::
+Instead, if we use an NVIDIA GPU for the convolution (and code that has not been optimised), the run time is::
 
-    real	12m41.819s
-    user	12m27.140s
-    sys	        0m12.721s
+    real	12m7.745s
+    user	11m55.047s
+    sys	        0m9.535s
 
 
 Change Log
@@ -224,7 +218,6 @@ from support import VISinstrumentModel
 
 #use CUDA for convolutions if available, otherwise fall back to scipy.signal.fftconvolve
 try:
-    #NOCUDA
     from support import GPUconvolution
     convolution = GPUconvolution.convolve
     info = 'CUDA acceleration available...'
@@ -306,7 +299,7 @@ class VISsimulator():
                                      ra=123.0,
                                      dec=45.0,
                                      injection=45000.0,
-                                     ghostCutoff=20.0,
+                                     ghostCutoff=22.0,
                                      coveringFraction=1.4,  #1.4 is for 565s exposure
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
@@ -314,8 +307,10 @@ class VISsimulator():
                                      flatfieldfile='data/VISFlatField2percent.fits',
                                      parallelTrapfile='data/cdm_euclid_parallel.dat',
                                      serialTrapfile='data/cdm_euclid_serial.dat',
+                                     cosmeticsFile='data/cosmetics.dat',
                                      ghostfile='data/ghost800nm.fits',
-                                     mode='same'))
+                                     mode='same',
+                                     version=__version__))
 
         #setup logger
         self.log = lg.setUpLogger('VISsim.log')
@@ -441,10 +436,6 @@ class VISsimulator():
         except:
             self.readoutNoise = True
         try:
-            self.postages = self.config.getboolean(self.section, 'postageStamps')
-        except:
-            self.postages = True
-        try:
             self.random = self.config.getboolean(self.section, 'random')
         except:
             self.random = False
@@ -521,7 +512,7 @@ class VISsimulator():
 
     def _loadGhostModel(self):
         """
-        Reads in ghost model from a FITS file and stores the data to self.ghostModel.
+        Reads in a ghost model from a FITS file and stores the data to self.ghostModel.
 
         Currently assumes that the ghost model has already been properly scaled and that the pixel
         scale of the input data corresponds to the nominal VIS pixel scale. Futhermore, assumes that the
@@ -580,41 +571,36 @@ class VISsimulator():
 
     def objectOnDetector(self, object):
         """
-        Tests if the object falls on the detector.
+        Tests if the object falls on the detector area being simulated.
 
-        :param object: object to be placed to the self.image.
+        :param object: object to be placed to the self.image being simulated.
+        :type object: list
 
         :return: whether the object falls on the detector or not
-        :rtype: boolean
+        :rtype: bool
         """
         ny, nx = self.finemap[object[3]].shape
-        mx = self.information['xsize']
-        my = self.information['ysize']
         xt = object[0]
         yt = object[1]
 
-        if object[3] > 0:
-            #galaxy
-            fac = (0.2**((object[2] - 22.)/7.)) / self.shapey[object[3]] / 2.
-        else:
-            #star
-            fac = 1.0
+        #the bounding box should be in the nominal scale
+        fac = 1./self.information['psfoversampling']
 
-        #Assess the boundary box of the input image.
+        #Assess the boundary box of the input image
         xlo = (1 - nx) * 0.5 * fac + xt
         xhi = (nx - 1) * 0.5 * fac + xt
         ylo = (1 - ny) * 0.5 * fac + yt
         yhi = (ny - 1) * 0.5 * fac + yt
 
         i1 = np.floor(xlo + 0.5)
-        i2 = np.floor(xhi + 0.5) + 1
+        i2 = np.ceil(xhi + 0.5) + 1
         j1 = np.floor(ylo + 0.5)
-        j2 = np.floor(yhi + 0.5) + 1
+        j2 = np.ceil(yhi + 0.5) + 1
 
-        if i2 < 1 or i1 > mx:
+        if i2 < 1 or i1 > self.information['xsize']:
             return False
 
-        if j2 < 1 or j1 > my:
+        if j2 < 1 or j1 > self.information['ysize']:
             return False
 
         return True
@@ -1867,14 +1853,24 @@ class VISsimulator():
         """
         cosmetics = np.loadtxt(self.information['cosmeticsFile'], delimiter=',')
 
-        for line in cosmetics:
-            x = int(np.floor(line[1]))
-            y = int(np.floor(line[2]))
-            value = line[3]
-            self.image[y, x] = value
+        x = np.round(cosmetics[:, 0]).astype(np.int)
+        y = np.round(cosmetics[:, 1]).astype(np.int)
+        value = cosmetics[:, 2]
 
-            self.log.info('Adding cosmetic defects from %s:' % input)
-            self.log.info('x=%i, y=%i, value=%f' % (x, y, value))
+        if self.information['quadrant'] > 0:
+            if self.information['quadrant'] > 1:
+                #change y coordinate value
+                y -= self.information['ysize']
+
+            if self.information['quadrant'] % 2 != 0:
+                x -= self.information['xsize']
+
+        for xc, yc, val in zip(x, y, value):
+            if 0 <= xc <= self.information['xsize'] and 0 <= yc <= self.information['ysize']:
+                self.image[yc, xc] = val
+
+                self.log.info('Adding cosmetic defects from %s:' % input)
+                self.log.info('x=%i, y=%i, value=%f' % (xc, yc, val))
 
 
     def applyRadiationDamage(self):
@@ -2116,7 +2112,7 @@ class VISsimulator():
         hdu.header.update('CD2_2', 0.1 / 3600.)
 
         hdu.header.update('DATE-OBS', datetime.datetime.isoformat(datetime.datetime.now()))
-        hdu.header.update('INSTRUME', 'VISsim')
+        hdu.header.update('INSTRUME', 'VISSim%s' % str(__version__))
 
         #add input keywords to the header
         for key, value in self.information.iteritems():
@@ -2141,7 +2137,7 @@ class VISsimulator():
             hdu.header.update(key.upper(), str(value), 'Boolean Flags')
 
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
-        hdu.header.add_history('Created by VISsim (version=%.2f) at %s' % (__version__,
+        hdu.header.add_history('Created by VISSim (version=%.2f) at %s' % (__version__,
                                                                            datetime.datetime.isoformat(datetime.datetime.now())))
         hdu.verify('fix')
 
@@ -2258,9 +2254,9 @@ class Test(unittest.TestCase):
         #assert
         print 'Asserting...'
         if CUDA:
-            np.testing.assert_array_almost_equal(new, expected, decimal=1, err_msg='', verbose=True)   #32bit
+            np.allclose(new, expected)
         else:
-            np.testing.assert_array_almost_equal(new, expected, decimal=7, err_msg='', verbose=True)  #64bit
+            np.testing.assert_array_almost_equal(new, expected, decimal=7, err_msg='', verbose=True)
 
 
 def processArgs(printHelp=False):

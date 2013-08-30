@@ -598,7 +598,7 @@ phases will be used</li>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -606,6 +606,28 @@ phases will be used</li>
 </tr>
 </tbody>
 </table>
+<dl class="function">
+<dt id="analysis.testCTIcorrection.cutoutRegions">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">cutoutRegions</tt><big>(</big><em>files</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=140</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.cutoutRegions" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>files</strong> &#8211; </li>
+<li><strong>xcen</strong> &#8211; </li>
+<li><strong>ycen</strong> &#8211; </li>
+<li><strong>side</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="function">
 <dt id="analysis.testCTIcorrection.plotResults">
 <tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.plotResults" title="Permalink to this definition">¶</a></dt>
@@ -623,10 +645,24 @@ phases will be used</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="analysis.testCTIcorrection.plotResultsNoNoise">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">plotResultsNoNoise</tt><big>(</big><em>inputfile</em>, <em>title</em>, <em>bins=10</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.plotResultsNoNoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the CTI correction algorithm results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="analysis.testCTIcorrection.testCTIcorrection">
 <tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">testCTIcorrection</tt><big>(</big><em>log</em>, <em>files</em>, <em>sigma=0.75</em>, <em>iterations=4</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=20</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.testCTIcorrection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates PSF properties such as ellipticity and size from data without CTI and from
-reduced data.</p>
+CTI data.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -646,6 +682,58 @@ reduced data.</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.testCTIcorrection.testCTIcorrectionNonoise">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">testCTIcorrectionNonoise</tt><big>(</big><em>log</em>, <em>files</em>, <em>output</em>, <em>sigma=0.75</em>, <em>iterations=4</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.testCTIcorrectionNonoise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates PSF properties such as ellipticity and size from data w/ and w/o CTI.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; python logger instance</li>
+<li><strong>files</strong> (<em>list</em>) &#8211; a list of files to be processed</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; size of the Gaussian weighting function</li>
+<li><strong>iterations</strong> (<em>int</em>) &#8211; the number of iterations for the moment based shape estimator</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">ellipticity and size</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.testCTIcorrection.useThibautsData">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">useThibautsData</tt><big>(</big><em>log</em>, <em>output</em>, <em>bcgr=72.2</em>, <em>sigma=0.75</em>, <em>iterations=4</em>, <em>loc=1900</em>, <em>galaxies=1000</em>, <em>datadir='/Users/smn2/EUCLID/CTItesting/uniform/'</em>, <em>thibautCDM03=False</em>, <em>beta=False</em>, <em>serial=1</em>, <em>parallel=1</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.useThibautsData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Test the impact of CTI in case of no noise and no correction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; logger instance</li>
+<li><strong>bcgr</strong> &#8211; background in electrons for the CTI modelling</li>
+<li><strong>sigma</strong> &#8211; size of the weighting function for the quadrupole moment</li>
+<li><strong>iterations</strong> &#8211; number of iterations in the quadrupole moments estimation</li>
+<li><strong>loc</strong> &#8211; location to which the galaxy will be placed [default=1900]</li>
+<li><strong>galaxies</strong> &#8211; number of galaxies to use (&lt; 10000)</li>
+<li><strong>datadir</strong> &#8211; directory pointing to the galaxy images</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
 </td>
 </tr>
 </tbody>

@@ -21,37 +21,37 @@
 \contentsline {subsubsection}{Dependencies}{24}{subsubsection*.59}
 \contentsline {subsubsection}{Testing}{25}{subsubsection*.60}
 \contentsline {subsubsection}{Benchmarking}{25}{subsubsection*.61}
-\contentsline {subsubsection}{Change Log}{25}{subsubsection*.62}
-\contentsline {subsubsection}{Future Work}{26}{subsubsection*.63}
-\contentsline {subsubsection}{Contact Information}{26}{subsubsection*.64}
-\contentsline {subsection}{\numberline {5.1.2}Generating Mock Objects with IRAF}{31}{subsection.5.1.2}
-\contentsline {chapter}{\numberline {6}Data reduction}{35}{chapter.6}
-\contentsline {section}{\numberline {6.1}Data reduction tools}{35}{section.6.1}
-\contentsline {subsection}{\numberline {6.1.1}VIS Data Reduction and Processing}{35}{subsection.6.1.1}
-\contentsline {section}{\numberline {6.2}VIS data reduction studies}{36}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}Bias Calibration}{36}{subsection.6.2.1}
-\contentsline {subsection}{\numberline {6.2.2}Flat Field Calibration}{39}{subsection.6.2.2}
-\contentsline {subsection}{\numberline {6.2.3}Non-linearity I: Detection Chain}{41}{subsection.6.2.3}
-\contentsline {subsection}{\numberline {6.2.4}Testing the CTI Correction Algorithm}{43}{subsection.6.2.4}
-\contentsline {subsection}{\numberline {6.2.5}Cosmic Ray Rejection}{44}{subsection.6.2.5}
-\contentsline {subsection}{\numberline {6.2.6}Impact of Ghost Images}{46}{subsection.6.2.6}
-\contentsline {chapter}{\numberline {7}Data Analysis}{49}{chapter.7}
-\contentsline {section}{\numberline {7.1}VIS data analysis tools}{49}{section.7.1}
-\contentsline {subsection}{\numberline {7.1.1}Object finding and measuring ellipticity}{49}{subsection.7.1.1}
-\contentsline {subsection}{\numberline {7.1.2}Measuring a shape of an object}{50}{subsection.7.1.2}
-\contentsline {subsection}{\numberline {7.1.3}Source finding}{52}{subsection.7.1.3}
-\contentsline {subsection}{\numberline {7.1.4}CCD Spot Measurements}{55}{subsection.7.1.4}
-\contentsline {subsection}{\numberline {7.1.5}Properties of the Point Spread Function}{57}{subsection.7.1.5}
-\contentsline {subsection}{\numberline {7.1.6}Generating PSF Basis Sets}{58}{subsection.7.1.6}
-\contentsline {subsection}{\numberline {7.1.7}PSF Fitting}{59}{subsection.7.1.7}
-\contentsline {subsection}{\numberline {7.1.8}Impact of CTI Trailing on Shear Power Spectrum}{62}{subsection.7.1.8}
-\contentsline {subsection}{\numberline {7.1.9}Non-linearity II: Model Transfer}{63}{subsection.7.1.9}
-\contentsline {chapter}{\numberline {8}Charge Transfer Inefficiency}{67}{chapter.8}
-\contentsline {section}{\numberline {8.1}Fortran code for CTI}{67}{section.8.1}
-\contentsline {chapter}{\numberline {9}Supporting methods and files}{69}{chapter.9}
-\contentsline {section}{\numberline {9.1}Objects}{69}{section.9.1}
-\contentsline {section}{\numberline {9.2}Code}{69}{section.9.2}
-\contentsline {chapter}{\numberline {10}Photometric Accuracy}{71}{chapter.10}
-\contentsline {chapter}{\numberline {11}Indices and tables}{75}{chapter.11}
-\contentsline {chapter}{Python Module Index}{77}{section*.207}
-\contentsline {chapter}{Index}{79}{section*.208}
+\contentsline {subsubsection}{Change Log}{26}{subsubsection*.62}
+\contentsline {subsubsection}{Future Work}{27}{subsubsection*.63}
+\contentsline {subsubsection}{Contact Information}{27}{subsubsection*.64}
+\contentsline {subsection}{\numberline {5.1.2}Generating Mock Objects with IRAF}{32}{subsection.5.1.2}
+\contentsline {chapter}{\numberline {6}Data reduction}{37}{chapter.6}
+\contentsline {section}{\numberline {6.1}Data reduction tools}{37}{section.6.1}
+\contentsline {subsection}{\numberline {6.1.1}VIS Data Reduction and Processing}{37}{subsection.6.1.1}
+\contentsline {section}{\numberline {6.2}VIS data reduction studies}{38}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}Bias Calibration}{38}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}Flat Field Calibration}{41}{subsection.6.2.2}
+\contentsline {subsection}{\numberline {6.2.3}Non-linearity I: Detection Chain}{43}{subsection.6.2.3}
+\contentsline {subsection}{\numberline {6.2.4}Testing the CTI Correction Algorithm}{45}{subsection.6.2.4}
+\contentsline {subsection}{\numberline {6.2.5}Cosmic Ray Rejection}{47}{subsection.6.2.5}
+\contentsline {subsection}{\numberline {6.2.6}Impact of Ghost Images}{49}{subsection.6.2.6}
+\contentsline {chapter}{\numberline {7}Data Analysis}{53}{chapter.7}
+\contentsline {section}{\numberline {7.1}VIS data analysis tools}{53}{section.7.1}
+\contentsline {subsection}{\numberline {7.1.1}Object finding and measuring ellipticity}{53}{subsection.7.1.1}
+\contentsline {subsection}{\numberline {7.1.2}Measuring a shape of an object}{54}{subsection.7.1.2}
+\contentsline {subsection}{\numberline {7.1.3}Source finding}{56}{subsection.7.1.3}
+\contentsline {subsection}{\numberline {7.1.4}CCD Spot Measurements}{59}{subsection.7.1.4}
+\contentsline {subsection}{\numberline {7.1.5}Properties of the Point Spread Function}{61}{subsection.7.1.5}
+\contentsline {subsection}{\numberline {7.1.6}Generating PSF Basis Sets}{62}{subsection.7.1.6}
+\contentsline {subsection}{\numberline {7.1.7}PSF Fitting}{63}{subsection.7.1.7}
+\contentsline {subsection}{\numberline {7.1.8}Impact of CTI Trailing on Shear Power Spectrum}{66}{subsection.7.1.8}
+\contentsline {subsection}{\numberline {7.1.9}Non-linearity II: Model Transfer}{67}{subsection.7.1.9}
+\contentsline {chapter}{\numberline {8}Charge Transfer Inefficiency}{71}{chapter.8}
+\contentsline {section}{\numberline {8.1}Fortran code for CTI}{71}{section.8.1}
+\contentsline {chapter}{\numberline {9}Supporting methods and files}{73}{chapter.9}
+\contentsline {section}{\numberline {9.1}Objects}{73}{section.9.1}
+\contentsline {section}{\numberline {9.2}Code}{73}{section.9.2}
+\contentsline {chapter}{\numberline {10}Photometric Accuracy}{75}{chapter.10}
+\contentsline {chapter}{\numberline {11}Indices and tables}{79}{chapter.11}
+\contentsline {chapter}{Python Module Index}{81}{section*.213}
+\contentsline {chapter}{Index}{83}{section*.214}

@@ -1,3 +1,17 @@
+"""
+First attempts to do convolutions using a GPU and CUDA.
+
+:requires: PyCUDA
+:requires: PyFFT
+:requires: NumPy
+:requires: SciPy
+:requires: pyFITS
+
+:version: 0.1
+
+:author: Sami-Matias Niemi
+:contact: s.niemi@ucl.ac.uk
+"""
 import numpy as np
 import pyfits as pf
 from scipy import signal

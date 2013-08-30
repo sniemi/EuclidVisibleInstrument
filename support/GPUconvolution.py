@@ -5,7 +5,7 @@ This file contains functions to run convolutions on an NVIDIA GPU using CUDA.
 :requires: PyFFT
 :requires: NumPy
 
-:version: 0.1
+:version: 0.2
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -21,7 +21,7 @@ import numpy as np
 cubin = compile(open('/Users/sammy/EUCLID/vissim-python/support/gputools.cu').read(), keep=True)
 
 
-def convolve(image, kernel, mode='same'):
+def convolve(image, kernel, mode='same', saveMemory=False):
     """
     Convolves the input image with a given kernel.
     Current forces the image and kernel to np.float32.
@@ -31,6 +31,8 @@ def convolve(image, kernel, mode='same'):
     :param kernel: kernel to be used in the convolution
     :type kernel: 2D ndarray, float32
     :param mode: output array, either valid, same, or full [same]
+    :param saveMemory: if mode is not full memory can be saved by making smaller zero padding
+    :type saveMemory: bool
 
     :return: convolved image
     :rtype: ndarray, float32
@@ -41,7 +43,14 @@ def convolve(image, kernel, mode='same'):
     #FFT padding size (next power two)
     sw = np.array(image.shape)
     sf = np.array(kernel.shape)
-    sfft = sw + sf - 1
+
+    if saveMemory:
+        #maximum of the two
+        sfft = [max(sw[0], sf[0]) - 1, max(sw[1], sf[1]) - 1]
+    else:
+        #nominal numerical recipes type zero padding
+        sfft = sw + sf - 1
+
     sfft_gpu = (2 ** np.ceil(np.log2(sfft)))
     sfft_gpu = (int(sfft_gpu[0]), int(sfft_gpu[1]))
 

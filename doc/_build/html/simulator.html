@@ -142,6 +142,7 @@ a star or an extended source (i.e. a galaxy).</li>
 convolve with the PSF, and finally overlay onto the detector according to its position.</li>
 <li>if object is a star, scale counts according to the derived
 scaling (first step), and finally overlay onto the detector according to its position.</li>
+<li>add a ghost of image of the object (scaled to the peak pixel of the object) [optional].</li>
 </ul>
 </div></blockquote>
 </li>
@@ -195,11 +196,11 @@ please report any weird or inconsistent simulations to the author.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.6)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1 and 1.7.1)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">numexpr (tested with 2.0.1)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1 and 0.12)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
 </tr>
@@ -212,11 +213,19 @@ in Python 3 (but is used here for speed and memory consumption improvements).
 In addition, at least the string formatting should be changed if moved to
 Python 3.x.</p>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">CUDA acceleration requires an NVIDIA GPU that supports CUDA and PyFFT and PyCUDA packages.
+Note that the CUDA acceleration does not speed up the computations unless oversampled PSF
+is being used. If &gt; 2GB of memory is available on the GPU, speed up up to a factor of 50 is
+possible.</p>
+</div>
 </div>
 <div class="section" id="testing">
 <h3>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h3>
 <p>Before trying to run the code, please make sure that you have compiled the
-cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
+cdm03bidir.f90 Fortran code using f2py (f2py -c -m cdm03bidir cdm03bidir.f90) and the the .so is present in
+the CTI folder. For testing,
 please run the unittest as follows:</p>
 <div class="highlight-python"><pre>python simulator.py -t</pre>
 </div>
@@ -224,30 +233,40 @@ please run the unittest as follows:</p>
 Please inspect the standard output for results.</p>
 <p>Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
-outputs but we must rely on the outputs that are free from random effects.</p>
-<p>In the data subdirectory there is a file called &#8220;nonoisenocrQ0_00_00testscience.fits&#8221;,
-which is the comparison image without any noise or cosmic rays. To test the functionality,
-please divide your nonoise and no cosmic ray track output image with the on in the data
-folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
-float64).</p>
+outputs but we must rely on the outputs that are free from random effects. The data subdirectory
+contains a file named &#8220;nonoisenocrQ0_00_00testscience.fits&#8221;, which is the comparison image without
+any noise or cosmic rays.</p>
 </div>
 <div class="section" id="benchmarking">
 <h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
 <p>A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:</p>
 <div class="highlight-python"><pre>Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
-6791 objects were place on the detector
+7091 objects were place on the detector
 
-real        2m19.378s
-user        2m13.237s
-sys         0m4.394s</pre>
+real        1m40.464s
+user        1m38.389s
+sys         0m1.749s</pre>
 </div>
-<p>These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+<p>These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
+64-bit Python 2.7.3 installation. Further speed testing can be performed using the cProfile module
 as follows:</p>
 <div class="highlight-python"><pre>python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X</pre>
 </div>
-<p>and then analysing the results with e.g. RunSnakeRun.</p>
+<p>and then analysing the results with e.g. snakeviz or RunSnakeRun.</p>
+<p>The result above was obtained with nominally sampled PSF, however, that is only good for
+testing purposes. If instead one uses say four times over sampled PSF (TESTSCIENCE4x) then the
+execution time may increases substantially. This is mostly due to the fact that convolution
+becomes rather expensive when done in the finely sampled PSF domain. If the four times oversampled case
+is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is:</p>
+<div class="highlight-python"><pre>real        22m48.456s
+user        21m58.730s
+sys         0m50.171s</pre>
+</div>
+<p>Instead, if we use an NVIDIA GPU for the convolution (and code that has not been optimised), the run time is:</p>
+<div class="highlight-python"><pre>real        12m7.745s
+user        11m55.047s
+sys         0m9.535s</pre>
+</div>
 </div>
 <div class="section" id="change-log">
 <h3>Change Log<a class="headerlink" href="#change-log" title="Permalink to this headline">¶</a></h3>
@@ -255,7 +274,7 @@ as follows:</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.2</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.28</td>
 </tr>
 </tbody>
 </table>
@@ -283,7 +302,22 @@ as follows:</p>
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
 1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
-     deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.</pre>
+     deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
+1.21: included an option to exclude cosmic background; separated dark current from background.
+1.25: changed to a bidirectional CDM03 model. This allows different CTI parameters to be used in parallel
+      and serial directions.
+1.26: an option to include ghosts from the dichroic. The ghost model is simple and does not take into account
+      the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
+      (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
+1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available. Convolution mode
+      is now controlled using a single parameter. Change from 'full' to 'same' as full provides no valid information
+      over 'same'. In principle the 'valid' mode would give all valid information, but in practise it leads to
+      truncated convolved galaxy images if the image and the kernel are of similar size.
+1.28: Moved the cosmic ray event generation to a separate class for easier management. Updated the code to
+      generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
+      to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
+      given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
+      the CCD, while cosmic rays can come from any direction and penetrate to any depth).</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -292,12 +326,12 @@ as follows:</p>
 <p class="first admonition-title">Todo</p>
 <ol class="last arabic simple">
 <li>objects.dat is now hard coded into the code, this should be read from the config file</li>
-<li>implement spatially variable PSF</li>
+<li>implement spatially variable PSF and ghost model</li>
 <li>test that the WCS is correctly implemented and allows CCD offsets</li>
 <li>charge injection line positions are now hardcoded to the code, read from the config file</li>
 <li>include rotation in metrology</li>
 <li>implement optional dithered offsets</li>
-<li>try to further improve the convolution speed (look into fftw package)</li>
+<li>CCD273 has 4 pixel row gap between the top and bottom half, this is not taken into account in coordinate shifts</li>
 </ol>
 </div>
 </div>
@@ -340,8 +374,9 @@ as follows:</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.addCosmicRays">
 <tt class="descname">addCosmicRays</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addCosmicRays" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.</p>
-<p>Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.</p>
+<dd><p>Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
+Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
+For details, see the documentation for the cosmicrays class in the support package.</p>
 </dd></dl>
 
 <dl class="method">
@@ -359,10 +394,23 @@ The size-magnitude scaling relation is taken to be the equation B1 from Miller e
 Appendix &#8220;prior distributions&#8221;). The spread is estimated from Figure 1 to be around 0&#8221;.1 (1 sigma).
 A random draw from a Gaussian distribution with spread of 0&#8221;.1 arc sec is performed so that galaxies
 of the same brightness would not be exactly the same size.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+simulate several dithers. The random dispersion can be turned off by setting random=no in
+the configuration file so that dithers can be simulated and co-added correctly.</p>
 </div>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.addObjectsAndGhosts">
+<tt class="descname">addObjectsAndGhosts</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addObjectsAndGhosts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add objects from the object list and associated ghost images to the CCD image (self.image).</p>
+<p>Scale the object&#8217;s brightness in electrons and size using the input catalog magnitude.
+The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+Appendix &#8220;prior distributions&#8221;). The spread is estimated from Figure 1 to be around 0&#8221;.1 (1 sigma).
+A random draw from a Gaussian distribution with spread of 0&#8221;.1 arc sec is performed so that galaxies
+of the same brightness would not be exactly the same size.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
@@ -415,10 +463,16 @@ serial direction.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground">
-<tt class="descname">applyDarkCurrentAndCosmicBackground</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply dark current and the cosmic background.
-Scales dark and background with the exposure time.</p>
+<dt id="simulator.simulator.VISsimulator.applyCosmicBackground">
+<tt class="descname">applyCosmicBackground</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyCosmicBackground" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply dark the cosmic background. Scales the background with the exposure time.</p>
+<p>Additionally saves the image without noise to a FITS file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.applyDarkCurrent">
+<tt class="descname">applyDarkCurrent</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyDarkCurrent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply dark current. Scales the dark with the exposure time.</p>
 <p>Additionally saves the image without noise to a FITS file.</p>
 </dd></dl>
 
@@ -474,33 +528,6 @@ be build on.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="simulator.simulator.VISsimulator.cosmicRayIntercepts">
-<tt class="descname">cosmicRayIntercepts</tt><big>(</big><em>lum</em>, <em>x0</em>, <em>y0</em>, <em>l</em>, <em>phi</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.cosmicRayIntercepts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Derive cosmic ray streak intercept points.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>lum</strong> &#8211; luminosities of the cosmic ray tracks</li>
-<li><strong>x0</strong> &#8211; central positions of the cosmic ray tracks in x-direction</li>
-<li><strong>y0</strong> &#8211; central positions of the cosmic ray tracks in y-direction</li>
-<li><strong>l</strong> &#8211; lengths of the cosmic ray tracks</li>
-<li><strong>phi</strong> &#8211; orientation angles of the cosmic ray tracks</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">map</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">nd-array</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="simulator.simulator.VISsimulator.discretise">
 <tt class="descname">discretise</tt><big>(</big><em>max=65535</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.discretise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts a floating point image array (self.image) to an integer array with max values
@@ -532,16 +559,16 @@ defined by the argument max.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.objectOnDetector">
 <tt class="descname">objectOnDetector</tt><big>(</big><em>object</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.objectOnDetector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Tests if the object falls on the detector.</p>
+<dd><p>Tests if the object falls on the detector area being simulated.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object</strong> &#8211; object to be placed to the self.image.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>object</strong> (<em>list</em>) &#8211; object to be placed to the self.image being simulated.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">whether the object falls on the detector or not</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
 </tr>
 </tbody>
 </table>
@@ -570,46 +597,49 @@ defined by the argument max.</p>
 <tt class="descname">processConfigs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.processConfigs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes configuration information and save the information to a dictionary self.information.</p>
 <p>The configuration file may look as follows:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">TEST</span><span class="p">]</span>
-<span class="n">quadrant</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">CCDx</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">CCDy</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">CCDxgap</span> <span class="o">=</span> <span class="mf">1.643</span>
-<span class="n">CCDygap</span> <span class="o">=</span> <span class="mf">8.116</span>
-<span class="n">xsize</span> <span class="o">=</span> <span class="mi">2048</span>
-<span class="n">ysize</span> <span class="o">=</span> <span class="mi">2066</span>
-<span class="n">prescanx</span> <span class="o">=</span> <span class="mi">50</span>
-<span class="n">ovrscanx</span> <span class="o">=</span> <span class="mi">20</span>
-<span class="n">fullwellcapacity</span> <span class="o">=</span> <span class="mi">200000</span>
-<span class="n">dark</span> <span class="o">=</span> <span class="mf">0.001</span>
-<span class="n">readout</span> <span class="o">=</span> <span class="mf">4.5</span>
-<span class="n">bias</span> <span class="o">=</span> <span class="mf">1000.0</span>
-<span class="n">cosmic_bkgd</span> <span class="o">=</span> <span class="mf">0.182758225257</span>
-<span class="n">e_ADU</span> <span class="o">=</span> <span class="mf">3.1</span>
-<span class="n">injection</span> <span class="o">=</span> <span class="mf">150000.0</span>
-<span class="n">magzero</span> <span class="o">=</span> <span class="mf">15182880871.225231</span>
-<span class="n">exposures</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">exptime</span> <span class="o">=</span> <span class="mf">565.0</span>
-<span class="n">RA</span> <span class="o">=</span> <span class="mf">145.95</span>
-<span class="n">DEC</span> <span class="o">=</span> <span class="o">-</span><span class="mf">38.16</span>
-<span class="n">sourcelist</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">source_test</span><span class="o">.</span><span class="n">dat</span>
-<span class="n">PSFfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">interpolated_psf</span><span class="o">.</span><span class="n">fits</span>
-<span class="n">trapfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cdm_euclid</span><span class="o">.</span><span class="n">dat</span>
-<span class="n">cosmeticsFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cosmetics</span><span class="o">.</span><span class="n">dat</span>
-<span class="n">flatfieldfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">VISFlatField2percent</span><span class="o">.</span><span class="n">fits</span>
-<span class="n">output</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">fits</span>
-<span class="n">addSources</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">noise</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">cosmetics</span> <span class="o">=</span> <span class="n">no</span>
-<span class="n">chargeInjectionx</span> <span class="o">=</span> <span class="n">no</span>
-<span class="n">chargeInjectiony</span> <span class="o">=</span> <span class="n">no</span>
-<span class="n">radiationDamage</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">cosmicRays</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">overscans</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">bleeding</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">flatfieldM</span> <span class="o">=</span> <span class="n">yes</span>
-<span class="n">random</span> <span class="o">=</span> <span class="n">yes</span>
-</pre></div>
+<div class="highlight-python"><pre>[TEST]
+quadrant = 0
+CCDx = 0
+CCDy = 0
+CCDxgap = 1.643
+CCDygap = 8.116
+xsize = 2048
+ysize = 2066
+prescanx = 50
+ovrscanx = 20
+fullwellcapacity = 200000
+dark = 0.001
+readout = 4.5
+bias = 1000.0
+cosmic_bkgd = 0.182758225257
+e_ADU = 3.1
+injection = 150000.0
+magzero = 15182880871.225231
+exposures = 1
+exptime = 565.0
+rdose = 8.0e9
+RA = 145.95
+DEC = -38.16
+sourcelist = data/source_test.dat
+PSFfile = data/interpolated_psf.fits
+parallelTrapfile = data/cdm_euclid_parallel.dat
+serialTrapfil e= data/cdm_euclid_serial.dat
+cosmeticsFile = data/cosmetics.dat
+flatfieldfile = data/VISFlatField2percent.fits
+output = test.fits
+addSources = yes
+noise = yes
+cosmetics = no
+chargeInjectionx = no
+chargeInjectiony = no
+radiationDamage = yes
+cosmicRays = yes
+overscans = yes
+bleeding = yes
+flatfieldM = yes
+random = yes
+background = yes
+ghosts = no</pre>
 </div>
 <p>For explanation of each field, see /data/test.config. Note that if an input field does not exist,
 then the values are taken from the default instrument model as described in
@@ -674,6 +704,39 @@ Will do all steps defined in the config file sequentially.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="simulator.simulator.VISsimulator.smoothingWithChargeDiffusion">
+<tt class="descname">smoothingWithChargeDiffusion</tt><big>(</big><em>image</em>, <em>sigma=(0.32</em>, <em>0.32)</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.smoothingWithChargeDiffusion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Smooths a given image with a gaussian kernel with widths given as sigmas.
+This smoothing can be used to mimic charge diffusion within the CCD.</p>
+<p>The default values are from Table 8-2 of CCD_273_Euclid_secification_1.0.130812.pdf converted
+to sigmas (FWHM / (2sqrt(2ln2)) and rounded up to the second decimal.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This method should not be called for the full image if the charge spreading
+has already been taken into account in the system PSF to avoid double counting.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>image</strong> (<em>ndarray</em>) &#8211; image array which is smoothed with the kernel</li>
+<li><strong>sigma</strong> &#8211; widths of the gaussian kernel that approximates the charge diffusion [0.32, 0.32].</li>
+<li><strong>sigma</strong> &#8211; tuple</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">smoothed image array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
 </tr>
 </tbody>
 </table>

@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{June 13, 2013}
+\date{August 30, 2013}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -1602,6 +1602,9 @@ convolve with the PSF, and finally overlay onto the detector according to its po
 if object is a star, scale counts according to the derived
 scaling (first step), and finally overlay onto the detector according to its position.
 
+\item {} 
+add a ghost of image of the object (scaled to the peak pixel of the object) {[}optional{]}.
+
 \end{itemize}
 
 \item {} 
@@ -1670,13 +1673,13 @@ This script depends on the following packages:
 PyFITS (tested with 3.0.6)
 
 \item[{requires}] \leavevmode
-NumPy (tested with 1.6.1)
+NumPy (tested with 1.6.1 and 1.7.1)
 
 \item[{requires}] \leavevmode
 numexpr (tested with 2.0.1)
 
 \item[{requires}] \leavevmode
-SciPy (tested with 0.10.1)
+SciPy (tested with 0.10.1 and 0.12)
 
 \item[{requires}] \leavevmode
 vissim-python package
@@ -1690,11 +1693,19 @@ In addition, at least the string formatting should be changed if moved to
 Python 3.x.
 \end{notice}
 
+\begin{notice}{note}{Note:}
+CUDA acceleration requires an NVIDIA GPU that supports CUDA and PyFFT and PyCUDA packages.
+Note that the CUDA acceleration does not speed up the computations unless oversampled PSF
+is being used. If \textgreater{} 2GB of memory is available on the GPU, speed up up to a factor of 50 is
+possible.
+\end{notice}
+
 
 \subsubsection{Testing}
 \label{simulator:testing}
 Before trying to run the code, please make sure that you have compiled the
-cdm03.f90 Fortran code using f2py (f2py -c -m cdm03 cdm03.f90). For testing,
+cdm03bidir.f90 Fortran code using f2py (f2py -c -m cdm03bidir cdm03bidir.f90) and the the .so is present in
+the CTI folder. For testing,
 please run the unittest as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
@@ -1706,14 +1717,9 @@ Please inspect the standard output for results.
 
 Running the test will produce an image representing VIS lower left (0th) quadrant of the CCD (x, y) = (0, 0). Because
 noise and cosmic rays are randomised one cannot directly compare the science
-outputs but we must rely on the outputs that are free from random effects.
-
-In the data subdirectory there is a file called ``nonoisenocrQ0\_00\_00testscience.fits'',
-which is the comparison image without any noise or cosmic rays. To test the functionality,
-please divide your nonoise and no cosmic ray track output image with the on in the data
-folder. This should lead to a uniformly unity image or at least very close given some
-numerical rounding uncertainties, especially in the FFT convolution (which is float32 not
-float64).
+outputs but we must rely on the outputs that are free from random effects. The data subdirectory
+contains a file named ``nonoisenocrQ0\_00\_00testscience.fits'', which is the comparison image without
+any noise or cosmic rays.
 
 
 \subsubsection{Benchmarking}
@@ -1722,28 +1728,48 @@ A minimal benchmarking has been performed using the TESTSCIENCE1X section of the
 
 \begin{Verbatim}[commandchars=\\\{\}]
 Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
-6791 objects were place on the detector
+7091 objects were place on the detector
 
-real        2m19.378s
-user        2m13.237s
-sys         0m4.394s
+real        1m40.464s
+user        1m38.389s
+sys         0m1.749s
 \end{Verbatim}
 
-These numbers have been obtained with my laptop (2.2 GHz Intel Core i7) with
-64-bit Python 2.7.2 installation. Further speed testing can be performed using the cProfile module
+These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
+64-bit Python 2.7.3 installation. Further speed testing can be performed using the cProfile module
 as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
 python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
 \end{Verbatim}
 
-and then analysing the results with e.g. RunSnakeRun.
+and then analysing the results with e.g. snakeviz or RunSnakeRun.
+
+The result above was obtained with nominally sampled PSF, however, that is only good for
+testing purposes. If instead one uses say four times over sampled PSF (TESTSCIENCE4x) then the
+execution time may increases substantially. This is mostly due to the fact that convolution
+becomes rather expensive when done in the finely sampled PSF domain. If the four times oversampled case
+is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+real        22m48.456s
+user        21m58.730s
+sys         0m50.171s
+\end{Verbatim}
+
+Instead, if we use an NVIDIA GPU for the convolution (and code that has not been optimised), the run time is:
+
+\begin{Verbatim}[commandchars=\\\{\}]
+real        12m7.745s
+user        11m55.047s
+sys         0m9.535s
+\end{Verbatim}
 
 
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.2
+1.28
 
 \end{description}\end{quote}
 
@@ -1774,6 +1800,21 @@ Version and change logs:
      being underestimated due to the fact that it was included as a variance not standard deviation.
 1.2: Included a spatially uniform scattered light. Changed how the image pixel values are rounded before
      deriving the Poisson noise. Included focal plane CCD gaps. Included a unittest.
+1.21: included an option to exclude cosmic background; separated dark current from background.
+1.25: changed to a bidirectional CDM03 model. This allows different CTI parameters to be used in parallel
+      and serial directions.
+1.26: an option to include ghosts from the dichroic. The ghost model is simple and does not take into account
+      the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
+      (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
+1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available. Convolution mode
+      is now controlled using a single parameter. Change from 'full' to 'same' as full provides no valid information
+      over 'same'. In principle the 'valid' mode would give all valid information, but in practise it leads to
+      truncated convolved galaxy images if the image and the kernel are of similar size.
+1.28: Moved the cosmic ray event generation to a separate class for easier management. Updated the code to
+      generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
+      to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
+      given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
+      the CCD, while cosmic rays can come from any direction and penetrate to any depth).
 \end{Verbatim}
 
 
@@ -1785,7 +1826,7 @@ Version and change logs:
 objects.dat is now hard coded into the code, this should be read from the config file
 
 \item {} 
-implement spatially variable PSF
+implement spatially variable PSF and ghost model
 
 \item {} 
 test that the WCS is correctly implemented and allows CCD offsets
@@ -1800,7 +1841,7 @@ include rotation in metrology
 implement optional dithered offsets
 
 \item {} 
-try to further improve the convolution speed (look into fftw package)
+CCD273 has 4 pixel row gap between the top and bottom half, this is not taken into account in coordinate shifts
 
 \end{enumerate}
 \end{notice}
@@ -1844,8 +1885,8 @@ Add either horizontal or vertical charge injection line to the image.
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.addCosmicRays}\pysiglinewithargsret{\bfcode{addCosmicRays}}{}{}
 Add cosmic rays to the arrays based on a power-law intensity distribution for tracks.
-
 Cosmic ray properties (such as location and angle) are chosen from random Uniform distribution.
+For details, see the documentation for the cosmicrays class in the support package.
 
 \end{fulllineitems}
 
@@ -1869,9 +1910,25 @@ Appendix ``prior distributions''). The spread is estimated from Figure 1 to be a
 A random draw from a Gaussian distribution with spread of 0''.1 arc sec is performed so that galaxies
 of the same brightness would not be exactly the same size.
 
-\begin{notice}{note}{Note:}
-scipy.signal.fftconvolve seems to be significantly faster than scipy.signal.convolve2d.
+\begin{notice}{warning}{Warning:}
+If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
+simulate several dithers. The random dispersion can be turned off by setting random=no in
+the configuration file so that dithers can be simulated and co-added correctly.
 \end{notice}
+
+\end{fulllineitems}
+
+\index{addObjectsAndGhosts() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addObjectsAndGhosts}\pysiglinewithargsret{\bfcode{addObjectsAndGhosts}}{}{}
+Add objects from the object list and associated ghost images to the CCD image (self.image).
+
+Scale the object's brightness in electrons and size using the input catalog magnitude.
+The size-magnitude scaling relation is taken to be the equation B1 from Miller et al. 2012 (1210.8201v1;
+Appendix ``prior distributions''). The spread is estimated from Figure 1 to be around 0''.1 (1 sigma).
+A random draw from a Gaussian distribution with spread of 0''.1 arc sec is performed so that galaxies
+of the same brightness would not be exactly the same size.
 
 \begin{notice}{warning}{Warning:}
 If random Gaussian dispersion is added to the scale-magnitude relation, then one cannot
@@ -1932,12 +1989,21 @@ This method does not work if the input file has exactly one line.
 
 \end{fulllineitems}
 
-\index{applyDarkCurrentAndCosmicBackground() (simulator.simulator.VISsimulator method)}
+\index{applyCosmicBackground() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyDarkCurrentAndCosmicBackground}\pysiglinewithargsret{\bfcode{applyDarkCurrentAndCosmicBackground}}{}{}
-Apply dark current and the cosmic background.
-Scales dark and background with the exposure time.
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyCosmicBackground}\pysiglinewithargsret{\bfcode{applyCosmicBackground}}{}{}
+Apply dark the cosmic background. Scales the background with the exposure time.
+
+Additionally saves the image without noise to a FITS file.
+
+\end{fulllineitems}
+
+\index{applyDarkCurrent() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.applyDarkCurrent}\pysiglinewithargsret{\bfcode{applyDarkCurrent}}{}{}
+Apply dark current. Scales the dark with the exposure time.
 
 Additionally saves the image without noise to a FITS file.
 
@@ -2014,40 +2080,6 @@ be build on.
 
 \end{fulllineitems}
 
-\index{cosmicRayIntercepts() (simulator.simulator.VISsimulator method)}
-
-\begin{fulllineitems}
-\phantomsection\label{simulator:simulator.simulator.VISsimulator.cosmicRayIntercepts}\pysiglinewithargsret{\bfcode{cosmicRayIntercepts}}{\emph{lum}, \emph{x0}, \emph{y0}, \emph{l}, \emph{phi}}{}
-Derive cosmic ray streak intercept points.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{lum} -- luminosities of the cosmic ray tracks
-
-\item {} 
-\textbf{x0} -- central positions of the cosmic ray tracks in x-direction
-
-\item {} 
-\textbf{y0} -- central positions of the cosmic ray tracks in y-direction
-
-\item {} 
-\textbf{l} -- lengths of the cosmic ray tracks
-
-\item {} 
-\textbf{phi} -- orientation angles of the cosmic ray tracks
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-map
-
-\item[{Return type}] \leavevmode
-nd-array
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 \index{discretise() (simulator.simulator.VISsimulator method)}
 
 \begin{fulllineitems}
@@ -2085,16 +2117,16 @@ Generates finely sampled images of the input data.
 
 \begin{fulllineitems}
 \phantomsection\label{simulator:simulator.simulator.VISsimulator.objectOnDetector}\pysiglinewithargsret{\bfcode{objectOnDetector}}{\emph{object}}{}
-Tests if the object falls on the detector.
+Tests if the object falls on the detector area being simulated.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
-\textbf{object} -- object to be placed to the self.image.
+\textbf{object} (\emph{list}) -- object to be placed to the self.image being simulated.
 
 \item[{Returns}] \leavevmode
 whether the object falls on the detector or not
 
 \item[{Return type}] \leavevmode
-boolean
+bool
 
 \end{description}\end{quote}
 
@@ -2128,45 +2160,49 @@ Processes configuration information and save the information to a dictionary sel
 The configuration file may look as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-\PYG{p}{[}\PYG{n}{TEST}\PYG{p}{]}
-\PYG{n}{quadrant} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{CCDx} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{CCDy} \PYG{o}{=} \PYG{l+m+mi}{0}
-\PYG{n}{CCDxgap} \PYG{o}{=} \PYG{l+m+mf}{1.643}
-\PYG{n}{CCDygap} \PYG{o}{=} \PYG{l+m+mf}{8.116}
-\PYG{n}{xsize} \PYG{o}{=} \PYG{l+m+mi}{2048}
-\PYG{n}{ysize} \PYG{o}{=} \PYG{l+m+mi}{2066}
-\PYG{n}{prescanx} \PYG{o}{=} \PYG{l+m+mi}{50}
-\PYG{n}{ovrscanx} \PYG{o}{=} \PYG{l+m+mi}{20}
-\PYG{n}{fullwellcapacity} \PYG{o}{=} \PYG{l+m+mi}{200000}
-\PYG{n}{dark} \PYG{o}{=} \PYG{l+m+mf}{0.001}
-\PYG{n}{readout} \PYG{o}{=} \PYG{l+m+mf}{4.5}
-\PYG{n}{bias} \PYG{o}{=} \PYG{l+m+mf}{1000.0}
-\PYG{n}{cosmic\PYGZus{}bkgd} \PYG{o}{=} \PYG{l+m+mf}{0.182758225257}
-\PYG{n}{e\PYGZus{}ADU} \PYG{o}{=} \PYG{l+m+mf}{3.1}
-\PYG{n}{injection} \PYG{o}{=} \PYG{l+m+mf}{150000.0}
-\PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{15182880871.225231}
-\PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
-\PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
-\PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
-\PYG{n}{DEC} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{38.16}
-\PYG{n}{sourcelist} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{source\PYGZus{}test}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{PSFfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{interpolated\PYGZus{}psf}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{trapfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cdm\PYGZus{}euclid}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{cosmeticsFile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{cosmetics}\PYG{o}{.}\PYG{n}{dat}
-\PYG{n}{flatfieldfile} \PYG{o}{=} \PYG{n}{data}\PYG{o}{/}\PYG{n}{VISFlatField2percent}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{output} \PYG{o}{=} \PYG{n}{test}\PYG{o}{.}\PYG{n}{fits}
-\PYG{n}{addSources} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{noise} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{cosmetics} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{chargeInjectionx} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{chargeInjectiony} \PYG{o}{=} \PYG{n}{no}
-\PYG{n}{radiationDamage} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{cosmicRays} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{overscans} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{bleeding} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{flatfieldM} \PYG{o}{=} \PYG{n}{yes}
-\PYG{n}{random} \PYG{o}{=} \PYG{n}{yes}
+[TEST]
+quadrant = 0
+CCDx = 0
+CCDy = 0
+CCDxgap = 1.643
+CCDygap = 8.116
+xsize = 2048
+ysize = 2066
+prescanx = 50
+ovrscanx = 20
+fullwellcapacity = 200000
+dark = 0.001
+readout = 4.5
+bias = 1000.0
+cosmic\_bkgd = 0.182758225257
+e\_ADU = 3.1
+injection = 150000.0
+magzero = 15182880871.225231
+exposures = 1
+exptime = 565.0
+rdose = 8.0e9
+RA = 145.95
+DEC = -38.16
+sourcelist = data/source\_test.dat
+PSFfile = data/interpolated\_psf.fits
+parallelTrapfile = data/cdm\_euclid\_parallel.dat
+serialTrapfil e= data/cdm\_euclid\_serial.dat
+cosmeticsFile = data/cosmetics.dat
+flatfieldfile = data/VISFlatField2percent.fits
+output = test.fits
+addSources = yes
+noise = yes
+cosmetics = no
+chargeInjectionx = no
+chargeInjectiony = no
+radiationDamage = yes
+cosmicRays = yes
+overscans = yes
+bleeding = yes
+flatfieldM = yes
+random = yes
+background = yes
+ghosts = no
 \end{Verbatim}
 
 For explanation of each field, see /data/test.config. Note that if an input field does not exist,
@@ -2251,6 +2287,43 @@ Will do all steps defined in the config file sequentially.
 \begin{quote}\begin{description}
 \item[{Returns}] \leavevmode
 None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{smoothingWithChargeDiffusion() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.smoothingWithChargeDiffusion}\pysiglinewithargsret{\bfcode{smoothingWithChargeDiffusion}}{\emph{image}, \emph{sigma=(0.32}, \emph{0.32)}}{}
+Smooths a given image with a gaussian kernel with widths given as sigmas.
+This smoothing can be used to mimic charge diffusion within the CCD.
+
+The default values are from Table 8-2 of CCD\_273\_Euclid\_secification\_1.0.130812.pdf converted
+to sigmas (FWHM / (2sqrt(2ln2)) and rounded up to the second decimal.
+
+\begin{notice}{note}{Note:}
+This method should not be called for the full image if the charge spreading
+has already been taken into account in the system PSF to avoid double counting.
+\end{notice}
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{image} (\emph{ndarray}) -- image array which is smoothed with the kernel
+
+\item {} 
+\textbf{sigma} -- widths of the gaussian kernel that approximates the charge diffusion {[}0.32, 0.32{]}.
+
+\item {} 
+\textbf{sigma} -- tuple
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+smoothed image array
+
+\item[{Return type}] \leavevmode
+ndarray
 
 \end{description}\end{quote}
 
@@ -3076,7 +3149,7 @@ PyFITS
 matplotlib
 
 \item[{version}] \leavevmode
-0.1
+0.3
 
 \item[{author}] \leavevmode
 Sami-Matias Niemi
@@ -3085,6 +3158,32 @@ Sami-Matias Niemi
 \href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \end{description}\end{quote}
+\index{cutoutRegions() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.testCTIcorrection.cutoutRegions}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{cutoutRegions}}{\emph{files}, \emph{xcen=1900}, \emph{ycen=1900}, \emph{side=140}}{}~\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{files} -- 
+
+\item {} 
+\textbf{xcen} -- 
+
+\item {} 
+\textbf{ycen} -- 
+
+\item {} 
+\textbf{side} -- 
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{plotResults() (in module analysis.testCTIcorrection)}
 
 \begin{fulllineitems}
@@ -3101,12 +3200,25 @@ None
 
 \end{fulllineitems}
 
+\index{plotResultsNoNoise() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.testCTIcorrection.plotResultsNoNoise}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{plotResultsNoNoise}}{\emph{inputfile}, \emph{title}, \emph{bins=10}}{}
+Plot the CTI correction algorithm results.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{testCTIcorrection() (in module analysis.testCTIcorrection)}
 
 \begin{fulllineitems}
 \phantomsection\label{reduction:analysis.testCTIcorrection.testCTIcorrection}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{testCTIcorrection}}{\emph{log}, \emph{files}, \emph{sigma=0.75}, \emph{iterations=4}, \emph{xcen=1900}, \emph{ycen=1900}, \emph{side=20}}{}
 Calculates PSF properties such as ellipticity and size from data without CTI and from
-reduced data.
+CTI data.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
 \item {} 
@@ -3137,6 +3249,74 @@ ellipticity and size
 
 \item[{Return type}] \leavevmode
 dict
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{testCTIcorrectionNonoise() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.testCTIcorrection.testCTIcorrectionNonoise}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{testCTIcorrectionNonoise}}{\emph{log}, \emph{files}, \emph{output}, \emph{sigma=0.75}, \emph{iterations=4}}{}
+Calculates PSF properties such as ellipticity and size from data w/ and w/o CTI.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- python logger instance
+
+\item {} 
+\textbf{files} (\emph{list}) -- a list of files to be processed
+
+\item {} 
+\textbf{sigma} (\emph{float}) -- size of the Gaussian weighting function
+
+\item {} 
+\textbf{iterations} (\emph{int}) -- the number of iterations for the moment based shape estimator
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+ellipticity and size
+
+\item[{Return type}] \leavevmode
+dict
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{useThibautsData() (in module analysis.testCTIcorrection)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.testCTIcorrection.useThibautsData}\pysiglinewithargsret{\code{analysis.testCTIcorrection.}\bfcode{useThibautsData}}{\emph{log}, \emph{output}, \emph{bcgr=72.2}, \emph{sigma=0.75}, \emph{iterations=4}, \emph{loc=1900}, \emph{galaxies=1000}, \emph{datadir='/Users/smn2/EUCLID/CTItesting/uniform/'}, \emph{thibautCDM03=False}, \emph{beta=False}, \emph{serial=1}, \emph{parallel=1}}{}
+Test the impact of CTI in case of no noise and no correction.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} -- logger instance
+
+\item {} 
+\textbf{bcgr} -- background in electrons for the CTI modelling
+
+\item {} 
+\textbf{sigma} -- size of the weighting function for the quadrupole moment
+
+\item {} 
+\textbf{iterations} -- number of iterations in the quadrupole moments estimation
+
+\item {} 
+\textbf{loc} -- location to which the galaxy will be placed {[}default=1900{]}
+
+\item {} 
+\textbf{galaxies} -- number of galaxies to use (\textless{} 10000)
+
+\item {} 
+\textbf{datadir} -- directory pointing to the galaxy images
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+
 
 \end{description}\end{quote}
 
@@ -3645,7 +3825,7 @@ Sami-Matias Niemi
 \href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.4
+0.45
 
 \end{description}\end{quote}
 \index{shapeMeasurement (class in analysis.shape)}

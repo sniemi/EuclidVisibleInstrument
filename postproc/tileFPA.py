@@ -110,7 +110,7 @@ class tileFPA():
         return self.FPAdata
 
 
-    def writeFITSfile(self, data=None, unsigned16bit=True):
+    def writeFITSfile(self, data=None, unsigned16bit=True, ra=2.998680417e2, dec=4.073388889e1):
         """
         Write out FITS files using PyFITS.
 
@@ -118,6 +118,10 @@ class tileFPA():
         :type data: ndarray
         :param unsigned16bit: whether to scale the data using bzero=32768
         :type unsigned16bit: bool
+        :param ra: Right Ascension of the centre of the FPA
+        :type ra: float
+        :param dec: Declination of the centre of the FPA
+        :type dec: float
 
         :return: None
         """
@@ -140,6 +144,20 @@ class tileFPA():
         if unsigned16bit:
             hdu.scale('int16', '', bzero=32768)
             hdu.header.add_history('Scaled to unsigned 16bit integer!')
+
+        #add WCS to the header
+        hdu.header.update('WCSAXES', 2)
+        hdu.header.update('CRPIX1', data.shape[1]/2.)
+        hdu.header.update('CRPIX2', data.shape[0]/2.)
+        hdu.header.update('CRVAL1', ra)
+        hdu.header.update('CRVAL2', dec)
+        hdu.header.update('CTYPE1', 'RA---TAN')
+        hdu.header.update('CTYPE2', 'DEC--TAN')
+        #north is up, east is left
+        hdu.header.update('CD1_1', -0.1 / 3600.) #pix size in arc sec / deg
+        hdu.header.update('CD1_2', 0.0)
+        hdu.header.update('CD2_1', 0.0)
+        hdu.header.update('CD2_2', 0.1 / 3600.)
 
         #add keywords
         for key, value in self.inputs.iteritems():

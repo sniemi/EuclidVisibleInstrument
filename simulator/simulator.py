@@ -137,7 +137,7 @@ Instead, if we use an NVIDIA GPU for the convolution (and code that has not been
 Change Log
 ----------
 
-:version: 1.28
+:version: 1.29
 
 Version and change logs::
 
@@ -180,6 +180,8 @@ Version and change logs::
           to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
           given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
           the CCD, while cosmic rays can come from any direction and penetrate to any depth).
+    1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
+          were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
 
 
 Future Work
@@ -230,7 +232,7 @@ except:
 
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.28
+__version__ = 1.29
 
 
 class VISsimulator():
@@ -830,11 +832,11 @@ class VISsimulator():
 
         #change the image coordinates based on the CCD being simulated
         if self.information['ccdx'] > 0:
-            #x coordinate shift
-            self.objects[:, 0] -= (self.information['ccdx'] * (4196. + (self.information['ccdxgap'] * 1000 / 12.)))
+            #x coordinate shift: only imaging area CCD pixels and one gap per CCD shift
+            self.objects[:, 0] -= (self.information['ccdx'] * (4096. + (self.information['ccdxgap'] * 1000 / 12.)))
         if self.information['ccdy'] > 0:
             #y coordinate shift
-            self.objects[:, 1] -= (self.information['ccdy'] * (4132. + (self.information['ccdxgap'] * 1000 / 12.)))
+            self.objects[:, 1] -= (self.information['ccdy'] * (4132. + (self.information['ccdygap'] * 1000 / 12.)))
 
         #and quadrant
         if self.information['quadrant'] > 0:

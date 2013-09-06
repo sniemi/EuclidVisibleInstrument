@@ -302,7 +302,7 @@ class VISsimulator():
                                      dec=45.0,
                                      injection=45000.0,
                                      ghostCutoff=22.0,
-                                     coveringFraction=1.4,  #1.4 is for 565s exposure
+                                     coveringFraction=1.4,  #CR: 1.4 is for 565s exposure
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
                                      cosmicraydistance='data/cdf_cr_total.dat',

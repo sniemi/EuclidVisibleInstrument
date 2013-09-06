@@ -110,7 +110,7 @@ class tileFPA():
         return self.FPAdata
 
 
-    def writeFITSfile(self, data=None, unsigned16bit=True, ra=2.998680417e2, dec=4.073388889e1):
+    def writeFITSfile(self, data=None, unsigned16bit=True, ra=299.8680417, dec=40.73388889):
         """
         Write out FITS files using PyFITS.
 
@@ -118,9 +118,9 @@ class tileFPA():
         :type data: ndarray
         :param unsigned16bit: whether to scale the data using bzero=32768
         :type unsigned16bit: bool
-        :param ra: Right Ascension of the centre of the FPA
+        :param ra: Right Ascension of the centre of the FPA [default = Cygnus A]
         :type ra: float
-        :param dec: Declination of the centre of the FPA
+        :param dec: Declination of the centre of the FPA [default = Cygnus A]
         :type dec: float
 
         :return: None
@@ -147,8 +147,10 @@ class tileFPA():
 
         #add WCS to the header
         hdu.header.update('WCSAXES', 2)
-        hdu.header.update('CRPIX1', data.shape[1]/2.)
-        hdu.header.update('CRPIX2', data.shape[0]/2.)
+        #hdu.header.update('CRPIX1', data.shape[1]/2.)
+        #hdu.header.update('CRPIX2', data.shape[0]/2.)
+        hdu.header.update('CRPIX1', 18558.427875) #Cygnus A
+        hdu.header.update('CRPIX2', 18558.427875) #Cygnus A
         hdu.header.update('CRVAL1', ra)
         hdu.header.update('CRVAL2', dec)
         hdu.header.update('CTYPE1', 'RA---TAN')

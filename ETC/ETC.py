@@ -8,7 +8,7 @@ This file provides a simple functions to calculate exposure times or limiting ma
 :requires: SciPy
 :requires: matplotlib
 
-:version: 0.3
+:version: 0.4
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -259,18 +259,95 @@ def SNRproptoPeak(info, exptime=565.0, exposures=1, diginoise=False, server=Fals
     plt.close()
 
 
+def galaxyDetection(info, magnitude=24.5, exposures=3, exptime=565):
+    """
+    Can be used to study the ghost contribution to the galaxy detection.
+
+    :param info:
+    :param magnitude:
+    :param exposures:
+    :param exptime:
+    :return:
+    """
+    req1 = 10./0.7
+    req2 = 10.
+
+    print info['zeropoint'], info['galaxy_fraction'], info['sky_background'], info['sky_low']
+    print info['pixel_size'], info['dark'], info['readnoise']
+
+    flux_in_aperture = 10**(-0.4*(magnitude - info['zeropoint'])) * info['galaxy_fraction']
+
+    sky = 10**(-0.4*(info['sky_background'] - info['zeropoint'])) * (info['pixel_size']**2)
+    instrument = 0.2 * 10**(-0.4*(info['sky_low'] - info['zeropoint'])) * (info['pixel_size']**2)
+    print instrument
+    ghostlevels = np.linspace(0, 200., num=20)
+
+    results = []
+    for ghost in ghostlevels:
+        bgr = (sky + instrument + info['dark']) * info['aperture_size'] * exptime
+        ghostContribution = ghost * info['aperture_size']
+        bgr += ghostContribution
+
+        nom = flux_in_aperture * exptime
+        denom = np.sqrt(nom + bgr + info['readnoise']**2 * info['aperture_size'])
+
+        snr = nom / denom * np.sqrt(exposures)
+        results.append(snr)
+
+    #find the crossing
+    results = np.asarray(results)
+    f = interpolate.interp1d(ghostlevels, results, kind='cubic')
+    x = np.linspace(ghostlevels.min(), ghostlevels.max(), num=1000)
+    vals = f(x)
+    msk1 = vals >= req1
+    msk2 = vals >= req2
+    maxn1 = np.max(x[msk1])
+    maxn2 = np.max(x[msk2])
+    print 'Ghost requirements:'
+    print maxn1, maxn2
+
+    #plot number of electrons vs SNR
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    plt.title('Impact of Ghost Image to Galaxy Detection')
+
+    ax.plot(ghostlevels, results, 'bo', label=r'SNR within the Aperture')
+    ax.plot(x, vals, '-', c='b')
+
+    ax.axhline(y=req1, c='r', ls='--', label=r'Requirement')
+    ax.axhline(y=req2, c='g', ls='-.')
+    #ax.axhline(y=req2, c='r', ls='-.', label=r'No Margin')
+
+    plt.text(100, req1-0.2, r'To meet the SNR requirement ghost contribution must be $\leq %.2f e^{-}$ per pixel' % (maxn1),
+             fontsize=11, ha='center', va='center')
+
+    ax.set_ylabel(r'Signal-to-Noise Ratio')
+    ax.set_xlabel(r'Ghost Contribution $[e^{-}]$')
+
+    ax.set_xlim(-0.01, 200.01)
+
+    plt.legend(shadow=True, fancybox=True, loc='best', numpoints=1)
+    plt.savefig('ObjectDetection.pdf')
+    plt.close()
+
+
 if __name__ == '__main__':
     magnitude = 24.5
     exptime = 565.0
 
     info = VISinformation()
+    print 'VIS zero point = %f' % info['zeropoint']
 
     exp = exposureTime(info, magnitude, exposures=1)
     limit = limitingMagnitude(info, exp=exptime)
-    snr = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False)
+    snrS = SNR(info, magnitude=magnitude, exptime=exptime, exposures=1, galaxy=False)
+    snrG = SNR(info, magnitude=magnitude, exptime=exptime, exposures=3)
 
-    print 'Exposure time required to reach SNR=10 (or 14.29) for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
-    print 'SNR=%f for %.2fmag object if exposure time is %.2f' % (snr, magnitude, exptime)
-    print 'Limiting magnitude of a galaxy for %.2f second exposure is %.2f' % (exptime, limit)
+    print 'Exposure time required to reach SNR=10/14.29 for a %.2f magnitude galaxy is %.1f' % (magnitude, exp)
+    print 'SNR=%f for %.2fmag star if exposure time is %.2f seconds' % (snrS, magnitude, exptime)
+    print 'SNR=%f for %.2fmag galaxy if three exposures of %.2f seconds' % (snrG, magnitude, exptime)
+    print 'Limiting magnitude of a galaxy in three %.2f second exposures is %.2f' % (exptime, limit)
 
     #SNRproptoPeak(info)
+
+    galaxyDetection(info, magnitude=magnitude, exptime=exptime)

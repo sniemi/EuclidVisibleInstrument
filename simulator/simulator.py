@@ -294,7 +294,7 @@ class VISsimulator():
                                      cosmic_bkgd=0.182758225257,
                                      scattered_light=2.96e-2,
                                      e_adu=3.1,
-                                     magzero=15182880871.225231,
+                                     magzero=15861729325.3279,
                                      exposures=1,
                                      exptime=565.0,
                                      rdose=8.0e9,

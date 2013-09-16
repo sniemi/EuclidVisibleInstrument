@@ -6,6 +6,7 @@ This scripts can be used to study the impact of ghost images on the weak lensing
 
 :requires: PyFITS
 :requires: NumPy (1.7.0 or newer for numpy.pad)
+:requires: SciPy
 :requires: matplotlib
 :requires: VISsim-Python
 
@@ -27,6 +28,7 @@ import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
 import pprint, cPickle, os, glob, shutil
+from scipy import interpolate
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
@@ -331,6 +333,298 @@ def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=2e5, dist
     return results
 
 
+def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, exptime=565., exposures=3,
+                      iterations=100, sigma=0.75, centered=False, offset=9):
+    #set sampling etc. for shape measurement
+    settings = dict(itereations=iterations, sigma=sigma, debug=True)
+
+    #read in PSF
+    data = pf.getdata(filename)
+
+    #place it a larger canvas with zero padding around
+    canvas = np.pad(data, 100, mode='constant', constant_values=0)  #requires numpy >= 1.7.0
+    ys, xs = canvas.shape
+    xcen = int(np.round(xs / 2., 0))
+    ycen = int(np.round(ys / 2., 0))
+
+    #normalize canvas, scale it to magnitude and save it
+    canvas /= np.max(canvas)
+    intscale = 10.0**(-0.4 * (magnitude-zp)) * exptime * exposures
+    canvas *= intscale
+    fileIO.writeFITS(canvas, 'originalPSF.fits', int=False)
+
+    #reference values
+    sh = shape.shapeMeasurement(canvas, log, **settings)
+    reference = sh.measureRefinedEllipticity()
+    fileIO.cPickleDumpDictionary(reference, 'ghostStarContribution.pk')
+    print 'Reference:'
+    pprint.pprint(reference)
+
+    #load ghost
+    ghostModel = pf.getdata('data/ghost800nm.fits')[355:423, 70:131]
+    ghostModel /= np.max(ghostModel)  #peak is 1 now
+    ys, xs = ghostModel.shape
+    yd = int(np.round(ys / 2., 0))
+    xd = int(np.round(xs / 2., 0))
+    fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
+
+    #ghost level
+    #scale the doughtnut pixel values, note that all pixels have the same value...
+    scales = np.logspace(-8, -3, 21)
+
+    result = {}
+    for scale in scales:
+        scaled = ghostModel.copy() * intscale * scale
+        #fileIO.writeFITS(scaled, 'ghostImage.fits', int=False)
+
+        tmp = canvas.copy()
+        if centered:
+            tmp[ycen - yd:ycen + yd, xcen - xd:xcen + xd + 1] += scaled
+        else:
+            tmp[ycen - yd + offset:ycen + yd + offset, xcen - xd + offset:xcen + xd + 1 + offset] += scaled
+            #tmp[ycen: ycen + 2*yd, xcen:xcen + 2*xd + 1] += scaled
+        #fileIO.writeFITS(tmp, 'originalPlusGhost.fits', int=False)
+
+        #measure e and R2 from the postage stamp image
+        sh = shape.shapeMeasurement(tmp, log, **settings)
+        results = sh.measureRefinedEllipticity()
+
+        de1 = results['e1'] - reference['e1']
+        de2 = results['e2'] - reference['e2']
+        de = np.sqrt(de1**2 + de2**2)
+        dR2 = (results['R2'] - reference['R2']) / reference['R2']
+
+        print '\n\nscale=', scale
+        print 'Delta: with ghost - reference'
+        print 'e1', de1
+        print 'e2', de2
+        print 'e', de
+        print 'R2', dR2
+
+        result[scale] = [de1, de2, de, dR2, results['e1'], results['e2'], results['ellipticity'], results['R2']]
+
+    return result
+
+
+def plotGhostContribution(res,title, output, title2, output2):
+    fig = plt.figure()
+    plt.title(title)
+    ax = fig.add_subplot(111)
+
+    for key in res.keys():
+        ax.scatter(key, np.abs(res[key][0]), c='m', marker='*', s=35)
+        ax.scatter(key, np.abs(res[key][1]), c='y', marker='s', s=35)
+        ax.scatter(key, np.abs(res[key][2]), c='r', marker='o', s=35)
+
+    ax.scatter(key, np.abs(res[key][0]), c='m', marker='*', label=r'$\delta e_{1}$')
+    ax.scatter(key, np.abs(res[key][1]), c='y', marker='s', label=r'$\delta e_{2}$')
+    ax.scatter(key, np.abs(res[key][2]), c='r', marker='o', label=r'$\delta e$')
+
+    ax.axvline(x=5e-5, c='g', ls='--', label='Ghost Requirement: 5e-5')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-6, 1e-1)
+    ax.set_xlim(1e-8, 1e-3)
+    ax.set_xlabel('Ghost Contrast Ratio')
+    ax.set_ylabel(r'$| \delta (e_{i})| \ , \ \ \ i \in [1,2]$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output)
+    plt.close()
+
+    #R2
+    fig = plt.figure()
+    plt.title(title2)
+    ax = fig.add_subplot(111)
+
+    for key in res.keys():
+        ax.scatter(key, np.abs(res[key][3]), c='m', marker='*', s=35)
+
+    ax.scatter(key, np.abs(res[key][3]), c='m', marker='*', label=r'$\frac{\delta R^{2}}{R^{2}_{ref}}$')
+
+    ax.axvline(x=5e-5, c='g', ls='--', label='Ghost Requirement: 5e-5')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-6, 1e0)
+    ax.set_xlim(1e-8, 1e-3)
+    ax.set_xlabel('Ghost Contrast Ratio')
+    ax.set_ylabel(r'$\left | \frac{\delta R^{2}}{R^{2}_{ref}} \right |$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output2)
+    plt.close()
+
+
+def ghostContributionElectrons(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, exptime=565., exposures=3,
+                      iterations=100, sigma=0.75, centered=False, offset=9, verbose=False):
+    #set sampling etc. for shape measurement
+    settings = dict(itereations=iterations, sigma=sigma, debug=True)
+
+    #read in PSF
+    data = pf.getdata(filename)
+
+    #place it a larger canvas with zero padding around
+    canvas = np.pad(data, 100, mode='constant', constant_values=0)  #requires numpy >= 1.7.0
+    ys, xs = canvas.shape
+    xcen = int(np.round(xs / 2., 0))
+    ycen = int(np.round(ys / 2., 0))
+
+    #normalize canvas, scale it to magnitude and save it
+    canvas /= np.max(canvas)
+    intscale = 10.0**(-0.4 * (magnitude-zp)) * exptime * exposures
+    canvas *= intscale
+    fileIO.writeFITS(canvas, 'originalPSF.fits', int=False)
+
+    #reference values
+    sh = shape.shapeMeasurement(canvas, log, **settings)
+    reference = sh.measureRefinedEllipticity()
+    fileIO.cPickleDumpDictionary(reference, 'ghostStarContribution.pk')
+
+    if verbose:
+        print 'Reference:'
+        pprint.pprint(reference)
+
+    #load ghost
+    ghostModel = pf.getdata('data/ghost800nm.fits')[355:423, 70:131]
+    ghostModel /= np.max(ghostModel)  #peak is 1 now
+    ys, xs = ghostModel.shape
+    yd = int(np.round(ys / 2., 0))
+    xd = int(np.round(xs / 2., 0))
+    fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
+
+    #ghost level
+    #scale the doughtnut pixel values, note that all pixels have the same value...
+    scales = np.logspace(-4, 2, 21)
+
+    result = {}
+    for scale in scales:
+        scaled = ghostModel.copy() * scale
+        #fileIO.writeFITS(scaled, 'ghostImage.fits', int=False)
+
+        tmp = canvas.copy()
+        if centered:
+            tmp[ycen - yd:ycen + yd, xcen - xd:xcen + xd + 1] += scaled
+        else:
+            tmp[ycen - yd + offset:ycen + yd + offset, xcen - xd + offset:xcen + xd + 1 + offset] += scaled
+            #tmp[ycen: ycen + 2*yd, xcen:xcen + 2*xd + 1] += scaled
+        #fileIO.writeFITS(tmp, 'originalPlusGhost.fits', int=False)
+
+        #measure e and R2 from the postage stamp image
+        sh = shape.shapeMeasurement(tmp, log, **settings)
+        results = sh.measureRefinedEllipticity()
+
+        de1 = results['e1'] - reference['e1']
+        de2 = results['e2'] - reference['e2']
+        de = np.sqrt(de1**2 + de2**2)
+        dR2 = (results['R2'] - reference['R2']) / reference['R2']
+
+        if verbose:
+            print '\n\nscale=', scale
+            print 'Delta: with ghost - reference'
+            print 'e1', de1
+            print 'e2', de2
+            print 'e', de
+            print 'R2', dR2
+
+        result[scale] = [de1, de2, de, dR2, results['e1'], results['e2'], results['ellipticity'], results['R2']]
+
+    return result
+
+
+def plotGhostContributionElectrons(res,title, output, title2, output2):
+    fig = plt.figure()
+    plt.title(title)
+    ax = fig.add_subplot(111)
+
+    levels = []
+    e = []
+    for key in res.keys():
+        ax.scatter(key, np.abs(res[key][0]), c='m', marker='*', s=35)
+        ax.scatter(key, np.abs(res[key][1]), c='y', marker='s', s=35)
+        ax.scatter(key, np.abs(res[key][2]), c='r', marker='o', s=35)
+        levels.append(key)
+        e.append(np.abs(res[key][2]))
+
+    ax.scatter(key, np.abs(res[key][0]), c='m', marker='*', label=r'$\delta e_{1}$')
+    ax.scatter(key, np.abs(res[key][1]), c='y', marker='s', label=r'$\delta e_{2}$')
+    ax.scatter(key, np.abs(res[key][2]), c='r', marker='o', label=r'$\delta e$')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-6, 1e0)
+    ax.set_xlim(1e-4, 1e2)
+    ax.set_xlabel('Ghost Contribution Peak Pixel [$e^{-}]$')
+    ax.set_ylabel(r'$| \delta (e_{i})| \ , \ \ \ i \in [1,2]$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output)
+    plt.close()
+
+    #find the crossing
+    levels = np.asarray(levels)
+    srt = np.argsort(levels)
+    results = np.asarray(e)
+    f = interpolate.interp1d(levels[srt], results[srt], kind='cubic')
+    x = np.logspace(np.log10(levels.min()), np.log10(levels.max()), 1000)
+    vals = f(x)
+    msk1 = vals.copy() <= 1e-2
+    msk2 = vals.copy() <= 1e-4
+    maxn1 = np.max(x[msk1])
+    maxn2 = np.max(x[msk2])
+    print 'Ghost electron level <=:'
+    print maxn1
+    print maxn2
+    print 'Corresponds to'
+    print 25.5 -5/2.*np.log10((maxn1)/(565*3*0.7*5e-5))
+    print 25.5 -5/2.*np.log10((maxn2)/(565*3*0.7*5e-5))
+
+    #R2
+    fig = plt.figure()
+    plt.title(title2)
+    ax = fig.add_subplot(111)
+
+    levels = []
+    r2 = []
+    for key in res.keys():
+        ax.scatter(key, np.abs(res[key][3]), c='m', marker='*', s=35)
+        levels.append(key)
+        r2.append(np.abs(res[key][3]))
+
+    ax.scatter(key, np.abs(res[key][3]), c='m', marker='*', label=r'$\frac{\delta R^{2}}{R^{2}_{ref}}$')
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    ax.set_ylim(1e-6, 1e1)
+    ax.set_xlim(1e-4, 1e2)
+    ax.set_xlabel('Ghost Contribution Peak Pixel [$e^{-}]$')
+    ax.set_ylabel(r'$\left | \frac{\delta R^{2}}{R^{2}_{ref}} \right |$')
+
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
+    plt.savefig(output2)
+    plt.close()
+
+    #find the crossing
+    levels = np.asarray(levels)
+    srt = np.argsort(levels)
+    results = np.asarray(r2)
+    f = interpolate.interp1d(levels[srt], results[srt], kind='cubic')
+    x = np.logspace(np.log10(levels.min()), np.log10(levels.max()), 1000)
+    vals = f(x)
+    msk1 = vals.copy() <= 1e-2
+    msk2 = vals.copy() <= 1e-4
+    maxn1 = np.max(x[msk1])
+    maxn2 = np.max(x[msk2])
+    print 'Ghost electron level <=:'
+    print maxn1
+    print maxn2
+    print 'Corresponds to'
+    print 25.5 -5/2.*np.log10((maxn1)/(565*3*0.7*5e-5))
+    print 25.5 -5/2.*np.log10((maxn2)/(565*3*0.7*5e-5))
+
+
+
 def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4, ghostlevel=5e-5):
     fig = plt.figure()
     plt.title(title)
@@ -428,7 +722,7 @@ def deleteAndMove(dir, files='*.fits'):
 
 
 if __name__ == '__main__':
-    run = True
+    run = False
     debug = False
     focus = False
     star = True
@@ -437,41 +731,66 @@ if __name__ == '__main__':
     log = lg.setUpLogger('ghosts.log')
     log.info('Analysing the impact of ghost images...')
 
-    if debug:
-        #out of focus ghosts
-        res = analyseOutofFocusImpact(log, filename='data/psf1x.fits', maxdistance=100, samples=7,
-                                      inner=8, outer=60, oversample=1.0, psfs=1000, iterations=5, sigma=0.75)
-        fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
-        res = cPickle.load(open('OutofFocusResultsDebug.pk'))
-        plotResults(res, 'OutofFocusGhostsDebug', 'VIS Ghosts: Out of Focus Analysis')
+    res = ghostContributionElectrons(log, sigma=0.2)
+    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarElectrons.pk')
+    res = cPickle.load(open('ghostContributionToStarElectrons.pk'))
+    plotGhostContributionElectrons(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasElectrons.pdf',
+                                   r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasElectrons.pdf')
+
+    # res = ghostContributionElectrons(log, centered=True)
+    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCenteredElectrons.pk')
+    # res = cPickle.load(open('ghostContributionToStarCenteredElectrons.pk'))
+    # plotGhostContributionElectrons(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentredElectrons.pdf',
+    #                                r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentredElectrons.pdf')
+
+    # res = ghostContribution(log)
+    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStar.pk')
+    # res = cPickle.load(open('ghostContributionToStar.pk'))
+    # plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBias.pdf',
+    #                       r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBias.pdf')
+    #
+    # res = ghostContribution(log, centered=True)
+    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCentered.pk')
+    # res = cPickle.load(open('ghostContributionToStarCentered.pk'))
+    # plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentred.pdf',
+    #                       r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentred.pdf')
 
 
-    if focus:
-        #if the ghosts were in focus
-        res = analyseInFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
-                                   oversample=2.0, psfs=200, iterations=4, sigma=0.75)
-        fileIO.cPickleDumpDictionary(res, 'InfocusResultsDebug.pk')
-        plotResults(res, 'InfocusGhosts', 'VIS Ghosts: In Focus Analysis')
-
-    if run:
-        #real run
-        res = analyseOutofFocusImpact(log)
-        fileIO.cPickleDumpDictionary(res, 'OutofFocusResults.pk')
-        res = cPickle.load(open('OutofFocusResults.pk'))
-        plotResults(res, 'OutofFocusGhosts', 'VIS Ghosts: Out of Focus Analysis')
-
-    if star:
-        print '\n\n\n\nWith Fixed Position:'
-        ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0)
-        deleteAndMove('psf1xFixed')
-
-        print '\n\n\n\nNo Fixed Position:'
-        ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0, fixedPosition=False)
-        deleteAndMove('psf1x')
-
-        print '\n\n\n\n2 Times Oversampled Fixed Position:'
-        ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
-        deleteAndMove('psf2xFixed')
+    # if debug:
+    #     #out of focus ghosts
+    #     res = analyseOutofFocusImpact(log, filename='data/psf1x.fits', maxdistance=100, samples=7,
+    #                                   inner=8, outer=60, oversample=1.0, psfs=1000, iterations=5, sigma=0.75)
+    #     fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
+    #     res = cPickle.load(open('OutofFocusResultsDebug.pk'))
+    #     plotResults(res, 'OutofFocusGhostsDebug', 'VIS Ghosts: PSF Knowledge')
+    #
+    #
+    # if focus:
+    #     #if the ghosts were in focus
+    #     res = analyseInFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
+    #                                oversample=2.0, psfs=200, iterations=4, sigma=0.75)
+    #     fileIO.cPickleDumpDictionary(res, 'InfocusResultsDebug.pk')
+    #     plotResults(res, 'InfocusGhosts', 'VIS Ghosts: In Focus Analysis')
+    #
+    # if run:
+    #     #real run
+    #     res = analyseOutofFocusImpact(log)
+    #     fileIO.cPickleDumpDictionary(res, 'OutofFocusResults.pk')
+    #     res = cPickle.load(open('OutofFocusResults.pk'))
+    #     plotResults(res, 'OutofFocusGhosts', 'Weak Lensing Channel Ghost: PSF Knowledge')
+    #
+    # if star:
+    #     print '\n\n\n\nWith Fixed Position:'
+    #     ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0)
+    #     deleteAndMove('psf1xFixed')
+    #
+    #     print '\n\n\n\nNo Fixed Position:'
+    #     ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0, fixedPosition=False)
+    #     deleteAndMove('psf1x')
+    #
+    #     print '\n\n\n\n2 Times Oversampled Fixed Position:'
+    #     ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
+    #     deleteAndMove('psf2xFixed')
 
 
     log.info('Run finished...\n\n\n')

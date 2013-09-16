@@ -11,7 +11,7 @@ size, dark current, gain, zeropoint, and sky background.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.6
+:version: 0.7
 """
 import matplotlib
 matplotlib.rc('text', usetex=True)
@@ -45,7 +45,7 @@ def VISinformation():
          fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
          gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
          galaxy_fraction: 0.836 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
-         magzero: 15182880871.225231 - derived, see belowCDM (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
+         magzero: 15861729325.3279 - derived, see belowCDM (VIS ETC)
          ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
          peak_fraction: 0.261179 - derived
          pixel_size: 0.1 - CCD spec EUCL-EST-RS-6-002
@@ -67,9 +67,9 @@ def VISinformation():
          vth: 11680000.0 - CDM03 (Short et al. 2010)
          xsize: 2048 - CCD spec EUCL-EST-RS-6-002
          ysize: 2066 - CCD spec EUCL-EST-RS-6-002
-         zeropoint: 25.45338546114 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         zeropoint: 25.50087633632 - VIS ETC
          zeropointNoObscuration: 25.57991044453 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
-         zodiacal: 22.55 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
+         zodiacal: 22.3203 - VIS ETC
 
     The magzero was calculated as follows::
 
@@ -83,9 +83,9 @@ def VISinformation():
     :return: instrument model parameters
     :rtype: dict
     """
-    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.3203, zodiacal=22.55,
+    out = dict(readnoise=4.5, pixel_size=0.1, dark=0.001, sky_background=22.3203, zodiacal=22.3203,
                diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
-               zeropoint=25.45338546114, gain=3.1, sky_high=21.7206, sky_low=22.9207, magzero=15182880871.225231,
+               zeropoint=25.50087633632, gain=3.1, sky_high=21.7206, sky_low=22.9207, magzero=15861729325.3279,
                fullwellcapacity=200000, readout=4.5, bias=1000.0, cosmic_bkgd=0.172, e_adu=3.1,
                xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969,
                zeropointNoObscuration=25.57991044453)

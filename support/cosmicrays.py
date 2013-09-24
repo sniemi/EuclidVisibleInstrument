@@ -403,6 +403,7 @@ class cosmicrays():
 if __name__ == "__main__":
     from support import logger as lg
     from support import files as fileIO
+    from scipy import ndimage
 
     #set up logger
     log = lg.setUpLogger('VISsim.log')
@@ -422,3 +423,7 @@ if __name__ == "__main__":
     #save to FITS
     fileIO.writeFITS(CCD_cr, 'cosmicrayTest.fits', int=False)
 
+    #smooth with a charge diffusion kernel
+    smooth = ndimage.filters.gaussian_filter(CCD_cr, (0.32, 0.32))
+
+    fileIO.writeFITS(smooth, 'cosmicrayTestSmoothed.fits', int=False)

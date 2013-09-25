@@ -1,5 +1,5 @@
 """
-This file provides a simple functions to calculate wavelength dependent effects.
+This file provides simple functions to calculate wavelength dependent effects.
 
 The functions can also be used to estimate the Weak Lensing Channel ghosts as a function
 of spectral type.
@@ -343,4 +343,3 @@ if __name__ == '__main__':
     #G2star()
 
     ghostResults()
-

@@ -264,10 +264,11 @@ def galaxyDetection(info, magnitude=24.5, exposures=3, exptime=565):
     Can be used to study the ghost contribution to the galaxy detection.
 
     :param info:
-    :param magnitude:
-    :param exposures:
-    :param exptime:
-    :return:
+    :param magnitude: object detection magnitude limit
+    :param exposures: number of exposures to be combined
+    :param exptime: individual exposure time
+
+    :return: number of electrons tolerated in the ghost
     """
     req1 = 10./0.7
     req2 = 10.
@@ -329,6 +330,8 @@ def galaxyDetection(info, magnitude=24.5, exposures=3, exptime=565):
     plt.legend(shadow=True, fancybox=True, loc='best', numpoints=1)
     plt.savefig('ObjectDetection.pdf')
     plt.close()
+
+    return maxn1, maxn2
 
 
 if __name__ == '__main__':

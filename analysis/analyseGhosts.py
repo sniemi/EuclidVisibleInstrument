@@ -27,11 +27,14 @@ matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
-import pprint, cPickle, os, glob, shutil
+import pprint, cPickle, os, glob, shutil, math
 from scipy import interpolate
 from analysis import shape
 from support import logger as lg
 from support import files as fileIO
+from support.VISinstrumentModel import VISinformation
+from sources import stellarNumberCounts
+from ETC import ETC
 
 
 def drawDoughnut(inner, outer, oversample=1, plot=False):
@@ -254,7 +257,7 @@ def analyseOutofFocusImpact(log, filename='data/psf4x.fits', psfscale=100000, ma
 
 
 def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=2e5, distance=750,
-                            inner=8, outer=60, oversample=12.0, iterations=20, sigma=0.75,
+                            inner=8, outer=60, oversample=12, iterations=20, sigma=0.75,
                             scale=5e-5, fixedPosition=True):
     #set sampling etc. for shape measurement
     settings = dict(sampling=1.0 / oversample, itereations=iterations, sigma=sigma, debug=True)
@@ -334,7 +337,7 @@ def ghostContributionToStar(log, filename='data/psf12x.fits', psfscale=2e5, dist
 
 
 def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, exptime=565., exposures=3,
-                      iterations=100, sigma=0.75, centered=False, offset=9):
+                      iterations=100, sigma=0.75, centered=False, offset=9, verbose=False):
     #set sampling etc. for shape measurement
     settings = dict(itereations=iterations, sigma=sigma, debug=True)
 
@@ -357,8 +360,10 @@ def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, 
     sh = shape.shapeMeasurement(canvas, log, **settings)
     reference = sh.measureRefinedEllipticity()
     fileIO.cPickleDumpDictionary(reference, 'ghostStarContribution.pk')
-    print 'Reference:'
-    pprint.pprint(reference)
+
+    if verbose:
+        print 'Reference:'
+        pprint.pprint(reference)
 
     #load ghost
     ghostModel = pf.getdata('data/ghost800nm.fits')[355:423, 70:131]
@@ -369,7 +374,7 @@ def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, 
     fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
 
     #ghost level
-    #scale the doughtnut pixel values, note that all pixels have the same value...
+    #scale the doughnut pixel values, note that all pixels have the same value...
     scales = np.logspace(-8, -3, 21)
 
     result = {}
@@ -394,19 +399,23 @@ def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, 
         de = np.sqrt(de1**2 + de2**2)
         dR2 = (results['R2'] - reference['R2']) / reference['R2']
 
-        print '\n\nscale=', scale
-        print 'Delta: with ghost - reference'
-        print 'e1', de1
-        print 'e2', de2
-        print 'e', de
-        print 'R2', dR2
+        if verbose:
+            print '\n\nscale=', scale
+            print 'Delta: with ghost - reference'
+            print 'e1', de1
+            print 'e2', de2
+            print 'e', de
+            print 'R2', dR2
 
         result[scale] = [de1, de2, de, dR2, results['e1'], results['e2'], results['ellipticity'], results['R2']]
 
     return result
 
 
-def plotGhostContribution(res,title, output, title2, output2):
+def plotGhostContribution(res, title, output, title2, output2):
+    """
+
+    """
     fig = plt.figure()
     plt.title(title)
     ax = fig.add_subplot(111)
@@ -495,7 +504,7 @@ def ghostContributionElectrons(log, filename='data/psf1x.fits', magnitude=24.5, 
     fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
 
     #ghost level
-    #scale the doughtnut pixel values, note that all pixels have the same value...
+    #scale the doughnut pixel values, note that all pixels have the same value...
     scales = np.logspace(-4, 2, 21)
 
     result = {}
@@ -533,7 +542,10 @@ def ghostContributionElectrons(log, filename='data/psf1x.fits', magnitude=24.5, 
     return result
 
 
-def plotGhostContributionElectrons(res,title, output, title2, output2):
+def plotGhostContributionElectrons(log, res, title, output, title2, output2, req=1e-4):
+    """
+
+    """
     fig = plt.figure()
     plt.title(title)
     ax = fig.add_subplot(111)
@@ -569,16 +581,23 @@ def plotGhostContributionElectrons(res,title, output, title2, output2):
     f = interpolate.interp1d(levels[srt], results[srt], kind='cubic')
     x = np.logspace(np.log10(levels.min()), np.log10(levels.max()), 1000)
     vals = f(x)
-    msk1 = vals.copy() <= 1e-2
-    msk2 = vals.copy() <= 1e-4
-    maxn1 = np.max(x[msk1])
-    maxn2 = np.max(x[msk2])
-    print 'Ghost electron level <=:'
-    print maxn1
-    print maxn2
+    msk2 = vals.copy() <= req
+    maxn2e = np.max(x[msk2])
+
+    print '-'*100
+    print 'ellipticity:'
+    print 'Ghost electron level <= ', maxn2e
     print 'Corresponds to'
-    print 25.5 -5/2.*np.log10((maxn1)/(565*3*0.7*5e-5))
-    print 25.5 -5/2.*np.log10((maxn2)/(565*3*0.7*5e-5))
+    me = []
+    for x in [1e-6, 5e-6, 5e-5]:
+        mag2e = 25.5 -5/2.*np.log10((maxn2e)/(565*3*0.7*x))
+        print '%.2f mag at %e ghost level' % (mag2e, x)
+        me.append(mag2e)
+
+    #area loss
+    _numberOfStarsAreaLoss(log, me,
+                           r'Shape Measurement $(\delta e)$ Area Loss Because of Ghosts from Stars',
+                           offset=0.5, covering=2550)
 
     #R2
     fig = plt.figure()
@@ -612,17 +631,24 @@ def plotGhostContributionElectrons(res,title, output, title2, output2):
     f = interpolate.interp1d(levels[srt], results[srt], kind='cubic')
     x = np.logspace(np.log10(levels.min()), np.log10(levels.max()), 1000)
     vals = f(x)
-    msk1 = vals.copy() <= 1e-2
-    msk2 = vals.copy() <= 1e-4
-    maxn1 = np.max(x[msk1])
-    maxn2 = np.max(x[msk2])
-    print 'Ghost electron level <=:'
-    print maxn1
-    print maxn2
-    print 'Corresponds to'
-    print 25.5 -5/2.*np.log10((maxn1)/(565*3*0.7*5e-5))
-    print 25.5 -5/2.*np.log10((maxn2)/(565*3*0.7*5e-5))
+    msk2 = vals.copy() <= req
+    maxn2r2 = np.max(x[msk2])
 
+    print '-'*100
+    print 'R2'
+    print 'Ghost electron level <= ', maxn2r2
+    print 'Corresponds to'
+    mr2 = []
+    for x in [1e-6, 5e-6, 5e-5]:
+        mag2e = 25.5 -5/2.*np.log10((maxn2r2)/(565*3*0.7*x))
+        print '%.2f mag at %e ghost level' % (mag2e, x)
+        mr2.append(mag2e)
+
+    #area loss
+    print 'Area loss, R2:'
+    _numberOfStarsAreaLoss(log, mr2,
+                           r'Shape Measurement $(\delta R^{2})$ Area Loss Because of Ghosts from Stars',
+                           offset=0.5, covering=2550)
 
 
 def plotResults(res, output, title, reqe=3e-5, reqR2=1e-4, ghostlevel=5e-5):
@@ -721,76 +747,247 @@ def deleteAndMove(dir, files='*.fits'):
         shutil.move(f, './'+dir+'/'+f)
 
 
+def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, offset=0.5, covering=2550):
+    """
+    Derive area loss in case of object detection i.e. the SNR drops below the requirement.
+    Assumes that a ghost covers the covering number of pixels and that the peak pixel of a
+    point source contains fpeak fraction of the total counts. An offset between the V-band
+    and VIS band is applied as VIS = V + offset.
+
+    :param log: logger instance
+    :param magnitude: magnitude limit of the objects to be detected
+    :param exptime: exposure time of an individual exposure in seconds
+    :param exposures: number of exposures combined in the data analysis
+    :param fpeak: PSF peak fraction
+    :param offset: offset between the V-band and the VIS band, VIS = V + offset
+    :param covering: covering fraction of a single ghost in pixels
+
+    :return: None
+    """
+    info = VISinformation()
+    ghoste, ghoste2 = ETC.galaxyDetection(info, magnitude=magnitude, exptime=exptime, exposures=exposures)
+
+    print '-'*100
+    print '\n\n\nObject Detection'
+    print '-'*100
+    res = []
+    for ghostreq in [1e-6, 5e-6, 5e-5]:
+        maglimit = info['zeropoint'] - 5/2.*np.log10((ghoste) / (exptime*exposures*fpeak*ghostreq))
+
+        txt = 'Limiting VIS magnitude for object detection = %.2f if %.2f extra electrons from ghost of ratio %.1e' % \
+          (maglimit, ghoste, ghostreq)
+
+        print txt
+        log.info(txt)
+
+        res.append(maglimit)
+
+    _numberOfStarsAreaLoss(log, res, r'Object Detection Area Loss Because of Ghosts from Stars',
+                           offset=offset, covering=covering)
+
+
+def _numberOfStarsAreaLoss(log, magnitudelimits, title, offset=0.5, covering=2550):
+    """
+    Calculates the area loss for given magnitude limit at a few galactic coordinates and
+    integrated over an observing region.
+    """
+    Nvconst = stellarNumberCounts.integratedCountsVband()
+
+    txt = '\n\n\nNumber of stars:'
+    print txt
+    log.info(txt)
+    s = 0.1
+
+    for ml in magnitudelimits:
+        print '\nmag     b     l    stars    CCD    area'
+        for b in [30, 50, 90]:
+            for l in [0, 90, 180]:
+                m = s * math.ceil(float(ml + offset) / s)
+                n = stellarNumberCounts.bahcallSoneira(m, l, b, Nvconst) * 1.15  #15 error in the counts
+                ccd = n * 49.6 / 3600
+                area = (ccd * covering) / (4096 * 4132.) * 100.
+                #print 'At l=%i, b=%i, there are about %i stars in a square degree brighter than %.1f' % (l, b, n, m)
+                #print '%i stars per square degree will mean %i stars per CCD and thus an area loss of %.2f per cent' % \
+                #      (n, ccd, area)
+
+                txt = '%.1f   %2d   %3d   %.1f    %.1f    %.2f' % (m, b, l, n, ccd, area)
+                print txt
+                log.info(txt)
+
+                if b == 90:
+                    #no need to do more than once... l is irrelevant
+                    break
+
+
+    txt = '\n\n\nIntegrated Area Loss:'
+    print txt
+    log.info(txt)
+    blow=30
+    bhigh=90
+    llow=0
+    lhigh=180
+    bnum=61
+    lnum=181
+    for ml in magnitudelimits:
+        m = s * math.ceil(float(ml + offset) / s)
+        l, b, counts = stellarNumberCounts.skyNumbers(m, blow, bhigh, llow, lhigh, bnum, lnum)
+        counts *= 1.15 #15 error in the counts
+        stars = np.mean(counts)
+        ccd = stars * 49.6 / 3600
+        area = (ccd * covering) / (4096 * 4132.) * 100.
+        txt = '%i stars per square degree will mean %i stars per CCD and thus an area loss of %.2f per cent' % \
+              (stars, ccd, area)
+
+        print txt
+        log.info(txt)
+
+        z = counts * covering / (4096 * 4132. * (4096 * 0.1 * 4132 * 0.1 / 60. / 60.)) * 100.
+
+        _areaLossPlot(m, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum, title, 'AreaLoss')
+
+
+def _areaLossPlot(maglimit, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum, title, output):
+    """
+    Generate a plot showing the area loss as a function of galactic coordinates for given magnitude limit.
+
+    :param maglimit:
+    :param b:
+    :param l:
+    :param z:
+    :param blow:
+    :param bhigh:
+    :param llow:
+    :param lhigh:
+    :param bnum:
+    :param lnum:
+
+    :return:
+    """
+    from kapteyn import maputils
+
+    header = {'NAXIS': 2,
+              'NAXIS1': len(l),
+              'NAXIS2': len(b),
+              'CTYPE1': 'GLON',
+              'CRVAL1': llow,
+              'CRPIX1': 0,
+              'CUNIT1': 'deg',
+              'CDELT1': float(bhigh-blow)/bnum,
+              'CTYPE2': 'GLAT',
+              'CRVAL2': blow,
+              'CRPIX2': 0,
+              'CUNIT2': 'deg',
+              'CDELT2': float(lhigh-llow)/lnum}
+
+    fig = plt.figure(figsize=(12, 7))
+    frame1 = fig.add_axes([0.1, 0.1, 0.85, 0.85])
+
+    #generate image
+    f = maputils.FITSimage(externalheader=header, externaldata=z)
+    im1 = f.Annotatedimage(frame1)
+
+    grat1 = im1.Graticule(skyout='Galactic', starty=blow, deltay=10, startx=llow, deltax=20)
+
+    colorbar = im1.Colorbar(orientation='horizontal')
+    colorbar.set_label(label=r'Area Loss [\%]', fontsize=18)
+
+    im1.Image()
+    im1.plot()
+
+    title += r' $V \leq %.1f$' % maglimit
+    frame1.set_title(title, y=1.02)
+
+    plt.savefig(output + '%i.pdf' % maglimit)
+
+
+def shapeMeasurement(log):
+    """
+    Shape measurement bias as a result of ghosts.
+    """
+    print '\n\n\nShape Measurement'
+    print '-'*100
+    print 'Ghost contribution in electrons, sigma=0.2, ghost not centred'
+    res = ghostContributionElectrons(log, sigma=0.2)
+    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarElectrons.pk')
+    res = cPickle.load(open('ghostContributionToStarElectrons.pk'))
+    plotGhostContributionElectrons(log, res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasElectrons.pdf',
+                                    r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasElectrons.pdf')
+
+    print '-'*100
+    print '\n\n\nGhost contribution in electrons, ghost centered on the object'
+    res = ghostContributionElectrons(log, centered=True)
+    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCenteredElectrons.pk')
+    res = cPickle.load(open('ghostContributionToStarCenteredElectrons.pk'))
+    plotGhostContributionElectrons(log, res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentredElectrons.pdf',
+                                    r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentredElectrons.pdf')
+
+    res = ghostContribution(log)
+    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStar.pk')
+    res = cPickle.load(open('ghostContributionToStar.pk'))
+    plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBias.pdf',
+                          r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBias.pdf')
+
+    res = ghostContribution(log, centered=True)
+    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCentered.pk')
+    res = cPickle.load(open('ghostContributionToStarCentered.pk'))
+    plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentred.pdf',
+                          r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentred.pdf')
+
+
+
 if __name__ == '__main__':
     run = False
     debug = False
     focus = False
-    star = True
+    star = False
 
     #start the script
     log = lg.setUpLogger('ghosts.log')
     log.info('Analysing the impact of ghost images...')
 
-    res = ghostContributionElectrons(log, sigma=0.2)
-    fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarElectrons.pk')
-    res = cPickle.load(open('ghostContributionToStarElectrons.pk'))
-    plotGhostContributionElectrons(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasElectrons.pdf',
-                                   r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasElectrons.pdf')
+    #imapact on object detection
+    log.info('Calculating the effect on object detection...')
+    objectDetection(log)
 
-    # res = ghostContributionElectrons(log, centered=True)
-    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCenteredElectrons.pk')
-    # res = cPickle.load(open('ghostContributionToStarCenteredElectrons.pk'))
-    # plotGhostContributionElectrons(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentredElectrons.pdf',
-    #                                r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentredElectrons.pdf')
+    #impact on shape measurement
+    log.info('Calculatsing the oeffect on shape measurements...')
+    shapeMeasurement(log)
 
-    # res = ghostContribution(log)
-    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStar.pk')
-    # res = cPickle.load(open('ghostContributionToStar.pk'))
-    # plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBias.pdf',
-    #                       r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBias.pdf')
-    #
-    # res = ghostContribution(log, centered=True)
-    # fileIO.cPickleDumpDictionary(res, 'ghostContributionToStarCentered.pk')
-    # res = cPickle.load(open('ghostContributionToStarCentered.pk'))
-    # plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentred.pdf',
-    #                       r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentred.pdf')
+    if debug:
+         #out of focus ghosts
+         res = analyseOutofFocusImpact(log, filename='data/psf1x.fits', maxdistance=100, samples=7,
+                                       inner=8, outer=60, oversample=1.0, psfs=1000, iterations=5, sigma=0.75)
+         fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
+         res = cPickle.load(open('OutofFocusResultsDebug.pk'))
+         plotResults(res, 'OutofFocusGhostsDebug', 'VIS Ghosts: PSF Knowledge')
 
 
-    # if debug:
-    #     #out of focus ghosts
-    #     res = analyseOutofFocusImpact(log, filename='data/psf1x.fits', maxdistance=100, samples=7,
-    #                                   inner=8, outer=60, oversample=1.0, psfs=1000, iterations=5, sigma=0.75)
-    #     fileIO.cPickleDumpDictionary(res, 'OutofFocusResultsDebug.pk')
-    #     res = cPickle.load(open('OutofFocusResultsDebug.pk'))
-    #     plotResults(res, 'OutofFocusGhostsDebug', 'VIS Ghosts: PSF Knowledge')
-    #
-    #
-    # if focus:
-    #     #if the ghosts were in focus
-    #     res = analyseInFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
-    #                                oversample=2.0, psfs=200, iterations=4, sigma=0.75)
-    #     fileIO.cPickleDumpDictionary(res, 'InfocusResultsDebug.pk')
-    #     plotResults(res, 'InfocusGhosts', 'VIS Ghosts: In Focus Analysis')
-    #
-    # if run:
-    #     #real run
-    #     res = analyseOutofFocusImpact(log)
-    #     fileIO.cPickleDumpDictionary(res, 'OutofFocusResults.pk')
-    #     res = cPickle.load(open('OutofFocusResults.pk'))
-    #     plotResults(res, 'OutofFocusGhosts', 'Weak Lensing Channel Ghost: PSF Knowledge')
-    #
-    # if star:
-    #     print '\n\n\n\nWith Fixed Position:'
-    #     ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0)
-    #     deleteAndMove('psf1xFixed')
-    #
-    #     print '\n\n\n\nNo Fixed Position:'
-    #     ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0, fixedPosition=False)
-    #     deleteAndMove('psf1x')
-    #
-    #     print '\n\n\n\n2 Times Oversampled Fixed Position:'
-    #     ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
-    #     deleteAndMove('psf2xFixed')
+    if focus:
+         #if the ghosts were in focus
+         res = analyseInFocusImpact(log, filename='data/psf2x.fits', psfscale=100000, maxdistance=100,
+                                    oversample=2.0, psfs=200, iterations=4, sigma=0.75)
+         fileIO.cPickleDumpDictionary(res, 'InfocusResultsDebug.pk')
+         plotResults(res, 'InfocusGhosts', 'VIS Ghosts: In Focus Analysis')
+
+    if run:
+         #real run
+         res = analyseOutofFocusImpact(log)
+         fileIO.cPickleDumpDictionary(res, 'OutofFocusResults.pk')
+         res = cPickle.load(open('OutofFocusResults.pk'))
+         plotResults(res, 'OutofFocusGhosts', 'Weak Lensing Channel Ghost: PSF Knowledge')
+
+    if star:
+         print '\n\n\n\nWith Fixed Position:'
+         ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0)
+         deleteAndMove('psf1xFixed')
+
+         print '\n\n\n\nNo Fixed Position:'
+         ghostContributionToStar(log, filename='data/psf1x.fits', oversample=1.0, fixedPosition=False)
+         deleteAndMove('psf1x')
+
+         print '\n\n\n\n2 Times Oversampled Fixed Position:'
+         ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
+         deleteAndMove('psf2xFixed')
 
 
     log.info('Run finished...\n\n\n')

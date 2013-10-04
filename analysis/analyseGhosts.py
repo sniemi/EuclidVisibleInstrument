@@ -589,7 +589,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     print 'Ghost electron level <= ', maxn2e
     print 'Corresponds to'
     me = []
-    for x in [1e-6, 5e-6, 5e-5]:
+    for x in [1e-6, 5e-6, 1e-5, 5e-5]:
         mag2e = 25.5 -5/2.*np.log10((maxn2e)/(565*3*0.7*x))
         print '%.2f mag at %e ghost level' % (mag2e, x)
         me.append(mag2e)
@@ -639,7 +639,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     print 'Ghost electron level <= ', maxn2r2
     print 'Corresponds to'
     mr2 = []
-    for x in [1e-6, 5e-6, 5e-5]:
+    for x in [1e-6, 5e-6, 1e-5, 5e-5]:
         mag2e = 25.5 -5/2.*np.log10((maxn2r2)/(565*3*0.7*x))
         print '%.2f mag at %e ghost level' % (mag2e, x)
         mr2.append(mag2e)
@@ -771,7 +771,7 @@ def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, of
     print '\n\n\nObject Detection'
     print '-'*100
     res = []
-    for ghostreq in [1e-6, 5e-6, 5e-5]:
+    for ghostreq in [1e-6, 5e-6, 1e-5, 5e-5]:
         maglimit = info['zeropoint'] - 5/2.*np.log10((ghoste) / (exptime*exposures*fpeak*ghostreq))
 
         txt = 'Limiting VIS magnitude for object detection = %.2f if %.2f extra electrons from ghost of ratio %.1e' % \
@@ -800,12 +800,15 @@ def _numberOfStarsAreaLoss(log, magnitudelimits, title, offset=0.5, covering=255
 
     for ml in magnitudelimits:
         print '\nmag     b     l    stars    CCD    area'
-        for b in [30, 50, 90]:
+        for b in [20, 25, 30, 50, 90]:
             for l in [0, 90, 180]:
                 m = s * math.ceil(float(ml + offset) / s)
                 n = stellarNumberCounts.bahcallSoneira(m, l, b, Nvconst) * 1.15  #15 error in the counts
                 ccd = n * 49.6 / 3600
                 area = (ccd * covering) / (4096 * 4132.) * 100.
+
+                if area > 100:
+                    area = 100.
                 #print 'At l=%i, b=%i, there are about %i stars in a square degree brighter than %.1f' % (l, b, n, m)
                 #print '%i stars per square degree will mean %i stars per CCD and thus an area loss of %.2f per cent' % \
                 #      (n, ccd, area)
@@ -822,12 +825,13 @@ def _numberOfStarsAreaLoss(log, magnitudelimits, title, offset=0.5, covering=255
     txt = '\n\n\nIntegrated Area Loss:'
     print txt
     log.info(txt)
-    blow=30
+    blow=20
     bhigh=90
     llow=0
     lhigh=180
-    bnum=61
+    bnum=71
     lnum=181
+
     for ml in magnitudelimits:
         m = s * math.ceil(float(ml + offset) / s)
         l, b, counts = stellarNumberCounts.skyNumbers(m, blow, bhigh, llow, lhigh, bnum, lnum)
@@ -835,6 +839,10 @@ def _numberOfStarsAreaLoss(log, magnitudelimits, title, offset=0.5, covering=255
         stars = np.mean(counts)
         ccd = stars * 49.6 / 3600
         area = (ccd * covering) / (4096 * 4132.) * 100.
+
+        if area > 100:
+            area = 100.
+
         txt = '%i stars per square degree will mean %i stars per CCD and thus an area loss of %.2f per cent' % \
               (stars, ccd, area)
 
@@ -842,6 +850,8 @@ def _numberOfStarsAreaLoss(log, magnitudelimits, title, offset=0.5, covering=255
         log.info(txt)
 
         z = counts * covering / (4096 * 4132. * (4096 * 0.1 * 4132 * 0.1 / 60. / 60.)) * 100.
+        msk = z > 100
+        z[msk] = 100.
 
         _areaLossPlot(m, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum, title, 'AreaLoss')
 
@@ -889,7 +899,7 @@ def _areaLossPlot(maglimit, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum, title
     grat1 = im1.Graticule(skyout='Galactic', starty=blow, deltay=10, startx=llow, deltax=20)
 
     colorbar = im1.Colorbar(orientation='horizontal')
-    colorbar.set_label(label=r'Area Loss [\%]', fontsize=18)
+    colorbar.set_label(label=r'Imaging Area Lost Because of Ghost Images [\%]', fontsize=18)
 
     im1.Image()
     im1.plot()

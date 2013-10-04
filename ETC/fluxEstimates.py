@@ -81,7 +81,6 @@ def _VISbandpassGhost(scale=0.8, area=10000.):
     return bp, bpEoL
 
 
-
 def throughputs(output='throughputs.pdf'):
     """
     Plot throughputs, compares to HST WFC3 UVIS F600LP
@@ -338,7 +337,7 @@ def ghostResults():
 
 if __name__ == '__main__':
     #testFlatSpectrum()
-    throughputs()
+    #throughputs()
     #flatSpectrum()
     #G2star()
 

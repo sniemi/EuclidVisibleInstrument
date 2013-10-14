@@ -376,9 +376,37 @@ def testNonlinearityModel(file='data/psf12x.fits', oversample=12.0, sigma=0.75,
     fileIO.writeFITS(newdata / data, outdir + '/nonlinearRatio.fits', int=False)
 
 
+def testGaussian():
+    from support import gaussians
+
+    log = lg.setUpLogger('delete.me')
+
+    data = gaussians.Gaussian2D(100, 100, 200, 200, 20, 20)['Gaussian']
+    data /= np.max(data)
+    data *= 2.e5
+
+    #measure shape
+    sh = shape.shapeMeasurement(data, log)
+    reference = sh.measureRefinedEllipticity()
+    print reference
+
+    #non-linearity shape
+    newdata = VISinstrumentModel.CCDnonLinearityModelSinusoidal(data, 0.2)
+    newdata[newdata < 0.] = 0.
+
+    sh = shape.shapeMeasurement(newdata, log)
+    nonlin = sh.measureRefinedEllipticity()
+    print nonlin
+
+    print reference['ellipticity'] - nonlin['ellipticity']
+    print reference['e1'] - nonlin['e1']
+    print reference['e2'] - nonlin['e2']
+    print reference['R2'] - nonlin['R2']
+
+
 if __name__ == '__main__':
     run = True
-    debug = False
+    debug = True
     plot = True
 
     #different runs
@@ -391,7 +419,7 @@ if __name__ == '__main__':
             'run7': dict(phase=0.98, multiplier=4.0)}
 
     for key, value in runs.iteritems():
-        print key
+        print key, value
         if not os.path.exists(key):
             os.makedirs(key)
 

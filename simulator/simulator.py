@@ -302,6 +302,7 @@ class VISsimulator():
                                      dec=45.0,
                                      injection=45000.0,
                                      ghostCutoff=22.0,
+                                     ghostRatio=5.e-5,
                                      coveringFraction=1.4,  #CR: 1.4 is for 565s exposure
                                      flatflux='data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths='data/cdf_cr_length.dat',
@@ -398,6 +399,12 @@ class VISsimulator():
 
         #force gain to be float
         self.information['e_adu'] = float(self.information['e_adu'])
+
+        #ghost ratio can be in engineering format, so getfloat does not capture it...
+        try:
+            self.information['ghostRatio'] = float(self.config.get(self.section, 'ghostRatio'))
+        except:
+            pass
 
         #name of the output file, include quadrants and CCDs
         self.information['output'] = 'Q%i_0%i_0%i%s' % (self.information['quadrant'],
@@ -524,7 +531,10 @@ class VISsimulator():
 
         self.ghostModel = pf.getdata(self.information['ghostfile'])
         self.ghostOffset = self.ghostModel.shape[0] / 2 + 10  #this line may require modification, if input changes
+        self.ghostModel /= np.max(self.ghostModel)
+        self.ghostModel *= self.information['ghostRatio']
         self.ghostMax = np.max(self.ghostModel)
+        self.log.info('Maximum in the ghost model %e' % self.ghostMax)
 
 
     def readCosmicRayInformation(self):

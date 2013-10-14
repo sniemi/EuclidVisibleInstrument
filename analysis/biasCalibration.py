@@ -1021,11 +1021,49 @@ def plotTolerableErrorE(res, title, output, req=3e-5):
     plt.close()
 
 
+def simpleAnalytical(offset=1500, size=(50, 50), readnoise=4.5, gain=3.1, req=0.6):
+    """
+    A simple function to test the area of pixels needed (defined by size) to derive the
+    pixel offset to the level of required number of electrons given the readout noise and
+    the gain of the system.
+
+    :param offset: the offset level in electrons [default = 1500]
+    :type offset: int
+    :param size: area describing the number of pixels available [default = (50, 50)]
+    :type size: tuple
+    :param readnoise: readout noise of the full detection chain [default = 4.5]
+    :type readnoise: float
+    :param gain: gain of the detection system [default = 3.1]
+    :type gain: float
+    :param req: required level to reach in electrons [default = 0.1]
+    :type req: float
+
+    :return: none
+    """
+    stars = 2000
+    mc = 50
+    fail = 0
+    for a in range(mc):
+        for x in range(stars):
+            data = np.round((((np.random.normal(loc=0, scale=readnoise, size=size)) + offset) / gain)).astype(np.int)
+            derived = data * gain - offset
+
+            if np.mean(derived) > req:
+                print 'Not enough pixels to derive the floor level to %.2f electron level' % req
+                print np.mean(derived), np.median(derived), np.std(derived)
+                fail += 1
+
+    print 'Failed %i times' % fail
+    print np.mean(derived), np.median(derived), np.std(derived)
+
+
 if __name__ == '__main__':
-    run = True
-    plot = True
-    error = True
+    run = False
+    plot = False
+    error = False
     debug = False
+
+    simpleAnalytical()
 
     #start the script
     log = lg.setUpLogger('biasCalibration.log')

@@ -373,8 +373,7 @@ def ghostContribution(log, filename='data/psf1x.fits', magnitude=24.5, zp=25.5, 
     xd = int(np.round(xs / 2., 0))
     fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
 
-    #ghost level
-    #scale the doughnut pixel values, note that all pixels have the same value...
+    #ghost levels
     scales = np.logspace(-8, -3, 21)
 
     result = {}
@@ -503,8 +502,7 @@ def ghostContributionElectrons(log, filename='data/psf1x.fits', magnitude=24.5, 
     xd = int(np.round(xs / 2., 0))
     fileIO.writeFITS(ghostModel, 'ghostImage.fits', int=False)
 
-    #ghost level
-    #scale the doughnut pixel values, note that all pixels have the same value...
+    #ghost levels
     scales = np.logspace(-4, 2, 21)
 
     result = {}
@@ -542,7 +540,7 @@ def ghostContributionElectrons(log, filename='data/psf1x.fits', magnitude=24.5, 
     return result
 
 
-def plotGhostContributionElectrons(log, res, title, output, title2, output2, req=1e-4):
+def plotGhostContributionElectrons(log, res, title, output, title2, output2, req=1e-3):
     """
 
     """
@@ -567,7 +565,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     ax.set_xscale('log')
     ax.set_ylim(1e-6, 1e0)
     ax.set_xlim(1e-4, 1e2)
-    ax.set_xlabel('Ghost Contribution Peak Pixel [$e^{-}]$')
+    ax.set_xlabel('Ghost Peak Pixel [$e^{-}]$')
     ax.set_ylabel(r'$| \delta (e_{i})| \ , \ \ \ i \in [1,2]$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -589,7 +587,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     print 'Ghost electron level <= ', maxn2e
     print 'Corresponds to'
     me = []
-    for x in [1e-6, 5e-6, 1e-5, 5e-5]:
+    for x in (6e-7, 1e-6, 4e-6, 5e-6, 1e-5, 5e-5):
         mag2e = 25.5 -5/2.*np.log10((maxn2e)/(565*3*0.7*x))
         print '%.2f mag at %e ghost level' % (mag2e, x)
         me.append(mag2e)
@@ -617,7 +615,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     ax.set_xscale('log')
     ax.set_ylim(1e-6, 1e1)
     ax.set_xlim(1e-4, 1e2)
-    ax.set_xlabel('Ghost Contribution Peak Pixel [$e^{-}]$')
+    ax.set_xlabel('Ghost Peak Pixel [$e^{-}]$')
     ax.set_ylabel(r'$\left | \frac{\delta R^{2}}{R^{2}_{ref}} \right |$')
 
     plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1, markerscale=1.8, loc='upper left')
@@ -639,7 +637,7 @@ def plotGhostContributionElectrons(log, res, title, output, title2, output2, req
     print 'Ghost electron level <= ', maxn2r2
     print 'Corresponds to'
     mr2 = []
-    for x in [1e-6, 5e-6, 1e-5, 5e-5]:
+    for x in (6e-7, 1e-6, 4e-6, 5e-6, 1e-5, 5e-5):
         mag2e = 25.5 -5/2.*np.log10((maxn2r2)/(565*3*0.7*x))
         print '%.2f mag at %e ghost level' % (mag2e, x)
         mr2.append(mag2e)
@@ -747,7 +745,8 @@ def deleteAndMove(dir, files='*.fits'):
         shutil.move(f, './'+dir+'/'+f)
 
 
-def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, offset=0.5, covering=2550):
+def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, offset=0.5, covering=2550,
+                    ghostlevels=(6e-7, 1e-6, 4e-6, 5e-6, 1e-5, 5e-5)):
     """
     Derive area loss in case of object detection i.e. the SNR drops below the requirement.
     Assumes that a ghost covers the covering number of pixels and that the peak pixel of a
@@ -761,6 +760,8 @@ def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, of
     :param fpeak: PSF peak fraction
     :param offset: offset between the V-band and the VIS band, VIS = V + offset
     :param covering: covering fraction of a single ghost in pixels
+    :param ghostlevels: a tuple of ghost levels to inspect
+    :param ghostlevels: tuple
 
     :return: None
     """
@@ -771,7 +772,7 @@ def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, of
     print '\n\n\nObject Detection'
     print '-'*100
     res = []
-    for ghostreq in [1e-6, 5e-6, 1e-5, 5e-5]:
+    for ghostreq in ghostlevels:
         maglimit = info['zeropoint'] - 5/2.*np.log10((ghoste) / (exptime*exposures*fpeak*ghostreq))
 
         txt = 'Limiting VIS magnitude for object detection = %.2f if %.2f extra electrons from ghost of ratio %.1e' % \
@@ -908,6 +909,7 @@ def _areaLossPlot(maglimit, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum, title
     frame1.set_title(title, y=1.02)
 
     plt.savefig(output + '%i.pdf' % maglimit)
+    plt.close()
 
 
 def shapeMeasurement(log):
@@ -942,7 +944,6 @@ def shapeMeasurement(log):
     res = cPickle.load(open('ghostContributionToStarCentered.pk'))
     plotGhostContribution(res, r'Shape Bias: 24.5 mag$_{AB}$ Point Source', 'shapeBiasCentred.pdf',
                           r'Size Bias: 24.5 mag$_{AB}$ Point Source', 'sizeBiasCentred.pdf')
-
 
 
 if __name__ == '__main__':
@@ -998,6 +999,5 @@ if __name__ == '__main__':
          print '\n\n\n\n2 Times Oversampled Fixed Position:'
          ghostContributionToStar(log, filename='data/psf2x.fits', oversample=2.0)
          deleteAndMove('psf2xFixed')
-
 
     log.info('Run finished...\n\n\n')

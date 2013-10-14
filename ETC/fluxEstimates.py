@@ -217,7 +217,7 @@ def G2star():
     bw2 = np.diff(obs2.binwave)
 
     #plot
-    plt.title('G2 Star (Pickels\_uk\_26)')
+    plt.title('G2 Star (Pickles\_uk\_26)')
     plt.plot(obs1.binwave[1:], obs1.binflux[1:]/bw1, 'r-', label='WFC3 F600LP')
     plt.plot(obs2.binwave[1:], obs2.binflux[1:]/bw2, 'b-', label='VIS Best Estimate')
     plt.plot(obsEoL.binwave[1:], obsEoL.binflux[1:]/bw2, 'g--', label='VIS EoL Req.')
@@ -252,8 +252,10 @@ def ghostCalculations(sourceSpectrum, title, output):
     #convert to counts and derive the count rate in e/s
     obs.convert('counts')
     obsG.convert('counts')
-    c = obs.countrate()
-    cG = obsG.countrate()
+    c = obs.countrate(range=[3200, 11500])
+    cG = obsG.countrate(range=[3200, 11500])
+    #c = obs.countrate(binned=False)
+    #cG = obsG.countrate(binned=False)
 
     print 'effective stimulation in magnitude (AB)'
     print obs.effstim('abmag'), obsG.effstim('abmag')
@@ -267,23 +269,24 @@ def ghostCalculations(sourceSpectrum, title, output):
     print 'ghost count rate / total count rate = %e' % (cG / c)
     print 'ghost count rate / total count rate [1750 dilution] = %e' % (cG / c / 1750.)
 
-    #bin widths
-    if 'lat' in title:
-        #Flat spectrum requires different scaling...
-        scale = 1.e5
-    else:
-        scale = 1.e7
-
     #binflux is wavelength bin dependent...
-    bw1 = np.diff(obs.binwave) * scale
-    bw2 = np.diff(obsG.binwave) * scale
+    bw1 = np.diff(obs.binwave)
+    bw2 = np.diff(obsG.binwave)
+
+    #for a, b in zip(obsG.binwave[1:], bw2):
+    #    print a, b
+
+    y1 = obs.binflux[1:]/bw1
+    y2 = obsG.binflux[1:]/bw2
+
+    scale = np.max(y1)
 
     #make a plot
     plt.title(title)
-    plt.semilogy(obs.binwave[1:], obs.binflux[1:]/bw1, 'b-', label='VIS Best Estimate')
-    plt.semilogy(obsG.binwave[1:], obsG.binflux[1:]/bw2, 'r--', label='VIS Ghost')
+    plt.semilogy(obs.binwave[1:], y1/scale, 'b-', label='Source')
+    plt.semilogy(obsG.binwave[1:], y2/scale, 'r--', label='Ghost')
     plt.xlim(3000, 11000)
-    plt.ylim(1e-7, 10.)
+    plt.ylim(1e-7, 2.)
     plt.xlabel(r'Wavelength [\AA]')
     plt.ylabel(r'Normalised Counts per Wavelength Unit')
     plt.legend(shadow=True, fancybox=True, loc='best')
@@ -305,7 +308,7 @@ def ghostResults():
     #G2V
     print '\n\n\nG2V:'
     G2 = S.FileSpectrum('/Users/sammy/synphot/pickles/dat_uvk/pickles_uk_26.fits')
-    obsBoL2, obsBoLG2 = ghostCalculations(G2, 'G2V Star (Pickels\_uk\_26)', 'G2Ghost.pdf')
+    obsBoL2, obsBoLG2 = ghostCalculations(G2, 'G2V Star (Pickles\_uk\_26)', 'G2Ghost.pdf')
 
     #Flat
     print '\n\n\nFlat F_lam:'
@@ -317,22 +320,22 @@ def ghostResults():
     #O5V
     print '\n\n\nO5V:'
     O5V = S.FileSpectrum('/Users/sammy/synphot/pickles/dat_uvk/pickles_uk_1.fits')
-    obsBoL2, obsBoLG2 = ghostCalculations(O5V, 'O5V Star (Pickels\_uk\_1)', 'O5Ghost.pdf')
+    obsBoL2, obsBoLG2 = ghostCalculations(O5V, 'O5V Star (Pickles\_uk\_1)', 'O5Ghost.pdf')
 
     #G2IV
     print '\n\n\nG2IV:'
     sp = S.FileSpectrum('/Users/sammy/synphot/pickles/dat_uvk/pickles_uk_54.fits')
-    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'G2IV Star (Pickels\_uk\_54)', 'G2IVGhost.pdf')
+    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'G2IV Star (Pickles\_uk\_54)', 'G2IVGhost.pdf')
 
     #G5III
     print '\n\n\nG5III:'
     sp = S.FileSpectrum('/Users/sammy/synphot/pickles/dat_uvk/pickles_uk_73.fits')
-    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'G5III Star (Pickels\_uk\_73)', 'G5IIIGhost.pdf')
+    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'G5III Star (Pickles\_uk\_73)', 'G5IIIGhost.pdf')
 
     #K2I
     print '\n\n\nK2I:'
     sp = S.FileSpectrum('/Users/sammy/synphot/pickles/dat_uvk/pickles_uk_128.fits')
-    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'K2I Star (Pickels\_uk\_128)', 'K2IGhost.pdf')
+    obsBoL2, obsBoLG2 = ghostCalculations(sp, 'K2I Star (Pickles\_uk\_128)', 'K2IGhost.pdf')
 
 
 if __name__ == '__main__':

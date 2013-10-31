@@ -35,7 +35,7 @@
   \item applyCosmetics() (simulator.simulator.VISsimulator method), \hyperpage{28}
   \item applyCosmicBackground() (simulator.simulator.VISsimulator method), \hyperpage{28}
   \item applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method), \hyperpage{38}
-  \item applyDarkCurrent() (simulator.simulator.VISsimulator method), \hyperpage{28}
+  \item applyDarkCurrent() (simulator.simulator.VISsimulator method), \hyperpage{29}
   \item applyFlatfield() (simulator.simulator.VISsimulator method), \hyperpage{29}
   \item applyLinearCorrection() (postproc.postprocessing.PostProcessing method), \hyperpage{10}
   \item applyNonlinearity() (simulator.simulator.VISsimulator method), \hyperpage{29}
@@ -102,6 +102,7 @@
 
   \indexspace
   \bigletter G
+  \item galaxyDetection() (in module ETC.ETC), \hyperpage{16}
   \item Gaussian2D() (analysis.shape.shapeMeasurement method), \hyperpage{55}
   \item GaussianAnimation() (in module sandbox.MTF), \hyperpage{7}
   \item gaussianFit() (in module analysis.analyseSpotMeasurements), \hyperpage{59}
@@ -132,7 +133,7 @@
   \indexspace
   \bigletter L
   \item leastSQfit() (in module analysis.fitPSF), \hyperpage{64}
-  \item limitingMagnitude() (in module ETC.ETC), \hyperpage{16}
+  \item limitingMagnitude() (in module ETC.ETC), \hyperpage{17}
   \item loadFITS() (postproc.postprocessing.PostProcessing method), \hyperpage{11}
 
   \indexspace
@@ -145,8 +146,9 @@
 
   \indexspace
   \bigletter O
+  \item objectDetection() (in module analysis.analyseGhosts), \hyperpage{51}
   \item objectOnDetector() (simulator.simulator.VISsimulator method), \hyperpage{29}
-  \item overlayToCCD() (simulator.simulator.VISsimulator method), \hyperpage{29}
+  \item overlayToCCD() (simulator.simulator.VISsimulator method), \hyperpage{30}
 
   \indexspace
   \bigletter P
@@ -164,7 +166,9 @@
   \item plotEncircledEnergy() (in module analysis.PSFproperties), \hyperpage{61}
   \item plotEs() (in module analysis.biasCalibration), \hyperpage{39}
   \item plotGaussianResults() (in module analysis.analyseSpotMeasurements), \hyperpage{60}
-  \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{42}
+  \item plotGhostContribution() (in module analysis.analyseGhosts), \hyperpage{51}
+  \item plotGhostContributionElectrons() (in module analysis.analyseGhosts), \hyperpage{51}
+  \item plotNumberOfFrames() (in module analysis.FlatfieldCalibration), \hyperpage{43}
   \item plotNumberOfFramesDelta() (in module analysis.biasCalibration), \hyperpage{39}
   \item plotNumberOfFramesSigma() (in module analysis.biasCalibration), \hyperpage{39}
   \item plotPower() (in module analysis.CTIpower), \hyperpage{67}
@@ -172,7 +176,7 @@
   \item plotResults() (in module analysis.nonlinearityCalibration), \hyperpage{44}
   \item plotResults() (in module analysis.nonlinearityModelTransfer), \hyperpage{67}
   \item plotResults() (in module analysis.testCTIcorrection), \hyperpage{45}
-  \item plotResultsNoNoise() (in module analysis.testCTIcorrection), \hyperpage{45}
+  \item plotResultsNoNoise() (in module analysis.testCTIcorrection), \hyperpage{46}
   \item postproc.postprocessing (module), \hyperpage{9}
   \item postproc.tileCCD (module), \hyperpage{12}
   \item postproc.tileFPA (module), \hyperpage{13}
@@ -212,6 +216,8 @@
   \bigletter S
   \item sandbox.MTF (module), \hyperpage{7}
   \item shapeMeasurement (class in analysis.shape), \hyperpage{54}
+  \item shapeMeasurement() (in module analysis.analyseGhosts), \hyperpage{51}
+  \item simpleAnalytical() (in module analysis.biasCalibration), \hyperpage{40}
   \item simulate() (simulator.simulator.VISsimulator method), \hyperpage{31}
   \item simulator.generateGalaxies (module), \hyperpage{32}
   \item simulator.simulator (module), \hyperpage{23}
@@ -230,7 +236,7 @@
   \bigletter T
   \item test() (in module analysis.fitPSF), \hyperpage{65}
   \item testBiasCalibrationDelta() (in module analysis.biasCalibration), \hyperpage{40}
-  \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{40}
+  \item testBiasCalibrationSigma() (in module analysis.biasCalibration), \hyperpage{41}
   \item testCosmicrayRejection() (in module analysis.cosmicrayCalibration), \hyperpage{47}
   \item testCosmicrayRejectionMultiPSF() (in module analysis.cosmicrayCalibration), \hyperpage{48}
   \item testCTIcorrection() (in module analysis.testCTIcorrection), \hyperpage{46}

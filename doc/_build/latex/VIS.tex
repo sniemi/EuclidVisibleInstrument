@@ -13,7 +13,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{August 30, 2013}
+\date{October 31, 2013}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -197,7 +197,7 @@ Sami-Matias Niemi
 \href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
 
 \item[{version}] \leavevmode
-0.6
+0.7
 
 \end{description}\end{quote}
 \index{CCDnonLinearityModel() (in module support.VISinstrumentModel)}
@@ -284,7 +284,7 @@ fullwellcapacity: 200000 - CCD spec (for simulator)
 fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
 gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
 galaxy\_fraction: 0.836 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-magzero: 15182880871.225231 - derived, see belowCDM (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
+magzero: 15861729325.3279 - derived, see belowCDM (VIS ETC)
 ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
 peak\_fraction: 0.261179 - derived
 pixel\_size: 0.1 - CCD spec EUCL-EST-RS-6-002
@@ -306,9 +306,9 @@ vg: 6e-11 - CDM03 (Short et al. 2010)
 vth: 11680000.0 - CDM03 (Short et al. 2010)
 xsize: 2048 - CCD spec EUCL-EST-RS-6-002
 ysize: 2066 - CCD spec EUCL-EST-RS-6-002
-zeropoint: 25.45338546114 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+zeropoint: 25.50087633632 - VIS ETC
 zeropointNoObscuration: 25.57991044453 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-zodiacal: 22.55 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
+zodiacal: 22.3203 - VIS ETC
 \end{Verbatim}
 
 The magzero was calculated as follows:
@@ -1118,7 +1118,7 @@ ndnarray
 \index{writeFITSfile() (postproc.tileFPA.tileFPA method)}
 
 \begin{fulllineitems}
-\phantomsection\label{postproc:postproc.tileFPA.tileFPA.writeFITSfile}\pysiglinewithargsret{\bfcode{writeFITSfile}}{\emph{data=None}, \emph{unsigned16bit=True}}{}
+\phantomsection\label{postproc:postproc.tileFPA.tileFPA.writeFITSfile}\pysiglinewithargsret{\bfcode{writeFITSfile}}{\emph{data=None}, \emph{unsigned16bit=True}, \emph{ra=299.8680417}, \emph{dec=40.73388889}}{}
 Write out FITS files using PyFITS.
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode\begin{itemize}
@@ -1127,6 +1127,12 @@ Write out FITS files using PyFITS.
 
 \item {} 
 \textbf{unsigned16bit} (\emph{bool}) -- whether to scale the data using bzero=32768
+
+\item {} 
+\textbf{ra} (\emph{float}) -- Right Ascension of the centre of the FPA {[}default = Cygnus A{]}
+
+\item {} 
+\textbf{dec} (\emph{float}) -- Declination of the centre of the FPA {[}default = Cygnus A{]}
 
 \end{itemize}
 
@@ -1168,7 +1174,7 @@ SciPy
 matplotlib
 
 \item[{version}] \leavevmode
-0.3
+0.4
 
 \item[{author}] \leavevmode
 Sami-Matias Niemi
@@ -1292,6 +1298,34 @@ exposure time {[}seconds{]}
 
 \item[{Return type}] \leavevmode
 float or ndarray
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{galaxyDetection() (in module ETC.ETC)}
+
+\begin{fulllineitems}
+\phantomsection\label{ETC:ETC.ETC.galaxyDetection}\pysiglinewithargsret{\code{ETC.ETC.}\bfcode{galaxyDetection}}{\emph{info}, \emph{magnitude=24.5}, \emph{exposures=3}, \emph{exptime=565}}{}
+Can be used to study the ghost contribution to the galaxy detection.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{info} -- 
+
+\item {} 
+\textbf{magnitude} -- object detection magnitude limit
+
+\item {} 
+\textbf{exposures} -- number of exposures to be combined
+
+\item {} 
+\textbf{exptime} -- individual exposure time
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+number of electrons tolerated in the ghost
 
 \end{description}\end{quote}
 
@@ -1769,7 +1803,7 @@ sys         0m9.535s
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.28
+1.30
 
 \end{description}\end{quote}
 
@@ -1815,6 +1849,9 @@ Version and change logs:
       to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
       given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
       the CCD, while cosmic rays can come from any direction and penetrate to any depth).
+1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
+      were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
+1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.
 \end{Verbatim}
 
 
@@ -2783,6 +2820,39 @@ Creates a simple plot to combine and show the results.
 
 \end{fulllineitems}
 
+\index{simpleAnalytical() (in module analysis.biasCalibration)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.biasCalibration.simpleAnalytical}\pysiglinewithargsret{\code{analysis.biasCalibration.}\bfcode{simpleAnalytical}}{\emph{offset=1500}, \emph{size=(50}, \emph{50)}, \emph{readnoise=4.5}, \emph{gain=3.1}, \emph{req=0.6}}{}
+A simple function to test the area of pixels needed (defined by size) to derive the
+pixel offset to the level of required number of electrons given the readout noise and
+the gain of the system.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{offset} (\emph{int}) -- the offset level in electrons {[}default = 1500{]}
+
+\item {} 
+\textbf{size} (\emph{tuple}) -- area describing the number of pixels available {[}default = (50, 50){]}
+
+\item {} 
+\textbf{readnoise} (\emph{float}) -- readout noise of the full detection chain {[}default = 4.5{]}
+
+\item {} 
+\textbf{gain} (\emph{float}) -- gain of the detection system {[}default = 3.1{]}
+
+\item {} 
+\textbf{req} (\emph{float}) -- required level to reach in electrons {[}default = 0.1{]}
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+none
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
 \index{testBiasCalibrationDelta() (in module analysis.biasCalibration)}
 
 \begin{fulllineitems}
@@ -3501,6 +3571,9 @@ PyFITS
 NumPy (1.7.0 or newer for numpy.pad)
 
 \item[{requires}] \leavevmode
+SciPy
+
+\item[{requires}] \leavevmode
 matplotlib
 
 \item[{requires}] \leavevmode
@@ -3666,6 +3739,72 @@ image, xcentre, ycentre
 list
 
 \end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{objectDetection() (in module analysis.analyseGhosts)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.analyseGhosts.objectDetection}\pysiglinewithargsret{\code{analysis.analyseGhosts.}\bfcode{objectDetection}}{\emph{log}, \emph{magnitude=24.5}, \emph{exptime=565}, \emph{exposures=3}, \emph{fpeak=0.7}, \emph{offset=0.5}, \emph{covering=2550}, \emph{ghostlevels=(6e-07}, \emph{1e-06}, \emph{4e-06}, \emph{5e-06}, \emph{1e-05}, \emph{5e-05)}}{}
+Derive area loss in case of object detection i.e. the SNR drops below the requirement.
+Assumes that a ghost covers the covering number of pixels and that the peak pixel of a
+point source contains fpeak fraction of the total counts. An offset between the V-band
+and VIS band is applied as VIS = V + offset.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} -- logger instance
+
+\item {} 
+\textbf{magnitude} -- magnitude limit of the objects to be detected
+
+\item {} 
+\textbf{exptime} -- exposure time of an individual exposure in seconds
+
+\item {} 
+\textbf{exposures} -- number of exposures combined in the data analysis
+
+\item {} 
+\textbf{fpeak} -- PSF peak fraction
+
+\item {} 
+\textbf{offset} -- offset between the V-band and the VIS band, VIS = V + offset
+
+\item {} 
+\textbf{covering} -- covering fraction of a single ghost in pixels
+
+\item {} 
+\textbf{ghostlevels} -- a tuple of ghost levels to inspect
+
+\item {} 
+\textbf{ghostlevels} -- tuple
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{plotGhostContribution() (in module analysis.analyseGhosts)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.analyseGhosts.plotGhostContribution}\pysiglinewithargsret{\code{analysis.analyseGhosts.}\bfcode{plotGhostContribution}}{\emph{res}, \emph{title}, \emph{output}, \emph{title2}, \emph{output2}}{}
+\end{fulllineitems}
+
+\index{plotGhostContributionElectrons() (in module analysis.analyseGhosts)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.analyseGhosts.plotGhostContributionElectrons}\pysiglinewithargsret{\code{analysis.analyseGhosts.}\bfcode{plotGhostContributionElectrons}}{\emph{log}, \emph{res}, \emph{title}, \emph{output}, \emph{title2}, \emph{output2}, \emph{req=0.001}}{}
+\end{fulllineitems}
+
+\index{shapeMeasurement() (in module analysis.analyseGhosts)}
+
+\begin{fulllineitems}
+\phantomsection\label{reduction:analysis.analyseGhosts.shapeMeasurement}\pysiglinewithargsret{\code{analysis.analyseGhosts.}\bfcode{shapeMeasurement}}{\emph{log}}{}
+Shape measurement bias as a result of ghosts.
 
 \end{fulllineitems}
 

@@ -274,7 +274,7 @@ sys         0m9.535s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.28</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.30</td>
 </tr>
 </tbody>
 </table>
@@ -317,7 +317,10 @@ sys         0m9.535s</pre>
       generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
       to mimic the spreading of charge within the CCD. This is closer to reality, but probably still inaccurate
       given geometric arguments (charge diffusion kernels are measured using light coming from the backside of
-      the CCD, while cosmic rays can come from any direction and penetrate to any depth).</pre>
+      the CCD, while cosmic rays can come from any direction and penetrate to any depth).
+1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
+      were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
+1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.</pre>
 </div>
 </div>
 <div class="section" id="future-work">

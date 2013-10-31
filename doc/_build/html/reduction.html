@@ -324,6 +324,32 @@ bias slope.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="analysis.biasCalibration.simpleAnalytical">
+<tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">simpleAnalytical</tt><big>(</big><em>offset=1500</em>, <em>size=(50</em>, <em>50)</em>, <em>readnoise=4.5</em>, <em>gain=3.1</em>, <em>req=0.6</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.simpleAnalytical" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple function to test the area of pixels needed (defined by size) to derive the
+pixel offset to the level of required number of electrons given the readout noise and
+the gain of the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>offset</strong> (<em>int</em>) &#8211; the offset level in electrons [default = 1500]</li>
+<li><strong>size</strong> (<em>tuple</em>) &#8211; area describing the number of pixels available [default = (50, 50)]</li>
+<li><strong>readnoise</strong> (<em>float</em>) &#8211; readout noise of the full detection chain [default = 4.5]</li>
+<li><strong>gain</strong> (<em>float</em>) &#8211; gain of the detection system [default = 3.1]</li>
+<li><strong>req</strong> (<em>float</em>) &#8211; required level to reach in electrons [default = 0.1]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">none</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="analysis.biasCalibration.testBiasCalibrationDelta">
 <tt class="descclassname">analysis.biasCalibration.</tt><tt class="descname">testBiasCalibrationDelta</tt><big>(</big><em>log</em>, <em>numdata=2066</em>, <em>floor=995</em>, <em>xsize=2048</em>, <em>ysize=2066</em>, <em>order=3</em>, <em>biases=15</em>, <em>surfaces=100</em>, <em>file='psf1x.fits'</em>, <em>psfs=500</em>, <em>psfscale=1000.0</em>, <em>debug=False</em>, <em>plots=False</em><big>)</big><a class="headerlink" href="#analysis.biasCalibration.testBiasCalibrationDelta" title="Permalink to this definition">¶</a></dt>
 <dd><p>Derive the PSF ellipticities for a given number of random surfaces with random PSF positions
@@ -869,15 +895,17 @@ direction.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (1.7.0 or newer for numpy.pad)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
 </tbody>
 </table>
@@ -991,6 +1019,53 @@ The dougnut pixel values are all scaled to a given scaling value (requirement 5e
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.objectDetection">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">objectDetection</tt><big>(</big><em>log</em>, <em>magnitude=24.5</em>, <em>exptime=565</em>, <em>exposures=3</em>, <em>fpeak=0.7</em>, <em>offset=0.5</em>, <em>covering=2550</em>, <em>ghostlevels=(6e-07</em>, <em>1e-06</em>, <em>4e-06</em>, <em>5e-06</em>, <em>1e-05</em>, <em>5e-05)</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.objectDetection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Derive area loss in case of object detection i.e. the SNR drops below the requirement.
+Assumes that a ghost covers the covering number of pixels and that the peak pixel of a
+point source contains fpeak fraction of the total counts. An offset between the V-band
+and VIS band is applied as VIS = V + offset.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> &#8211; logger instance</li>
+<li><strong>magnitude</strong> &#8211; magnitude limit of the objects to be detected</li>
+<li><strong>exptime</strong> &#8211; exposure time of an individual exposure in seconds</li>
+<li><strong>exposures</strong> &#8211; number of exposures combined in the data analysis</li>
+<li><strong>fpeak</strong> &#8211; PSF peak fraction</li>
+<li><strong>offset</strong> &#8211; offset between the V-band and the VIS band, VIS = V + offset</li>
+<li><strong>covering</strong> &#8211; covering fraction of a single ghost in pixels</li>
+<li><strong>ghostlevels</strong> &#8211; a tuple of ghost levels to inspect</li>
+<li><strong>ghostlevels</strong> &#8211; tuple</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.plotGhostContribution">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">plotGhostContribution</tt><big>(</big><em>res</em>, <em>title</em>, <em>output</em>, <em>title2</em>, <em>output2</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.plotGhostContribution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.plotGhostContributionElectrons">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">plotGhostContributionElectrons</tt><big>(</big><em>log</em>, <em>res</em>, <em>title</em>, <em>output</em>, <em>title2</em>, <em>output2</em>, <em>req=0.001</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.plotGhostContributionElectrons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGhosts.shapeMeasurement">
+<tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>log</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.shapeMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shape measurement bias as a result of ghosts.</p>
 </dd></dl>
 
 </div>

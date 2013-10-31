@@ -581,7 +581,7 @@ which quadrant is being processed so that the extra regions are subtracted corre
 
 <dl class="method">
 <dt id="postproc.tileFPA.tileFPA.writeFITSfile">
-<tt class="descname">writeFITSfile</tt><big>(</big><em>data=None</em>, <em>unsigned16bit=True</em><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">writeFITSfile</tt><big>(</big><em>data=None</em>, <em>unsigned16bit=True</em>, <em>ra=299.8680417</em>, <em>dec=40.73388889</em><big>)</big><a class="headerlink" href="#postproc.tileFPA.tileFPA.writeFITSfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write out FITS files using PyFITS.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -590,6 +590,8 @@ which quadrant is being processed so that the extra regions are subtracted corre
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file, if None use self.data</li>
 <li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+<li><strong>ra</strong> (<em>float</em>) &#8211; Right Ascension of the centre of the FPA [default = Cygnus A]</li>
+<li><strong>dec</strong> (<em>float</em>) &#8211; Declination of the centre of the FPA [default = Cygnus A]</li>
 </ul>
 </td>
 </tr>

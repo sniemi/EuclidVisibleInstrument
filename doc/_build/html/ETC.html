@@ -107,7 +107,7 @@
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.3</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.4</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -200,6 +200,29 @@ should be used [default = False]</li>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float or ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ETC.ETC.galaxyDetection">
+<tt class="descclassname">ETC.ETC.</tt><tt class="descname">galaxyDetection</tt><big>(</big><em>info</em>, <em>magnitude=24.5</em>, <em>exposures=3</em>, <em>exptime=565</em><big>)</big><a class="headerlink" href="#ETC.ETC.galaxyDetection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used to study the ghost contribution to the galaxy detection.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>info</strong> &#8211; </li>
+<li><strong>magnitude</strong> &#8211; object detection magnitude limit</li>
+<li><strong>exposures</strong> &#8211; number of exposures to be combined</li>
+<li><strong>exptime</strong> &#8211; individual exposure time</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">number of electrons tolerated in the ghost</p>
 </td>
 </tr>
 </tbody>

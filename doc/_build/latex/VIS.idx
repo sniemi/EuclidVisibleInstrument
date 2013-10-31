@@ -43,7 +43,8 @@
 \indexentry{SNR() (in module ETC.ETC)|hyperpage}{15}
 \indexentry{SNRproptoPeak() (in module ETC.ETC)|hyperpage}{16}
 \indexentry{exposureTime() (in module ETC.ETC)|hyperpage}{16}
-\indexentry{limitingMagnitude() (in module ETC.ETC)|hyperpage}{16}
+\indexentry{galaxyDetection() (in module ETC.ETC)|hyperpage}{16}
+\indexentry{limitingMagnitude() (in module ETC.ETC)|hyperpage}{17}
 \indexentry{sources.createObjectCatalogue (module)|hyperpage}{19}
 \indexentry{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{19}
 \indexentry{generateCatalog() (in module sources.createObjectCatalogue)|hyperpage}{20}
@@ -65,7 +66,7 @@
 \indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{28}
 \indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{28}
 \indexentry{applyCosmicBackground() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyDarkCurrent() (simulator.simulator.VISsimulator method)|hyperpage}{28}
+\indexentry{applyDarkCurrent() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{applyNonlinearity() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{applyPoissonNoise() (simulator.simulator.VISsimulator method)|hyperpage}{29}
@@ -77,7 +78,7 @@
 \indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{29}
 \indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{30}
 \indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{30}
 \indexentry{readConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{31}
 \indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{31}
@@ -109,12 +110,13 @@
 \indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{39}
 \indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{39}
 \indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{39}
+\indexentry{simpleAnalytical() (in module analysis.biasCalibration)|hyperpage}{40}
 \indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{40}
-\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{40}
+\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{41}
 \indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{41}
 \indexentry{findTolerableError() (in module analysis.FlatfieldCalibration)|hyperpage}{42}
 \indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{42}
-\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{42}
+\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
 \indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
 \indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
 \indexentry{analysis.nonlinearityCalibration (module)|hyperpage}{43}
@@ -123,7 +125,7 @@
 \indexentry{analysis.testCTIcorrection (module)|hyperpage}{45}
 \indexentry{cutoutRegions() (in module analysis.testCTIcorrection)|hyperpage}{45}
 \indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{45}
-\indexentry{plotResultsNoNoise() (in module analysis.testCTIcorrection)|hyperpage}{45}
+\indexentry{plotResultsNoNoise() (in module analysis.testCTIcorrection)|hyperpage}{46}
 \indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{46}
 \indexentry{testCTIcorrectionNonoise() (in module analysis.testCTIcorrection)|hyperpage}{46}
 \indexentry{useThibautsData() (in module analysis.testCTIcorrection)|hyperpage}{46}
@@ -136,6 +138,10 @@
 \indexentry{analyseOutofFocusImpact() (in module analysis.analyseGhosts)|hyperpage}{50}
 \indexentry{deleteAndMove() (in module analysis.analyseGhosts)|hyperpage}{50}
 \indexentry{drawDoughnut() (in module analysis.analyseGhosts)|hyperpage}{50}
+\indexentry{objectDetection() (in module analysis.analyseGhosts)|hyperpage}{51}
+\indexentry{plotGhostContribution() (in module analysis.analyseGhosts)|hyperpage}{51}
+\indexentry{plotGhostContributionElectrons() (in module analysis.analyseGhosts)|hyperpage}{51}
+\indexentry{shapeMeasurement() (in module analysis.analyseGhosts)|hyperpage}{51}
 \indexentry{analysis.analyse (module)|hyperpage}{53}
 \indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{53}
 \indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{53}

@@ -1921,6 +1921,9 @@ class VISsimulator():
 
         self.log.info('Non-linearity effects included.')
 
+        if self.radiationDamage:
+            self.noCTI = VISinstrumentModel.CCDnonLinearityModel(self.noCTI.copy())
+
         if self.cosmicRays:
             self.imagenoCR = VISinstrumentModel.CCDnonLinearityModel(self.imagenoCR.copy())
 
@@ -1942,7 +1945,6 @@ class VISsimulator():
 
         if self.radiationDamage:
             self.noCTI += noise
-            self.noCTI /= self.information['e_adu']
 
         if self.cosmicRays:
             self.imagenoCR += noise
@@ -1958,6 +1960,9 @@ class VISsimulator():
 
         self.image /= self.information['e_adu']
         self.log.info('Converting from electrons to ADUs using a factor of %f' % self.information['e_adu'])
+
+        if self.radiationDamage:
+            self.noCTI /= self.information['e_adu']
 
         if self.cosmicRays:
             self.imagenoCR /= self.information['e_adu']
@@ -1975,6 +1980,9 @@ class VISsimulator():
 
         if self.cosmicRays:
             self.imagenoCR += self.information['bias']
+
+        if self.cosmicRays:
+            self.noCTI += self.information['bias']
 
 
     def addPreOverScans(self):

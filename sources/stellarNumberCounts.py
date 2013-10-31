@@ -169,6 +169,7 @@ def _skyProjectionPlot(maglimit, b, l, z, blow, bhigh, llow, lhigh, bnum, lnum):
     frame1.set_title(title, y=1.02)
 
     plt.savefig('stellarD%i.pdf' % maglimit)
+    plt.close()
 
 
 def skyNumbers(maglimit=20, blow=20., bhigh=90., llow=0., lhigh=360., bnum=71, lnum=361, plot=True):

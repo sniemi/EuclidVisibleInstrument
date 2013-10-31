@@ -137,7 +137,7 @@ Instead, if we use an NVIDIA GPU for the convolution (and code that has not been
 Change Log
 ----------
 
-:version: 1.29
+:version: 1.30
 
 Version and change logs::
 
@@ -182,6 +182,7 @@ Version and change logs::
           the CCD, while cosmic rays can come from any direction and penetrate to any depth).
     1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
           were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
+    1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.
 
 
 Future Work
@@ -232,7 +233,7 @@ except:
 
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.29
+__version__ = 1.30
 
 
 class VISsimulator():

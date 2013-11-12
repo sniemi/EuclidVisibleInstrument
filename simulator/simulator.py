@@ -182,7 +182,7 @@ Version and change logs::
           the CCD, while cosmic rays can come from any direction and penetrate to any depth).
     1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
           were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
-    1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.
+    1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information['mode']
 
 
 Future Work
@@ -255,8 +255,6 @@ class VISsimulator():
         :param opts: OptionParser instance
         :type opts: OptionParser instance
         """
-        print info
-
         self.configfile = opts.configfile
 
         if opts.section is None:
@@ -291,7 +289,7 @@ class VISsimulator():
                                      fullwellcapacity=200000,
                                      dark=0.001,
                                      readout=4.5,
-                                     bias=1000.0,
+                                     bias=500.0,
                                      cosmic_bkgd=0.182758225257,
                                      scattered_light=2.96e-2,
                                      e_adu=3.1,
@@ -316,17 +314,18 @@ class VISsimulator():
                                      mode='same',
                                      version=__version__))
 
-        #setup logger
-        self.log = lg.setUpLogger('VISsim.log')
-        self.log.info(info)
-
 
     def readConfigs(self):
         """
-        Reads the config file information using configParser.
+        Reads the config file information using configParser and sets up a logger.
         """
         self.config = ConfigParser.RawConfigParser()
         self.config.readfp(open(self.configfile))
+
+        #setup logger
+        self.log = lg.setUpLogger(self.config.get(self.section, 'output').replace('.fits', '.log'))
+        self.log.info('STARTING A NEW SIMULATION')
+        self.log.info(self.information)
 
 
     def processConfigs(self):
@@ -361,7 +360,7 @@ class VISsimulator():
             sourcelist = data/source_test.dat
             PSFfile = data/interpolated_psf.fits
             parallelTrapfile = data/cdm_euclid_parallel.dat
-            serialTrapfil e= data/cdm_euclid_serial.dat
+            serialTrapfile = data/cdm_euclid_serial.dat
             cosmeticsFile = data/cosmetics.dat
             flatfieldfile = data/VISFlatField2percent.fits
             output = test.fits

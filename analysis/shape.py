@@ -126,6 +126,11 @@ class shapeMeasurement():
         e2 = 2. * Qxy / denom
         ellipticity = math.sqrt(e1*e1 + e2*e2)
 
+        #also a and b
+        a = np.sqrt(.5 * (Qxx + Qyy + np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy)))
+        b = np.sqrt(.5 * (Qxx + Qyy - np.sqrt((Qxx - Qyy)**2 + 4.*Qxy*Qxy)))
+
+        #check that ellipticity is reasonable
         if ellipticity > 1.0:
             self.log.error('Ellipticity greater than 1 derived, will set it to unity!')
             ellipticity = 1.0
@@ -133,7 +138,9 @@ class shapeMeasurement():
         self.log.info('Centroiding (x, y) = (%f, %f) and ellipticity = %.4f (%.4f, %.4f)' %
                       (Ycentre+1, Xcentre+1, ellipticity, e1, e2))
 
-        out = dict(ellipticity=ellipticity, e1=e1, e2=e2, Qxx=Qxx, Qyy=Qyy, Qxy=Qxy, centreY=Ycentre, centreX=Xcentre)
+        out = dict(ellipticity=ellipticity, e1=e1, e2=e2, Qxx=Qxx, Qyy=Qyy, Qxy=Qxy,
+                   centreY=Ycentre, centreX=Xcentre,
+                   a=a, b=b)
         return out
 
 
@@ -248,7 +255,15 @@ class shapeMeasurement():
         for x in range(self.settings['iterations']):
             if self.settings['weighted']:
                 self.log.info('Iteration %i with circular symmetric Gaussian weights' % x)
-                gaussian = self.circular2DGaussian(quad['centreX']+1, quad['centreY']+1, self.settings['sampleSigma'])
+                if self.settings['fixedPosition']:
+                    gaussian = self.circular2DGaussian(self.settings['fixedX'],
+                                                       self.settings['fixedY'],
+                                                       self.settings['sampleSigma'])
+                else:
+                    gaussian = self.circular2DGaussian(quad['centreX']+1,
+                                                       quad['centreY']+1,
+                                                       self.settings['sampleSigma'])
+
                 GaussianWeighted = self.data.copy() * gaussian['Gaussian'].copy()
             else:
                 self.log.info('Iteration %i with no weighting' % x)
@@ -267,7 +282,8 @@ class shapeMeasurement():
                    e1=quad['e1'], e2=quad['e2'],
                    ellipticity=quad['ellipticity'],
                    R2=R2,
-                   GaussianWeighted=GaussianWeighted)
+                   GaussianWeighted=GaussianWeighted,
+                   a=quad['a'], b=quad['b'])
         return out
 
 

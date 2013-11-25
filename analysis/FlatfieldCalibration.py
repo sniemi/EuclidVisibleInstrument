@@ -25,7 +25,7 @@ of the local PSF R2 shall not exceed 1x10-4 (one sigma).
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.96
+:version: 0.97
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -114,7 +114,8 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load the true reference p-flat and calculate the error in the derived flat field (i.e. residual)
     real = pf.getdata(reference).astype(np.float64)
-    res = np.abs(real - pixvar) / (real*pixvar) + 1.
+    #res = np.abs(real - pixvar) / (real*pixvar) + 1.  #old: maybe incorrect?
+    res = pixvar / real
 
     if debug:
         print np.mean(res), np.min(res), np.max(res), np.std(res)
@@ -761,7 +762,6 @@ if __name__ == '__main__':
         print np.std(combined), np.std(combined[500:561, 500:561]), np.std(combined[300:361, 300:361])
 
         results = testNoFlatfieldingEffects(log, oversample=4.0, file='data/psf4x.fits', psfs=400)
-        plotNumberOfFrames(results)
 
     if plots:
         if not run:

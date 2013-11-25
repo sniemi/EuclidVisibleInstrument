@@ -27,6 +27,131 @@ import numpy as np
 from scipy import fftpack
 
 
+class ps:
+        """
+        A class to calculate the power spectrum.
+        """
+        def __init__(self, g, step=48.0, size=10.0, nbin=20):
+                """
+                Attributes :
+                - "g" is a complex square array representing a measurement at each point of a square grid.
+                - "step" is the pixel step size in both x and y = postage stamp size = 48 for great10
+                - "size" is is the total grid width (= height), in degrees, 10 for great10
+                - "nbin" : number of ell bins for the power spectrum
+                """
+                self.g = g
+                self.step = step
+                self.size = size
+                self.nbin2 = nbin
+
+
+        def setup(self):
+                """
+                Set up stuff like l ranges
+                """
+                self.n = self.g.shape[0] # The width = height of the array
+                if self.g.shape[1] != self.n:
+                        sys.exit("Only square arrays !")
+
+                self.radstep =  (self.size / self.n) * (np.pi / 180.0) # Angular step size in radians
+
+                bigl = self.size * np.pi / 180.0
+
+                self.max_l_mode = 2.0 * np.pi / self.radstep
+                self.min_l_mode = 2.0 * np.pi / (self.size * np.pi/180.0)
+                self.nyquist_deg = self.size / self.n
+
+                print "Range of l modes : %f to %f" % (self.min_l_mode, self.max_l_mode)
+
+                #print "Builing logarithmics l bins ..."
+                self.dlogl = (self.max_l_mode - self.min_l_mode)/(self.nbin2 - 1.0)
+                lbin = self.min_l_mode + (self.dlogl * (np.arange(self.nbin2))) -1.0 + 0.00001
+
+                nbin = 2 * self.n
+
+                # Creating a complex wavevector
+
+                self.el1 = 2.0 * np.pi * (np.arange(self.n)  - ((self.n-1)/2.0) + 0.001) / bigl
+
+                self.lvec = np.zeros((self.n,self.n), dtype = np.complex)
+                icoord = np.zeros((self.n,self.n))
+                jcoord = np.zeros((self.n,self.n))
+
+                for i1 in range(self.n): # warning different python/matlab convention, i1 starts at 0
+                        l1 = self.el1[i1]
+                        for j1 in range(self.n):
+                                l2 = self.el1[j1]
+                                self.lvec[i1,j1] = np.complex(l1, l2)
+                                icoord[i1,j1] = i1+1
+                                jcoord[i1,j1] = j1+1
+
+
+
+        def create(self):
+                """
+                Calculate the actual power spectrum
+                """
+                #% Estimate E and B modes assuming linear-KS.
+                gfieldft = np.fft.fftshift(np.fft.fft2(self.g))
+                gkapi = np.conjugate(self.lvec) * np.conjugate(self.lvec) * gfieldft / (self.lvec * np.conjugate(self.lvec))
+                gkapi = np.fft.ifft2(np.fft.ifftshift(gkapi))
+
+                gkapft = np.fft.fftshift(np.fft.fft2(np.real(gkapi)))
+                gbetft = np.fft.fftshift(np.fft.fft2(np.imag(gkapi)))
+
+                self.gCEE_2 = np.real(gkapft)**2.0 + np.imag(gkapft)**2.0 # E mode power
+                self.gCBB_2 = np.real(gbetft)**2.0 + np.imag(gbetft)**2.0 # B mode power
+                self.gCEB_2 = np.dot(np.real(gkapft), np.real(gbetft)) - np.dot(np.imag(gkapft), np.imag(gbetft)) # EB cross power
+
+
+
+        def angavg(self):
+                """
+                Angular average of the spectrum
+                """
+
+                self.gPowEE = np.zeros(self.nbin2)
+                self.gPowBB = np.zeros(self.nbin2)
+                self.gPowEB = np.zeros(self.nbin2)
+                self.ll = np.zeros(self.nbin2)
+                dll = np.zeros(self.nbin2)
+
+                for i1 in range(self.n): # start at 0
+                        l1 = self.el1[i1]
+                        for j1 in range(self.n):
+                                l2 = self.el1[j1]
+                                l = np.sqrt(l1*l1 + l2*l2)
+                                #print l
+
+                                if ( l <= self.max_l_mode and l >= self.min_l_mode) :
+                                        ibin = int(np.round((l + 1 - self.min_l_mode) / self.dlogl))
+                                        self.gPowEE[ibin] += self.gCEE_2[i1,j1] * l
+                                        self.gPowBB[ibin] += self.gCBB_2[i1,j1] * l
+                                        self.gPowEB[ibin] += self.gCEB_2[i1,j1] * l
+                                else:
+                                        print "Hmm, l out of min-max range, this part should be improved ..."
+
+                                self.ll[ibin] = l # the array of l values
+                                if ibin > 1:
+                                        dll[ibin] = self.ll[ibin+1] - self.ll[ibin] # ibin starts from 0
+
+                self.gPowEE /= (self.n**4 * self.dlogl)
+                self.gPowBB /= (self.n**4 * self.dlogl)
+                self.gPowEB /= (self.n**4 * self.dlogl)
+
+
+        def plot(self, title="Power Spectrum"):
+                """
+                Plot it
+                """
+                plt.loglog(self.ll, self.gPowEE, "r.-", label="E mode")
+                plt.loglog(self.ll, self.gPowBB, "b.-", label="B mode")
+                plt.xlabel("Wavenumber l")
+                plt.ylabel("Power [l^2 C_l / (2 pi)]")
+                plt.title(title)
+                plt.legend()
+                plt.show()
+
 def plotCTIeffect(data):
     """
     This function plots the CTI impact on shear. The Data is assumed to be in the following format::
@@ -249,11 +374,27 @@ def plotPower(data):
     """
     x = data[:, 0]
     y = data[:, 1]
+    #g1 = data[:, 2]
+    #g2 = data[:, 3]
     g1_total = data[:, 4]
     g2_total = data[:, 5]
 
+    g1 = g1_total
+    g2 = g2_total
+
     xi = np.unique(x)
     yi = np.unique(y)
+
+    g1 = g1.reshape((len(yi), len(xi)))
+    g2 = g2.reshape((len(yi), len(xi)))
+
+    ein = np.vectorize(complex)(g1, g2)
+    myps = ps(ein, step=5.0, size=30.0, nbin=500)
+    myps.setup()
+    myps.create()
+    myps.angavg()
+    myps.plot(title="CTI Residual")
+
 
     #G1
     data = g1_total.reshape((len(yi), len(xi)))

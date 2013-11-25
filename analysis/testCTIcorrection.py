@@ -691,8 +691,100 @@ def useThibautsData(log, output, bcgr=72.2, sigma=0.75, iterations=4, loc=1900, 
     return results
 
 
+def addCTI(file, loc=1900, bcgr=72.2, thibautCDM03=False, beta=True, serial=1, parallel=1):
+    """
+    Add CTI trails to a FITS file or input data.
+    """
+    #trap parameters: parallel
+    if thibautCDM03:
+        f1 = '/Users/sammy/EUCLID/vissim-python/data/cdm_thibaut_parallel.dat'
+        f2 = '/Users/sammy/EUCLID/vissim-python/data/cdm_thibaut_serial.dat'
+        params = ThibautsCDM03params()
+        params.update(dict(parallelTrapfile=f1, serialTrapfile=f2, rdose=8.0e9, serial=serial, parallel=parallel))
+    else:
+        f1 = '/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_parallel.dat'
+        f2 = '/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_serial.dat'
+        params = MSSLCDM03params()
+        params.update(dict(parallelTrapfile=f1, serialTrapfile=f2, rdose=8.0e9, serial=serial, parallel=parallel))
+        if beta:
+            params.update(dict(beta_p=0.6, beta_s=0.6))
+
+    print f1, f2
+
+    #load data
+    if type(file) is str:
+        nocti = pf.getdata(file)
+    else:
+        nocti = file.copy()
+
+    #place it on canvas
+    tmp = np.zeros((2066, 2048))
+    ysize, xsize = nocti.shape
+    ysize /= 2
+    xsize /= 2
+    tmp[loc-ysize:loc+ysize, loc-xsize:loc+xsize] = nocti.copy()
+
+    #add background
+    tmp += bcgr
+
+    #run CDM03
+    c = CTI.CDM03bidir(params, [])
+    tmp = c.applyRadiationDamage(tmp)
+
+    #remove background and make a cutout
+    CTIdata = tmp[loc-ysize:loc+ysize, loc-xsize:loc+xsize]
+    CTIdata -= bcgr
+    CTIdata[CTIdata < 0.] = 0.
+
+    return CTIdata
+
+
+def simpleTest(log, sigma=0.75, iterations=50):
+    #Thibauts data
+    folder = '/Users/sammy/EUCLID/CTItesting/uniform/'
+    wcti = pf.getdata(folder +
+                      'galaxy_100mas_dist2_q=0.5078_re=6.5402_theta=0.91895_norm=1000_dx=0.3338_dy=0.0048CTI.fits')
+    wocti = pf.getdata(folder +
+                       'galaxy_100mas_dist2_q=0.5078_re=6.5402_theta=0.91895_norm=1000_dx=0.3338_dy=0.0048noCTI.fits')
+
+    #reset settings
+    settings = dict(sigma=sigma, iterations=iterations)
+
+    #calculate shapes
+    sh = shape.shapeMeasurement(wcti, log, **settings)
+    wctiresults = sh.measureRefinedEllipticity()
+
+    sh = shape.shapeMeasurement(wocti, log, **settings)
+    woctiresults = sh.measureRefinedEllipticity()
+
+    #include CTI with my recipe
+    ctiMSSL = addCTI(wocti.copy())
+    ctiThibault = addCTI(wocti.copy(), thibautCDM03=True)
+
+    sh = shape.shapeMeasurement(ctiMSSL, log, **settings)
+    wMSSLctiresults = sh.measureRefinedEllipticity()
+
+    sh = shape.shapeMeasurement(ctiThibault, log, **settings)
+    wThibautctiresults = sh.measureRefinedEllipticity()
+
+    fileIO.writeFITS(ctiMSSL, 'tmp1.fits', int=False)
+    fileIO.writeFITS(ctiThibault, 'tmp2.fits', int=False)
+    fileIO.writeFITS(wcti/ctiMSSL, 'tmp3.fits', int=False)
+
+    for key in wctiresults:
+        tmp1 = wctiresults[key] - wMSSLctiresults[key]
+        tmp2 = wctiresults[key] - wThibautctiresults[key]
+        if 'Gaussian' in key:
+            print key, np.max(np.abs(tmp1)), np.max(np.abs(tmp2))
+        else:
+            print key, tmp1, tmp2
+
+
 if __name__ == '__main__':
     log = lg.setUpLogger('CTItesting.log')
+
+    #simple test with Thibaut's files
+    simpleTest(log)
 
     #use Thibaut's input galaxies
     galaxies = 800
@@ -705,9 +797,9 @@ if __name__ == '__main__':
     #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsData.pk', galaxies=galaxies)
     #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDatab6.pk', beta=True, galaxies=galaxies)
     #thibaut = useThibautsData(log, 'resultsNoNoiseThibautsDataThibautsCDM03.pk', thibautCDM03=True, galaxies=galaxies)
-    plotResultsNoNoise('resultsNoNoiseThibautsData.pk', 'MSSL CDM03 Parameters (beta=0.29, 0.12)')
-    plotResultsNoNoise('resultsNoNoiseThibautsDatab6.pk', 'MSSL CDM03 Parameters (beta=0.6, 0.6)')
-    plotResultsNoNoise('resultsNoNoiseThibautsDataThibautsCDM03.pk', 'Thibaut CDM03 Parameters')
+    #plotResultsNoNoise('resultsNoNoiseThibautsData.pk', 'MSSL CDM03 Parameters (beta=0.29, 0.12)')
+    #plotResultsNoNoise('resultsNoNoiseThibautsDatab6.pk', 'MSSL CDM03 Parameters (beta=0.6, 0.6)')
+    #plotResultsNoNoise('resultsNoNoiseThibautsDataThibautsCDM03.pk', 'Thibaut CDM03 Parameters')
 
     #cut out regions
     #cutoutRegions(g.glob('Q0_00_00stars*.fits'))

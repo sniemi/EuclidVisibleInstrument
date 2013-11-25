@@ -13,11 +13,12 @@ parameters in parallel and serial direction.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.3
+:version: 0.35
 """
 import numpy as np
 try:
     import cdm03bidir
+    #import cdm03bidirTest as cdm03bidir  #for testing purposes only
 except ImportError:
     print 'No CDM03bidir module available, please compile it: f2py -c -m cdm03bidir cdm03bidir.f90'
 
@@ -57,29 +58,42 @@ class CDM03bidir():
         self.log = log
         self._setupLogger()
 
-
-        #read in trap information
-        trapdata = np.loadtxt(self.values['parallelTrapfile'])
-        self.nt_p = trapdata[:, 0]
-        self.sigma_p = trapdata[:, 1]
-        self.taur_p = trapdata[:, 2]
-
-        trapdata = np.loadtxt(self.values['serialTrapfile'])
-        self.nt_s = trapdata[:, 0]
-        self.sigma_s = trapdata[:, 1]
-        self.taur_s = trapdata[:, 2]
-
-        #scale thibaut's values
-        if 'thibaut' in self.values['parallelTrapfile']:
-            self.sigma_p *= 10000. #thibault's values in m**2
-        if 'thibaut' in self.values['serialTrapfile']:
-            self.sigma_s *= 10000. #thibault's values in m**2
-
         #default CDM03 settings
         self.params = dict(beta_p=0.6, beta_s=0.6, fwc=200000., vth=1.168e7, vg=6.e-11, t=20.48e-3,
                            sfwc=730000., svg=1.0e-10, st=5.0e-6, parallel=1., serial=1.)
         #update with inputs
         self.params.update(self.values)
+
+        #read in trap information
+        trapdata = np.loadtxt(self.values['parallelTrapfile'])
+        if trapdata.ndim > 1:
+            self.nt_p = trapdata[:, 0]
+            self.sigma_p = trapdata[:, 1]
+            self.taur_p = trapdata[:, 2]
+        else:
+            #only one trap species
+            self.nt_p = [trapdata[0],]
+            self.sigma_p = [trapdata[1],]
+            self.taur_p = [trapdata[2],]
+
+        trapdata = np.loadtxt(self.values['serialTrapfile'])
+        if trapdata.ndim > 1:
+            self.nt_s = trapdata[:, 0]
+            self.sigma_s = trapdata[:, 1]
+            self.taur_s = trapdata[:, 2]
+        else:
+            #only one trap species
+            self.nt_s = [trapdata[0],]
+            self.sigma_s = [trapdata[1],]
+            self.taur_s = [trapdata[2],]
+
+        #scale thibaut's values
+        if 'thibaut' in self.values['parallelTrapfile']:
+            self.nt_p /= 0.576  #thibaut's values traps / pixel
+            self.sigma_p *= 1.e4 #thibaut's values in m**2
+        if 'thibaut' in self.values['serialTrapfile']:
+            self.nt_s *= 0.576 #thibaut's values traps / pixel  #should be division?
+            self.sigma_s *= 1.e4 #thibaut's values in m**2
 
 
     def _setupLogger(self):
@@ -244,7 +258,7 @@ class CDM03bidir():
             self.log.info('jflip=%i' % jflip)
 
         CTIed = cdm03bidir.cdm03(np.asfortranarray(data),
-                                 iquadrant % 2, iquadrant / 2,
+                                 jflip, iflip,
                                  self.values['dob'], self.values['rdose'],
                                  self.nt_p, self.sigma_p, self.taur_p,
                                  self.nt_s, self.sigma_s, self.taur_s,

@@ -39,43 +39,6 @@ DOUBLE PRECISION, ALLOCATABLE                        :: no(:,:), sno(:,:), s(:,:
 DOUBLE PRECISION                                     :: nc,nr               ! number of electrons captured, released
 INTEGER                                              :: i, j, k
 
-
-!CDM03 model related variables
-!MSSL parameters when fitting to test data
-!DOUBLE PRECISION :: beta_p=0.29         ! charge cloud expansion parameter in parallel direction [0, 1]
-!DOUBLE PRECISION :: beta_s=0.12         ! charge cloud expansion parameter in serial direction [0, 1]
-!DOUBLE PRECISION :: fwc=200000.         ! full well capacity
-!DOUBLE PRECISION :: vth=1.168e7         ! electron thermal velocity [cm/s]
-!DOUBLE PRECISION :: t=20.48e-3          ! parallel line time [s] (Hopkinson test data)
-!DOUBLE PRECISION :: vg=6.e-11           ! geometric confinement volume (MSSL)
-!DOUBLE PRECISION :: st=5.0e-6           ! serial pixel transfer period [s] for (Hopkinson test data)
-!DOUBLE PRECISION :: sfwc=730000.        ! serial (readout register) pixel full well capacity
-!DOUBLE PRECISION :: svg=1.0e-10         ! geometrical confinement volume of serial register pixels [cm**3] (MSSL)
-
-!MSSL parameter values when simulating
-!DOUBLE PRECISION :: beta_p=0.6          ! charge cloud expansion parameter in parallel direction [0, 1]
-!DOUBLE PRECISION :: beta_s=0.6          ! charge cloud expansion parameter in serial direction [0, 1]
-!DOUBLE PRECISION :: fwc=200000.         ! full well capacity
-!DOUBLE PRECISION :: vth=1.168e7         ! electron thermal velocity [cm/s]
-!DOUBLE PRECISION :: t=1.0e-3            ! parallel line time [s] (NEW))
-!DOUBLE PRECISION :: vg=7.20E-11         ! geometric confinement volume
-!DOUBLE PRECISION :: st=1.428e-5         ! serial pixel transfer period [s] for 70kHz
-!DOUBLE PRECISION :: sfwc=200000.        ! serial (readout register) pixel full well capacity
-!DOUBLE PRECISION :: svg=1.20E-10        ! geometrical confinement volume of serial register pixels [cm**3] (MSSL)
-
-
-!Thibaut's parameter values
-!DOUBLE PRECISION :: beta_p=0.29         ! charge cloud expansion parameter in parallel direction [0, 1]
-!DOUBLE PRECISION :: beta_s=0.12         ! charge cloud expansion parameter in serial direction [0, 1]
-!DOUBLE PRECISION :: fwc=200000.         ! full well capacity
-!DOUBLE PRECISION :: vth=1.62E+07        ! electron thermal velocity [cm/s]
-!DOUBLE PRECISION :: t=2.10E-02          ! parallel line time [s] (Hopkinson test data)
-!DOUBLE PRECISION :: vg=7.20E-11         ! geometric confinement volume (Thibaut)
-!DOUBLE PRECISION :: st=5.00E-06         ! serial pixel transfer period [s] for (Hopkinson test data)
-!DOUBLE PRECISION :: sfwc=1450000.       ! serial (readout register) pixel full well capacity
-!DOUBLE PRECISION :: svg=3.00E-10        ! geometrical confinement volume of serial register pixels [cm**3] (Thibaut)
-
-
 !CDM03 model related variables
 DOUBLE PRECISION :: beta_p     ! charge cloud expansion parameter in parallel direction [0, 1]
 DOUBLE PRECISION :: beta_s     ! charge cloud expansion parameter in serial direction [0, 1]
@@ -88,7 +51,7 @@ DOUBLE PRECISION :: sfwc       ! serial (readout register) pixel full well capac
 DOUBLE PRECISION :: svg        ! geometrical confinement volume of serial register pixels [cm**3]
 
 ! helper
-INTEGER :: zdim, dim
+INTEGER :: zdim
 DOUBLE PRECISION :: parallel
 DOUBLE PRECISION :: serial
 
@@ -99,15 +62,8 @@ DOUBLE PRECISION, DIMENSION(zdim_s)   :: nt_s, tr_s, sigma_s, gamm_s, g_s, alpha
 zdim = max(zdim_p, zdim_s)
 
 !reserve space based on the longer dimension
-IF (xdim > ydim) THEN
-  ALLOCATE(s(xdim, xdim), sno(xdim, zdim), no(xdim, zdim))
-  dim = xdim
-ELSE
-  ALLOCATE(s(ydim, ydim), sno(ydim, zdim), no(ydim, zdim))
-  dim = ydim
-ENDIF
+ALLOCATE(s(xdim, ydim), sno(xdim, zdim), no(ydim, zdim))
 
-!set params
 beta_p = in_params(1)
 beta_s = in_params(2)
 fwc = in_params(3)
@@ -128,8 +84,7 @@ no(:,:) = 0.
 sno(:,:) = 0.
 sout(:,:) = 0.
 
-! absolute trap density which should be scaled according to radiation dose
-! (nt=1.5e10 gives approx fit to GH data for a dose of 8e9 10MeV equiv. protons)
+! trap density should be scaled according to radiation dose
 nt_p = in_nt_p * rdose                    !absolute trap density [per cm**3]
 sigma_p = in_sigma_p
 tr_p = in_tr_p
@@ -142,7 +97,7 @@ tr_s = in_tr_s
 ! because this is what is assumed in CDM03 (EUCLID_TN_ESA_AS_003_0-2.pdf)
 DO i = 1, xdim
    DO j = 1, ydim
-      s(j, i) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
+      s(i, j) = sinp(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j))
    ENDDO
 ENDDO
 
@@ -154,14 +109,17 @@ s = min(s, fwc)
 
 IF (parallel > 0.) THEN
     !parallel direction
-    !PRINT *, "Including parallel CTI"
+    PRINT *, "Including parallel CTI"
     alpha_p=t*sigma_p*vth*fwc**beta_p/2./vg
     g_p=nt_p*2.*vg/fwc**beta_p
+    !g_p = 0.022360679774997897 * 2.   !fix this to get agreement with thibaut's test results, a single source
+    PRINT *, g_p
+    PRINT *, alpha_p
 
-    DO i = 1, dim
-       gamm_p = g_p * REAL(i)
+    DO i = 1, xdim
+       gamm_p = g_p * (REAL(i) - 1)  !had to include -1 to get agreement with Thibaut, bug in Java version?
        DO k = 1, zdim_p
-          DO j = 1, dim
+          DO j = 1, ydim
              nc=0.
 
              IF(s(i,j).gt.0.01)THEN
@@ -180,37 +138,38 @@ ENDIF
 
 IF (serial > 0.) THEN
     !serial direction
-    !PRINT *, "Including serial CTI"
+    PRINT *, "Including serial CTI"
     alpha_s=st*sigma_s*vth*sfwc**beta_s/2./svg
-    g_s=nt_s*2.*svg/sfwc**beta_s
+    !g_s=nt_s*2.*svg/sfwc**beta_s !usual equation
+    g_s=nt_s*2.*vg/sfwc**beta_s  !because of the way Thibaut gives the traps
+    !g_s = 0.022360679774997897  * 2. !the value needed
+    PRINT *, g_s
+    print *, alpha_s
 
-    DO j = 1, dim
+    DO j = 1, ydim
        gamm_s = g_s * REAL(j)
        DO k=1, zdim_s
-          IF(tr_s(k).lt.t)THEN
-             DO i = 1, dim
-                nc=0.
+         DO i = 1, xdim
+            nc=0.
 
-                IF(s(i,j).gt.0.01)THEN
-                  nc=max((gamm_s(k)*s(i,j)**beta_s-sno(i,k))/(gamm_s(k)*s(i,j)**(beta_s-1.)+1.) &
-                  *(1.-exp(-alpha_s(k)*s(i,j)**(1.-beta_s))),0.d0)
-                ENDIF
+            IF(s(i,j).gt.0.01)THEN
+              nc=max((gamm_s(k)*s(i,j)**beta_s-sno(i,k))/(gamm_s(k)*s(i,j)**(beta_s-1.)+1.) &
+              *(1.-exp(-alpha_s(k)*s(i,j)**(1.-beta_s))),0.d0)
+            ENDIF
 
-                sno(i,k) = sno(i,k) + nc
-                nr = sno(i,k) * (1. - exp(-st/tr_s(k)))
-                s(i,j) = s(i,j) - nc + nr
-                sno(i,k) = sno(i,k) - nr
-             ENDDO
-          ENDIF
+            sno(i,k) = sno(i,k) + nc
+            nr = sno(i,k) * (1. - exp(-st/tr_s(k)))
+            s(i,j) = s(i,j) - nc + nr
+            sno(i,k) = sno(i,k) - nr
+         ENDDO
        ENDDO
     ENDDO
 ENDIF
 
-! We need to rotate back from Gaia coordinate system and
 ! flip data back to the input orientation
 DO i = 1, xdim
    DO j = 1, ydim
-      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(j, i)
+      sout(i+iflip*(xdim+1-2*i), j+jflip*(ydim+1-2*j)) = s(i, j)
    ENDDO
 ENDDO
 

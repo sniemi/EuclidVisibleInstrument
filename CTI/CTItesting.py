@@ -8,14 +8,13 @@ This script can be used to test the CDM03 CTI model.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.3
+:version: 0.4
 """
 import os, datetime, time
 import numpy as np
 import pyfits as pf
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
-from CTI import cdm03bidir
 from CTI import CTI
 
 
@@ -64,13 +63,12 @@ def serialMeasurements(filename='CCD204_05325-03-02_Hopkinson-serial-EPER-data_2
 
 
 def ThibautsCDM03params():
-    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.62E+07,
-                t=2.10E-02, vg=7.20E-11, st=5.00E-06, sfwc=1450000., svg=3.00E-10)
-
+    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=162222.38231975277, #vth in wrong units now?
+                t=2.1e-2, vg=7.2e-11, st=5.0e-6, sfwc=1450000., svg=3.00E-10)
 
 def MSSLCDM03params():
-    return dict(beta_p=0.29, beta_s=0.12, fwc=200000., vth=1.168e7,
-                t=20.48e-3, vg=6.e-11, st=5.0e-6, sfwc=730000., svg=1.20E-10)
+    return dict(beta_p=0.29, beta_s=0.29, fwc=200000., vth=1.168e7,
+                t=20.48e-3, vg=6.e-11, st=5.e-6, sfwc=730000., svg=1.2e-10)
 
 
 def writeFITSfile(data, output, unsigned16bit=True):
@@ -764,7 +762,6 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
 
     :return:
     """
-
     #create a quadrant
     CCD = np.zeros((2066, 2048), dtype=np.float64)
 
@@ -779,7 +776,7 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
     if thibaut:
         params = ThibautsCDM03params()
         params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=8.0e9,
-                           serial=0))
+                           serial=0, parallel=1, quadrant=0))
         c = CTI.CDM03bidir(params, [])
         CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
         writeFITSfile(CCDCTIhor, 'CTIHT.fits', unsigned16bit=False)
@@ -787,14 +784,14 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
         if beta:
             params = MSSLCDM03params()
             params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
-                               beta_s=0.6, beta_p=0.6, serial=0))
+                               beta_s=0.6, beta_p=0.6, serial=0, parallel=1, quadrant=0))
             c = CTI.CDM03bidir(params, [])
             CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
             writeFITSfile(CCDCTIhor, 'CTIH2.fits', unsigned16bit=False)
         else:
             params = MSSLCDM03params()
             params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
-                               serial=0))
+                               serial=0, parallel=1, quadrant=0))
             c = CTI.CDM03bidir(params, [])
             CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
             writeFITSfile(CCDCTIhor, 'CTIH.fits', unsigned16bit=False)
@@ -815,7 +812,7 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
     if thibaut:
         params = ThibautsCDM03params()
         params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=8.0e9,
-                           parallel=0))
+                           parallel=0, serial=1, quadrant=0))
         c = CTI.CDM03bidir(params, [])
         CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
         writeFITSfile(CCDCTI, 'CTIVT.fits', unsigned16bit=False)
@@ -823,14 +820,14 @@ def deriveTrails(parallel, serial, chargeInjection=44500.,
         if beta:
             params = MSSLCDM03params()
             params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
-                               beta_p=0.6, beta_s=0.6, parallel=0))
+                               beta_p=0.6, beta_s=0.6, parallel=0, serial=1, quadrant=0))
             c = CTI.CDM03bidir(params, [])
             CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
             writeFITSfile(CCDCTI, 'CTIV2.fits', unsigned16bit=False)
         else:
             params = MSSLCDM03params()
             params.update(dict(parallelTrapfile=parallel, serialTrapfile=serial, rdose=1.6e10,
-                               parallel=0))
+                               parallel=0, serial=1, quadrant=0))
             c = CTI.CDM03bidir(params, [])
             CCDCTI = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
             writeFITSfile(CCDCTI, 'CTIV.fits', unsigned16bit=False)
@@ -866,9 +863,11 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
         print 'Deriving trails...'
         parallelT, serialT = deriveTrails('cdm_thibaut_parallel.dat', 'cdm_thibaut_serial.dat', thibaut=True,
                                           lines=lines)
-        parallel, serial = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat',
+        parallel, serial = deriveTrails('/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_parallel.dat',
+                                        '/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_serial.dat',
                                         lines=lines)
-        parallel2, serial2 = deriveTrails('cdm_euclid_parallel.dat', 'cdm_euclid_serial.dat', beta=True,
+        parallel2, serial2 = deriveTrails('/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_parallel.dat',
+                                          '/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_serial.dat', beta=True,
                                           lines=lines)
     else:
         tmp = pf.getdata('CTIHT.fits')
@@ -913,7 +912,7 @@ def testThibautResults(derive=False, lines=dict(ystart1=1064, ystop1=1249, xstar
     ax2.semilogy(inds, serialValues, 'bs', ms=3, label='152.5K')
     ax2.semilogy(inds, profileSerial, 'r-', label='Thibaut')
     #ax2.semilogy(inds[:len(profileParallel)], profileParallel, 'r-', label='Thibaut')
-    ax2.semilogy(inds, profileSerialM, 'y-', label='MSSL beta=0.12')
+    ax2.semilogy(inds, profileSerialM, 'y-', label='MSSL beta=0.29')
     ax2.semilogy(inds, profileSerialM2, 'm-', label='MSSL beta=0.6')
 
     ax1.set_ylim(1., 60000)
@@ -1057,12 +1056,38 @@ def applyRadiationDamageBiDir2(data, nt_p, sigma_p, taur_p, nt_s, sigma_s, taur_
     return CTIed.transpose()
 
 
+def generateTestData(lines, level=np.logspace(2, 5, num=7)):
+    """
+
+    """
+    params = MSSLCDM03params()
+    params.update(dict(parallelTrapfile='/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_parallel.dat',
+                       serialTrapfile='/Users/sammy/EUCLID/vissim-python/data/cdm_euclid_serial.dat',
+                       rdose=1.6e10, serial=0, parallel=1, quadrant=0))
+
+    for i, l in enumerate(level):
+        print i, l
+        #create a quadrant
+        CCD = np.zeros((2066, 2048), dtype=np.float64)
+
+        #add horizontal charge injection lines
+        CCD[lines['ystart1']:lines['ystop1'], :] = l
+        writeFITSfile(CCD.copy(), 'ChargeInjectionParallel%i.fits' % i, unsigned16bit=False)
+
+        #radiate CTI to plot initial set trails
+        c = CTI.CDM03bidir(params, [])
+        CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+        writeFITSfile(CCDCTIhor, 'CTI%i.fits' % i, unsigned16bit=False)
+
+
 if __name__ == '__main__':
     #locations of the charge injection lines
     lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
 
+    generateTestData(lines)
+
     #compare MSSL and Thibaut's charge trails
-    #testThibautResults(lines=lines, derive=True)
+    testThibautResults(lines=lines, derive=True)
 
     #plot EPER test data
     #plotTestData()
@@ -1071,7 +1096,7 @@ if __name__ == '__main__':
     #fitParallelLSQ(lines)
     #fitSerialLSQ(lines)
 
-    fitParallelBayesian(lines)
+    #fitParallelBayesian(lines)
     #fitParallelBayesian(lines, test=True)
     #fitSerialBayesian(lines)
     #fitSerialBayesian(lines, test=True)

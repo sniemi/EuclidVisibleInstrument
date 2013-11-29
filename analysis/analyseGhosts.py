@@ -769,7 +769,7 @@ def objectDetection(log, magnitude=24.5, exptime=565, exposures=3, fpeak=0.7, of
     ghoste, ghoste2 = ETC.galaxyDetection(info, magnitude=magnitude, exptime=exptime, exposures=exposures)
 
     print '-'*100
-    print '\n\n\nObject Detection'
+    print '\n\n\nObject Detection, a ghost covers %i pixels' % covering
     print '-'*100
     res = []
     for ghostreq in ghostlevels:
@@ -959,10 +959,12 @@ if __name__ == '__main__':
     #imapact on object detection
     log.info('Calculating the effect on object detection...')
     objectDetection(log)
+    #objectDetection(log, ghostlevels=(5.e-5, 5.e-7))
+    #objectDetection(log, covering=10000, ghostlevels=(1.15e-5, 1.15e-7))
 
     #impact on shape measurement
-    log.info('Calculatsing the oeffect on shape measurements...')
-    shapeMeasurement(log)
+    #log.info('Calculatsing the oeffect on shape measurements...')
+    #shapeMeasurement(log)
 
     if debug:
          #out of focus ghosts

@@ -18,6 +18,8 @@ place the script to an empty directory and either copy or link to the data direc
 import numpy as np
 import scipy.interpolate as interpolate
 import matplotlib.pyplot as plt
+from sources import stellarNumberCounts
+import math
 
 
 def drawFromCumulativeDistributionFunction(cpdf, x, number):
@@ -72,22 +74,28 @@ def plotCatalog(catalog):
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.hist(mag[~stars], bins=20, label='Galaxies', alpha=0.3)
+    try:
+        ax.hist(mag[~stars], bins=20, label='Galaxies', alpha=0.3)
+    except:
+        pass
     ax.hist(mag[stars], bins=20, label='Stars', alpha=0.5)
     ax.semilogy()
     ax.set_xlabel('R+I Magnitude')
-    ax.set_ylabel('# objects')
+    ax.set_ylabel('Number of Objects')
     plt.legend(fancybox=True, shadow=True, numpoints=1, loc=2)
     plt.savefig(catalog + 'counts.pdf')
     plt.close()
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.hist(mag[~stars], bins=20, label='Galaxies', cumulative=True, alpha=0.3)
+    try:
+        ax.hist(mag[~stars], bins=20, label='Galaxies', cumulative=True, alpha=0.3)
+    except:
+        pass
     ax.hist(mag[stars], bins=20, label='Stars', cumulative=True, alpha=0.5)
     ax.semilogy()
     ax.set_xlabel('R+I Magnitude')
-    ax.set_ylabel('# objects')
+    ax.set_ylabel('Number of Objects')
     plt.legend(fancybox=True, shadow=True, numpoints=1, loc=2)
     plt.savefig(catalog + 'countsCum.pdf')
     plt.close()
@@ -109,18 +117,19 @@ def generateCatalog(**kwargs):
     settings.update(kwargs)
 
     #cumulative distribution of galaxies
-    d = np.loadtxt(settings['galaxies'], usecols=(0, 1))
-    gmags = d[:, 0]
-    gcounts = d[:, 1]
-    #nums = int(np.max(gcounts) / 3600. * settings['fudge'] * settings['fov'])  #3600=from sq deg to sq arcsec
-    nums = int(np.max(gcounts) / 3600. / 3600. * settings['nx'] * settings['ny'] / 10. / 10.)
+    if settings['galaxies']:
+        d = np.loadtxt(settings['galaxies'], usecols=(0, 1))
+        gmags = d[:, 0]
+        gcounts = d[:, 1]
+        #nums = int(np.max(gcounts) / 3600. * settings['fudge'] * settings['fov'])  #3600=from sq deg to sq arcsec
+        nums = int(np.max(gcounts) / 3600. / 3600. * settings['nx'] * settings['ny'] / 10. / 10.)
 
-    z = np.polyfit(gmags, np.log10(gcounts), 4)
-    p = np.poly1d(z)
-    galaxymags = np.arange(10.0, 30.2, 0.2)
-    galaxycounts = 10**p(galaxymags)
-    plotDistributionFunction(gmags, gcounts, galaxymags, galaxycounts, settings['outputprefix'] + 'GalaxyDist.pdf')
-    cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
+        z = np.polyfit(gmags, np.log10(gcounts), 4)
+        p = np.poly1d(z)
+        galaxymags = np.arange(10.0, 30.2, 0.2)
+        galaxycounts = 10**p(galaxymags)
+        plotDistributionFunction(gmags, gcounts, galaxymags, galaxycounts, settings['outputprefix'] + 'GalaxyDist.pdf')
+        cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
 
     #stars
     if settings['besancon']:
@@ -160,11 +169,14 @@ def generateCatalog(**kwargs):
         plotDistributionFunction(stmags, stcounts, starmags, starcounts, settings['outputprefix'] + 'StarDist.pdf')
 
         cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
-        starcounts /=  3600. #convert to square arcseconds
-        nstars = int(np.max(starcounts) * settings['fudge'] * sfudge * settings['fov'] *
-                     settings['nx'] * settings['ny'] / 4096. / 4132.)
 
-    print '%i stars and %i galaxies' % (nstars, nums)
+        starcounts /=  3600. #convert to square arcseconds
+        nstars = int(np.max(starcounts) * sfudge *
+                     settings['nx'] * settings['ny'] / 4096. / 4132. * 10 * 10)
+
+    print '%i stars' % nstars
+    if settings['galaxies']:
+        print '%i galaxies' % nums
 
     for n in range(settings['ncatalogs']):
         #open output
@@ -191,17 +203,77 @@ def generateCatalog(**kwargs):
                 fh.write('%f %f %f 0 0.00000\n' % (a, b, c))
 
         #find random positions, rotation, and type for galaxies
-        xc = np.random.random(nums) * settings['nx']
-        yc = np.random.random(nums) * settings['ny']
-        theta = np.random.random(nums) * 360.0
-        typ = np.random.random_integers(low=np.min(settings['types']), high=np.max(settings['types']), size=nums)
-        mag = drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
+        if settings['galaxies']:
+            xc = np.random.random(nums) * settings['nx']
+            yc = np.random.random(nums) * settings['ny']
+            theta = np.random.random(nums) * 360.0
+            typ = np.random.random_integers(low=np.min(settings['types']), high=np.max(settings['types']), size=nums)
+            mag = drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
 
-        #write out galaxies
-        for x, y, m, t, ang in zip(xc, yc, mag, typ, theta):
-            fh.write('%f %f %f %i %f \n' % (x, y, m, t, ang))
+            #write out galaxies
+            for x, y, m, t, ang in zip(xc, yc, mag, typ, theta):
+                fh.write('%f %f %f %i %f \n' % (x, y, m, t, ang))
 
         fh.close()
+
+def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=26000, ymax=26000):
+    """
+    Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
+
+    :param magnitudeLimit: limiting magnitude in V-band
+    :type magnitudeLimit: int
+    :param b: galactic longitude
+    :type b: int
+    :param l: galactic latitude
+    :type l: int
+    :param sqdeg: number of square degrees to cover
+    :type sqdeg: float
+    :param xmax: highest pixel value to use for the random positions in x
+    :type xmax: int
+    :param ymax: highest pixel value to use for the random positions in y
+    :type ymax: int
+
+    :return: None
+    """
+    Nvconst = stellarNumberCounts.integratedCountsVband()
+
+    n = stellarNumberCounts.bahcallSoneira(magnitudeLimit, l, b, Nvconst)  #per square degree
+
+    nstars = int(n * sqdeg)
+
+    print '%i stars brighter than %i mag_V in %f square degrees at b=%i and l=%i' % (nstars, magnitudeLimit, sqdeg, b, l)
+
+    xcoords = np.random.random(nstars) * xmax
+    ycoords = np.random.random(nstars) * ymax
+
+    stcounts = []
+    stmags = np.linspace(3.5, 30, num=15)
+    for m in stmags:
+        tmp = stellarNumberCounts.bahcallSoneira(m, l, b, Nvconst)
+        stcounts.append(tmp)
+    stcounts = np.asarray(stcounts)
+    #fit a function and generate finer sample
+    z = np.polyfit(stmags, np.log10(stcounts), 4)
+    p = np.poly1d(z)
+    starmags = np.arange(1, 30.2, 0.2)
+    starcounts = 10**p(starmags)
+    cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
+
+    mag = drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
+
+    fh = open('starsOnly.dat', 'w')
+    fh.write('#   1 X                Object position along x                                    [pixel]\n')
+    fh.write('#   2 Y                Object position along y                                    [pixel]\n')
+    fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
+    fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
+    fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
+
+    for x, y, m in zip(xcoords, ycoords, mag):
+        fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
+    fh.close()
+
+    plotCatalog('starsOnly.dat')
+
 
 
 def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
@@ -263,17 +335,19 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
     #plotCatalog('fullFoV0.dat')
 
-    #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
-    settings = dict(besancon=False, deg=30, nx=10000, ny=10000, outputprefix='CCDcatalogue30d',
-                    types=np.arange(17, 103))
-    generateCatalog(**settings)
-    settings = dict(besancon=False, deg=60, nx=10000, ny=10000, outputprefix='CCDcatalogue60d',
-                    types=np.arange(17, 103))
-    generateCatalog(**settings)
-    settings = dict(besancon=False, deg=90, nx=10000, ny=10000, outputprefix='CCDcatalogue90d',
-                    types=np.arange(17, 103))
-    generateCatalog(**settings)
+    starCatalogueBachallSoneira(b=25)
 
+    #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
+    #
+    #settings = dict(besancon=False, deg=30, nx=10000, ny=10000, outputprefix='CCDcatalogue30d',
+    #                types=np.arange(17, 103), galaxies=True)
+    #generateCatalog(**settings)
+    #settings = dict(besancon=False, deg=60, nx=10000, ny=10000, outputprefix='CCDcatalogue60d',
+    #                types=np.arange(17, 103), galaxies=True)
+    #generateCatalog(**settings)
+    #settings = dict(besancon=False, deg=90, nx=10000, ny=10000, outputprefix='CCDcatalogue90d',
+    #                types=np.arange(17, 103), galaxies=True)
+    #generateCatalog(**settings)
 
     #create 100 catalogs at deg=30
     #settings = dict(besancon=False, deg=30, ncatalogs=500)

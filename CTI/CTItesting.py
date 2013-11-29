@@ -1080,14 +1080,40 @@ def generateTestData(lines, level=np.logspace(2, 5, num=7)):
         writeFITSfile(CCDCTIhor, 'CTI%i.fits' % i, unsigned16bit=False)
 
 
+def generateSimpleTestData(lines, level=(100, 1000, 10000)):
+    """
+
+    """
+    params = MSSLCDM03params()
+    params.update(dict(parallelTrapfile='/Users/sammy/EUCLID/CTItesting/Reconciliation/singletrap/cdm_test_parallel.dat',
+                       serialTrapfile='/Users/sammy/EUCLID/CTItesting/Reconciliation/singletrap/cdm_test_serial.dat',
+                       rdose=1.6e10, serial=0, parallel=1, quadrant=0))
+
+    for i, l in enumerate(level):
+        print i, l
+        #create a quadrant
+        CCD = np.zeros((2066, 2048), dtype=np.float64)
+
+        #add horizontal charge injection lines
+        CCD[lines['ystart1']:lines['ystop1'], :] = l
+        writeFITSfile(CCD.copy(), 'ChargeInjectionParallelSingle%i.fits' % i, unsigned16bit=False)
+
+        #radiate CTI to plot initial set trails
+        c = CTI.CDM03bidir(params, [])
+        CCDCTIhor = c.applyRadiationDamage(CCD.copy().transpose()).transpose()
+        writeFITSfile(CCDCTIhor, 'CTISingle%i.fits' % i, unsigned16bit=False)
+
+
+
 if __name__ == '__main__':
     #locations of the charge injection lines
     lines = dict(ystart1=1064, ystop1=1250, xstart1=577, xstop1=597)
 
-    generateTestData(lines)
+    #generateTestData(lines)
+    generateSimpleTestData(lines)
 
     #compare MSSL and Thibaut's charge trails
-    testThibautResults(lines=lines, derive=True)
+    #testThibautResults(lines=lines, derive=True)
 
     #plot EPER test data
     #plotTestData()

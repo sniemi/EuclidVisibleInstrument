@@ -61,9 +61,9 @@ Dependencies
 This script depends on the following packages:
 
 :requires: PyFITS (tested with 3.0.6)
-:requires: NumPy (tested with 1.6.1 and 1.7.1)
+:requires: NumPy (tested with 1.6.1, 1.7.1, and 1.8.0)
 :requires: numexpr (tested with 2.0.1)
-:requires: SciPy (tested with 0.10.1 and 0.12)
+:requires: SciPy (tested with 0.10.1, 0.12, and 0.13)
 :requires: vissim-python package
 
 .. Note:: This class is not Python 3 compatible. For example, xrange does not exist
@@ -137,7 +137,7 @@ Instead, if we use an NVIDIA GPU for the convolution (and code that has not been
 Change Log
 ----------
 
-:version: 1.30
+:version: 1.31
 
 Version and change logs::
 
@@ -183,6 +183,9 @@ Version and change logs::
     1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
           were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
     1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information['mode']
+    1.31: now a single FOLDER variable at the beginning of the program that should be set to
+          point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
+          more suitable for the correct input model.
 
 
 Future Work
@@ -231,9 +234,11 @@ except:
     info = 'No CUDA detected, using SciPy for convolution'
     CUDA = False
 
+#change this as needed
+FOLDER = '/Users/sammy/EUCLID/vissim-python/'
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.30
+__version__ = 1.31
 
 
 class VISsimulator():
@@ -303,14 +308,14 @@ class VISsimulator():
                                      ghostCutoff=22.0,
                                      ghostRatio=5.e-5,
                                      coveringFraction=1.4,  #CR: 1.4 is for 565s exposure
-                                     flatflux='data/VIScalibrationUnitflux.fits',
-                                     cosmicraylengths='data/cdf_cr_length.dat',
-                                     cosmicraydistance='data/cdf_cr_total.dat',
-                                     flatfieldfile='data/VISFlatField2percent.fits',
-                                     parallelTrapfile='data/cdm_euclid_parallel.dat',
-                                     serialTrapfile='data/cdm_euclid_serial.dat',
-                                     cosmeticsFile='data/cosmetics.dat',
-                                     ghostfile='data/ghost800nm.fits',
+                                     flatflux=FOLDER+'data/VIScalibrationUnitflux.fits',
+                                     cosmicraylengths=FOLDER+'data/cdf_cr_length.dat',
+                                     cosmicraydistance=FOLDER+'data/cdf_cr_total.dat',
+                                     flatfieldfile=FOLDER+'data/VISFlatField2percent.fits',
+                                     parallelTrapfile=FOLDER+'data/cdm_euclid_parallel.dat',
+                                     serialTrapfile=FOLDER+'data/cdm_euclid_serial.dat',
+                                     cosmeticsFile=FOLDER+'data/cosmetics.dat',
+                                     ghostfile=FOLDER+'data/ghost800nm.fits',
                                      mode='same',
                                      version=__version__))
 
@@ -525,14 +530,19 @@ class VISsimulator():
 
         Currently assumes that the ghost model has already been properly scaled and that the pixel
         scale of the input data corresponds to the nominal VIS pixel scale. Futhermore, assumes that the
-        distance to the ghost from y=0 is appropriate (given current knowledge, about 395 VIS pixels).
+        distance to the ghost from y=0 is appropriate (given current knowledge, about 750 VIS pixels).
         """
         self.log.info('Loading ghost model from %s' % self.information['ghostfile'])
 
         self.ghostModel = pf.getdata(self.information['ghostfile'])
-        self.ghostOffset = self.ghostModel.shape[0] / 2 + 10  #this line may require modification, if input changes
+
+        #offset from the object, note that at the moment this is fixed, but in reality a focal plane position dependent.
+        self.ghostOffset = 750
+
+        #scale the peak pixel to the given ratio
         self.ghostModel /= np.max(self.ghostModel)
         self.ghostModel *= self.information['ghostRatio']
+
         self.ghostMax = np.max(self.ghostModel)
         self.log.info('Maximum in the ghost model %e' % self.ghostMax)
 
@@ -804,7 +814,7 @@ class VISsimulator():
         self.log.info(str)
 
         #read in object types
-        data = open('data/objects.dat').readlines()
+        data = open(FOLDER+'data/objects.dat').readlines()
 
         #only 2D array will have second dimension, so this will trigger the exception if only one input source
         tmp_ = self.objects.shape[1]
@@ -823,9 +833,9 @@ class VISsimulator():
                     if int(tmp[0]) == stype:
                         #found match
                         if tmp[2].endswith('.fits'):
-                            d = pf.getdata(tmp[2])
+                            d = pf.getdata(FOLDER+tmp[2])
                         else:
-                            d = np.loadtxt(tmp[2], skiprows=2)
+                            d = np.loadtxt(FOLDER+tmp[2], skiprows=2)
                         objectMapping[stype] = dict(file=tmp[2], data=d)
                         break
 
@@ -2252,7 +2262,7 @@ class Test(unittest.TestCase):
         opts.quadrant = '0'
         opts.xCCD = '0'
         opts.yCCD = '0'
-        opts.configfile = 'data/test.config'
+        opts.configfile = FOLDER+'data/test.config'
         opts.section = 'TESTSCIENCE1X'
         opts.debug = False
         opts.testing = True
@@ -2270,7 +2280,7 @@ class Test(unittest.TestCase):
         #load generated file
         new = pf.open('nonoisenocrQ0_00_00testscience.fits')[1].data
         #load test file
-        expected = pf.open('data/nonoisenocrQ0_00_00testscience.fits')[1].data
+        expected = pf.open(FOLDER+'data/nonoisenocrQ0_00_00testscience.fits')[1].data
         #assert
         print 'Asserting...'
         if CUDA:

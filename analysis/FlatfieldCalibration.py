@@ -114,8 +114,8 @@ def generateResidualFlatField(files='Q0*flatfield*.fits', combine=77, lampfile='
 
     #load the true reference p-flat and calculate the error in the derived flat field (i.e. residual)
     real = pf.getdata(reference).astype(np.float64)
-    #res = np.abs(real - pixvar) / (real*pixvar) + 1.  #old: maybe incorrect?
-    res = 1. - pixvar / real
+    res = np.abs(real - pixvar) / (real*pixvar) + 1.  #old: maybe incorrect?
+    #res = np.abs(pixvar - real) + 1.
 
     if debug:
         print np.mean(res), np.min(res), np.max(res), np.std(res)
@@ -257,7 +257,7 @@ def testFlatCalibration(log, flats, surfaces=10, file='data/psf1x.fits', psfs=50
 
                 #get the underlying residual surface and multiple with the PSF
                 small = residual[ypos:ypos+data.shape[0], xpos:xpos+data.shape[1]].copy()
-                small += 1.
+                #small += 1.
                 small *= tmp
                 #small *= tmp   # depends on the residual geenration
 

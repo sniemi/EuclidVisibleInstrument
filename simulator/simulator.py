@@ -137,7 +137,7 @@ Instead, if we use an NVIDIA GPU for the convolution (and code that has not been
 Change Log
 ----------
 
-:version: 1.31
+:version: 1.32
 
 Version and change logs::
 
@@ -186,6 +186,7 @@ Version and change logs::
     1.31: now a single FOLDER variable at the beginning of the program that should be set to
           point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
           more suitable for the correct input model.
+    1.32: option to fix the random number generator seed to unity.
 
 
 Future Work
@@ -238,7 +239,7 @@ except:
 FOLDER = '/Users/sammy/EUCLID/vissim-python/'
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.31
+__version__ = 1.32
 
 
 class VISsimulator():
@@ -276,6 +277,13 @@ class VISsimulator():
             self.random = opts.testing
         except:
             self.random = False
+
+        try:
+            self.fixed = opts.fixed
+            print 'Fixing the random number generator seed'
+            np.random.seed(seed=1)  #fix the seed
+        except:
+            pass
 
         #load instrument model, these values are also stored in the FITS header
         self.information = VISinstrumentModel.VISinformation()
@@ -1991,7 +1999,7 @@ class VISsimulator():
         if self.cosmicRays:
             self.imagenoCR += self.information['bias']
 
-        if self.cosmicRays:
+        if self.radiationDamage:
             self.noCTI += self.information['bias']
 
 
@@ -2309,6 +2317,8 @@ def processArgs(printHelp=False):
                       help='Debugging mode on')
     parser.add_option('-t', '--test', dest='test', action='store_true',
                       help='Run unittest')
+    parser.add_option('-f', '--fixed', dest='fixed', action='store_true',
+                      help='Use a fixed seed for the random number generators')
     if printHelp:
         parser.print_help()
     else:

@@ -76,16 +76,21 @@ def plotfile(filename='/Users/sammy/EUCLID/vissim-python/data/psf1x.fits',
 
 
 def shapeMovie(filename='/Users/sammy/EUCLID/CTItesting/Reconciliation/damaged_image_parallel.fits',
-               sigma=0.75, scale=False, zoom=30, frames=20):
-    #settings = dict(sigma=sigma, iterations=1)
-    settings = dict(sigma=sigma, iterations=1, fixedPosition=True, fixedX=85.0, fixedY=85.)
+               sigma=0.75, scale=False, zoom=30, frames=20, subtractMedian=False):
+    settings = dict(sigma=sigma, iterations=1)
+    #settings = dict(sigma=sigma, iterations=1, fixedPosition=True, fixedX=85.0, fixedY=85.)
 
     l = lg.setUpLogger('CTItesting.log')
 
     data = pf.getdata(filename)
+
     if scale:
         data /= np.max(data)
         data *= 1.e5
+
+    if subtractMedian:
+        data -= np.median(data)
+        data = data[78:90, 78   :90]  #also limit the area
 
     sh = shape.shapeMeasurement(data, l, **settings)
     results = sh.measureRefinedEllipticity()
@@ -125,8 +130,8 @@ def shapeMovie(filename='/Users/sammy/EUCLID/CTItesting/Reconciliation/damaged_i
         return ax2, text, e
 
     def animate(i):
-        #settings = dict(sigma=sigma, iterations=i+1)
-        settings = dict(sigma=sigma, iterations=i+1, fixedPosition=True, fixedX=85.0, fixedY=85.)
+        settings = dict(sigma=sigma, iterations=i+1)
+        #settings = dict(sigma=sigma, iterations=i+1, fixedPosition=True, fixedX=85.0, fixedY=85.)
         sh = shape.shapeMeasurement(data, l, **settings)
         results = sh.measureRefinedEllipticity()
 
@@ -152,5 +157,6 @@ if __name__ == '__main__':
     #plotfile(filename='/Users/sammy/EUCLID/CTItesting/Reconciliation/damaged_image_parallel.fits',
     #         out='ctitest.pdf', iterations=3)
 
-    shapeMovie(sigma=0.2)
+    #shapeMovie()
+    shapeMovie(subtractMedian=True, sigma=0.1, zoom=5, frames=30)
     #shapeMovie(sigma=0.35, frames=50)

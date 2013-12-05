@@ -216,6 +216,7 @@ def generateCatalog(**kwargs):
 
         fh.close()
 
+
 def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=26000, ymax=26000):
     """
     Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
@@ -274,6 +275,90 @@ def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=
 
     plotCatalog('starsOnly.dat')
 
+
+def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=26000, ymax=26000,
+                            types=np.arange(17, 103)):
+    """
+    Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
+    Includes also galaxies.
+
+    :param magnitudeLimit: limiting magnitude in V-band
+    :type magnitudeLimit: int
+    :param b: galactic longitude
+    :type b: int
+    :param l: galactic latitude
+    :type l: int
+    :param sqdeg: number of square degrees to cover
+    :type sqdeg: float
+    :param xmax: highest pixel value to use for the random positions in x
+    :type xmax: int
+    :param ymax: highest pixel value to use for the random positions in y
+    :type ymax: int
+
+    :return: None
+    """
+    #stars
+    Nvconst = stellarNumberCounts.integratedCountsVband()
+
+    n = stellarNumberCounts.bahcallSoneira(magnitudeLimit, l, b, Nvconst)  #per square degree
+
+    nstars = int(n * sqdeg)
+
+    print '%i stars brighter than %i mag_V in %f square degrees at b=%i and l=%i' % (nstars, magnitudeLimit, sqdeg, b, l)
+
+    xcoords = np.random.random(nstars) * xmax
+    ycoords = np.random.random(nstars) * ymax
+
+    stcounts = []
+    stmags = np.linspace(3.5, 30, num=15)
+    for m in stmags:
+        tmp = stellarNumberCounts.bahcallSoneira(m, l, b, Nvconst)
+        stcounts.append(tmp)
+    stcounts = np.asarray(stcounts)
+    #fit a function and generate finer sample
+    z = np.polyfit(stmags, np.log10(stcounts), 4)
+    p = np.poly1d(z)
+    starmags = np.arange(1, 30.2, 0.2)
+    starcounts = 10**p(starmags)
+    cpdf = (starcounts - np.min(starcounts))/ (np.max(starcounts) - np.min(starcounts))
+
+    mag = drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
+
+    fh = open('catalogue.dat', 'w')
+    fh.write('#   1 X                Object position along x                                    [pixel]\n')
+    fh.write('#   2 Y                Object position along y                                    [pixel]\n')
+    fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
+    fh.write('#   4 TYPE             Object type                                                [0=star, others=FITS]\n')
+    fh.write('#   5 ORIENTATION      Objects orientation                                        [deg]\n')
+
+    for x, y, m in zip(xcoords, ycoords, mag):
+        fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
+
+    #galaxies
+    d = np.loadtxt('data/cdf_galaxies.dat', usecols=(0, 1))
+    gmags = d[:, 0]
+    gcounts = d[:, 1]
+    nums = int(np.max(gcounts) * sqdeg)
+
+    print '%i galaxies' % nums
+
+    z = np.polyfit(gmags, np.log10(gcounts), 4)
+    p = np.poly1d(z)
+    galaxymags = np.arange(10.0, 30.2, 0.2)
+    galaxycounts = 10**p(galaxymags)
+    plotDistributionFunction(gmags, gcounts, galaxymags, galaxycounts, 'GalaxyDist.pdf')
+    cumulative = (galaxycounts - np.min(galaxycounts))/ (np.max(galaxycounts) - np.min(galaxycounts))
+
+    xc = np.random.random(nums) * xmax
+    yc = np.random.random(nums) * ymax
+    theta = np.random.random(nums) * 360.0
+    typ = np.random.random_integers(low=np.min(types), high=np.max(types), size=nums)
+    mag = drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
+
+    for x, y, m, t, ang in zip(xc, yc, mag, typ, theta):
+        fh.write('%f %f %f %i %f \n' % (x, y, m, t, ang))
+
+    fh.close()
 
 
 def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
@@ -335,7 +420,9 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
     #plotCatalog('fullFoV0.dat')
 
-    starCatalogueBachallSoneira(b=25)
+    CatalogueBachallSoneira()
+
+#    starCatalogueBachallSoneira(b=25)
 
     #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
     #

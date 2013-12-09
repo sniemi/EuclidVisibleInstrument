@@ -186,7 +186,7 @@ Version and change logs::
     1.31: now a single FOLDER variable at the beginning of the program that should be set to
           point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
           more suitable for the correct input model.
-    1.32: option to fix the random number generator seed to unity.
+    1.32: option to fix the random number generator seed using -f flag.
 
 
 Future Work
@@ -279,9 +279,9 @@ class VISsimulator():
             self.random = False
 
         try:
-            self.fixed = opts.fixed
-            print 'Fixing the random number generator seed'
-            np.random.seed(seed=1)  #fix the seed
+            seed = int(opts.fixed)
+            np.random.seed(seed=seed)  #fix the seed
+            print 'Fixing the random number generator seed to %i' % seed
         except:
             pass
 
@@ -554,6 +554,9 @@ class VISsimulator():
         self.ghostMax = np.max(self.ghostModel)
         self.log.info('Maximum in the ghost model %e' % self.ghostMax)
 
+        #generate ghost image array
+        self.ghost = np.zeros(self.image.shape)
+
 
     def readCosmicRayInformation(self):
         """
@@ -636,9 +639,9 @@ class VISsimulator():
         return True
 
 
-    def overlayToCCD(self, data, obj):
+    def overlayToCCD(self, data, obj, image=True):
         """
-        Overlay data from a source object onto the self.image.
+        Overlay data from a source object onto the self.image if image = True, else t self.ghost
 
         :param data: ndarray of data to be overlaid on to self.image
         :type data: ndarray
@@ -685,40 +688,76 @@ class VISsimulator():
         self.log.info('Adding an object to (x,y)=({0:.4f}, {1:.4f})'.format(xt, yt))
         self.log.info('Bounding box = [%i, %i : %i, %i]' % (i1, i2, j1, j2))
 
-        #add to the image
-        if ni == nx and nj == ny:
-            #full frame will fit
-            self.image[j1:j2, i1:i2] += data
-        elif ni < nx and nj == ny:
-            #x dimensions shorter
-            if int(np.floor(xlo + 0.5)) < 1:
-                #small values, left side
-                self.image[j1:j2, i1:i2] += data[:, nx-ni:]
+        if image:
+            #add to the image
+            if ni == nx and nj == ny:
+                #full frame will fit
+                self.image[j1:j2, i1:i2] += data
+            elif ni < nx and nj == ny:
+                #x dimensions shorter
+                if int(np.floor(xlo + 0.5)) < 1:
+                    #small values, left side
+                    self.image[j1:j2, i1:i2] += data[:, nx-ni:]
+                else:
+                    #large values, right side
+                    self.image[j1:j2, i1:i2] += data[:, :ni]
+            elif nj < ny and ni == nx:
+                #y dimensions shorter
+                if int(np.floor(ylo + 0.5)) < 1:
+                    #small values, bottom
+                    self.image[j1:j2, i1:i2] += data[ny-nj:, :]
+                else:
+                    #large values, top
+                    self.image[j1:j2, i1:i2] += data[:nj, :]
             else:
-                #large values, right side
-                self.image[j1:j2, i1:i2] += data[:, :ni]
-        elif nj < ny and ni == nx:
-            #y dimensions shorter
-            if int(np.floor(ylo + 0.5)) < 1:
-                #small values, bottom
-                self.image[j1:j2, i1:i2] += data[ny-nj:, :]
-            else:
-                #large values, top
-                self.image[j1:j2, i1:i2] += data[:nj, :]
+                #both lengths smaller, can be in any of the four corners
+                if int(np.floor(xlo + 0.5)) < 1 > int(np.floor(ylo + 0.5)):
+                    #left lower
+                    self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
+                elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(yhi + 0.5)) > self.information['ysize']:
+                    #left upper
+                    self.image[j1:j2, i1:i2] += data[:nj, nx-ni:]
+                elif int(np.floor(xhi + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
+                    #right lower
+                    self.image[j1:j2, i1:i2] += data[ny-nj:, :ni]
+                else:
+                    #right upper
+                    self.image[j1:j2, i1:i2] += data[:nj, :ni]
         else:
-            #both lengths smaller, can be in any of the four corners
-            if int(np.floor(xlo + 0.5)) < 1 > int(np.floor(ylo + 0.5)):
-                #left lower
-                self.image[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
-            elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(yhi + 0.5)) > self.information['ysize']:
-                #left upper
-                self.image[j1:j2, i1:i2] += data[:nj, nx-ni:]
-            elif int(np.floor(xhi + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
-                #right lower
-                self.image[j1:j2, i1:i2] += data[ny-nj:, :ni]
+            #add to the ghost
+            if ni == nx and nj == ny:
+                #full frame will fit
+                self.ghost[j1:j2, i1:i2] += data
+            elif ni < nx and nj == ny:
+                #x dimensions shorter
+                if int(np.floor(xlo + 0.5)) < 1:
+                    #small values, left side
+                    self.ghost[j1:j2, i1:i2] += data[:, nx-ni:]
+                else:
+                    #large values, right side
+                    self.ghost[j1:j2, i1:i2] += data[:, :ni]
+            elif nj < ny and ni == nx:
+                #y dimensions shorter
+                if int(np.floor(ylo + 0.5)) < 1:
+                    #small values, bottom
+                    self.ghost[j1:j2, i1:i2] += data[ny-nj:, :]
+                else:
+                    #large values, top
+                    self.ghost[j1:j2, i1:i2] += data[:nj, :]
             else:
-                #right upper
-                self.image[j1:j2, i1:i2] += data[:nj, :ni]
+                #both lengths smaller, can be in any of the four corners
+                if int(np.floor(xlo + 0.5)) < 1 > int(np.floor(ylo + 0.5)):
+                    #left lower
+                    self.ghost[j1:j2, i1:i2] += data[ny-nj:, nx-ni:]
+                elif int(np.floor(xlo + 0.5)) < 1 and int(np.floor(yhi + 0.5)) > self.information['ysize']:
+                    #left upper
+                    self.ghost[j1:j2, i1:i2] += data[:nj, nx-ni:]
+                elif int(np.floor(xhi + 0.5)) > self.information['xsize'] and int(np.floor(ylo + 0.5)) < 1:
+                    #right lower
+                    self.ghost[j1:j2, i1:i2] += data[ny-nj:, :ni]
+                else:
+                    #right upper
+                    self.ghost[j1:j2, i1:i2] += data[:nj, :ni]
 
 
     def writeFITSfile(self, data, filename, unsigned16bit=False):
@@ -1327,7 +1366,7 @@ class VISsimulator():
                             tmp = self.ghostModel.copy() * mx
 
                             #add the ghost
-                            self.overlayToCCD(tmp, [obj[0], obj[1]+self.ghostOffset])
+                            self.overlayToCCD(tmp, [obj[0], obj[1]+self.ghostOffset], image=False)
                         else:
                             #extended source, rename finemap
                             data = self.finemap[stype].copy()
@@ -1405,7 +1444,7 @@ class VISsimulator():
                                 tmp *= (self.ghostMax * mx)
 
                                 #add the ghost
-                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
                     else:
                         #object not on the screen, however its ghost image can be...
                         self.log.info('Object %i was outside the detector area' % (j + 1))
@@ -1432,7 +1471,7 @@ class VISsimulator():
                                 tmp = self.ghostModel.copy() * np.max(data)
 
                                 #add the ghost
-                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
                             else:
                                 if obj[2] < self.information['ghostCutoff']:
                                     #galaxy
@@ -1496,7 +1535,7 @@ class VISsimulator():
                                     tmp *= (self.ghostMax * mx)
 
                                     #add the ghost
-                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
         else:
             #loop over exposures
             self.log.info('Using equation B1 from Miller et al. 2012 (1210.8201v1) '
@@ -1545,7 +1584,7 @@ class VISsimulator():
                             tmp = self.ghostModel.copy() * mx
 
                             #add the ghost
-                            self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                            self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
                         else:
                             #extended source, rename finemap
                             data = self.finemap[stype].copy()
@@ -1630,7 +1669,7 @@ class VISsimulator():
                                 tmp *= (self.ghostMax * mx)
 
                                 #add the ghost
-                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
 
                     else:
                         #object not on the screen, however its ghost image can be...
@@ -1658,7 +1697,7 @@ class VISsimulator():
                                 tmp = self.ghostModel.copy() * np.max(data)
 
                                 #add the ghost
-                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
                             else:
                                 #galaxy
                                 if obj[2] < self.information['ghostCutoff']:
@@ -1722,7 +1761,7 @@ class VISsimulator():
                                     tmp *= (self.ghostMax * mx)
 
                                     #add the ghost
-                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset])
+                                    self.overlayToCCD(tmp, [obj[0], obj[1] + self.ghostOffset], image=False)
 
         self.log.info('%i objects were place on the detector' % visible)
         print '%i objects were place on the detector' % visible
@@ -1871,7 +1910,6 @@ class VISsimulator():
         self.image += residual
 
         if self.cosmicRays:
-            #self.imagenoCR[ self.imagenoCR < 0.0] = 0.0
             self.imagenoCR = np.random.poisson(np.rint(self.imagenoCR)).astype(np.float64)
 
 
@@ -2201,6 +2239,8 @@ class VISsimulator():
             if self.ghosts:
                 self._loadGhostModel()
                 self.addObjectsAndGhosts()
+                self.writeFITSfile(self.ghost, 'ghost' + self.information['output'])
+                self.image += self.ghost
             else:
                 self.addObjects()
 
@@ -2317,8 +2357,8 @@ def processArgs(printHelp=False):
                       help='Debugging mode on')
     parser.add_option('-t', '--test', dest='test', action='store_true',
                       help='Run unittest')
-    parser.add_option('-f', '--fixed', dest='fixed', action='store_true',
-                      help='Use a fixed seed for the random number generators')
+    parser.add_option('-f', '--fixed', dest='fixed', help='Use a fixed seed for the random number generators',
+                      metavar='int')
     if printHelp:
         parser.print_help()
     else:

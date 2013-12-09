@@ -15,11 +15,47 @@ import numpy as np
 import pyfits as pf
 from astropy.stats import sigma_clip
 from support import files as fileIO
-from statsmodels.nonparametric.kde import KDEUnivariate
 from astropy.modeling import models, fitting
 from skimage.morphology import reconstruction, disk, binary_opening
 from scipy.ndimage import gaussian_filter
 from skimage.filter.rank import entropy
+from sklearn.neighbors import KernelDensity
+from scipy.stats import gaussian_kde
+from statsmodels.nonparametric.kde import KDEUnivariate
+from statsmodels.nonparametric.kernel_density import KDEMultivariate
+from sklearn.grid_search import GridSearchCV
+
+
+def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
+    """Kernel Density Estimation with Scipy"""
+    # Note that scipy weights its bandwidth by the covariance of the
+    # input data.  To make the results comparable to the other methods,
+    # we divide the bandwidth by the sample standard deviation here.
+    kde = gaussian_kde(x, bw_method=bandwidth / x.std(ddof=1), **kwargs)
+    return kde.evaluate(x_grid)
+
+
+def kde_statsmodels_u(x, x_grid, bandwidth=0.2, **kwargs):
+    """Univariate Kernel Density Estimation with Statsmodels"""
+    kde = KDEUnivariate(x)
+    kde.fit(bw=bandwidth, **kwargs)
+    return kde.evaluate(x_grid)
+
+
+def kde_statsmodels_m(x, x_grid, bandwidth=0.2, **kwargs):
+    """Multivariate Kernel Density Estimation with Statsmodels"""
+    kde = KDEMultivariate(x, bw=bandwidth * np.ones_like(x),
+                          var_type='c', **kwargs)
+    return kde.pdf(x_grid)
+
+
+def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs):
+    """Kernel Density Estimation with Scikit-learn"""
+    kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
+    kde_skl.fit(x[:, np.newaxis])
+    # score_samples() returns the log-likelihood of the samples
+    log_pdf = kde_skl.score_samples(x_grid[:, np.newaxis])
+    return np.exp(log_pdf)
 
 
 def plotStatistcs(data):
@@ -29,10 +65,19 @@ def plotStatistcs(data):
 
     :return: None
     """
+    #search for best bandwidth
+    # print 'searching for the best KDE bandwidth'
+    # grid = GridSearchCV(KernelDensity(),
+    #                     {'bandwidth': np.linspace(0.1, 1.0, 15)}, n_jobs=-1,
+    #                     cv=20) # 20-fold cross-validation
+    # grid.fit(data.copy())
+    # print grid.best_params_
     #derive KDE
-    kd = KDEUnivariate(data.copy().astype(np.float64))
-    kd.fit(adjust=3)
-    #kd.fit(kernel='biw', fft=False)
+    print 'deriving KDE'
+    x_grid = np.linspace(data.min(), data.max(), 200)
+    #pdf = kde_sklearn(data.copy(), x_grid, bandwidth=grid.best_params_['bandwidth'])
+    #pdf = kde_sklearn(data.copy(), x_grid)
+    pdf = kde_statsmodels_u(data.copy().astype(np.float64), x_grid, bandwidth=1.5)
 
     #plot data
     fig, axarr = plt.subplots(1, 2, sharey=True)
@@ -44,7 +89,7 @@ def plotStatistcs(data):
     ax2.set_title('Models')
 
     d = ax1.hist(data, bins=np.linspace(data.min(), data.max()), normed=True, alpha=0.7)
-    ax1.plot(kd.support, kd.density, 'r-', label='Gaussian KDE')
+    ax1.plot(x_grid, pdf, 'r-', label='Gaussian KDE')
 
     # Gaussian fit
     x = [0.5 * (d[1][i] + d[1][i+1]) for i in xrange(len(d[1])-1)]
@@ -54,7 +99,7 @@ def plotStatistcs(data):
     g = f2(g_init, x, y)
 
     ax2.plot(x, g(x), 'b-', label='Gaussian Fit')
-    ax2.plot(kd.support, kd.density, 'r-', label='Gaussian KDE', alpha=0.7)
+    ax2.plot(x_grid, pdf, 'r-', label='Gaussian KDE', alpha=0.7)
 
     ax1.set_ylabel('PDF')
 

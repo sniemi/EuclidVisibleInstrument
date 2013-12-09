@@ -217,7 +217,8 @@ def generateCatalog(**kwargs):
         fh.close()
 
 
-def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=26000, ymax=26000):
+def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496,
+                                xmax=26000, ymax=26000, output='starsOnly.dat'):
     """
     Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
 
@@ -262,7 +263,7 @@ def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=
 
     mag = drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
 
-    fh = open('starsOnly.dat', 'w')
+    fh = open(output, 'w')
     fh.write('#   1 X                Object position along x                                    [pixel]\n')
     fh.write('#   2 Y                Object position along y                                    [pixel]\n')
     fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
@@ -273,7 +274,7 @@ def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496, xmax=
         fh.write('%f %f %f %i %f \n' % (x, y, m, 0, 0.0))
     fh.close()
 
-    plotCatalog('starsOnly.dat')
+    plotCatalog(output)
 
 
 def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=26000, ymax=26000,
@@ -420,9 +421,12 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
     #plotCatalog('fullFoV0.dat')
 
-    CatalogueBachallSoneira()
+    #CatalogueBachallSoneira()
 
-#    starCatalogueBachallSoneira(b=25)
+    #starCatalogueBachallSoneira(b=25, output='starsOnly.dat')
+    starCatalogueBachallSoneira(b=25, output='starsOnly1.dat')
+    starCatalogueBachallSoneira(b=25, output='starsOnly2.dat')
+    starCatalogueBachallSoneira(b=25, output='starsOnly3.dat')
 
     #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
     #

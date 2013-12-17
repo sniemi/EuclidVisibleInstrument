@@ -6,7 +6,7 @@ This script can be used to convert lab data to FITS files.
 :requires: matplotlib
 :requires: VISsim-Python
 
-:version: 0.1
+:version: 0.2
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -22,11 +22,9 @@ matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import numpy as np
-import pyfits as pf
-import os, time, sys
-import glob as g
+import os
 from support import files as fileIO
-from optparse import OptionParser
+
 
 
 def readBinaryFiles(file, dimensions=(100, 100), saveFITS=True, output='tmp.fits'):
@@ -87,6 +85,32 @@ def convertAllBinsToFITS(suffix='.bin'):
                         plotImage(i, tmp.replace('.fits', '.pdf'))
 
 
+def convertMatlabToFITS(suffix='.mat'):
+    """
+    Converts all matlab files with a given suffix within the current working directory to the FITS format.
+    Uses SciPy.io to read the matlab files.
+
+    :return: None
+    """
+    import scipy.io
+
+    for root, dirs, files in os.walk(os.getcwd()):
+        print 'Root directory to process is %s \n' % root
+        for f in files:
+            #only process files that end with the suffix
+            if f.endswith(suffix):
+                tmp = root+'/'+f.replace(' ', '').replace(suffix, '.fits')
+                #only process if the FITS file does not exist
+                if not os.path.isfile(tmp):
+                    input = root+'/'+f
+                    print 'Processing file', input
+                    i = scipy.io.loadmat(input)['PSF']
+
+                    if i is not None:
+                        fileIO.writeFITS(i, tmp, int=False)
+                        plotImage(i, tmp.replace('.fits', '.pdf'))
+
+
 def plotImage(image, output):
     """
     A simple script to plot the imaging data.
@@ -108,4 +132,5 @@ def plotImage(image, output):
 
 
 if __name__ == '__main__':
-    convertAllBinsToFITS(suffix='.bim')
+#    convertAllBinsToFITS(suffix='.bim')
+    convertMatlabToFITS()

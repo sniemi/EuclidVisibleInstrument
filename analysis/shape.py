@@ -13,7 +13,7 @@ Simple class to measure quadrupole moments and ellipticity of an object.
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.45
+:version: 0.46
 """
 import math, os, datetime, unittest
 import numpy as np
@@ -273,6 +273,7 @@ class shapeMeasurement():
 
         # The squared radius R2 in um2
         R2 = quad['Qxx'] * self.settings['sampling']**2 + quad['Qyy'] * self.settings['sampling']**2
+        R2arcsec = R2 * (self.settings['pixelSize'] / self.settings['platescale'])**2
 
         if self.settings['debug']:
             self.writeFITS(gaussian['Gaussian'], 'GaussianWeightingFunction.fits')
@@ -282,6 +283,7 @@ class shapeMeasurement():
                    e1=quad['e1'], e2=quad['e2'],
                    ellipticity=quad['ellipticity'],
                    R2=R2,
+                   R2arcsec=R2arcsec,
                    GaussianWeighted=GaussianWeighted,
                    a=quad['a'], b=quad['b'])
         return out

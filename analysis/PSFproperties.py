@@ -325,7 +325,38 @@ def peakFraction(file='data/psf12x.fits', radius=0.65, oversample=12):
     log.info('Run finished...\n\n\n')
 
 
+def shapeComparisonToAST(oversample=3.):
+    """
+    To calculate shapes from AST PSFs.
+
+    One of the actions from the PLM-SRR was 8941 (RID No: ENG-219), with the
+    following wording:
+    ASFT shall provide to the VIS team a PSF profile with associated R2
+    with the sampling set to 4 microns and the VIS team will check that when
+    applying the R2 processing the result is identical, to double check that
+    the process is correct.
+    """
+    log = lg.setUpLogger('delete.log')
+
+    files = glob.glob('*.fits')
+    files = sorted(files)
+
+    for file in files:
+        data = pf.getdata(file)
+
+        settings = dict(sampling=1.0/oversample, itereations=20)
+        sh = shape.shapeMeasurement(data, log, **settings)
+        reference = sh.measureRefinedEllipticity()
+
+        R2 = reference['R2']  #in pixels
+        R2a = reference['R2arcsec']
+
+        print file, R2, R2a
+
+
 if __name__ == '__main__':
     #FoVanalysis()
     #encircledEnergy()
-    peakFraction()
+    #peakFraction()
+
+    shapeComparisonToAST()

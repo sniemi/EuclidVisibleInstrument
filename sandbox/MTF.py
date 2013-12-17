@@ -105,7 +105,8 @@ def circular2DGaussian(array_size, sigma):
 
     #gaussian
     exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
-    Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
+    #Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
+    Gaussian = np.exp(-exponent) / np.sqrt(2. * math.pi * sigma*sigma)
 
     return Gaussian
 
@@ -272,20 +273,18 @@ def GaussianAnimation(array_shape=(512, 512), frames=15):
     plt.close()
 
 
-def requirement(alpha=0.2, w=12.9):
+def requirement(alpha=0.2, w=2.):
     """
     Plots the requirements, both for PSF and MTF and compares them.
 
-    A fudge factor is required... should be pi / 2., but power laws are scale invariant so it doesn't matter.
-
     :param alpha: power law slope
-    :param w: fudge factor (wavenumber)
+    :param w: wavenumber
     :return: None
     """
     #from MTF
     wave = [550, 750, 900]
     mtf = np.asarray([0.3, 0.35, 0.4])
-    forGaussian = np.sqrt(- np.log(mtf) * 16 * np.log(2) / w**2)
+    forGaussian = np.sqrt(- np.log(mtf) * 4 * np.log(2) / np.pi**2 / w**2)
 
     # fit
     fitfunc = lambda p, x: p[0] * x ** p[1]
@@ -299,13 +298,12 @@ def requirement(alpha=0.2, w=12.9):
     # compute the best fit function from the best fit parameters
     corrfit = fitfunc(fit, x)
 
-
-    plt.plot(x, y, label=r'$\alpha = - %.3f$' % alpha)
-    plt.plot(wave, forGaussian, 'rs', label='MTFs')
-    plt.plot(x, corrfit, 'r--', label=r'Bestfit: $\alpha \sim %.3f $' % (fit[1]))
+    plt.plot(x, y, label=r'PERD: $\alpha = - %.1f$' % alpha)
+    plt.plot(wave, forGaussian, 'rs', label='MTF Requirement')
+    plt.plot(x, corrfit, 'r--', label=r'Fit: $\alpha \sim %.3f $' % (fit[1]))
 
     plt.xlabel('Wavelength [nm]')
-    plt.ylabel('FWHM [arbitrary]')
+    plt.ylabel('FWHM [Arbitrary, u=%i]' % w)
     plt.legend(shadow=True, fancybox=True, numpoints=1)
     plt.savefig('requirementAlpha.pdf')
     plt.close()
@@ -330,12 +328,12 @@ def compareAnalytical(array_shape=(256, 256), nyq=16.):
     This is only valid for Gaussian PSFs.
 
     :param array_shape:
-    :param nyq: cutout frequency (Nyquist = 4?)
+    :param nyq: cutout frequency (16)
 
     :return: None
     """
-    w = np.pi / 2.
-    w /= (nyq / 4.)
+    #inverse of the nyquist as defined 1/w**2
+    w = 1. / nyq
 
     res = []
     sigma = np.logspace(-0.55, 0.75, 50)
@@ -351,11 +349,11 @@ def compareAnalytical(array_shape=(256, 256), nyq=16.):
 
     res = np.asarray(res)
 
-    analytical = np.sqrt(- np.log(res.copy()) * 16 * np.log(2) / w**2)
+    analytical = np.sqrt(- np.log(res.copy()) * 4 * np.log(2) / np.pi**2 / w**2)
 
     plt.title('Gaussian PSF')
-    plt.plot(res, FWHM(sigma), 'r-', label=r'numerical, $\nu \sim %.2f$' % (array_shape[1] / nyq))
-    plt.plot(res, analytical, 'b--', label=r'analytical, $\omega \sim %.3f$' % w)
+    plt.plot(res, FWHM(sigma), 'r-', label=r'numerical, $\nu \sim %i$' % (array_shape[1]/nyq))
+    plt.plot(res, analytical, 'b--', label=r'analytical, $\omega \sim %i$' % nyq)
 
     plt.ylabel('FWHM [arbitrary]')
     plt.xlabel('MTF [normalized]')
@@ -366,7 +364,7 @@ def compareAnalytical(array_shape=(256, 256), nyq=16.):
 
 
 if __name__ == '__main__':
-    #requirement()
-    compareAnalytical()
+    requirement()
+    #compareAnalytical()
     #GaussianAnimation()
     #Example()

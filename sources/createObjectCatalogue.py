@@ -218,9 +218,14 @@ def generateCatalog(**kwargs):
 
 
 def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496,
-                                xmax=26000, ymax=26000, output='starsOnly.dat'):
+                                xmax=26000, ymax=29000, output='starsOnly.dat'):
     """
     Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
+
+    For a full focal plane the default values should be fine. A full focal plane covers about 0.496 square degrees
+    and in x and y pixels:
+    5*(4096 + (1.643*1000/12.)) + 4096 and
+    5*(4132 + (8.116*1000/12.)) + 4132, respectively.
 
     :param magnitudeLimit: limiting magnitude in V-band
     :type magnitudeLimit: int

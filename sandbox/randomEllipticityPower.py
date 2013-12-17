@@ -9,6 +9,7 @@ matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 
 def azimuthalAverage(image, center=None, stddev=False, returnradii=False, return_nr=False,
@@ -99,6 +100,81 @@ def randomEllipticityField(n):
     return e
 
 
+def circular2DGaussian(array_size, sigma):
+    """
+    Create a circular symmetric Gaussian centered on x, y.
+
+    :param sigma: standard deviation of the Gaussian, note that sigma_x = sigma_y = sigma
+    :type sigma: float
+
+    :return: circular Gaussian 2D
+    :rtype: ndarray
+    """
+    x = array_size[1] / 2.
+    y = array_size[0] / 2.
+
+    #x and y coordinate vectors
+    Gyvect = np.arange(1, array_size[0] + 1)
+    Gxvect = np.arange(1, array_size[1] + 1)
+
+    #meshgrid
+    Gxmesh, Gymesh = np.meshgrid(Gxvect, Gyvect)
+
+    #normalizers
+    sigmax = 1. / (2. * sigma**2)
+    sigmay = sigmax #same sigma in both directions, thus same normalizer
+
+    #gaussian
+    exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
+    #Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
+    Gaussian = np.exp(-exponent) / np.sqrt(2. * math.pi * sigma*sigma)
+
+    return Gaussian
+
+
+def knownPowerSpectrum(n, plot=True):
+    gaussian = np.random.normal(loc=0., scale=1., size=(n, n))
+    fG = np.fft.fft2(gaussian)
+
+    #P = circular2DGaussian((n, n), n/2.)
+
+    # #triangle
+    # def triangle(length, amplitude=1.):
+    #     section = length // 2
+    #     x = np.linspace(0, amplitude, section)
+    #     return np.r_[x, x[-1::-1]]
+    # tmp = triangle(n)
+    # XI, YI = np.meshgrid(tmp, tmp)
+    # P = XI + YI
+
+
+    #x and y coordinate vectors
+    x = np.arange(1, n/2 + 1)
+    Gxvect = np.r_[x, x[-1::-1]]
+    Gxmesh, Gymesh = np.meshgrid(Gxvect, Gxvect)
+    P = ((Gxmesh - n/2.)**2 + (Gymesh - n/2.)**2)
+
+    #x = np.linspace(0, 10, n/2)
+    #XI, YI = np.meshgrid(x, x)
+    #P = np.zeros(gaussian.shape)
+    #P[:n/2, :n/2] = XI + YI
+    #P[:n/2, n/2:] = YI
+    #P[n/2:, :n/2] = XI
+    #P[n/2:, n / 2:] = XI
+
+    if plot:
+        fig = plt.figure()
+        ax1 = fig.add_subplot(111)
+        ax1.imshow(P, origin='lower', interpolation='none')
+        plt.savefig('shape.png')
+
+    #multiply the Fourier of the gaussian random field with the shape and FFT back
+    multi = fG * P
+    field = np.fft.ifft2(multi)
+
+    return field
+
+
 def powerSpectrum(shearField, n):
     """
     From shear field to 2D and binned 1D power spectra.
@@ -109,6 +185,7 @@ def powerSpectrum(shearField, n):
     """
     #2D FFT of the shear field
     e_FFT = np.fft.fft2(shearField)
+    e_FFT = np.fft.fftshift(e_FFT)
 
     #make a 2D array of the position angles
     xposition = np.tile(np.arange(n)+1, (n, 1))
@@ -133,7 +210,7 @@ def powerSpectrum(shearField, n):
 
     #rotate is now the 2D power spectrum in l_x,l_y space
     #now need to bin the rotate in |l| in azimuthal (angular) bins about the central value
-    rd, profile = azimuthalAverage(e_mod, binsize=2., returnradii=True)
+    rd, profile = azimuthalAverage(e_mod, binsize=10., returnradii=True)
 
     return e_FFT, rd, profile
 
@@ -162,11 +239,12 @@ def plot(e, e_FFT, rd, profile, output='test.pdf'):
 
 
 def doAll(n):
-    e = randomEllipticityField(n)
+    #e = randomEllipticityField(n)
+    e = knownPowerSpectrum(n)
     power, rd, profile = powerSpectrum(e, n)
     plot(e, power, rd, profile)
 
 
 if __name__ == '__main__':
-    n = 512
+    n = 2048
     doAll(n)

@@ -1,3 +1,6 @@
+"""
+Simple script to generate a power spectrum from shear field
+"""
 import matplotlib
 matplotlib.rc('text', usetex=True)
 matplotlib.rcParams['font.size'] = 17
@@ -8,8 +11,8 @@ matplotlib.rcParams['legend.handlelength'] = 3
 matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-import math
 
 
 def azimuthalAverage(image, center=None, stddev=False, returnradii=False, return_nr=False,
@@ -69,9 +72,10 @@ def azimuthalAverage(image, center=None, stddev=False, returnradii=False, return
     if stddev:
         radial_prof = np.array([image.flat[whichbin == b].std() for b in xrange(1, nbins + 1)])
     else:
+        #radial_prof = np.array([(image * weights).flat[whichbin == b].sum() / float(weights.flat[whichbin == b].sum())
+        #                        / float(binsize) for b in xrange(1, nbins + 1)])
         radial_prof = np.array([(image * weights).flat[whichbin == b].sum() / float(weights.flat[whichbin == b].sum())
-                                / float(binsize) for b in xrange(1, nbins + 1)])
-
+                                for b in xrange(1, nbins + 1)])
     if interpnan:
         radial_prof = np.interp(bin_centers, bin_centers[radial_prof == radial_prof],
                             radial_prof[radial_prof == radial_prof], left=left, right=right)
@@ -100,72 +104,42 @@ def randomEllipticityField(n):
     return e
 
 
-def circular2DGaussian(array_size, sigma):
+def knownPowerSpectrum(n, loc=0., scale=2., plot=True):
     """
-    Create a circular symmetric Gaussian centered on x, y.
-
-    :param sigma: standard deviation of the Gaussian, note that sigma_x = sigma_y = sigma
-    :type sigma: float
-
-    :return: circular Gaussian 2D
-    :rtype: ndarray
+    Generate a Gaussian Random Field with a power law power (in l) spectrum.
     """
-    x = array_size[1] / 2.
-    y = array_size[0] / 2.
-
-    #x and y coordinate vectors
-    Gyvect = np.arange(1, array_size[0] + 1)
-    Gxvect = np.arange(1, array_size[1] + 1)
-
-    #meshgrid
-    Gxmesh, Gymesh = np.meshgrid(Gxvect, Gyvect)
-
-    #normalizers
-    sigmax = 1. / (2. * sigma**2)
-    sigmay = sigmax #same sigma in both directions, thus same normalizer
-
-    #gaussian
-    exponent = (sigmax * (Gxmesh - x)**2 + sigmay * (Gymesh - y)**2)
-    #Gaussian = np.exp(-exponent) / (2. * math.pi * sigma*sigma)
-    Gaussian = np.exp(-exponent) / np.sqrt(2. * math.pi * sigma*sigma)
-
-    return Gaussian
-
-
-def knownPowerSpectrum(n, plot=True):
-    gaussian = np.random.normal(loc=0., scale=1., size=(n, n))
+    #gaussian random field around zero with sigma=1 and FFT it
+    gaussian = np.random.normal(loc=loc, scale=scale, size=(n, n))
     fG = np.fft.fft2(gaussian)
 
-    #P = circular2DGaussian((n, n), n/2.)
-
-    # #triangle
-    # def triangle(length, amplitude=1.):
-    #     section = length // 2
-    #     x = np.linspace(0, amplitude, section)
-    #     return np.r_[x, x[-1::-1]]
-    # tmp = triangle(n)
-    # XI, YI = np.meshgrid(tmp, tmp)
-    # P = XI + YI
-
-
+    #generate a cone surface
     #x and y coordinate vectors
-    x = np.arange(1, n/2 + 1)
-    Gxvect = np.r_[x, x[-1::-1]]
-    Gxmesh, Gymesh = np.meshgrid(Gxvect, Gxvect)
-    P = ((Gxmesh - n/2.)**2 + (Gymesh - n/2.)**2)
+    Gyvect = np.arange(1, n + 1)
+    Gxvect = np.arange(1, n + 1)
+    #meshgrid
+    Gxmesh, Gymesh = np.meshgrid(Gxvect, Gyvect)
+    P = n - np.sqrt((Gxmesh - n/2.)**2 + (Gymesh - n/2.)**2)
 
-    #x = np.linspace(0, 10, n/2)
-    #XI, YI = np.meshgrid(x, x)
-    #P = np.zeros(gaussian.shape)
-    #P[:n/2, :n/2] = XI + YI
-    #P[:n/2, n/2:] = YI
-    #P[n/2:, :n/2] = XI
-    #P[n/2:, n / 2:] = XI
+    #normalise to unity
+    P -= P.min()
+    P /= P.max()
 
     if plot:
-        fig = plt.figure()
-        ax1 = fig.add_subplot(111)
-        ax1.imshow(P, origin='lower', interpolation='none')
+        inpslope = (np.max(P) - np.min(P)) / np.sqrt(2048. / n) * scale * 2. * np.pi**2
+        print 'input slope:', inpslope
+
+        fig = plt.figure(figsize=(15,8))
+        ax1 = fig.add_subplot(131, projection='3d')
+        ax2 = fig.add_subplot(132)
+        ax3 = fig.add_subplot(133)
+
+        ax1.plot_surface(Gxmesh, Gymesh, P, rstride=250, cstride=250)
+        ax2.imshow(P, origin='lower', interpolation='none')
+        ax3.plot(P[np.unravel_index(P.argmax(), P.shape)[0], :], 'r-')
+        ax3.plot(P[:, np.unravel_index(P.argmax(), P.shape)[1]], 'b--')
+
+        ax3.set_xlim(0, n)
+
         plt.savefig('shape.png')
 
     #multiply the Fourier of the gaussian random field with the shape and FFT back
@@ -201,6 +175,7 @@ def powerSpectrum(shearField, n):
     #inverse back to real space -> E + iB
     e_IFFT = np.fft.ifft(rotate)
     e_real = np.real(e_IFFT)
+    #b = np.imag(e_IFFT)  #could also check the b-mode
 
     # FFT the E-mode
     e_real_fft = np.fft.fft2(e_real)
@@ -210,7 +185,7 @@ def powerSpectrum(shearField, n):
 
     #rotate is now the 2D power spectrum in l_x,l_y space
     #now need to bin the rotate in |l| in azimuthal (angular) bins about the central value
-    rd, profile = azimuthalAverage(e_mod, binsize=10., returnradii=True)
+    rd, profile = azimuthalAverage(e_mod, binsize=5, returnradii=True)
 
     return e_FFT, rd, profile
 
@@ -219,6 +194,11 @@ def plot(e, e_FFT, rd, profile, output='test.pdf'):
     """
     Plot results
     """
+    #linear fit to the C(l), exclude beginning and end
+    fit = np.polyfit(rd[10:-10], profile[10:-10], 1, full=True)
+    p = np.poly1d(fit[0])
+    print 'derived slope:', fit[0][0]
+
     fig = plt.figure(figsize=(16, 7))
     ax1 = fig.add_subplot(131)
     ax2 = fig.add_subplot(132)
@@ -228,12 +208,18 @@ def plot(e, e_FFT, rd, profile, output='test.pdf'):
     ax2.set_title('2D Power Spectrum')
     ax3.set_title('1D Binned Power Spectrum')
 
-    ax1.imshow(np.abs(e), origin='lower', interpolation='none')
-    ax2.imshow(np.abs(e_FFT), origin='lower', interpolation='none')
-    ax3.plot(rd, profile)
+    e = np.abs(e)
+    e_FFT = np.abs(e_FFT)
+
+    ax1.imshow(e, origin='lower', interpolation='none', vmin=np.min(e)*1.1, vmax=np.max(e)*0.9)
+    ax2.imshow(e_FFT, origin='lower', interpolation='none', vmin=np.min(e_FFT)*1.1, vmax=np.max(e_FFT)*0.9)
+    ax3.plot(rd, p(rd), 'r-', label='fit')
+    ax3.plot(rd, profile, label='power')
 
     ax3.set_xlabel('l')
     ax3.set_ylabel('C(l)')
+
+    ax3.set_xlim(0, np.floor(np.sqrt((e_FFT.shape[0]/2.)**2 + (e_FFT.shape[1]/2.)**2)-1))
 
     plt.savefig(output)
 
@@ -246,5 +232,6 @@ def doAll(n):
 
 
 if __name__ == '__main__':
-    n = 2048
+    n = 2048 #size of the array (n, n)
+
     doAll(n)

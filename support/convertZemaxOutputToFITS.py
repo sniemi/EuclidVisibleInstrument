@@ -1,4 +1,7 @@
 """
+File Conversions
+================
+
 A simple script to convert Zemax text file output to FITS format.
 Copies the meta to the header.
 

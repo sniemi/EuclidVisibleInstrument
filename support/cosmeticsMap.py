@@ -1,4 +1,7 @@
 """
+CCD Cosmetics Maps
+==================
+
 A simple script to generate a random location cosmetics map.
 
 :requires: NumPy

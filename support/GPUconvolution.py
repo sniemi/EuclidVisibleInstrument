@@ -1,4 +1,7 @@
 """
+GPU Convolution
+===============
+
 This file contains functions to run convolutions on an NVIDIA GPU using CUDA.
 
 :requires: PyCUDA

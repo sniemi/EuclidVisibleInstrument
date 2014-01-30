@@ -196,11 +196,11 @@ please report any weird or inconsistent simulations to the author.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.6)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1 and 1.7.1)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1, 1.7.1, and 1.8.0)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">numexpr (tested with 2.0.1)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1 and 0.12)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1, 0.12, and 0.13)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
 </tr>
@@ -274,7 +274,7 @@ sys         0m9.535s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.30</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.32</td>
 </tr>
 </tbody>
 </table>
@@ -320,7 +320,11 @@ sys         0m9.535s</pre>
       the CCD, while cosmic rays can come from any direction and penetrate to any depth).
 1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
       were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
-1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.</pre>
+1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information['mode']
+1.31: now a single FOLDER variable at the beginning of the program that should be set to
+      point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
+      more suitable for the correct input model.
+1.32: option to fix the random number generator seed using -f flag.</pre>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -579,8 +583,8 @@ defined by the argument max.</p>
 
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.overlayToCCD">
-<tt class="descname">overlayToCCD</tt><big>(</big><em>data</em>, <em>obj</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.overlayToCCD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overlay data from a source object onto the self.image.</p>
+<tt class="descname">overlayToCCD</tt><big>(</big><em>data</em>, <em>obj</em>, <em>image=True</em><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.overlayToCCD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overlay data from a source object onto the self.image if image = True, else t self.ghost</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -600,49 +604,50 @@ defined by the argument max.</p>
 <tt class="descname">processConfigs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.processConfigs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes configuration information and save the information to a dictionary self.information.</p>
 <p>The configuration file may look as follows:</p>
-<div class="highlight-python"><pre>[TEST]
-quadrant = 0
-CCDx = 0
-CCDy = 0
-CCDxgap = 1.643
-CCDygap = 8.116
-xsize = 2048
-ysize = 2066
-prescanx = 50
-ovrscanx = 20
-fullwellcapacity = 200000
-dark = 0.001
-readout = 4.5
-bias = 1000.0
-cosmic_bkgd = 0.182758225257
-e_ADU = 3.1
-injection = 150000.0
-magzero = 15182880871.225231
-exposures = 1
-exptime = 565.0
-rdose = 8.0e9
-RA = 145.95
-DEC = -38.16
-sourcelist = data/source_test.dat
-PSFfile = data/interpolated_psf.fits
-parallelTrapfile = data/cdm_euclid_parallel.dat
-serialTrapfil e= data/cdm_euclid_serial.dat
-cosmeticsFile = data/cosmetics.dat
-flatfieldfile = data/VISFlatField2percent.fits
-output = test.fits
-addSources = yes
-noise = yes
-cosmetics = no
-chargeInjectionx = no
-chargeInjectiony = no
-radiationDamage = yes
-cosmicRays = yes
-overscans = yes
-bleeding = yes
-flatfieldM = yes
-random = yes
-background = yes
-ghosts = no</pre>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[</span><span class="n">TEST</span><span class="p">]</span>
+<span class="n">quadrant</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDx</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDy</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CCDxgap</span> <span class="o">=</span> <span class="mf">1.643</span>
+<span class="n">CCDygap</span> <span class="o">=</span> <span class="mf">8.116</span>
+<span class="n">xsize</span> <span class="o">=</span> <span class="mi">2048</span>
+<span class="n">ysize</span> <span class="o">=</span> <span class="mi">2066</span>
+<span class="n">prescanx</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="n">ovrscanx</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">fullwellcapacity</span> <span class="o">=</span> <span class="mi">200000</span>
+<span class="n">dark</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="n">readout</span> <span class="o">=</span> <span class="mf">4.5</span>
+<span class="n">bias</span> <span class="o">=</span> <span class="mf">1000.0</span>
+<span class="n">cosmic_bkgd</span> <span class="o">=</span> <span class="mf">0.182758225257</span>
+<span class="n">e_ADU</span> <span class="o">=</span> <span class="mf">3.1</span>
+<span class="n">injection</span> <span class="o">=</span> <span class="mf">150000.0</span>
+<span class="n">magzero</span> <span class="o">=</span> <span class="mf">15182880871.225231</span>
+<span class="n">exposures</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">exptime</span> <span class="o">=</span> <span class="mf">565.0</span>
+<span class="n">rdose</span> <span class="o">=</span> <span class="mf">8.0e9</span>
+<span class="n">RA</span> <span class="o">=</span> <span class="mf">145.95</span>
+<span class="n">DEC</span> <span class="o">=</span> <span class="o">-</span><span class="mf">38.16</span>
+<span class="n">sourcelist</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">source_test</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">PSFfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">interpolated_psf</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">parallelTrapfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cdm_euclid_parallel</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">serialTrapfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cdm_euclid_serial</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">cosmeticsFile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">cosmetics</span><span class="o">.</span><span class="n">dat</span>
+<span class="n">flatfieldfile</span> <span class="o">=</span> <span class="n">data</span><span class="o">/</span><span class="n">VISFlatField2percent</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">fits</span>
+<span class="n">addSources</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">cosmetics</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">chargeInjectionx</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">chargeInjectiony</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">radiationDamage</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">cosmicRays</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">overscans</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">bleeding</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">flatfieldM</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">random</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">background</span> <span class="o">=</span> <span class="n">yes</span>
+<span class="n">ghosts</span> <span class="o">=</span> <span class="n">no</span>
+</pre></div>
 </div>
 <p>For explanation of each field, see /data/test.config. Note that if an input field does not exist,
 then the values are taken from the default instrument model as described in
@@ -653,7 +658,7 @@ a config file with a correct field name.</p>
 <dl class="method">
 <dt id="simulator.simulator.VISsimulator.readConfigs">
 <tt class="descname">readConfigs</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.readConfigs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads the config file information using configParser.</p>
+<dd><p>Reads the config file information using configParser and sets up a logger.</p>
 </dd></dl>
 
 <dl class="method">

@@ -104,7 +104,7 @@ def randomEllipticityField(n):
     return e
 
 
-def knownPowerSpectrum(n, loc=0., scale=2., plot=True):
+def linearPowerSpectrum(n, loc=0., scale=1.5, plot=True):
     """
     Generate a Gaussian Random Field with a power law power (in l) spectrum.
     """
@@ -125,8 +125,9 @@ def knownPowerSpectrum(n, loc=0., scale=2., plot=True):
     P /= P.max()
 
     if plot:
+        intercept = n * np.pi**2 / np.sqrt(2048. / n) * scale / np.sqrt(2)
         inpslope = (np.max(P) - np.min(P)) / np.sqrt(2048. / n) * scale * 2. * np.pi**2
-        print 'input slope:', inpslope
+        print 'input slope and intercept:', inpslope, intercept
 
         fig = plt.figure(figsize=(15,8))
         ax1 = fig.add_subplot(131, projection='3d')
@@ -140,13 +141,88 @@ def knownPowerSpectrum(n, loc=0., scale=2., plot=True):
 
         ax3.set_xlim(0, n)
 
-        plt.savefig('shape.png')
+        plt.savefig('linear.png')
 
     #multiply the Fourier of the gaussian random field with the shape and FFT back
     multi = fG * P
-    field = np.fft.ifft2(multi)
+    out = np.fft.ifft2(multi)
 
-    return field
+    if plot:
+        field = np.abs(out.copy())
+
+        fig = plt.figure(figsize=(15,8))
+        ax1 = fig.add_subplot(131, projection='3d')
+        ax2 = fig.add_subplot(132)
+        ax3 = fig.add_subplot(133)
+
+        ax1.plot_surface(Gxmesh, Gymesh, field, rstride=250, cstride=250)
+        ax2.imshow(field, origin='lower', interpolation='none')
+        ax3.plot(field[np.unravel_index(field.argmax(), field.shape)[0], :], 'r-')
+        ax3.plot(field[:, np.unravel_index(field.argmax(), field.shape)[1]], 'b--')
+
+        ax3.set_xlim(0, n)
+
+        plt.savefig('linearfield.png')
+
+    return out
+
+
+def flatPowerSpectrum(n, loc=0., scale=1.5, plot=True):
+    """
+    Generate a Gaussian Random Field with a power law power (in l) spectrum.
+    """
+    #gaussian random field around zero with sigma=1 and FFT it
+    gaussian = np.random.normal(loc=loc, scale=scale, size=(n, n))
+    fG = np.fft.fft2(gaussian)
+
+    #flat surface
+    P = np.ones((n, n))
+
+    if plot:
+        intercept = n * np.pi**2 / np.sqrt(1024. / n) * scale * 2
+        inpslope = (np.max(P) - np.min(P)) / np.sqrt(2048. / n) * scale * 2. * np.pi**2
+        print 'input slope and intercept:', inpslope, intercept
+
+        #meshgrid, needed for the plot
+        Gxvect = np.arange(1, n + 1)
+        Gxmesh, Gymesh = np.meshgrid(Gxvect, Gxvect)
+
+        fig = plt.figure(figsize=(15,8))
+        ax1 = fig.add_subplot(131, projection='3d')
+        ax2 = fig.add_subplot(132)
+        ax3 = fig.add_subplot(133)
+
+        ax1.plot_surface(Gxmesh, Gymesh, P, rstride=250, cstride=250)
+        ax2.imshow(P, origin='lower', interpolation='none')
+        ax3.plot(P[np.unravel_index(P.argmax(), P.shape)[0], :], 'r-')
+        ax3.plot(P[:, np.unravel_index(P.argmax(), P.shape)[1]], 'b--')
+
+        ax3.set_xlim(0, n)
+
+        plt.savefig('flat.png')
+
+    #multiply the Fourier of the gaussian random field with the shape and FFT back
+    multi = fG * P
+    out = np.fft.ifft2(multi)
+
+    if plot:
+        field = np.abs(out.copy())
+
+        fig = plt.figure(figsize=(15,8))
+        ax1 = fig.add_subplot(131, projection='3d')
+        ax2 = fig.add_subplot(132)
+        ax3 = fig.add_subplot(133)
+
+        ax1.plot_surface(Gxmesh, Gymesh, field, rstride=250, cstride=250)
+        ax2.imshow(field, origin='lower', interpolation='none')
+        ax3.plot(field[np.unravel_index(field.argmax(), field.shape)[0], :], 'r-')
+        ax3.plot(field[:, np.unravel_index(field.argmax(), field.shape)[1]], 'b--')
+
+        ax3.set_xlim(0, n)
+
+        plt.savefig('flatfield.png')
+
+    return out
 
 
 def powerSpectrum(shearField, n):
@@ -197,7 +273,7 @@ def plot(e, e_FFT, rd, profile, output='test.pdf'):
     #linear fit to the C(l), exclude beginning and end
     fit = np.polyfit(rd[10:-10], profile[10:-10], 1, full=True)
     p = np.poly1d(fit[0])
-    print 'derived slope:', fit[0][0]
+    print 'derived slope and intercept:', fit[0][0], fit[0][1]
 
     fig = plt.figure(figsize=(16, 7))
     ax1 = fig.add_subplot(131)
@@ -224,14 +300,29 @@ def plot(e, e_FFT, rd, profile, output='test.pdf'):
     plt.savefig(output)
 
 
-def doAll(n):
-    #e = randomEllipticityField(n)
-    e = knownPowerSpectrum(n)
+def doAllflat(n):
+    e = flatPowerSpectrum(n)
     power, rd, profile = powerSpectrum(e, n)
-    plot(e, power, rd, profile)
+    plot(e, power, rd, profile, output='flat.pdf')
+
+
+def doAlllinear(n):
+    e = linearPowerSpectrum(n)
+    power, rd, profile = powerSpectrum(e, n)
+    plot(e, power, rd, profile, output='linear.pdf')
+
+
+def doAllrandom(n):
+    e = randomEllipticityField(n)
+    power, rd, profile = powerSpectrum(e, n)
+    plot(e, power, rd, profile, output='random.pdf')
 
 
 if __name__ == '__main__':
     n = 2048 #size of the array (n, n)
 
-    doAll(n)
+    print '\n\nflat:'
+    doAllflat(n)
+
+    print '\n\nlinear:'
+    doAlllinear(n)

@@ -1,4 +1,7 @@
 """
+Image Manipulations
+===================
+
 Basic image manipulation algorithms such as Gaussian smoothing and free rebinning.
 
 :requires: NumPy

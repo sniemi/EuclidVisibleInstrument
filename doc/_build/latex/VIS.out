@@ -17,12 +17,12 @@
 \BOOKMARK [0][-]{chapter.5}{Creating Simulated Mock Images}{}% 17
 \BOOKMARK [1][-]{section.5.1}{Simulation tools}{chapter.5}% 18
 \BOOKMARK [2][-]{subsection.5.1.1}{The Euclid Visible Instrument Image Simulator}{section.5.1}% 19
-\BOOKMARK [3][-]{subsubsection*.60}{Dependencies}{subsection.5.1.1}% 20
-\BOOKMARK [3][-]{subsubsection*.61}{Testing}{subsection.5.1.1}% 21
-\BOOKMARK [3][-]{subsubsection*.62}{Benchmarking}{subsection.5.1.1}% 22
-\BOOKMARK [3][-]{subsubsection*.63}{Change Log}{subsection.5.1.1}% 23
-\BOOKMARK [3][-]{subsubsection*.64}{Future Work}{subsection.5.1.1}% 24
-\BOOKMARK [3][-]{subsubsection*.65}{Contact Information}{subsection.5.1.1}% 25
+\BOOKMARK [3][-]{subsubsection*.70}{Dependencies}{subsection.5.1.1}% 20
+\BOOKMARK [3][-]{subsubsection*.71}{Testing}{subsection.5.1.1}% 21
+\BOOKMARK [3][-]{subsubsection*.72}{Benchmarking}{subsection.5.1.1}% 22
+\BOOKMARK [3][-]{subsubsection*.73}{Change Log}{subsection.5.1.1}% 23
+\BOOKMARK [3][-]{subsubsection*.74}{Future Work}{subsection.5.1.1}% 24
+\BOOKMARK [3][-]{subsubsection*.75}{Contact Information}{subsection.5.1.1}% 25
 \BOOKMARK [2][-]{subsection.5.1.2}{Generating Mock Objects with IRAF}{section.5.1}% 26
 \BOOKMARK [0][-]{chapter.6}{Data reduction}{}% 27
 \BOOKMARK [1][-]{section.6.1}{Data reduction tools}{chapter.6}% 28
@@ -34,23 +34,32 @@
 \BOOKMARK [2][-]{subsection.6.2.4}{Testing the CTI Correction Algorithm}{section.6.2}% 34
 \BOOKMARK [2][-]{subsection.6.2.5}{Cosmic Ray Rejection}{section.6.2}% 35
 \BOOKMARK [2][-]{subsection.6.2.6}{Impact of Ghost Images}{section.6.2}% 36
-\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 37
-\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 38
-\BOOKMARK [2][-]{subsection.7.1.1}{Object finding and measuring ellipticity}{section.7.1}% 39
-\BOOKMARK [2][-]{subsection.7.1.2}{Measuring a shape of an object}{section.7.1}% 40
-\BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 41
-\BOOKMARK [2][-]{subsection.7.1.4}{CCD Spot Measurements}{section.7.1}% 42
-\BOOKMARK [2][-]{subsection.7.1.5}{Properties of the Point Spread Function}{section.7.1}% 43
-\BOOKMARK [2][-]{subsection.7.1.6}{Generating PSF Basis Sets}{section.7.1}% 44
-\BOOKMARK [2][-]{subsection.7.1.7}{PSF Fitting}{section.7.1}% 45
-\BOOKMARK [2][-]{subsection.7.1.8}{Impact of CTI Trailing on Shear Power Spectrum}{section.7.1}% 46
-\BOOKMARK [2][-]{subsection.7.1.9}{Non-linearity II: Model Transfer}{section.7.1}% 47
-\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 48
-\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 49
-\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 50
-\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 51
-\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 52
-\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 53
-\BOOKMARK [0][-]{chapter.11}{Indices and tables}{}% 54
-\BOOKMARK [0][-]{section*.219}{Python Module Index}{}% 55
-\BOOKMARK [0][-]{section*.220}{Index}{}% 56
+\BOOKMARK [2][-]{subsection.6.2.7}{Non-linearity II: Model Transfer}{section.6.2}% 37
+\BOOKMARK [2][-]{subsection.6.2.8}{Background Subtraction}{section.6.2}% 38
+\BOOKMARK [0][-]{chapter.7}{Data Analysis}{}% 39
+\BOOKMARK [1][-]{section.7.1}{VIS data analysis tools}{chapter.7}% 40
+\BOOKMARK [2][-]{subsection.7.1.1}{Object finding and measuring ellipticity}{section.7.1}% 41
+\BOOKMARK [2][-]{subsection.7.1.2}{Measuring a shape of an object}{section.7.1}% 42
+\BOOKMARK [2][-]{subsection.7.1.3}{Source finding}{section.7.1}% 43
+\BOOKMARK [2][-]{subsection.7.1.4}{CCD Spot Measurements}{section.7.1}% 44
+\BOOKMARK [2][-]{subsection.7.1.5}{Properties of the Point Spread Function}{section.7.1}% 45
+\BOOKMARK [2][-]{subsection.7.1.6}{Generating PSF Basis Sets}{section.7.1}% 46
+\BOOKMARK [2][-]{subsection.7.1.7}{PSF Fitting}{section.7.1}% 47
+\BOOKMARK [2][-]{subsection.7.1.8}{Impact of CTI Trailing on Shear Power Spectrum}{section.7.1}% 48
+\BOOKMARK [2][-]{subsection.7.1.9}{Saturated Imaging Area}{section.7.1}% 49
+\BOOKMARK [0][-]{chapter.8}{Charge Transfer Inefficiency}{}% 50
+\BOOKMARK [1][-]{section.8.1}{Fortran code for CTI}{chapter.8}% 51
+\BOOKMARK [0][-]{chapter.9}{Supporting methods and files}{}% 52
+\BOOKMARK [1][-]{section.9.1}{Objects}{chapter.9}% 53
+\BOOKMARK [1][-]{section.9.2}{Code}{chapter.9}% 54
+\BOOKMARK [0][-]{chapter.10}{Photometric Accuracy}{}% 55
+\BOOKMARK [0][-]{chapter.11}{Supporting Methods}{}% 56
+\BOOKMARK [1][-]{section.11.1}{Supporting Methods}{chapter.11}% 57
+\BOOKMARK [2][-]{subsection.11.1.1}{CCD Charge Bleeding}{section.11.1}% 58
+\BOOKMARK [2][-]{subsection.11.1.2}{File Conversions}{section.11.1}% 59
+\BOOKMARK [2][-]{subsection.11.1.3}{CCD Cosmetics Maps}{section.11.1}% 60
+\BOOKMARK [2][-]{subsection.11.1.4}{Cosmic Rays}{section.11.1}% 61
+\BOOKMARK [2][-]{subsection.11.1.5}{Image Manipulations}{section.11.1}% 62
+\BOOKMARK [0][-]{chapter.12}{Indices and tables}{}% 63
+\BOOKMARK [0][-]{section*.281}{Python Module Index}{}% 64
+\BOOKMARK [0][-]{section*.282}{Index}{}% 65

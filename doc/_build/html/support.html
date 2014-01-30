@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Supporting Methods &mdash; VIS 1.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="VIS 1.1 documentation" href="index.html" />
+    <link rel="prev" title="VIS data analysis tools" href="analysis.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="VIS data analysis tools"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Supporting Methods</a><ul>
+<li><a class="reference internal" href="#ccd-charge-bleeding">CCD Charge Bleeding</a></li>
+<li><a class="reference internal" href="#file-conversions">File Conversions</a></li>
+<li><a class="reference internal" href="#ccd-cosmetics-maps">CCD Cosmetics Maps</a></li>
+<li><a class="reference internal" href="#cosmic-rays">Cosmic Rays</a></li>
+<li><a class="reference internal" href="#image-manipulations">Image Manipulations</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="analysis.html"
+                        title="previous chapter">VIS data analysis tools</a></p>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-support.bleedingtest">
+<span id="supporting-methods"></span><h1>Supporting Methods<a class="headerlink" href="#module-support.bleedingtest" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ccd-charge-bleeding">
+<h2>CCD Charge Bleeding<a class="headerlink" href="#ccd-charge-bleeding" title="Permalink to this headline">¶</a></h2>
+<p>A simple script to test how to simulate CCD bleeding effects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:smn2&#37;&#52;&#48;mssl&#46;ucl&#46;ac&#46;uk">smn2<span>&#64;</span>mssl<span>&#46;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="support.bleedingtest.writeFITSfile">
+<tt class="descclassname">support.bleedingtest.</tt><tt class="descname">writeFITSfile</tt><big>(</big><em>data</em>, <em>filename</em>, <em>unsigned16bit=False</em><big>)</big><a class="headerlink" href="#support.bleedingtest.writeFITSfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes out a simple FITS file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to be written</li>
+<li><strong>filename</strong> (<em>str</em>) &#8211; name of the output file</li>
+<li><strong>unsigned16bit</strong> (<em>bool</em>) &#8211; whether to scale the data using bzero=32768</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-support.convertZemaxOutputToFITS"></span><div class="section" id="file-conversions">
+<h2>File Conversions<a class="headerlink" href="#file-conversions" title="Permalink to this headline">¶</a></h2>
+<p>A simple script to convert Zemax text file output to FITS format.
+Copies the meta to the header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="support.convertZemaxOutputToFITS.convertToFITS">
+<tt class="descclassname">support.convertZemaxOutputToFITS.</tt><tt class="descname">convertToFITS</tt><big>(</big><em>filename</em>, <em>output</em>, <em>overwrite=True</em><big>)</big><a class="headerlink" href="#support.convertZemaxOutputToFITS.convertToFITS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts Zemax output TXT file to FITS format. Stores the
+extra information from the Zemax output to the FITS header.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<em>str</em>) &#8211; name of the Zemax output txt file</li>
+<li><strong>output</strong> (<em>str</em>) &#8211; name of the output FITS file</li>
+<li><strong>overwrite</strong> (<em>bool</em>) &#8211; whether or not to overwrite the output file if exists</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-support.cosmeticsMap"></span><div class="section" id="ccd-cosmetics-maps">
+<h2>CCD Cosmetics Maps<a class="headerlink" href="#ccd-cosmetics-maps" title="Permalink to this headline">¶</a></h2>
+<p>A simple script to generate a random location cosmetics map.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="support.cosmeticsMap.generateCatalogue">
+<tt class="descclassname">support.cosmeticsMap.</tt><tt class="descname">generateCatalogue</tt><big>(</big><em>deadpixels=280</em>, <em>hotpixels=5</em>, <em>xsize=4096</em>, <em>ysize=4132</em>, <em>output='cosmetics.dat'</em><big>)</big><a class="headerlink" href="#support.cosmeticsMap.generateCatalogue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a cosmetics catalogue with dead and hot pixels with random locations.
+The default numbers have been taken from MSSL/Euclid/TR/12003 Issue 2 Draft b.</p>
+<p>Results are written to a CSV file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>deadpixels</strong> (<em>int</em>) &#8211; number of dead (QE=0) pixels [280]</li>
+<li><strong>hotpixels</strong> (<em>int</em>) &#8211; number of hot (value between 40k and 250ke) pixels [5]</li>
+<li><strong>xsize</strong> (<em>int</em>) &#8211; x coordinate values between 0 and xsize [4096]</li>
+<li><strong>ysize</strong> (<em>int</em>) &#8211; y coordinate values between 0 and ysize [4132]</li>
+<li><strong>output</strong> (<em>str</em>) &#8211; name of the output file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-support.cosmicrays"></span><div class="section" id="cosmic-rays">
+<h2>Cosmic Rays<a class="headerlink" href="#cosmic-rays" title="Permalink to this headline">¶</a></h2>
+<p>This simple class can be used to include cosmic ray events to an image.
+By default the cosmic ray events are drawn from distributions describing
+the length and energy of the events. Such distributions can be generated
+for example using Stardust code (<a class="reference external" href="http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=04636917">http://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=04636917</a>).
+The energy of the cosmic ray events can also be set to constant for
+testing purposes. The class can be used to draw a single cosmic ray
+event or up to a covering fraction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="support.cosmicrays.cosmicrays">
+<em class="property">class </em><tt class="descclassname">support.cosmicrays.</tt><tt class="descname">cosmicrays</tt><big>(</big><em>log</em>, <em>image</em>, <em>crInfo=None</em>, <em>information=None</em><big>)</big><a class="headerlink" href="#support.cosmicrays.cosmicrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cosmic ray generation class. Can either draw events from distributions or
+set the energy of the events to a constant.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log</strong> &#8211; logger instance</li>
+<li><strong>image</strong> &#8211; image to which cosmic rays are added to (a copy is made not to change the original numpy array)</li>
+<li><strong>crInfo</strong> &#8211; column information (cosmic ray file)</li>
+<li><strong>information</strong> &#8211; cosmic ray track information (file containing track length and energy information) and
+exposure time.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="support.cosmicrays.cosmicrays.addCosmicRays">
+<tt class="descname">addCosmicRays</tt><big>(</big><em>limit=None</em><big>)</big><a class="headerlink" href="#support.cosmicrays.cosmicrays.addCosmicRays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include cosmic rays to the image given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image with cosmic rays</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="support.cosmicrays.cosmicrays.addSingleEvent">
+<tt class="descname">addSingleEvent</tt><big>(</big><em>limit=None</em><big>)</big><a class="headerlink" href="#support.cosmicrays.cosmicrays.addSingleEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Include a single cosmic ray event to the image given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image with cosmic rays</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="support.cosmicrays.cosmicrays.addUpToFraction">
+<tt class="descname">addUpToFraction</tt><big>(</big><em>coveringFraction</em>, <em>limit=None</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#support.cosmicrays.cosmicrays.addUpToFraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add cosmic ray events up to the covering Fraction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coveringFraction</strong> (<em>float</em>) &#8211; covering fraction of cosmic rya events in per cent of total number of pixels</li>
+<li><strong>limit</strong> (<em>None or float</em>) &#8211; limiting energy for the cosmic ray event [None = draw from distribution]</li>
+<li><strong>verbose</strong> (<em>bool</em>) &#8211; print out information to stdout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">image with cosmic rays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span class="target" id="module-support.imageManipulation"></span><div class="section" id="image-manipulations">
+<h2>Image Manipulations<a class="headerlink" href="#image-manipulations" title="Permalink to this headline">¶</a></h2>
+<p>Basic image manipulation algorithms such as Gaussian smoothing and free rebinning.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:sniemi&#37;&#52;&#48;unc&#46;edu">sniemi<span>&#64;</span>unc<span>&#46;</span>edu</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="support.imageManipulation.blurImage">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">blurImage</tt><big>(</big><em>im</em>, <em>n</em>, <em>ny=None</em><big>)</big><a class="headerlink" href="#support.imageManipulation.blurImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>blurs the image by convolving with a gaussian kernel of typical
+size np. The optional keyword argument ny allows for a different
+size in the y direction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.imageManipulation.congrid">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">congrid</tt><big>(</big><em>a</em>, <em>newdims</em>, <em>method='linear'</em>, <em>centre=False</em>, <em>minusone=False</em><big>)</big><a class="headerlink" href="#support.imageManipulation.congrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Arbitrary resampling of source array to new dimension sizes.
+Currently only supports maintaining the same number of dimensions.
+To use 1-D arrays, first promote them to shape (x,1).</p>
+<p>Uses the same parameters and creates the same co-ordinate lookup points
+as IDL&#8217;&#8217;s congrid routine, which apparently originally came from a VAX/VMS
+routine of the same name.</p>
+<p>method:
+neighbour - closest value from original data
+nearest and linear - uses n x 1-D interpolations using scipy.interpolate.interp1d
+(see Numerical Recipes for validity of use of n 1-D interpolations)
+spline - uses ndimage.map_coordinates</p>
+<p>centre:
+True - interpolation points are at the centres of the bins
+False - points are at the front edge of the bin</p>
+<p>minusone:
+For example- inarray.shape = (i,j) &amp; new dimensions = (x,y)
+False - inarray is resampled by factors of (i/x) * (j/y)
+True - inarray is resampled by(i-1)/(x-1) * (j-1)/(y-1)
+This prevents extrapolation one element beyond bounds of input array.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.imageManipulation.frebin">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">frebin</tt><big>(</big><em>image</em>, <em>nsout</em>, <em>nlout=1</em>, <em>total=False</em><big>)</big><a class="headerlink" href="#support.imageManipulation.frebin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shrink or expand the size of an array an arbitary amount using interpolation.
+Conserves flux by ensuring that each input pixel is equally represented
+in the output array.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">one could do the binning faster if old and new outputs are modulo 0</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">modelled after the IDL code frebin.pro, so this may not be the fastest solution</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>image</strong> &#8211; input image, 1-d or 2-d ndarray</li>
+<li><strong>nsout</strong> &#8211; number of samples in the output image, numeric scalar</li>
+<li><strong>nlout</strong> &#8211; number of lines (ydir) in the output image, numeric scalar</li>
+<li><strong>total</strong> &#8211; Use of the total conserves surface flux. If True, the output pixels
+will be the sum of pixels within the appropriate box of the input image.
+Otherwise they will be the average.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">binned array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.imageManipulation.gaussianKernel">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">gaussianKernel</tt><big>(</big><em>size</em>, <em>sizey=None</em><big>)</big><a class="headerlink" href="#support.imageManipulation.gaussianKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a normalized 2D gauss kernel array for convolutions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.imageManipulation.rebin">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">rebin</tt><big>(</big><em>a</em>, <em>*args</em><big>)</big><a class="headerlink" href="#support.imageManipulation.rebin" title="Permalink to this definition">¶</a></dt>
+<dd><p>rebin ndarray data into a smaller ndarray of the same rank whose dimensions
+are factors of the original dimensions. eg. An array with 6 columns and 4 rows
+can be reduced to have 6,3,2 or 1 columns and 4,2 or 1 rows.
+example usages:
+&gt;&gt;&gt; a=rand(6,4); b=rebin(a,3,2)
+&gt;&gt;&gt; a=rand(6); b=rebin(a,2)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="support.imageManipulation.rebinFactor">
+<tt class="descclassname">support.imageManipulation.</tt><tt class="descname">rebinFactor</tt><big>(</big><em>a</em>, <em>newshape</em><big>)</big><a class="headerlink" href="#support.imageManipulation.rebinFactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="analysis.html" title="VIS data analysis tools"
+             >previous</a> |</li>
+        <li><a href="index.html">home</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Sami-Matias Niemi.
+    </div>
+  </body>
+</html>

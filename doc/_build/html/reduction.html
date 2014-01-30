@@ -70,6 +70,8 @@
 <li><a class="reference internal" href="#testing-the-cti-correction-algorithm">Testing the CTI Correction Algorithm</a></li>
 <li><a class="reference internal" href="#cosmic-ray-rejection">Cosmic Ray Rejection</a></li>
 <li><a class="reference internal" href="#impact-of-ghost-images">Impact of Ghost Images</a></li>
+<li><a class="reference internal" href="#non-linearity-ii-model-transfer">Non-linearity II: Model Transfer</a></li>
+<li><a class="reference internal" href="#background-subtraction">Background Subtraction</a></li>
 </ul>
 </li>
 </ul>
@@ -420,7 +422,7 @@ takes about 80 seconds. Thus, the last row is effected by cosmic a lot more than
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
 </tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.96</td>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.97</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
@@ -632,6 +634,12 @@ phases will be used</li>
 </tr>
 </tbody>
 </table>
+<dl class="function">
+<dt id="analysis.testCTIcorrection.addCTI">
+<tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">addCTI</tt><big>(</big><em>file</em>, <em>loc=1900</em>, <em>bcgr=72.2</em>, <em>thibautCDM03=False</em>, <em>beta=True</em>, <em>serial=1</em>, <em>parallel=1</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.addCTI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add CTI trails to a FITS file or input data.</p>
+</dd></dl>
+
 <dl class="function">
 <dt id="analysis.testCTIcorrection.cutoutRegions">
 <tt class="descclassname">analysis.testCTIcorrection.</tt><tt class="descname">cutoutRegions</tt><big>(</big><em>files</em>, <em>xcen=1900</em>, <em>ycen=1900</em>, <em>side=140</em><big>)</big><a class="headerlink" href="#analysis.testCTIcorrection.cutoutRegions" title="Permalink to this definition">¶</a></dt>
@@ -1066,6 +1074,228 @@ and VIS band is applied as VIS = V + offset.</p>
 <dt id="analysis.analyseGhosts.shapeMeasurement">
 <tt class="descclassname">analysis.analyseGhosts.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>log</em><big>)</big><a class="headerlink" href="#analysis.analyseGhosts.shapeMeasurement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shape measurement bias as a result of ghosts.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.nonlinearityModelTransfer"></span><div class="section" id="non-linearity-ii-model-transfer">
+<h2>Non-linearity II: Model Transfer<a class="headerlink" href="#non-linearity-ii-model-transfer" title="Permalink to this headline">¶</a></h2>
+<p>Most PSF stars are bright while most weak lensing galaxies are faint,
+thus the PSF model needs to be transferable to an appropriate object luminosity (and colour, position, etc.).
+This simple script can be used to study the error in the model transfer due to non-linearity that can be
+tolerated given the requirements.</p>
+<p>The following requirements related to the model transfer have been taken from CalCD-B.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.2</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.nonlinearityModelTransfer.plotResults">
+<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em>, <em>reqe=3.5e-05</em>, <em>reqr2=0.00035</em>, <em>outdir='results'</em>, <em>timeStamp=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.plotResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simple plot to combine and show the results.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [reference values, results dictionary]</li>
+<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3.5e-5]</li>
+<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=3.5e-4]</li>
+<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer">
+<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">testNonlinearityModelTransfer</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>sigma=0.75</em>, <em>psfs=5000</em>, <em>amps=12</em>, <em>multiplier=1.5</em>, <em>minerror=-5.0</em>, <em>maxerror=-1.0</em>, <em>lowflux=500</em>, <em>highflux=180000</em>, <em>linspace=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.</p>
+<p>The error has been assumed to follow a sinusoidal curve with random phase and a given number of angular
+frequencies (defined by the multiplier). The amplitudes being studied, i.e. the size of the maximum deviation,
+can be spaced either linearly or logarithmically.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger instance</li>
+<li><strong>file</strong> (<em>str</em>) &#8211; name of the PSF FITS files to use [default=data/psf12x.fits]</li>
+<li><strong>oversample</strong> &#8211; the PSF oversampling factor, which needs to match the input file [default=12]</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; 1sigma radius of the Gaussian weighting function for shape measurements</li>
+<li><strong>phs</strong> (<em>float</em>) &#8211; phase in case phases = None</li>
+<li><strong>phases</strong> (<em>None or int</em>) &#8211; if None then a single fixed phase will be applied, if an int then a given number of random
+phases will be used</li>
+<li><strong>psfs</strong> (<em>int</em>) &#8211; the number of PSFs to use.</li>
+<li><strong>amps</strong> (<em>int</em>) &#8211; the number of individual samplings used when covering the error space</li>
+<li><strong>multiplier</strong> (<em>int or float</em>) &#8211; the number of angular frequencies to be used</li>
+<li><strong>minerror</strong> (<em>float</em>) &#8211; the minimum error to be covered, given in log10(min_error) [default=-5 i.e. 0.001%]</li>
+<li><strong>maxerror</strong> (<em>float</em>) &#8211; the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]</li>
+<li><strong>linspace</strong> (<em>boolean</em>) &#8211; whether the amplitudes of the error curves should be linearly or logarithmically spaced.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">reference value and results dictionaries</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.analyseBackground"></span><p>This script can be used to derive statistics of background pixels.</p>
+<dl class="function">
+<dt id="analysis.analyseBackground.dilation">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">dilation</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.dilation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use dilation to define the background. Not working too well...</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.kde_scipy">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">kde_scipy</tt><big>(</big><em>x</em>, <em>x_grid</em>, <em>bandwidth=0.2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.kde_scipy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kernel Density Estimation with Scipy</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.kde_sklearn">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">kde_sklearn</tt><big>(</big><em>x</em>, <em>x_grid</em>, <em>bandwidth=0.2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.kde_sklearn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kernel Density Estimation with Scikit-learn</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.kde_statsmodels_m">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">kde_statsmodels_m</tt><big>(</big><em>x</em>, <em>x_grid</em>, <em>bandwidth=0.2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.kde_statsmodels_m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multivariate Kernel Density Estimation with Statsmodels</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.kde_statsmodels_u">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">kde_statsmodels_u</tt><big>(</big><em>x</em>, <em>x_grid</em>, <em>bandwidth=0.2</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.kde_statsmodels_u" title="Permalink to this definition">¶</a></dt>
+<dd><p>Univariate Kernel Density Estimation with Statsmodels</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.loadData">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">loadData</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.loadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data, exclude pre- and over scan regions, and subtract the bias level found from the header.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.maskObjects">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">maskObjects</tt><big>(</big><em>data</em>, <em>sigma=4.0</em>, <em>iterations=None</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.maskObjects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask objects using sigma clipping around the median.</p>
+<p>Will also plot the data and the mask.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">masked numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.plotEntropy">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">plotEntropy</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.plotEntropy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the entropy in the data. No really suitable as the input data
+not in a useful format.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.plotStatistcs">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">plotStatistcs</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.plotStatistcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot statistics of the background pixels. Assumes that the input contains only
+the background pixel values as a 1D array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseBackground.sigmaClippedOpening">
+<tt class="descclassname">analysis.analyseBackground.</tt><tt class="descname">sigmaClippedOpening</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.analyseBackground.sigmaClippedOpening" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform Gaussian filtering, sigma clipping and binary opening to define
+a mask for the background pixels.</p>
+</dd></dl>
+
+<span class="target" id="module-analysis.analyseBackgroundSubtraction"></span><div class="section" id="background-subtraction">
+<h2>Background Subtraction<a class="headerlink" href="#background-subtraction" title="Permalink to this headline">¶</a></h2>
+<p>This scripts can be used to study the impact of background subtraction errors on the shape measurements.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.analyseBackgroundSubtraction.simpleAnalytical">
+<tt class="descclassname">analysis.analyseBackgroundSubtraction.</tt><tt class="descname">simpleAnalytical</tt><big>(</big><em>value=130</em>, <em>size=(50</em>, <em>50)</em>, <em>readnoise=4.5</em>, <em>gain=3.1</em>, <em>req=1.0</em><big>)</big><a class="headerlink" href="#analysis.analyseBackgroundSubtraction.simpleAnalytical" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple function to test the area of pixels needed (defined by size) to derive the
+pixel value to the level of required number of electrons given the readout noise and
+the gain of the system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> (<em>int</em>) &#8211; the floor level in electrons to be found [default = 130]</li>
+<li><strong>size</strong> (<em>tuple</em>) &#8211; area describing the number of pixels available [default = (50, 50)]</li>
+<li><strong>readnoise</strong> (<em>float</em>) &#8211; readout noise of the full detection chain [default = 4.5]</li>
+<li><strong>gain</strong> (<em>float</em>) &#8211; gain of the detection system [default = 3.1]</li>
+<li><strong>req</strong> (<em>float</em>) &#8211; required level to reach in electrons [default = 1]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">none</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

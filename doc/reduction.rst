@@ -34,3 +34,11 @@ VIS data reduction studies
 .. automodule:: analysis.analyseGhosts
     :members:
 
+.. automodule:: analysis.nonlinearityModelTransfer
+    :members:
+
+.. automodule:: analysis.analyseBackground
+    :members:
+
+.. automodule:: analysis.analyseBackgroundSubtraction
+    :members:

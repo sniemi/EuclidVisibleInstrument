@@ -5,11 +5,13 @@ VIS data analysis tools
 .. currentmodule:: analysis
 
 .. automodule:: analysis.analyse
+    :members:
 
 .. autoclass:: analyseVISdata
     :members:
 
 .. automodule:: analysis.shape
+    :members:
 
 .. autoclass:: shapeMeasurement
     :members:
@@ -29,12 +31,20 @@ VIS data analysis tools
 .. automodule:: analysis.PSFbasisSets
     :members:
 
+.. automodule:: analysis.PSFcentroidingEffects
+    :members:
+
+.. automodule:: analysis.PSFresolutionEffects
+    :members:
+
 .. automodule:: analysis.fitPSF
     :members:
 
 .. automodule:: analysis.CTIpower
     :members:
 
-.. automodule:: analysis.nonlinearityModelTransfer
+.. automodule:: analysis.compareSNRs
     :members:
 
+.. automodule:: analysis.saturatedArea
+    :members:

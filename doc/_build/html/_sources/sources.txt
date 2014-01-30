@@ -7,7 +7,5 @@
 .. automodule:: sources.generatePostageStamps
    :members:
 
-
-
-
-
+.. automodule:: sources.stellarNumberCounts
+   :members:

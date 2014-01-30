@@ -19,7 +19,7 @@
 \indexentry{applyLinearCorrection() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{applyRadiationDamage() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{applyReadoutNoise() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
-\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{11}
+\indexentry{compressAndRemoveFile() (postproc.postprocessing.PostProcessing method)|hyperpage}{10}
 \indexentry{cutoutRegion() (postproc.postprocessing.PostProcessing method)|hyperpage}{11}
 \indexentry{discretisetoADUs() (postproc.postprocessing.PostProcessing method)|hyperpage}{11}
 \indexentry{generateCTImap() (postproc.postprocessing.PostProcessing method)|hyperpage}{11}
@@ -36,7 +36,7 @@
 \indexentry{postproc.tileFPA (module)|hyperpage}{13}
 \indexentry{tileFPA (class in postproc.tileFPA)|hyperpage}{13}
 \indexentry{readData() (postproc.tileFPA.tileFPA method)|hyperpage}{13}
-\indexentry{runAll() (postproc.tileFPA.tileFPA method)|hyperpage}{14}
+\indexentry{runAll() (postproc.tileFPA.tileFPA method)|hyperpage}{13}
 \indexentry{tileFPA() (postproc.tileFPA.tileFPA method)|hyperpage}{14}
 \indexentry{writeFITSfile() (postproc.tileFPA.tileFPA method)|hyperpage}{14}
 \indexentry{ETC.ETC (module)|hyperpage}{15}
@@ -45,181 +45,257 @@
 \indexentry{exposureTime() (in module ETC.ETC)|hyperpage}{16}
 \indexentry{galaxyDetection() (in module ETC.ETC)|hyperpage}{16}
 \indexentry{limitingMagnitude() (in module ETC.ETC)|hyperpage}{17}
+\indexentry{ETC.fluxEstimates (module)|hyperpage}{17}
+\indexentry{ghostCalculations() (in module ETC.fluxEstimates)|hyperpage}{17}
+\indexentry{ghostResults() (in module ETC.fluxEstimates)|hyperpage}{18}
+\indexentry{testFlatSpectrum() (in module ETC.fluxEstimates)|hyperpage}{18}
+\indexentry{throughputs() (in module ETC.fluxEstimates)|hyperpage}{18}
 \indexentry{sources.createObjectCatalogue (module)|hyperpage}{19}
-\indexentry{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{19}
+\indexentry{drawFromCumulativeDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{20}
 \indexentry{generateCatalog() (in module sources.createObjectCatalogue)|hyperpage}{20}
 \indexentry{plotCatalog() (in module sources.createObjectCatalogue)|hyperpage}{20}
 \indexentry{plotDistributionFunction() (in module sources.createObjectCatalogue)|hyperpage}{20}
 \indexentry{starCatalog() (in module sources.createObjectCatalogue)|hyperpage}{20}
 \indexentry{starCatalogFixedMagnitude() (in module sources.createObjectCatalogue)|hyperpage}{20}
-\indexentry{sources.generatePostageStamps (module)|hyperpage}{20}
-\indexentry{generaPostageStamps() (in module sources.generatePostageStamps)|hyperpage}{20}
-\indexentry{simulator.simulator (module)|hyperpage}{23}
-\indexentry{VISsimulator (class in simulator.simulator)|hyperpage}{27}
-\indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{27}
-\indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{27}
-\indexentry{addLampFlux() (simulator.simulator.VISsimulator method)|hyperpage}{27}
-\indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{27}
-\indexentry{addObjectsAndGhosts() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyCosmicBackground() (simulator.simulator.VISsimulator method)|hyperpage}{28}
-\indexentry{applyDarkCurrent() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyNonlinearity() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyPoissonNoise() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{applyScatteredLight() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{29}
-\indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{30}
-\indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{30}
-\indexentry{readConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{smoothingWithChargeDiffusion() (simulator.simulator.VISsimulator method)|hyperpage}{31}
-\indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{32}
-\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{32}
-\indexentry{simulator.generateGalaxies (module)|hyperpage}{32}
-\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{32}
-\indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{32}
-\indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{32}
-\indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{33}
-\indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{33}
-\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{33}
-\indexentry{reduction.reduceVISdata (module)|hyperpage}{37}
-\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{37}
-\indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{38}
-\indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{38}
-\indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{38}
-\indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{38}
-\indexentry{analysis.biasCalibration (module)|hyperpage}{38}
-\indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{38}
-\indexentry{findTolerableErrorPiston() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{findTolerableErrorSlope() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{pistonKnowledge() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{39}
-\indexentry{simpleAnalytical() (in module analysis.biasCalibration)|hyperpage}{40}
-\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{40}
-\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{41}
-\indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{41}
-\indexentry{findTolerableError() (in module analysis.FlatfieldCalibration)|hyperpage}{42}
-\indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{42}
-\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
-\indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
-\indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{43}
-\indexentry{analysis.nonlinearityCalibration (module)|hyperpage}{43}
-\indexentry{plotResults() (in module analysis.nonlinearityCalibration)|hyperpage}{44}
-\indexentry{testNonlinearity() (in module analysis.nonlinearityCalibration)|hyperpage}{44}
-\indexentry{analysis.testCTIcorrection (module)|hyperpage}{45}
-\indexentry{cutoutRegions() (in module analysis.testCTIcorrection)|hyperpage}{45}
-\indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{45}
-\indexentry{plotResultsNoNoise() (in module analysis.testCTIcorrection)|hyperpage}{46}
-\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{46}
-\indexentry{testCTIcorrectionNonoise() (in module analysis.testCTIcorrection)|hyperpage}{46}
-\indexentry{useThibautsData() (in module analysis.testCTIcorrection)|hyperpage}{46}
-\indexentry{analysis.cosmicrayCalibration (module)|hyperpage}{47}
-\indexentry{plotResults() (in module analysis.cosmicrayCalibration)|hyperpage}{47}
-\indexentry{testCosmicrayRejection() (in module analysis.cosmicrayCalibration)|hyperpage}{47}
-\indexentry{testCosmicrayRejectionMultiPSF() (in module analysis.cosmicrayCalibration)|hyperpage}{48}
-\indexentry{analysis.analyseGhosts (module)|hyperpage}{49}
-\indexentry{analyseInFocusImpact() (in module analysis.analyseGhosts)|hyperpage}{49}
-\indexentry{analyseOutofFocusImpact() (in module analysis.analyseGhosts)|hyperpage}{50}
-\indexentry{deleteAndMove() (in module analysis.analyseGhosts)|hyperpage}{50}
-\indexentry{drawDoughnut() (in module analysis.analyseGhosts)|hyperpage}{50}
-\indexentry{objectDetection() (in module analysis.analyseGhosts)|hyperpage}{51}
-\indexentry{plotGhostContribution() (in module analysis.analyseGhosts)|hyperpage}{51}
-\indexentry{plotGhostContributionElectrons() (in module analysis.analyseGhosts)|hyperpage}{51}
-\indexentry{shapeMeasurement() (in module analysis.analyseGhosts)|hyperpage}{51}
-\indexentry{analysis.analyse (module)|hyperpage}{53}
-\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{53}
-\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{53}
-\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{54}
-\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{54}
-\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{54}
-\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{54}
-\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{54}
-\indexentry{analysis.shape (module)|hyperpage}{54}
-\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{54}
-\indexentry{Gaussian2D() (analysis.shape.shapeMeasurement method)|hyperpage}{55}
-\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{55}
-\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{55}
-\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{55}
-\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{55}
-\indexentry{analysis.sourceFinder (module)|hyperpage}{56}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{56}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{56}
-\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{56}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{56}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{56}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{57}
-\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{57}
-\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{58}
-\indexentry{analysis.analyseSpotMeasurements (module)|hyperpage}{59}
-\indexentry{analyseSpotsDeconvolution() (in module analysis.analyseSpotMeasurements)|hyperpage}{59}
-\indexentry{analyseSpotsFitting() (in module analysis.analyseSpotMeasurements)|hyperpage}{59}
-\indexentry{examples() (in module analysis.analyseSpotMeasurements)|hyperpage}{59}
-\indexentry{fitf() (in module analysis.analyseSpotMeasurements)|hyperpage}{59}
-\indexentry{gaussianFit() (in module analysis.analyseSpotMeasurements)|hyperpage}{59}
-\indexentry{generateBessel() (in module analysis.analyseSpotMeasurements)|hyperpage}{60}
-\indexentry{plotGaussianResults() (in module analysis.analyseSpotMeasurements)|hyperpage}{60}
-\indexentry{readData() (in module analysis.analyseSpotMeasurements)|hyperpage}{60}
-\indexentry{weinerFilter() (in module analysis.analyseSpotMeasurements)|hyperpage}{60}
-\indexentry{analysis.PSFproperties (module)|hyperpage}{61}
-\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{61}
-\indexentry{analysis.PSFbasisSets (module)|hyperpage}{62}
-\indexentry{deriveBasisSetsICA() (in module analysis.PSFbasisSets)|hyperpage}{62}
-\indexentry{deriveBasisSetsPCA() (in module analysis.PSFbasisSets)|hyperpage}{62}
-\indexentry{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)|hyperpage}{62}
-\indexentry{generateMovie() (in module analysis.PSFbasisSets)|hyperpage}{63}
-\indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{63}
-\indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{63}
-\indexentry{analysis.fitPSF (module)|hyperpage}{63}
-\indexentry{BaysianPCAfitting() (in module analysis.fitPSF)|hyperpage}{64}
-\indexentry{ICAleastSq() (in module analysis.fitPSF)|hyperpage}{64}
-\indexentry{PCAleastSQ() (in module analysis.fitPSF)|hyperpage}{64}
-\indexentry{leastSQfit() (in module analysis.fitPSF)|hyperpage}{64}
-\indexentry{test() (in module analysis.fitPSF)|hyperpage}{65}
-\indexentry{visualise() (in module analysis.fitPSF)|hyperpage}{65}
-\indexentry{analysis.CTIpower (module)|hyperpage}{65}
-\indexentry{azimuthalAverage() (in module analysis.CTIpower)|hyperpage}{66}
-\indexentry{azimuthalAverageSimple() (in module analysis.CTIpower)|hyperpage}{66}
-\indexentry{plot() (in module analysis.CTIpower)|hyperpage}{67}
-\indexentry{plotCTIeffect() (in module analysis.CTIpower)|hyperpage}{67}
-\indexentry{plotPower() (in module analysis.CTIpower)|hyperpage}{67}
-\indexentry{analysis.nonlinearityModelTransfer (module)|hyperpage}{67}
-\indexentry{plotResults() (in module analysis.nonlinearityModelTransfer)|hyperpage}{67}
-\indexentry{testNonlinearityModelTransfer() (in module analysis.nonlinearityModelTransfer)|hyperpage}{68}
+\indexentry{starCatalogueBachallSoneira() (in module sources.createObjectCatalogue)|hyperpage}{21}
+\indexentry{sources.generatePostageStamps (module)|hyperpage}{21}
+\indexentry{generaPostageStamps() (in module sources.generatePostageStamps)|hyperpage}{21}
+\indexentry{sources.stellarNumberCounts (module)|hyperpage}{22}
+\indexentry{bahcallSoneira() (in module sources.stellarNumberCounts)|hyperpage}{22}
+\indexentry{integratedCountsVband() (in module sources.stellarNumberCounts)|hyperpage}{22}
+\indexentry{skyNumbers() (in module sources.stellarNumberCounts)|hyperpage}{22}
+\indexentry{simulator.simulator (module)|hyperpage}{25}
+\indexentry{VISsimulator (class in simulator.simulator)|hyperpage}{29}
+\indexentry{addChargeInjection() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{addCosmicRays() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{addLampFlux() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{addObjects() (simulator.simulator.VISsimulator method)|hyperpage}{29}
+\indexentry{addObjectsAndGhosts() (simulator.simulator.VISsimulator method)|hyperpage}{30}
+\indexentry{addPreOverScans() (simulator.simulator.VISsimulator method)|hyperpage}{30}
+\indexentry{applyBias() (simulator.simulator.VISsimulator method)|hyperpage}{30}
+\indexentry{applyBleeding() (simulator.simulator.VISsimulator method)|hyperpage}{30}
+\indexentry{applyCosmetics() (simulator.simulator.VISsimulator method)|hyperpage}{30}
+\indexentry{applyCosmicBackground() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyDarkCurrent() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyFlatfield() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyNonlinearity() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyPoissonNoise() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyRadiationDamage() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyReadoutNoise() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{applyScatteredLight() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{configure() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{discretise() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{electrons2ADU() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{generateFinemaps() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{objectOnDetector() (simulator.simulator.VISsimulator method)|hyperpage}{31}
+\indexentry{overlayToCCD() (simulator.simulator.VISsimulator method)|hyperpage}{32}
+\indexentry{processConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{32}
+\indexentry{readConfigs() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{readCosmicRayInformation() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{readObjectlist() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{readPSFs() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{simulate() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{smoothingWithChargeDiffusion() (simulator.simulator.VISsimulator method)|hyperpage}{33}
+\indexentry{writeFITSfile() (simulator.simulator.VISsimulator method)|hyperpage}{34}
+\indexentry{writeOutputs() (simulator.simulator.VISsimulator method)|hyperpage}{34}
+\indexentry{simulator.generateGalaxies (module)|hyperpage}{34}
+\indexentry{generateFakeData (class in simulator.generateGalaxies)|hyperpage}{34}
+\indexentry{addObjects() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{34}
+\indexentry{createGalaxylist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{35}
+\indexentry{createStarlist() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{35}
+\indexentry{maskCrazyValues() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{35}
+\indexentry{runAll() (simulator.generateGalaxies.generateFakeData method)|hyperpage}{35}
+\indexentry{reduction.reduceVISdata (module)|hyperpage}{39}
+\indexentry{reduceVISdata (class in reduction.reduceVISdata)|hyperpage}{39}
+\indexentry{applyCTICorrection() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{40}
+\indexentry{flatfield() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{40}
+\indexentry{subtractBias() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{40}
+\indexentry{writeFITSfile() (reduction.reduceVISdata.reduceVISdata method)|hyperpage}{40}
+\indexentry{analysis.biasCalibration (module)|hyperpage}{40}
+\indexentry{addReadoutNoise() (in module analysis.biasCalibration)|hyperpage}{40}
+\indexentry{findTolerableErrorPiston() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{findTolerableErrorSlope() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{pistonKnowledge() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{plotDeltaEs() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{plotEs() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{plotNumberOfFramesDelta() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{plotNumberOfFramesSigma() (in module analysis.biasCalibration)|hyperpage}{41}
+\indexentry{simpleAnalytical() (in module analysis.biasCalibration)|hyperpage}{42}
+\indexentry{testBiasCalibrationDelta() (in module analysis.biasCalibration)|hyperpage}{42}
+\indexentry{testBiasCalibrationSigma() (in module analysis.biasCalibration)|hyperpage}{43}
+\indexentry{analysis.FlatfieldCalibration (module)|hyperpage}{43}
+\indexentry{findTolerableError() (in module analysis.FlatfieldCalibration)|hyperpage}{44}
+\indexentry{generateResidualFlatField() (in module analysis.FlatfieldCalibration)|hyperpage}{44}
+\indexentry{plotNumberOfFrames() (in module analysis.FlatfieldCalibration)|hyperpage}{45}
+\indexentry{testFlatCalibration() (in module analysis.FlatfieldCalibration)|hyperpage}{45}
+\indexentry{testNoFlatfieldingEffects() (in module analysis.FlatfieldCalibration)|hyperpage}{45}
+\indexentry{analysis.nonlinearityCalibration (module)|hyperpage}{45}
+\indexentry{plotResults() (in module analysis.nonlinearityCalibration)|hyperpage}{46}
+\indexentry{testNonlinearity() (in module analysis.nonlinearityCalibration)|hyperpage}{46}
+\indexentry{analysis.testCTIcorrection (module)|hyperpage}{47}
+\indexentry{addCTI() (in module analysis.testCTIcorrection)|hyperpage}{47}
+\indexentry{cutoutRegions() (in module analysis.testCTIcorrection)|hyperpage}{47}
+\indexentry{plotResults() (in module analysis.testCTIcorrection)|hyperpage}{47}
+\indexentry{plotResultsNoNoise() (in module analysis.testCTIcorrection)|hyperpage}{48}
+\indexentry{testCTIcorrection() (in module analysis.testCTIcorrection)|hyperpage}{48}
+\indexentry{testCTIcorrectionNonoise() (in module analysis.testCTIcorrection)|hyperpage}{48}
+\indexentry{useThibautsData() (in module analysis.testCTIcorrection)|hyperpage}{48}
+\indexentry{analysis.cosmicrayCalibration (module)|hyperpage}{49}
+\indexentry{plotResults() (in module analysis.cosmicrayCalibration)|hyperpage}{49}
+\indexentry{testCosmicrayRejection() (in module analysis.cosmicrayCalibration)|hyperpage}{50}
+\indexentry{testCosmicrayRejectionMultiPSF() (in module analysis.cosmicrayCalibration)|hyperpage}{50}
+\indexentry{analysis.analyseGhosts (module)|hyperpage}{51}
+\indexentry{analyseInFocusImpact() (in module analysis.analyseGhosts)|hyperpage}{52}
+\indexentry{analyseOutofFocusImpact() (in module analysis.analyseGhosts)|hyperpage}{52}
+\indexentry{deleteAndMove() (in module analysis.analyseGhosts)|hyperpage}{53}
+\indexentry{drawDoughnut() (in module analysis.analyseGhosts)|hyperpage}{53}
+\indexentry{objectDetection() (in module analysis.analyseGhosts)|hyperpage}{53}
+\indexentry{plotGhostContribution() (in module analysis.analyseGhosts)|hyperpage}{54}
+\indexentry{plotGhostContributionElectrons() (in module analysis.analyseGhosts)|hyperpage}{54}
+\indexentry{shapeMeasurement() (in module analysis.analyseGhosts)|hyperpage}{54}
+\indexentry{analysis.nonlinearityModelTransfer (module)|hyperpage}{54}
+\indexentry{plotResults() (in module analysis.nonlinearityModelTransfer)|hyperpage}{54}
+\indexentry{testNonlinearityModelTransfer() (in module analysis.nonlinearityModelTransfer)|hyperpage}{54}
+\indexentry{analysis.analyseBackground (module)|hyperpage}{56}
+\indexentry{dilation() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{kde\_scipy() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{kde\_sklearn() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{kde\_statsmodels\_m() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{kde\_statsmodels\_u() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{loadData() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{maskObjects() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{plotEntropy() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{plotStatistcs() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{sigmaClippedOpening() (in module analysis.analyseBackground)|hyperpage}{56}
+\indexentry{analysis.analyseBackgroundSubtraction (module)|hyperpage}{56}
+\indexentry{simpleAnalytical() (in module analysis.analyseBackgroundSubtraction)|hyperpage}{57}
+\indexentry{analysis.analyse (module)|hyperpage}{59}
+\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{59}
+\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{59}
+\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{processArgs() (in module analysis.analyse)|hyperpage}{60}
+\indexentry{analyseVISdata (class in analysis.analyse)|hyperpage}{60}
+\indexentry{doAll() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{findSources() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{measureEllipticity() (analysis.analyse.analyseVISdata method)|hyperpage}{60}
+\indexentry{plotEllipticityDistribution() (analysis.analyse.analyseVISdata method)|hyperpage}{61}
+\indexentry{readSources() (analysis.analyse.analyseVISdata method)|hyperpage}{61}
+\indexentry{writeResults() (analysis.analyse.analyseVISdata method)|hyperpage}{61}
+\indexentry{analysis.shape (module)|hyperpage}{61}
+\indexentry{TestShape (class in analysis.shape)|hyperpage}{61}
+\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{61}
+\indexentry{Gaussian2D() (analysis.shape.shapeMeasurement method)|hyperpage}{61}
+\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{62}
+\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{62}
+\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{62}
+\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{62}
+\indexentry{shapeMeasurement (class in analysis.shape)|hyperpage}{62}
+\indexentry{Gaussian2D() (analysis.shape.shapeMeasurement method)|hyperpage}{63}
+\indexentry{circular2DGaussian() (analysis.shape.shapeMeasurement method)|hyperpage}{63}
+\indexentry{measureRefinedEllipticity() (analysis.shape.shapeMeasurement method)|hyperpage}{63}
+\indexentry{quadrupoles() (analysis.shape.shapeMeasurement method)|hyperpage}{63}
+\indexentry{writeFITS() (analysis.shape.shapeMeasurement method)|hyperpage}{63}
+\indexentry{analysis.sourceFinder (module)|hyperpage}{64}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{64}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{64}
+\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{64}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{64}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{sourceFinder (class in analysis.sourceFinder)|hyperpage}{65}
+\indexentry{cleanSample() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{doAperturePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{65}
+\indexentry{find() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{generateOutput() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{getCenterOfMass() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{getContours() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{getFluxes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{getSizes() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{plot() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{runAll() (analysis.sourceFinder.sourceFinder method)|hyperpage}{66}
+\indexentry{writePhotometry() (analysis.sourceFinder.sourceFinder method)|hyperpage}{67}
+\indexentry{analysis.analyseSpotMeasurements (module)|hyperpage}{67}
+\indexentry{analyseSpotsDeconvolution() (in module analysis.analyseSpotMeasurements)|hyperpage}{67}
+\indexentry{analyseSpotsFitting() (in module analysis.analyseSpotMeasurements)|hyperpage}{67}
+\indexentry{examples() (in module analysis.analyseSpotMeasurements)|hyperpage}{67}
+\indexentry{fitf() (in module analysis.analyseSpotMeasurements)|hyperpage}{67}
+\indexentry{gaussianFit() (in module analysis.analyseSpotMeasurements)|hyperpage}{68}
+\indexentry{generateBessel() (in module analysis.analyseSpotMeasurements)|hyperpage}{68}
+\indexentry{plotGaussianResults() (in module analysis.analyseSpotMeasurements)|hyperpage}{68}
+\indexentry{readData() (in module analysis.analyseSpotMeasurements)|hyperpage}{68}
+\indexentry{weinerFilter() (in module analysis.analyseSpotMeasurements)|hyperpage}{68}
+\indexentry{analysis.PSFproperties (module)|hyperpage}{69}
+\indexentry{encircledEnergy() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{generatePlots() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{measureChars() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{parseName() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{peakFraction() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{plotEncircledEnergy() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{readData() (in module analysis.PSFproperties)|hyperpage}{69}
+\indexentry{shapeComparisonToAST() (in module analysis.PSFproperties)|hyperpage}{70}
+\indexentry{analysis.PSFbasisSets (module)|hyperpage}{70}
+\indexentry{deriveBasisSetsICA() (in module analysis.PSFbasisSets)|hyperpage}{70}
+\indexentry{deriveBasisSetsPCA() (in module analysis.PSFbasisSets)|hyperpage}{70}
+\indexentry{deriveBasisSetsRandomizedPCA() (in module analysis.PSFbasisSets)|hyperpage}{71}
+\indexentry{generateMovie() (in module analysis.PSFbasisSets)|hyperpage}{71}
+\indexentry{processArgs() (in module analysis.PSFbasisSets)|hyperpage}{71}
+\indexentry{visualiseBasisSets() (in module analysis.PSFbasisSets)|hyperpage}{71}
+\indexentry{analysis.PSFcentroidingEffects (module)|hyperpage}{71}
+\indexentry{Gaussian2D() (in module analysis.PSFcentroidingEffects)|hyperpage}{72}
+\indexentry{frebin() (in module analysis.PSFcentroidingEffects)|hyperpage}{72}
+\indexentry{plotCentroids() (in module analysis.PSFcentroidingEffects)|hyperpage}{72}
+\indexentry{testCentroidingImpact() (in module analysis.PSFcentroidingEffects)|hyperpage}{72}
+\indexentry{testCentroidingImpactSingleDirection() (in module analysis.PSFcentroidingEffects)|hyperpage}{73}
+\indexentry{analysis.fitPSF (module)|hyperpage}{73}
+\indexentry{BaysianPCAfitting() (in module analysis.fitPSF)|hyperpage}{73}
+\indexentry{ICAleastSq() (in module analysis.fitPSF)|hyperpage}{74}
+\indexentry{PCAleastSQ() (in module analysis.fitPSF)|hyperpage}{74}
+\indexentry{leastSQfit() (in module analysis.fitPSF)|hyperpage}{74}
+\indexentry{test() (in module analysis.fitPSF)|hyperpage}{75}
+\indexentry{visualise() (in module analysis.fitPSF)|hyperpage}{75}
+\indexentry{analysis.CTIpower (module)|hyperpage}{75}
+\indexentry{azimuthalAverage() (in module analysis.CTIpower)|hyperpage}{76}
+\indexentry{azimuthalAverageSimple() (in module analysis.CTIpower)|hyperpage}{76}
+\indexentry{plot() (in module analysis.CTIpower)|hyperpage}{77}
+\indexentry{plotCTIeffect() (in module analysis.CTIpower)|hyperpage}{77}
+\indexentry{plotPower() (in module analysis.CTIpower)|hyperpage}{77}
+\indexentry{ps (class in analysis.CTIpower)|hyperpage}{77}
+\indexentry{angavg() (analysis.CTIpower.ps method)|hyperpage}{77}
+\indexentry{create() (analysis.CTIpower.ps method)|hyperpage}{77}
+\indexentry{plot() (analysis.CTIpower.ps method)|hyperpage}{77}
+\indexentry{setup() (analysis.CTIpower.ps method)|hyperpage}{77}
+\indexentry{analysis.compareSNRs (module)|hyperpage}{77}
+\indexentry{compareCounts() (in module analysis.compareSNRs)|hyperpage}{77}
+\indexentry{compareMagnitudes() (in module analysis.compareSNRs)|hyperpage}{77}
+\indexentry{compareSNR() (in module analysis.compareSNRs)|hyperpage}{77}
+\indexentry{readCatalog() (in module analysis.compareSNRs)|hyperpage}{77}
+\indexentry{analysis.saturatedArea (module)|hyperpage}{78}
+\indexentry{pixelsImpacted() (in module analysis.saturatedArea)|hyperpage}{78}
+\indexentry{support.bleedingtest (module)|hyperpage}{87}
+\indexentry{writeFITSfile() (in module support.bleedingtest)|hyperpage}{87}
+\indexentry{support.convertZemaxOutputToFITS (module)|hyperpage}{87}
+\indexentry{convertToFITS() (in module support.convertZemaxOutputToFITS)|hyperpage}{88}
+\indexentry{support.cosmeticsMap (module)|hyperpage}{88}
+\indexentry{generateCatalogue() (in module support.cosmeticsMap)|hyperpage}{88}
+\indexentry{support.cosmicrays (module)|hyperpage}{88}
+\indexentry{cosmicrays (class in support.cosmicrays)|hyperpage}{89}
+\indexentry{addCosmicRays() (support.cosmicrays.cosmicrays method)|hyperpage}{89}
+\indexentry{addSingleEvent() (support.cosmicrays.cosmicrays method)|hyperpage}{89}
+\indexentry{addUpToFraction() (support.cosmicrays.cosmicrays method)|hyperpage}{89}
+\indexentry{support.imageManipulation (module)|hyperpage}{89}
+\indexentry{blurImage() (in module support.imageManipulation)|hyperpage}{90}
+\indexentry{congrid() (in module support.imageManipulation)|hyperpage}{90}
+\indexentry{frebin() (in module support.imageManipulation)|hyperpage}{90}
+\indexentry{gaussianKernel() (in module support.imageManipulation)|hyperpage}{90}
+\indexentry{rebin() (in module support.imageManipulation)|hyperpage}{91}
+\indexentry{rebinFactor() (in module support.imageManipulation)|hyperpage}{91}

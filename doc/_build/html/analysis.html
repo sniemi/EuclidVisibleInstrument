@@ -26,6 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="VIS 1.1 documentation" href="index.html" />
+    <link rel="next" title="Supporting Methods" href="support.html" />
     <link rel="prev" title="Data reduction tools" href="reduction.html" /> 
   </head>
   <body>
@@ -42,6 +43,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="support.html" title="Supporting Methods"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="reduction.html" title="Data reduction tools"
              accesskey="P">previous</a> |</li>
@@ -64,7 +68,7 @@
 <li><a class="reference internal" href="#generating-psf-basis-sets">Generating PSF Basis Sets</a></li>
 <li><a class="reference internal" href="#psf-fitting">PSF Fitting</a></li>
 <li><a class="reference internal" href="#impact-of-cti-trailing-on-shear-power-spectrum">Impact of CTI Trailing on Shear Power Spectrum</a></li>
-<li><a class="reference internal" href="#non-linearity-ii-model-transfer">Non-linearity II: Model Transfer</a></li>
+<li><a class="reference internal" href="#saturated-imaging-area">Saturated Imaging Area</a></li>
 </ul>
 </li>
 </ul>
@@ -72,6 +76,9 @@
   <h4>Previous topic</h4>
   <p class="topless"><a href="reduction.html"
                         title="previous chapter">Data reduction tools</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="support.html"
+                        title="next chapter">Supporting Methods</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -120,7 +127,6 @@ in the input file.</p>
 </tr>
 </tbody>
 </table>
-</div>
 <dl class="class">
 <dt id="analysis.analyse.analyseVISdata">
 <em class="property">class </em><tt class="descclassname">analysis.analyse.</tt><tt class="descname">analyseVISdata</tt><big>(</big><em>filename</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.analyse.analyseVISdata" title="Permalink to this definition">¶</a></dt>
@@ -194,14 +200,89 @@ is in SExtractor format and contains the following columns:</p>
 
 </dd></dl>
 
+<dl class="function">
+<dt id="analysis.analyse.processArgs">
+<tt class="descclassname">analysis.analyse.</tt><tt class="descname">processArgs</tt><big>(</big><em>printHelp=False</em><big>)</big><a class="headerlink" href="#analysis.analyse.processArgs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes command line arguments.</p>
+</dd></dl>
+
+</div>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">analysis.analyse.</tt><tt class="descname">analyseVISdata</tt><big>(</big><em>filename</em>, <em>log</em>, <em>**kwargs</em><big>)</big></dt>
+<dd><p>Simple class that can be used to find objects and measure their ellipticities.</p>
+<p>One can either choose to use a Python based source finding algorithm or
+give a SExtractor catalog as an input. If an input catalog is provided
+then the program assumes that X_IMAGE and Y_IMAGE columns are present
+in the input file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>string</em>) &#8211; name of the FITS file to be analysed.</li>
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; additional keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Settings dictionary contains all parameter values needed
+for source finding and analysis.</p>
+<dl class="method">
+<dt>
+<tt class="descname">doAll</tt><big>(</big><big>)</big></dt>
+<dd><p>Run all class methods sequentially.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">findSources</tt><big>(</big><big>)</big></dt>
+<dd><p>Finds sources from data that has been read in when the class was initiated.
+Saves results such as x and y coordinates of the objects to self.sources.
+x and y coordinates are also available directly in self.x and self.y.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">measureEllipticity</tt><big>(</big><big>)</big></dt>
+<dd><p>Measures ellipticity for all objects with coordinates (self.x, self.y).</p>
+<p>Ellipticity is measured using Guassian weighted quadrupole moments.
+See shape.py and especially the ShapeMeasurement class for more details.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">plotEllipticityDistribution</tt><big>(</big><big>)</big></dt>
+<dd><p>Creates a simple plot showing the derived ellipticity distribution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">readSources</tt><big>(</big><big>)</big></dt>
+<dd><p>Reads in a list of sources from an external file. This method assumes
+that the input source file is in SExtractor format. Input catalog is
+saves to self.sources. x and y coordinates are also available directly in self.x and self.y.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">writeResults</tt><big>(</big><big>)</big></dt>
+<dd><p>Outputs results to an ascii file defined in self.settings. This ascii file
+is in SExtractor format and contains the following columns:</p>
+<div class="highlight-python"><pre>1. X coordinate
+2. Y coordinate
+3. ellipticity
+4. R_{2}</pre>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 <span class="target" id="module-analysis.shape"></span><div class="section" id="measuring-a-shape-of-an-object">
 <h2>Measuring a shape of an object<a class="headerlink" href="#measuring-a-shape-of-an-object" title="Permalink to this headline">¶</a></h2>
 <p>Simple class to measure quadrupole moments and ellipticity of an object.</p>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Double check that the e1 component is not flipped in sense that Qxx and Qyy would be reversed
-because NumPy arrays are column major.</p>
-</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -214,11 +295,16 @@ because NumPy arrays are column major.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
 </tr>
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.45</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">0.47</td>
 </tr>
 </tbody>
 </table>
-</div>
+<dl class="class">
+<dt id="analysis.shape.TestShape">
+<em class="property">class </em><tt class="descclassname">analysis.shape.</tt><tt class="descname">TestShape</tt><big>(</big><em>methodName='runTest'</em><big>)</big><a class="headerlink" href="#analysis.shape.TestShape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unit tests for the shape class.</p>
+</dd></dl>
+
 <dl class="class">
 <dt id="analysis.shape.shapeMeasurement">
 <em class="property">class </em><tt class="descclassname">analysis.shape.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>data</em>, <em>log</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement" title="Permalink to this definition">¶</a></dt>
@@ -295,8 +381,16 @@ because NumPy arrays are column major.</p>
 <p>By default polarisability/ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
 If self.settings[&#8216;weighted&#8217;] is False then no weighting scheme is used.</p>
 <p>The number of iterations is defined in self.settings[&#8216;iterations&#8217;].</p>
-<p>:return centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
-:rtype: dict</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -320,6 +414,136 @@ If self.settings[&#8216;weighted&#8217;] is False then no weighting scheme is us
 <dl class="method">
 <dt id="analysis.shape.shapeMeasurement.writeFITS">
 <tt class="descname">writeFITS</tt><big>(</big><em>data</em>, <em>output</em><big>)</big><a class="headerlink" href="#analysis.shape.shapeMeasurement.writeFITS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write out a FITS file using PyFITS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; data to write to a FITS file</li>
+<li><strong>output</strong> (<em>string</em>) &#8211; name of the output file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<dl class="class">
+<dt>
+<em class="property">class </em><tt class="descclassname">analysis.shape.</tt><tt class="descname">shapeMeasurement</tt><big>(</big><em>data</em>, <em>log</em>, <em>**kwargs</em><big>)</big></dt>
+<dd><p>Provides methods to measure the shape of an object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data</strong> (<em>ndarray</em>) &#8211; name of the FITS file to be analysed.</li>
+<li><strong>log</strong> (<em>instance</em>) &#8211; logger</li>
+<li><strong>kwargs</strong> (<em>dict</em>) &#8211; additional keyword arguments</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Settings dictionary contains all parameter values needed.</p>
+<dl class="method">
+<dt>
+<tt class="descname">Gaussian2D</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigmax</em>, <em>sigmay</em><big>)</big></dt>
+<dd><p>Create a two-dimensional Gaussian centered on x, y.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; x coordinate of the centre</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; y coordinate of the centre</li>
+<li><strong>sigmax</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in x-direction</li>
+<li><strong>sigmay</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in y-direction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">circular Gaussian 2D profile and x and y mesh grid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">circular2DGaussian</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigma</em><big>)</big></dt>
+<dd><p>Create a circular symmetric Gaussian centered on x, y.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; x coordinate of the centre</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; y coordinate of the centre</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian, note that sigma_x = sigma_y = sigma</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">circular Gaussian 2D profile and x and y mesh grid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">measureRefinedEllipticity</tt><big>(</big><big>)</big></dt>
+<dd><p>Derive a refined iterated polarisability/ellipticity measurement for a given object.</p>
+<p>By default polarisability/ellipticity is defined in terms of the Gaussian weighted quadrupole moments.
+If self.settings[&#8216;weighted&#8217;] is False then no weighting scheme is used.</p>
+<p>The number of iterations is defined in self.settings[&#8216;iterations&#8217;].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">quadrupoles</tt><big>(</big><em>img</em><big>)</big></dt>
+<dd><p>Derive quadrupole moments and ellipticity from the input image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>ndarray</em>) &#8211; input image data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">quadrupoles, centroid, and ellipticity (also the projected components e1, e2)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<tt class="descname">writeFITS</tt><big>(</big><em>data</em>, <em>output</em><big>)</big></dt>
 <dd><p>Write out a FITS file using PyFITS.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -958,6 +1182,18 @@ to an aperture of a given radius.</p>
 <dd><p>Reads in the data from a given FITS file.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="analysis.PSFproperties.shapeComparisonToAST">
+<tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">shapeComparisonToAST</tt><big>(</big><em>oversample=3.0</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.shapeComparisonToAST" title="Permalink to this definition">¶</a></dt>
+<dd><p>To calculate shapes from AST PSFs.</p>
+<p>One of the actions from the PLM-SRR was 8941 (RID No: ENG-219), with the
+following wording:
+ASFT shall provide to the VIS team a PSF profile with associated R2
+with the sampling set to 4 microns and the VIS team will check that when
+applying the R2 processing the result is identical, to double check that
+the process is correct.</p>
+</dd></dl>
+
 </div>
 <span class="target" id="module-analysis.PSFbasisSets"></span><div class="section" id="generating-psf-basis-sets">
 <h2>Generating PSF Basis Sets<a class="headerlink" href="#generating-psf-basis-sets" title="Permalink to this headline">¶</a></h2>
@@ -1089,6 +1325,136 @@ singular values to ensure uncorrelated outputs with unit component-wise variance
 </dd></dl>
 
 </div>
+<span class="target" id="module-analysis.PSFcentroidingEffects"></span><p>Simple script to test the impact of centroiding on PSF ellipticity and size.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">VISsim-Python</td>
+</tr>
+<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.PSFcentroidingEffects.Gaussian2D">
+<tt class="descclassname">analysis.PSFcentroidingEffects.</tt><tt class="descname">Gaussian2D</tt><big>(</big><em>x</em>, <em>y</em>, <em>sigmax</em>, <em>sigmay</em>, <em>xsize=512</em>, <em>ysize=512</em><big>)</big><a class="headerlink" href="#analysis.PSFcentroidingEffects.Gaussian2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a two-dimensional Gaussian centered on x, y.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; x coordinate of the centre</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; y coordinate of the centre</li>
+<li><strong>sigmax</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in x-direction</li>
+<li><strong>sigmay</strong> (<em>float</em>) &#8211; standard deviation of the Gaussian in y-direction</li>
+<li><strong>xsize</strong> (<em>int</em>) &#8211; number of pixels in xdirection</li>
+<li><strong>ysize</strong> (<em>int</em>) &#8211; number of pixels in ydirection</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">circular Gaussian 2D profile and x and y mesh grid</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFcentroidingEffects.frebin">
+<tt class="descclassname">analysis.PSFcentroidingEffects.</tt><tt class="descname">frebin</tt><big>(</big><em>image</em>, <em>nsout</em>, <em>nlout=1</em>, <em>total=False</em><big>)</big><a class="headerlink" href="#analysis.PSFcentroidingEffects.frebin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shrink or expand the size of an array an arbitary amount using interpolation.
+Conserves flux by ensuring that each input pixel is equally represented
+in the output array.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">one could do the binning faster if old and new outputs are modulo 0</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">modelled after the IDL code frebin.pro, so this may not be the fastest solution</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>image</strong> &#8211; input image, 1-d or 2-d ndarray</li>
+<li><strong>nsout</strong> &#8211; number of samples in the output image, numeric scalar</li>
+<li><strong>nlout</strong> &#8211; number of lines (ydir) in the output image, numeric scalar</li>
+<li><strong>total</strong> &#8211; Use of the total conserves surface flux. If True, the output pixels
+will be the sum of pixels within the appropriate box of the input image.
+Otherwise they will be the average.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">binned array</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFcentroidingEffects.plotCentroids">
+<tt class="descclassname">analysis.PSFcentroidingEffects.</tt><tt class="descname">plotCentroids</tt><big>(</big><em>results</em><big>)</big><a class="headerlink" href="#analysis.PSFcentroidingEffects.plotCentroids" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFcentroidingEffects.testCentroidingImpact">
+<tt class="descclassname">analysis.PSFcentroidingEffects.</tt><tt class="descname">testCentroidingImpact</tt><big>(</big><em>log</em>, <em>psf='/Users/sammy/EUCLID/vissim-python/data/psf12x.fits'</em>, <em>xrange=12</em>, <em>yrange=12</em>, <em>zoom=12</em>, <em>iterations=50</em><big>)</big><a class="headerlink" href="#analysis.PSFcentroidingEffects.testCentroidingImpact" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.PSFcentroidingEffects.testCentroidingImpactSingleDirection">
+<tt class="descclassname">analysis.PSFcentroidingEffects.</tt><tt class="descname">testCentroidingImpactSingleDirection</tt><big>(</big><em>log</em>, <em>psf='/Users/sammy/EUCLID/vissim-python/data/psf12x.fits'</em>, <em>canvas=16</em>, <em>ran=13</em>, <em>zoom=12</em>, <em>iterations=50</em>, <em>sigma=0.75</em>, <em>gaussian=False</em>, <em>interpolation=False</em>, <em>save=True</em><big>)</big><a class="headerlink" href="#analysis.PSFcentroidingEffects.testCentroidingImpactSingleDirection" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <span class="target" id="module-analysis.fitPSF"></span><div class="section" id="psf-fitting">
 <h2>PSF Fitting<a class="headerlink" href="#psf-fitting" title="Permalink to this headline">¶</a></h2>
 <p>This script can be used to fit a set of basis functions to a point spread function.</p>
@@ -1395,23 +1761,69 @@ None, which then uses the center of the image (including fractional pixels).</li
 </table>
 </dd></dl>
 
+<dl class="class">
+<dt id="analysis.CTIpower.ps">
+<em class="property">class </em><tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">ps</tt><big>(</big><em>g</em>, <em>step=48.0</em>, <em>size=10.0</em>, <em>nbin=20</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.ps" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to calculate the power spectrum.</p>
+<dl class="method">
+<dt id="analysis.CTIpower.ps.angavg">
+<tt class="descname">angavg</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.CTIpower.ps.angavg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Angular average of the spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analysis.CTIpower.ps.create">
+<tt class="descname">create</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.CTIpower.ps.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the actual power spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analysis.CTIpower.ps.plot">
+<tt class="descname">plot</tt><big>(</big><em>title='Power Spectrum'</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.ps.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot it</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="analysis.CTIpower.ps.setup">
+<tt class="descname">setup</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.CTIpower.ps.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up stuff like l ranges</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-<span class="target" id="module-analysis.nonlinearityModelTransfer"></span><div class="section" id="non-linearity-ii-model-transfer">
-<h2>Non-linearity II: Model Transfer<a class="headerlink" href="#non-linearity-ii-model-transfer" title="Permalink to this headline">¶</a></h2>
-<p>Most PSF stars are bright while most weak lensing galaxies are faint,
-thus the PSF model needs to be transferable to an appropriate object luminosity (and colour, position, etc.).
-This simple script can be used to study the error in the model transfer due to non-linearity that can be
-tolerated given the requirements.</p>
-<p>The following requirements related to the model transfer have been taken from CalCD-B.</p>
+<span class="target" id="module-analysis.compareSNRs"></span><p>This script can be used to compare SNRs of SExtracted pointed sources to the radiometric calculations.</p>
+<dl class="function">
+<dt id="analysis.compareSNRs.compareCounts">
+<tt class="descclassname">analysis.compareSNRs.</tt><tt class="descname">compareCounts</tt><big>(</big><em>catalog</em>, <em>min=30</em>, <em>max=1610</em>, <em>timestamp=False</em><big>)</big><a class="headerlink" href="#analysis.compareSNRs.compareCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="analysis.compareSNRs.compareMagnitudes">
+<tt class="descclassname">analysis.compareSNRs.</tt><tt class="descname">compareMagnitudes</tt><big>(</big><em>catalog</em>, <em>min=22.9</em>, <em>max=26.1</em>, <em>timestamp=False</em><big>)</big><a class="headerlink" href="#analysis.compareSNRs.compareMagnitudes" title="Permalink to this definition">¶</a></dt>
+<dd><p>A simple plot to compare input and extracted magnitudes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.compareSNRs.compareSNR">
+<tt class="descclassname">analysis.compareSNRs.</tt><tt class="descname">compareSNR</tt><big>(</big><em>catalog</em>, <em>max=33</em>, <em>noNoise=False</em><big>)</big><a class="headerlink" href="#analysis.compareSNRs.compareSNR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare SExtracted SNR to radiometric model from ETC module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.compareSNRs.readCatalog">
+<tt class="descclassname">analysis.compareSNRs.</tt><tt class="descname">readCatalog</tt><big>(</big><em>file='mergedNoNoise.dat'</em><big>)</big><a class="headerlink" href="#analysis.compareSNRs.readCatalog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in a SExtractor type catalog using the sextutils module.</p>
+</dd></dl>
+
+<span class="target" id="module-analysis.saturatedArea"></span><div class="section" id="saturated-imaging-area">
+<h2>Saturated Imaging Area<a class="headerlink" href="#saturated-imaging-area" title="Permalink to this headline">¶</a></h2>
+<p>This scripts can be used to study the imaging area that is impacted by bright stars.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS</td>
-</tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">SciPy</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
 </tr>
 <tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
 </tr>
@@ -1426,64 +1838,17 @@ tolerated given the requirements.</p>
 </tbody>
 </table>
 <dl class="function">
-<dt id="analysis.nonlinearityModelTransfer.plotResults">
-<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">plotResults</tt><big>(</big><em>results</em>, <em>reqe=3.5e-05</em>, <em>reqr2=0.00035</em>, <em>outdir='results'</em>, <em>timeStamp=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.plotResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a simple plot to combine and show the results.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>res</strong> (<em>list</em>) &#8211; results to be plotted [reference values, results dictionary]</li>
-<li><strong>reqe</strong> (<em>float</em>) &#8211; the requirement for ellipticity [default=3.5e-5]</li>
-<li><strong>reqr2</strong> (<em>float</em>) &#8211; the requirement for size R2 [default=3.5e-4]</li>
-<li><strong>outdir</strong> (<em>str</em>) &#8211; output directory to which the plots will be saved to</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
+<dt>
+<tt class="descname">areaImpacted(magnitudes=array([  0.,   1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,   9.,  10.,</tt></dt>
+<dt>
+<tt class="descname">11.,  12.,  13.,  14.,  15.,  16.,  17.,  18.,  19.]), offset=0.5, star=False)</tt></dt>
+<dd></dd></dl>
 
 <dl class="function">
-<dt id="analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer">
-<tt class="descclassname">analysis.nonlinearityModelTransfer.</tt><tt class="descname">testNonlinearityModelTransfer</tt><big>(</big><em>log</em>, <em>file='data/psf12x.fits'</em>, <em>oversample=12.0</em>, <em>sigma=0.75</em>, <em>psfs=5000</em>, <em>amps=12</em>, <em>multiplier=1.5</em>, <em>minerror=-5.0</em>, <em>maxerror=-1.0</em>, <em>lowflux=500</em>, <em>highflux=180000</em>, <em>linspace=False</em><big>)</big><a class="headerlink" href="#analysis.nonlinearityModelTransfer.testNonlinearityModelTransfer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function to study the error in the non-linearity correction on the knowledge of the PSF ellipticity and size.</p>
-<p>The error has been assumed to follow a sinusoidal curve with random phase and a given number of angular
-frequencies (defined by the multiplier). The amplitudes being studied, i.e. the size of the maximum deviation,
-can be spaced either linearly or logarithmically.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>log</strong> (<em>instance</em>) &#8211; logger instance</li>
-<li><strong>file</strong> (<em>str</em>) &#8211; name of the PSF FITS files to use [default=data/psf12x.fits]</li>
-<li><strong>oversample</strong> &#8211; the PSF oversampling factor, which needs to match the input file [default=12]</li>
-<li><strong>sigma</strong> (<em>float</em>) &#8211; 1sigma radius of the Gaussian weighting function for shape measurements</li>
-<li><strong>phs</strong> (<em>float</em>) &#8211; phase in case phases = None</li>
-<li><strong>phases</strong> (<em>None or int</em>) &#8211; if None then a single fixed phase will be applied, if an int then a given number of random
-phases will be used</li>
-<li><strong>psfs</strong> (<em>int</em>) &#8211; the number of PSFs to use.</li>
-<li><strong>amps</strong> (<em>int</em>) &#8211; the number of individual samplings used when covering the error space</li>
-<li><strong>multiplier</strong> (<em>int or float</em>) &#8211; the number of angular frequencies to be used</li>
-<li><strong>minerror</strong> (<em>float</em>) &#8211; the minimum error to be covered, given in log10(min_error) [default=-5 i.e. 0.001%]</li>
-<li><strong>maxerror</strong> (<em>float</em>) &#8211; the maximum error to be covered, given in log10(max_error) [default=-1 i.e. 10%]</li>
-<li><strong>linspace</strong> (<em>boolean</em>) &#8211; whether the amplitudes of the error curves should be linearly or logarithmically spaced.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">reference value and results dictionaries</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+<dt id="analysis.saturatedArea.pixelsImpacted">
+<tt class="descclassname">analysis.saturatedArea.</tt><tt class="descname">pixelsImpacted</tt><big>(</big><em>magnitude</em>, <em>exptime=565</em>, <em>pixelFractions=(0.65</em>, <em>0.4</em>, <em>0.35</em>, <em>0.18</em>, <em>0.09</em>, <em>0.05)</em>, <em>star=False</em>, <em>lookup=True</em><big>)</big><a class="headerlink" href="#analysis.saturatedArea.pixelsImpacted" title="Permalink to this definition">¶</a></dt>
+<dd><p>This potentially overestimates because does not consider the fact that bleeding is along the column
+and hence some saturated pixels may be double counted.</p>
 </dd></dl>
 
 </div>
@@ -1504,6 +1869,9 @@ phases will be used</li>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="support.html" title="Supporting Methods"
+             >next</a> |</li>
         <li class="right" >
           <a href="reduction.html" title="Data reduction tools"
              >previous</a> |</li>

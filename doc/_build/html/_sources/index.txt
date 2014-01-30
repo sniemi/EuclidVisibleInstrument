@@ -3,8 +3,8 @@ Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation
 
 :Author: Sami-Matias Niemi
 :Contact: s.niemi@ucl.ac.uk
-:issue: 1.0
-:version: 1.2
+:issue: 1.1
+:version: 1.3
 :date: |today|
 
 
@@ -250,6 +250,20 @@ single 565 second exposure, and therefore the scatter is large in case of fainte
 
      Example showing the recovered photometry for point sources from a reference simulator image with realistic noise
      and an average background, but without any radiation damage to the CCD.
+
+
+
+Supporting Methods
+==================
+
+The *support* subpackage contains classes and scripts that support other codes. For more detailed
+documentation of the classes, please see:
+
+.. toctree::
+   :maxdepth: 4
+
+   support
+
 
 
 Indices and tables

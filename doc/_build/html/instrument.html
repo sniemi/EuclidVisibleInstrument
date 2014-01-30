@@ -362,7 +362,7 @@ This is only valid for Gaussian PSFs.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>array_shape</strong> &#8211; </li>
-<li><strong>nyq</strong> &#8211; cutout frequency (Nyquist = 4?)</li>
+<li><strong>nyq</strong> &#8211; cutout frequency (16)</li>
 </ul>
 </td>
 </tr>
@@ -413,16 +413,15 @@ uses this convention.</p>
 
 <dl class="function">
 <dt id="sandbox.MTF.requirement">
-<tt class="descclassname">sandbox.MTF.</tt><tt class="descname">requirement</tt><big>(</big><em>alpha=0.2</em>, <em>w=12.9</em><big>)</big><a class="headerlink" href="#sandbox.MTF.requirement" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">sandbox.MTF.</tt><tt class="descname">requirement</tt><big>(</big><em>alpha=0.2</em>, <em>w=2.0</em><big>)</big><a class="headerlink" href="#sandbox.MTF.requirement" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots the requirements, both for PSF and MTF and compares them.</p>
-<p>A fudge factor is required... should be pi / 2., but power laws are scale invariant so it doesn&#8217;t matter.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>alpha</strong> &#8211; power law slope</li>
-<li><strong>w</strong> &#8211; fudge factor (wavenumber)</li>
+<li><strong>w</strong> &#8211; wavenumber</li>
 </ul>
 </td>
 </tr>

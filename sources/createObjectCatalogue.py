@@ -428,10 +428,9 @@ if __name__ == '__main__':
 
     #CatalogueBachallSoneira()
 
-    #starCatalogueBachallSoneira(b=25, output='starsOnly.dat')
-    starCatalogueBachallSoneira(b=25, output='starsOnly1.dat')
-    starCatalogueBachallSoneira(b=25, output='starsOnly2.dat')
-    starCatalogueBachallSoneira(b=25, output='starsOnly3.dat')
+    #for ghost analysis (for Henk)
+    for x in range(50):
+        starCatalogueBachallSoneira(b=25, output='starsOnly%i.dat' % x)
 
     #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
     #

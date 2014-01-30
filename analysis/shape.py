@@ -4,16 +4,13 @@ Measuring a shape of an object
 
 Simple class to measure quadrupole moments and ellipticity of an object.
 
-.. Note:: Double check that the e1 component is not flipped in sense that Qxx and Qyy would be reversed
-          because NumPy arrays are column major.
-
 :requires: NumPy
 :requres: PyFITS
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
 
-:version: 0.46
+:version: 0.47
 """
 import math, os, datetime, unittest
 import numpy as np
@@ -237,7 +234,7 @@ class shapeMeasurement():
 
         The number of iterations is defined in self.settings['iterations'].
 
-        :return centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
+        :return: centroids [indexing stars from 1], ellipticity (including projected e1 and e2), and R2
         :rtype: dict
         """
         self.settings['sampleSigma'] = self.settings['sigma'] / self.settings['pixelSize'] * \

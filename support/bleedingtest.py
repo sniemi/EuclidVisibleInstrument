@@ -1,4 +1,7 @@
 """
+CCD Charge Bleeding
+===================
+
 A simple script to test how to simulate CCD bleeding effects.
 
 :requires: PyFITS

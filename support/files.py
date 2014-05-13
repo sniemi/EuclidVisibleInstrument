@@ -5,7 +5,7 @@ IO related functions.
 :requires: NumPy
 
 :author: Sami-Matias Niemi
-:contact: smn2@mssl.ucl.ac.uk
+:contact: s.niemi@mucl.ac.uk
 """
 import datetime, cPickle, os
 import pyfits as pf
@@ -23,6 +23,20 @@ def cPickleDumpDictionary(dictionary, output):
     """
     out = open(output, 'wb')
     cPickle.dump(dictionary, out)
+    out.close()
+
+
+def cPickleDump(data, output):
+    """
+    Dumps data to a cPickled file.
+
+    :param data: a Python data container
+    :param output: name of the output file
+
+    :return: None
+    """
+    out = open(output, 'wb')
+    cPickle.dump(data, out)
     out.close()
 
 

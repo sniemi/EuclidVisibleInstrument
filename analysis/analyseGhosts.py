@@ -958,9 +958,9 @@ if __name__ == '__main__':
 
     #imapact on object detection
     log.info('Calculating the effect on object detection...')
-    objectDetection(log)
+    #objectDetection(log)
     #objectDetection(log, ghostlevels=(5.e-5, 5.e-7))
-    #objectDetection(log, covering=10000, ghostlevels=(1.15e-5, 1.15e-7))
+    objectDetection(log, covering=11500, ghostlevels=(5.e-5, 4.e-6, 5.e-6, 1.e-6, 6.e-7))
 
     #impact on shape measurement
     #log.info('Calculatsing the oeffect on shape measurements...')

@@ -35,8 +35,8 @@ def VISinformation():
          apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
          aperture_size: 132.73228961416876 - derived (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
          beta: 0.6 - CDM03 (Short et al. 2010)
-         bias: 1000.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
-         cosmic_bkgd: 0.172 - derived  (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
+         bias: 500.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
+         cosmic_bkgd: 0.172 - derived (radiometric_model_reference_phase4_JA110415_2_MSSL_version)
          dark: 0.001 - CCD spec EUCL-EST-RS-6-002
          diameter: 1.3 - radiometric_model_reference_phase4_JA110415_2_MSSL_version
          dob: 0 - CDM03 (Short et al. 2010)
@@ -87,7 +87,7 @@ def VISinformation():
                diameter=1.3, galaxy_fraction=0.836, star_fraction=0.928243, peak_fraction=0.261179,
                zeropoint=25.50087633632, gain=3.1, sky_high=21.7206, sky_low=22.9207, magzero=15861729325.3279,
                fullwellcapacity=200000, readout=4.5, bias=1000.0, cosmic_bkgd=0.172, e_adu=3.1,
-               xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=88., apCorrection=0.925969,
+               xsize=2048, ysize=2066, prescanx=50, ovrscanx=20, readtime=78., apCorrection=0.925969,
                zeropointNoObscuration=25.57991044453)
 
     out.update({'dob' : 0, 'rdose' : 8.0e9,

@@ -50,7 +50,6 @@ def plotPRNU(data, xmin=700, xmax=1700, ymin=3500, ymax=4500, order=3, smooth=3.
     """
     Generate and plot maps of PRNU, ratios of PRNU maps, and show the PRNU as a function of wavelength.
     """
-
     number_of_subplots = math.ceil(len(data.keys())/2.)
 
     plt.figure(figsize=(8, 13))

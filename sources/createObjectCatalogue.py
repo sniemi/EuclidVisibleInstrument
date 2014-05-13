@@ -282,8 +282,9 @@ def starCatalogueBachallSoneira(magnitudeLimit=28, b=30, l=0, sqdeg=0.496,
     plotCatalog(output)
 
 
-def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=26000, ymax=26000,
-                            types=np.arange(17, 103)):
+def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0,
+                            sqdeg=0.496, xmax=26000, ymax=29000,
+                            types=np.arange(17, 103), output='catalogue.dat'):
     """
     Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
     Includes also galaxies.
@@ -300,6 +301,10 @@ def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=2600
     :type xmax: int
     :param ymax: highest pixel value to use for the random positions in y
     :type ymax: int
+    :param types: a list of galaxy types corresponding to the postage stamp images
+    :type types: list
+    :param output: name of the output file
+    :type output: str
 
     :return: None
     """
@@ -330,7 +335,7 @@ def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=2600
 
     mag = drawFromCumulativeDistributionFunction(cpdf, starmags, nstars)
 
-    fh = open('catalogue.dat', 'w')
+    fh = open(output, 'w')
     fh.write('#   1 X                Object position along x                                    [pixel]\n')
     fh.write('#   2 Y                Object position along y                                    [pixel]\n')
     fh.write('#   3 MAG              Object magnitude                                           [AB]\n')
@@ -362,9 +367,14 @@ def CatalogueBachallSoneira(magnitudeLimit=28, b=25, l=0, sqdeg=0.496, xmax=2600
     mag = drawFromCumulativeDistributionFunction(cumulative, galaxymags, nums)
 
     for x, y, m, t, ang in zip(xc, yc, mag, typ, theta):
-        fh.write('%f %f %f %i %f \n' % (x, y, m, t, ang))
+        if t < 1:
+            fh.write('%f %f %f %i %f \n' % (x, y, m, t, 0.0))
+        else:
+            fh.write('%f %f %f %i %f \n' % (x, y, m, t, ang))
 
     fh.close()
+
+    plotCatalog(output)
 
 
 def starCatalog(stars=400, xmax=2048, ymax=2066, magmin=23, magmax=26):
@@ -421,16 +431,17 @@ if __name__ == '__main__':
     #generateCatalog(**settings)
 
     #full FoV
-    #settings = dict(besancon=False, deg=30, nx=60000, ny=60000, outputprefix='fullFoV',
-    #                types=np.arange(17, 103))
-    #generateCatalog(**settings)
-    #plotCatalog('fullFoV0.dat')
+    settings = dict(besancon=False, deg=30, nx=40000, ny=40000, outputprefix='fullFoV',
+                    types=np.arange(17, 103))
+    generateCatalog(**settings)
+    plotCatalog('fullFoV0.dat')
 
     #CatalogueBachallSoneira()
 
     #for ghost analysis (for Henk)
-    for x in range(50):
-        starCatalogueBachallSoneira(b=25, output='starsOnly%i.dat' % x)
+    #for x in range(10):
+    #    starCatalogueBachallSoneira(b=25, output='starsOnly%i.dat' % x)
+    #    CatalogueBachallSoneira(b=30, types=[0,], output='ghostSandG%i.dat' % (x+1))
 
     #single CCD (but extra so that ghosts can be simulated to CCD=1,1)
     #

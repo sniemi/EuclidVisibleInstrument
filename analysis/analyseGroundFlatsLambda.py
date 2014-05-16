@@ -657,6 +657,9 @@ def structuralSimilarity(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=0.):
     plt.subplots_adjust(wspace=0.05, hspace=0.15, left=0.01, right=0.99, top=0.95, bottom=0.05)
 
     #loop over data from shortest wavelength to the longest
+    wavearray = []
+    msearray = []
+    ssiarray = []
     for i, wave in enumerate(sorted(data.keys())):
         tmp = data[wave][ymin:ymax, xmin:xmax].copy()
         rows, cols = tmp.shape
@@ -666,7 +669,8 @@ def structuralSimilarity(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=0.):
             tmp = gaussian_filter(tmp, smooth)
 
         ms = mse(tmp, ref)
-        ssi = ssim(tmp, ref, dynamic_range=tmp.max() - tmp.min(), win_size=19)
+        #careful with the win_size, can take up to 16G of memory if set to e.g. 19
+        ssi = ssim(tmp, ref, dynamic_range=tmp.max() - tmp.min(), win_size=9)
 
         ax = plt.subplot(number_of_subplots, 2, i+1)
         im = ax.imshow(tmp, interpolation='none', origin='lower', vmin=0.997, vmax=1.003)
@@ -676,6 +680,9 @@ def structuralSimilarity(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=0.):
         plt.axis('off')
 
         print wave, ms, ssi
+        wavearray.append(int(wave))
+        msearray.append(ms)
+        ssiarray.append(ssi)
 
     cbar = plt.colorbar(im, cax=fig.add_axes([0.65, 0.14, 0.25, 0.03], frameon=False),
                         ticks=[0.997, 1, 1.003], format='%.3f', orientation='horizontal')
@@ -683,6 +690,20 @@ def structuralSimilarity(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=0.):
 
     plt.savefig('StructuralSimilarities.png')
     plt.close()
+
+    fig = plt.figure()
+    plt.title(r'Mean Squared Error Wrt. $\lambda = 700$nm')
+    ax = fig.add_subplot(111)
+    ax.plot(wavearray, msearray, 'bo')
+    ax.set_xlim(500, 900)
+    ax.set_ylim(-0.03, 6.)
+    ax.set_ylabel('MSE')
+    ax.set_xlabel('Wavelength [nm]')
+    plt.savefig('MSEwave.pdf')
+    plt.close()
+
+
+
 
 
 def _loadPRNUmaps(id='*FlatField.fits'):

@@ -4,7 +4,7 @@ A simple script to analyse ground/lab flat fields.
 This script has been written to analyse the wavelength dependency of the PRNU.
 
 :author: Sami-Matias Niemi
-:version: 0.1
+:version: 0.3
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -32,8 +32,55 @@ from astropy.modeling import models, fitting
 from multiprocessing import Pool
 import math
 from PIL import Image
-from skimage import data, img_as_float
+from scipy.interpolate import interp1d
 from skimage.measure import structural_similarity as ssim
+from sklearn import linear_model
+from sklearn.gaussian_process import GaussianProcess
+from matplotlib.ticker import FixedFormatter
+from scipy.stats import gaussian_kde
+from statsmodels.nonparametric.kde import KDEUnivariate
+from statsmodels.nonparametric.kernel_density import KDEMultivariate
+from sklearn.neighbors import KernelDensity
+
+
+def kde_scipy(x, x_grid, bandwidth=0.2, **kwargs):
+    """Kernel Density Estimation with Scipy"""
+    # Note that scipy weights its bandwidth by the covariance of the
+    # input data.  To make the results comparable to the other methods,
+    # we divide the bandwidth by the sample standard deviation here.
+    kde = gaussian_kde(x, bw_method=bandwidth / x.std(ddof=1), **kwargs)
+    return kde.evaluate(x_grid)
+
+
+def kde_statsmodels_u(x, x_grid, bandwidth=0.2, **kwargs):
+    """Univariate Kernel Density Estimation with Statsmodels"""
+    kde = KDEUnivariate(x)
+    kde.fit(bw=bandwidth, **kwargs)
+    return kde.evaluate(x_grid)
+
+
+def kde_statsmodels_m(x, x_grid, bandwidth=0.2, **kwargs):
+    """Multivariate Kernel Density Estimation with Statsmodels"""
+    kde = KDEMultivariate(x, bw=bandwidth * np.ones_like(x),
+                          var_type='c', **kwargs)
+    return kde.pdf(x_grid)
+
+
+def kde_sklearn(x, x_grid, bandwidth=0.2, **kwargs):
+    """Kernel Density Estimation with Scikit-learn"""
+    kde_skl = KernelDensity(bandwidth=bandwidth, **kwargs)
+    kde_skl.fit(x[:, np.newaxis])
+    # score_samples() returns the log-likelihood of the samples
+    log_pdf = kde_skl.score_samples(x_grid[:, np.newaxis])
+    return np.exp(log_pdf)
+
+
+def kde_statsmodels_u(x, x_grid, bandwidth=0.2, **kwargs):
+    """Univariate Kernel Density Estimation with Statsmodels"""
+    kde = KDEUnivariate(x)
+    kde.fit(bw=bandwidth, **kwargs)
+    return kde.evaluate(x_grid)
+
 
 
 def subtractBias(data, biasfile):
@@ -352,14 +399,31 @@ def plot(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=2.):
     p3 = np.poly1d(z3)
     x = np.linspace(500, 900)
 
+    #using a gaussian process
+    X = np.atleast_2d(w).T
+    y = np.asarray(mean)
+    ev = np.atleast_2d(np.linspace(500, 900, 1000)).T #points at which to evaluate
+    # Instanciate a Gaussian Process model
+    gp = GaussianProcess(corr='squared_exponential', theta0=1e-1, thetaL=1e-3, thetaU=1,
+                         nugget=(np.asarray(std)*3/y)**2, random_start=100)
+    # Fit to data using Maximum Likelihood Estimation of the parameters
+    gp.fit(X, y)
+    # Make the prediction on the meshed x-axis (ask for MSE as well)
+    y_pred, MSE = gp.predict(ev, eval_MSE=True)
+    sigma = np.sqrt(MSE)
+
     #standard error of the mean
     sigma3 = 3.*np.asarray(std)/np.sqrt(len(std))
 
     #wavelength dependency plot
     plt.title('Wavelength Dependency of the PRNU')
-    plt.plot(x, p2(x), 'b-', label='linear fit')
-    plt.plot(x, p3(x), 'g--', label='3rd order fit')
+    #plt.plot(x, p3(x), 'g--', label='3rd order fit')
+    plt.plot(ev, y_pred, 'b-', label='Prediction')
+    plt.fill(np.concatenate([ev, ev[::-1]]),
+             np.concatenate([y_pred - 1.9600 * sigma, (y_pred + 1.9600 * sigma)[::-1]]),
+             alpha=.5, fc='b', ec='None', label=u'95\% confidence interval')
     plt.errorbar(w, mean, yerr=sigma3, c='r', fmt='o', label='data, $3\sigma$ errors')
+    plt.plot(x, p2(x), 'g-', lw=2, label='linear fit')
     plt.xlabel(r'Wavelength $\lambda$ [nm]')
     plt.ylabel(r'PRNU $[\%]$')
     plt.xlim(500, 900)
@@ -703,7 +767,314 @@ def structuralSimilarity(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=0.):
     plt.close()
 
 
+def interpolateMissing(hide=600, kind='linear', three=False):
+    """
+    Interpolates the hidden PRNU map by using the other PRNU maps and interpolating between them.
+    The current implementations is really slow because it relies in nested 1D interpolation.
 
+    :param hide: which wavelength is used as the target to recover
+    :type hide: int
+    :param kind: interpolation type e.g. linear or qaudratic, see scipy interp1d for information
+    :type kind: str
+    :param three: whether only three wavelengths were available
+    :type three: bool
+
+    :return: derived PRNU map, target PRNU map
+    :rtype: list of ndarrays
+    """
+    shide = str(hide)
+
+    data = _loadPRNUmaps()
+
+    #these are all the other data
+    rest = []
+    w  = []
+    for i, wave in enumerate(sorted(data.keys())):
+        if shide not in wave:
+            rest.append(data[wave][1150:1300, 1200:1400])
+            #rest.append(data[wave][200:1600, 300:3500])
+            w.append(int(wave))
+        else:
+            #this is the one we try to recover
+            hidden = data[shide][1150:1300, 1200:1400]
+            #hidden = data[shide][200:1600, 300:3500]
+
+    if three:
+        #pick first and last and one from the middle
+        rest = [rest[0], rest[2], rest[-1]]
+        w = [w[0], w[2], w[-1]]
+
+    rest = np.asarray(rest)
+    ww, jj, ii = rest.shape
+    print w
+
+    out = np.zeros(hidden.shape)
+    #this is really slow way of doing this...
+    for j in range(jj):
+        for i in range(ii):
+            f = interp1d(w, rest[:, j, i], kind=kind)
+            out[j, i] = f(hide)
+
+    ratio = out / hidden
+    print 'Mean, STD, MSE:'
+    print ratio.mean(), ratio.std(), mse(out, hidden)
+
+    #save FITS files
+    if three:
+        fileIO.writeFITS(out, 'recoveredThree%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hiddenThree%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residualThree%i.fits' % hide, int=False)
+    else:
+        fileIO.writeFITS(out, 'recovered%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hidden%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residual%i.fits' % hide, int=False)
+
+    return out, hidden
+
+
+def predictMissingLinearRegression(hide=600, three=False):
+    shide = str(hide)
+
+    data = _loadPRNUmaps()
+
+    #these are all the other data
+    rest = []
+    w  = []
+    for i, wave in enumerate(sorted(data.keys())):
+        if shide not in wave:
+            #rest.append(data[wave][1150:1300, 1200:1400])
+            rest.append(data[wave][200:1600, 300:3500])
+            w.append(int(wave))
+        else:
+            #this is the one we try to recover
+            #hidden = data[shide][1150:1300, 1200:1400]
+            hidden = data[shide][200:1600, 300:3500]
+
+    if three:
+        #pick first and last and one from the middle
+        rest = [rest[0], rest[2], rest[-1]]
+        w = [w[0], w[2], w[-1]]
+
+    rest = np.asarray(rest)
+    print w
+    w = np.atleast_2d(w).T  #needed for the linear regression
+
+    #Create linear regression object
+    ww, jj, ii = rest.shape
+    out = np.zeros(hidden.shape)
+    #this is really slow way of doing this...
+    for j in range(jj):
+        for i in range(ii):
+            regr = linear_model.LinearRegression()
+            regr.fit(w, rest[:, j, i])
+            out[j, i] = regr.predict(hide)
+
+    ratio = out / hidden
+    print 'Mean, STD, MSE:'
+    print ratio.mean(), ratio.std(), mse(out, hidden)
+
+    #save FITS files
+    if three:
+        fileIO.writeFITS(out, 'recoveredThreeLR%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hiddenThreeLR%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residualThreeLR%i.fits' % hide, int=False)
+    else:
+        fileIO.writeFITS(out, 'recoveredLR%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hiddenLR%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residualLR%i.fits' % hide, int=False)
+
+    return out, hidden
+
+
+def predictMissingGaussianProcessRegression(hide=600, three=False):
+    shide = str(hide)
+
+    data = _loadPRNUmaps()
+
+    #these are all the other data
+    rest = []
+    w  = []
+    for i, wave in enumerate(sorted(data.keys())):
+        if shide not in wave:
+            rest.append(data[wave][1150:1300, 1200:1400])
+            #rest.append(data[wave][200:1600, 300:3500])
+            w.append(int(wave))
+        else:
+            #this is the one we try to recover
+            hidden = data[shide][1150:1300, 1200:1400]
+            #hidden = data[shide][200:1600, 300:3500]
+
+    if three:
+        #pick first and last and one from the middle
+        rest = [rest[0], rest[2], rest[-1]]
+        w = [w[0], w[2], w[-1]]
+
+    rest = np.asarray(rest)
+    print w
+    w = np.atleast_2d(w).T  #needed for the gp
+
+    #Create linear regression object
+    ww, jj, ii = rest.shape
+    out = np.zeros(hidden.shape)
+    #this is really slow way of doing this...
+    for j in range(jj):
+        for i in range(ii):
+            # Instanciate a Gaussian Process model
+            gp = GaussianProcess(regr='linear', corr='linear')
+            gp.fit(w, rest[:, j, i])
+            out[j, i] = gp.predict(hide)
+
+    ratio = out / hidden
+    print 'Mean, STD, MSE:'
+    print ratio.mean(), ratio.std(), mse(out, hidden)
+
+    #save FITS files
+    if three:
+        fileIO.writeFITS(out, 'recoveredThreeGP%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hiddenThreeGP%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residualThreeGP%i.fits' % hide, int=False)
+    else:
+        fileIO.writeFITS(out, 'recoveredGP%i.fits' % hide, int=False)
+        fileIO.writeFITS(hidden, 'hiddenGP%i.fits' % hide, int=False)
+        fileIO.writeFITS(ratio, 'residualGP%i.fits' % hide, int=False)
+
+    return out, hidden
+
+
+def plotMissing(target, derived, hide, out='', smooth=2, ratio=True):
+    """
+    Generate plots showing the target and derived PRNU maps and the residual of the two.
+    """
+    #plot simple images
+    fig = plt.figure(figsize=(15, 5))
+    ax1 = fig.add_subplot(131)
+    ax2 = fig.add_subplot(132)
+    ax3 = fig.add_subplot(133)
+
+    ax1.set_title('Target')
+    ax2.set_title('Derived')
+    if ratio:
+        ax3.set_title(r'Residual: (D/T)')
+    else:
+        ax3.set_title(r'Residual: $|D - T|$')
+
+    i1 = ax1.imshow(gaussian_filter(target, smooth),
+                    origin='lower', interpolation='none', rasterized=True, vmin=0.995, vmax=1.005)
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.3f', ticks=[0.995, 1, 1.005])
+    i2 = ax2.imshow(gaussian_filter(derived, smooth),
+                    interpolation='none', origin='lower', rasterized=True, vmin=0.995, vmax=1.005)
+    plt.colorbar(i2, ax=ax2, orientation='horizontal', format='%.3f', ticks=[0.995, 1, 1.005])
+    if ratio:
+        i3 = ax3.imshow(derived/target,
+                        interpolation='none', origin='lower', rasterized=True, vmin=0.995, vmax=1.005)
+        plt.colorbar(i3, ax=ax3, orientation='horizontal', format='%.3f', ticks=[0.995, 1, 1.005])
+    else:
+        i3 = ax3.imshow(np.absolute(derived - target),
+                        interpolation='none', origin='lower', rasterized=True, vmin=0., vmax=1e-3)
+        plt.colorbar(i3, ax=ax3, orientation='horizontal', format='%.1e', ticks=[0., 5e-4, 1e-3])
+    plt.savefig('PRNUmapRecovery%s%i.pdf' % (out, hide))
+    plt.close()
+
+
+def calculateAreaStatistcs(data, ylen=100, xlen=100):
+    """
+    Calculates a standard deviation in regions of a given size.
+    """
+    st = []
+    ydim, xdim = data.shape
+    samplesx = xdim / xlen
+    samplesy = ydim / ylen
+    #print samplesx, samplesy
+    for a in range(samplesy):
+        for b in range(samplesx):
+            area = data[a*ylen:(a+1)*ylen, b*xlen:(b+1)*xlen]
+            s = np.std(sigma_clip(area, 6.)) * 100.
+            st.append(s)
+
+    return st
+
+
+def plotRecoveredResiduals(xmin=-0.0035, xmax=0.0035, ymax=0.065, nbins=60):
+
+    six = g.glob('residualLR*.fits')
+    three = g.glob('residualThreeLR*.fits')
+
+    sixdata = []
+    #data format: [(wave1, data1), (wave2, data2)...]
+    for file in six:
+        #sixdata.append((int(file[10:13]), pf.getdata(file))) #ratio data
+        sixdata.append((int(file[10:13]),
+                        pf.getdata(file.replace('residual', 'hidden')) -
+                        pf.getdata(file.replace('residual', 'recovered'))))
+
+    threedata = []
+    for file in three:
+        #threedata.append((int(file[15:18]), pf.getdata(file))) #ratio data
+        threedata.append((int(file[15:18]),
+                          pf.getdata(file.replace('residual', 'hidden')) -
+                          pf.getdata(file.replace('residual', 'recovered'))))
+
+    #simple plot showing some structures
+    number_of_subplots = math.ceil(len(threedata))
+
+    plt.figure(figsize=(13, 13))
+    plt.subplots_adjust(wspace=0.01, hspace=0.2, left=0.05, right=0.99, top=0.95, bottom=0.05)
+
+    bins = np.linspace(xmin, xmax, nbins)
+
+    #loop over data from shortest wavelength to the longest
+    i = 1
+    pdfs = []
+    for wave, data in sixdata:
+        d = data.ravel()
+        pdf = kde_statsmodels_u(d.astype(np.float64), bins, bandwidth=1.e-4) * 1.e-4 * 1.2
+        pdfs.append(pdf)
+        txt = r'Six LEDs: $\lambda =$ ' + str(wave) + 'nm'
+        ax = plt.subplot(number_of_subplots, 2, i)
+        ax.set_title(txt)
+        ax.hist(d, bins=bins, weights=np.ones_like(d)/len(d))
+        ax.plot(bins, pdf, 'r-', lw=2)
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(0., ymax)
+        ax.axvline(x=0, color='g', lw=1.5)
+        #ax.set_xticks([xmin+2e-3, 1, xmax-2e-3])
+        plt.setp(ax.get_xticklabels(), visible=False)
+        xx, locs = plt.xticks()
+        ll = ['%.3f' % a for a in xx]
+        plt.gca().xaxis.set_major_formatter(FixedFormatter(ll))
+        ax.annotate(r'$\sigma(T-D) \sim %.2e$' % d.std(), xycoords='axes fraction', xy=(0.05, 0.85))
+
+        i += 2
+
+    plt.setp(ax.get_xticklabels(), visible=True)
+
+    i = 2
+    j = 0
+    for wave, data in threedata:
+        d = data.ravel()
+        txt = r'Three LEDs: $\lambda =$ ' + str(wave) + 'nm'
+        ax = plt.subplot(number_of_subplots, 2, i)
+        ax.set_title(txt)
+        ax.hist(d, bins=bins, weights=np.ones_like(d)/len(d))
+        ax.plot(bins, pdfs[j], 'r-', lw=2)
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(0., ymax)
+        ax.axvline(x=0, color='g', lw=1.5)
+        #ax.set_xticks([xmin+2e-3, 1, xmax-2e-3])
+        plt.setp(ax.get_xticklabels(), visible=False)
+        xx, locs = plt.xticks()
+        ll = ['%.3f' % a for a in xx]
+        plt.gca().xaxis.set_major_formatter(FixedFormatter(ll))
+        plt.setp(ax.get_yticklabels(), visible=False)
+        ax.annotate(r'$\sigma(T-D) \sim %.2e$' % d.std(), xycoords='axes fraction', xy=(0.05, 0.85))
+
+        i += 2
+        j += 1
+
+    plt.setp(ax.get_xticklabels(), visible=True)
+
+    plt.savefig('RecoveredResidualPixelValues.pdf')
+    plt.close()
 
 
 def _loadPRNUmaps(id='*FlatField.fits'):
@@ -737,4 +1108,36 @@ if __name__ == '__main__':
     #morphPRNUmap()
 
     #structural parameters
-    structuralSimilarity()
+    #structuralSimilarity()
+
+    # #try to recover a PRNU map using information at other wavelengths
+    # #using linear interpolation
+    # for hide in [570, 600, 660, 700, 800]:
+    #     print 'Hiding %inm, trying to recover using linear interpolation with' % hide
+    #     d, t = interpolateMissing(hide=hide)
+    #     plotMissing(t, d, hide)
+    #     d, t = interpolateMissing(hide=hide, three=True)
+    #     plotMissing(t, d, hide, out='Three')
+
+    #try to recover a PRNU map using information at other wavelengths
+    #using linear regression
+    # for hide in [570, 600, 660, 700, 800]:
+    #     print 'Hiding %inm, trying to recover using linear regression with' % hide
+    #     d, t = predictMissingLinearRegression(hide=hide)
+    #     plotMissing(t, d, hide, out='LR')
+    #     d, t = predictMissingLinearRegression(hide=hide, three=True)
+    #     plotMissing(t, d, hide, out='ThreeLR')
+
+    # #try to recover a PRNU map using information at other wavelengths
+    # #using gaussian process
+    # for hide in [570, 600, 660, 700, 800]:
+    #     print 'Hiding %inm, trying to recover using gaussian process with' % hide
+    #     d, t = predictMissingGaussianProcessRegression(hide=hide)
+    #     plotMissing(t, d, hide, out='GP')
+    #     d, t = predictMissingGaussianProcessRegression(hide=hide, three=True)
+    #     plotMissing(t, d, hide, out='ThreeGP')
+
+
+    #plotMissing(pf.getdata('small/recovered700.fits'), pf.getdata('small/hidden700.fits'), 700, out='TEST')
+
+    plotRecoveredResiduals()

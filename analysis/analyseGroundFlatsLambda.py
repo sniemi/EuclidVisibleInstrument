@@ -4,7 +4,7 @@ A simple script to analyse ground/lab flat fields.
 This script has been written to analyse the wavelength dependency of the PRNU.
 
 :author: Sami-Matias Niemi
-:version: 0.3
+:version: 0.4
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -17,6 +17,7 @@ matplotlib.rcParams['legend.handlelength'] = 3
 matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 matplotlib.rcParams['image.interpolation'] = 'none'
+from mpl_toolkits.axes_grid1 import AxesGrid
 import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
@@ -30,7 +31,7 @@ from support import files as fileIO
 from astropy.stats import sigma_clip
 from astropy.modeling import models, fitting
 from multiprocessing import Pool
-import math
+import math, os
 from PIL import Image
 from scipy.interpolate import interp1d
 from skimage.measure import structural_similarity as ssim
@@ -262,6 +263,85 @@ def findFiles():
     return out
 
 
+def findFilesLimit(limit=20):
+    """
+    Find files for each wavelength
+    """
+    #pre-process: 28th
+    files = g.glob('28Apr/*Euclid.fits')
+    f = [file.replace('28Apr/', '') for file in files]
+    f = [file.replace('_', '.') for file in f]
+    times = [float(file[:5]) for file in f]
+    files = np.asarray(files)
+    times = np.asarray(times)
+
+    #545: 15_42 _13sEuclid - 16_25 _37sEuclid
+    msk545 = (times >= 15.42) & (times <= 16.25)
+    f545 = files[msk545]
+    f545 = np.random.choice(f545, size=limit)
+
+    #570: 16_36 _58sEuclid - 17_00 _12sEuclid
+    msk570 = (times >= 16.36) & (times <= 17.00)
+    f570 = files[msk570]
+    f570 = np.random.choice(f570, size=limit)
+
+    #bias: 14_48 _49sEuclid - 15_00 _25sEuclid
+    mskbias = (times >= 14.48) & (times <= 15.00)
+    bias = files[mskbias]
+
+    #pre-process: 29th
+    files = g.glob('29Apr/*Euclid.fits')
+    f = [file.replace('29Apr/', '') for file in files]
+    f = [file.replace('_', '.') for file in f]
+    times = [float(file[:5]) for file in f]
+    files = np.asarray(files)
+    times = np.asarray(times)
+
+    #660: 13_31 _55sEuclid - 14_10 _49sEuclid
+    msk660 = (times >= 13.31) & (times <= 14.10)
+    f660 = files[msk660]
+    f660 = np.random.choice(f660, size=limit)
+
+    #700: 14_32 _24sEuclid - 15_08 _02sEuclid
+    msk700 = (times >= 14.32) & (times <= 15.08)
+    f700 = files[msk700]
+    f700 = np.random.choice(f700, size=limit)
+
+    #800: 15_22 _34sEuclid - 15_59 _06sEuclid
+    msk800 = (times >= 15.22) & (times <= 15.59)
+    f800 = files[msk800]
+    f800 = np.random.choice(f800, size=limit)
+
+
+    #850: 16_24 _37sEuclid - 17_04 _03sEuclid
+    msk850 = (times >= 16.24) & (times <= 17.04)
+    f850 = files[msk850]
+    f850 = np.random.choice(f850, size=limit)
+
+    #pre-process: 30th
+    files = g.glob('30Apr/*Euclid.fits')
+    f = [file.replace('30Apr/', '') for file in files]
+    f = [file.replace('_', '.') for file in f]
+    times = [float(file[:5]) for file in f]
+    files = np.asarray(files)
+    times = np.asarray(times)
+
+    #600: 16_12 _49sEuclid-16_50 _22sEuclid
+    msk600 = (times >= 16.12) & (times <= 16.50)
+    f600 = files[msk600]
+    f600 = np.random.choice(f600, size=limit)
+
+
+    #940: 17_09 _37sEuclid - 17_48 _13sEuclid
+    msk940 = (times >= 17.09) & (times <= 17.48)
+    f940 = files[msk940]
+    f940 = np.random.choice(f940, size=limit)
+
+    #dictionary
+    out = dict(f545=f545, f570=f570, f600=f600, f660=f660, f700=f700, f800=f800, f850=f850, f940=f940, bias=bias)
+
+    return out
+
 def _generateFlats(key, files):
     """
     Actual calls to generate flat fields.
@@ -281,6 +361,9 @@ def generateFlats(args):
 
 
 def flats():
+    """
+    Generates normalised flats at several wavelengths. Use all input files.
+    """
     #search for the right files
     files = findFiles()
 
@@ -291,6 +374,27 @@ def flats():
     #generate flats using multiprocessing
     pool = Pool(processes=6)
     pool.map(generateFlats, [(key, files[key]) for key in files.keys()])
+
+
+def flatsLimit(limit=20):
+    """
+    Generates normalised flats at several wavelengths, but using randomly chosen input files to a limiting number.
+    This allows a matched SNR studies.
+    """
+    #search for the right files
+    files = findFilesLimit(limit=limit)
+
+    #generate bias
+    makeBias(files['bias'])
+    files.pop('bias', None)
+
+    #generate flats using multiprocessing
+    pool = Pool(processes=6)
+    pool.map(generateFlats, [(key, files[key]) for key in files.keys()])
+
+    #rename
+    for file in g.glob('*FlatField.fits'):
+        os.rename(file, file.replace('.fits', 'L%i.fits' % limit))
 
 
 def plot(xmin=300, xmax=3500, ymin=200, ymax=1600, smooth=2.):
@@ -1077,6 +1181,304 @@ def plotRecoveredResiduals(xmin=-0.0035, xmax=0.0035, ymax=0.065, nbins=60):
     plt.close()
 
 
+def _lowOrderPolynomialSurfaceRecovery(w, data, wall, degree=4, kind='linear'):
+    #first remove low order polynomial
+    coeffs = []
+    for i, d in enumerate(data):
+        #meshgrid representing data
+        x, y = np.mgrid[:d.shape[0], :d.shape[1]]
+
+        #fit a polynomial 2d surface to remove the illumination profile
+        p_init = models.Polynomial2D(degree=degree)
+        f = fitting.NonLinearLSQFitter()
+        p = f(p_init, x, y, d)
+
+        coeffs.append(p)
+
+    nparamas = len(coeffs[0].parameters)
+
+    interpolated = []
+    for a in range(nparamas):
+        yy = [c.parameters[a] for c in coeffs]
+        f = interp1d(w, yy, kind=kind)
+        interpolated.append(np.mean(f(wall))) #mean value of the interpolated
+
+    #create mapping between coefficients and the interpolated values and then generate a new model
+    mapping = dict(zip(p.param_names, interpolated))
+    model = models.Polynomial2D(degree=degree, **mapping)
+
+    #recovered is the model evaluated on the grid
+    recovered = model(x, y)
+
+    return recovered
+
+
+def _singularValueDecompostionRecover(w, data, degree=2):
+    #singular value decomposition of the first, assumed to be 545
+    U545, s545, V545 = np.linalg.svd(data[0], full_matrices=True, compute_uv=True)
+    l = []
+    for ww, d in zip(w, data):
+        l.append(np.dot(U545.T, np.dot(d, V545)))
+    #numpy array
+    l = np.asarray(l)
+
+    #fit quadratic model to each l
+    ww, jj, ii = l.shape
+    lpred = np.zeros(data[0].shape)
+    #this is really slow way of doing this...
+    for j in range(jj):
+        for i in range(ii):
+            p_init = models.Polynomial1D(degree=degree)
+            #p_init = models.Legendre1D(degree=degree)
+            #p_init = models.Chebyshev1D(degree=degree)
+            f = fitting.NonLinearLSQFitter()
+            p = f(p_init, w, l[:, j, i])
+            lpred[j, i] = np.mean(p(w))
+
+    #modelled flat
+    recovered = np.dot(U545, np.dot(lpred, V545.T))
+
+    return recovered
+
+
+def recoverMaster(smooth=2, degree=3, fitlow=False, limits=(600, 700, 600, 700)):
+    """
+    Recover a master PRNU using low order surface fitting and Singular Value Decomposition.
+    """
+    #master flat is the average of the independent PRNU maps
+    master = pf.getdata('MasterFlat.fits')[limits[2]:limits[3], limits[0]:limits[1]]
+
+    if fitlow:
+        #meshgrid representing data
+        x, y = np.mgrid[:master.shape[0], :master.shape[1]]
+        #fit a polynomial 2d surface to remove the illumination profile
+        p_init = models.Polynomial2D(degree=degree)
+        f = fitting.NonLinearLSQFitter()
+        p = f(p_init, x, y, master)
+        #normalize data and save it to res list
+        master /= p(x, y)
+
+    #wavelengths to use in the analysis
+    three = ['545', '700', '850']
+    four = ['545', '600', '700', '850']
+    five = ['545', '570', '660', '800', '850']
+    six = ['545', '570', '600', '660', '800', '850']
+    LEDsets = ((three, 28), (four, 21), (five, 17), (six, 14))
+
+    #bins
+    bins = np.linspace(-0.001, 0.001, 50)
+
+    #figure definitions
+    fig = plt.figure(figsize=(13, 13))
+    plt.subplots_adjust(wspace=0.01, hspace=0.2, left=0.05, right=0.99, top=0.95, bottom=0.05)
+
+    i = len(LEDsets)
+    run = 1
+    sigmas = []
+    for LEDs, limit in LEDsets:
+        deff = []
+        for l in LEDs:
+            t = pf.getdata('f%sFlatField.L%i.fits' % (l, limit))[limits[2]:limits[3], limits[0]:limits[1]]
+            if fitlow:
+                #meshgrid representing data
+                x, y = np.mgrid[:t.shape[0], :t.shape[1]]
+                #fit a polynomial 2d surface to remove the illumination profile
+                p_init = models.Polynomial2D(degree=degree)
+                f = fitting.NonLinearLSQFitter()
+                p = f(p_init, x, y, t)
+                #normalize data and save it to res list
+                t /= p(x, y)
+            deff.append(t)
+
+        print 'Trying to recover a master PRNU map with', LEDs
+
+        #build a PRNU model using SVD
+        recovered = _singularValueDecompostionRecover([int(w) for w in LEDs], deff, degree=len(LEDs)-1)
+
+        #difference between the model and the truth and simple statistics
+        ratio = (recovered - master) / float(len(LEDs)-1.)
+        sigma = ratio.std()
+        print sigma, ratio.mean(), ratio.max(), ratio.min()
+        sigmas.append(sigma)
+
+        #plot
+        ax1 = fig.add_subplot(i, 4, run)
+        ax2 = fig.add_subplot(i, 4, run+1)
+        ax3 = fig.add_subplot(i, 4, run+2)
+        ax4 = fig.add_subplot(i, 4, run+3)
+
+        ax1.set_title('Target')
+        ax2.set_title('Derived')
+        ax3.set_title(r'Residual: D-T')
+
+        i1 = ax1.imshow(gaussian_filter(master, smooth),
+                        origin='lower', interpolation='none', rasterized=True, vmin=0.997, vmax=1.003)
+        i2 = ax2.imshow(gaussian_filter(recovered, smooth),
+                        interpolation='none', origin='lower', rasterized=True, vmin=0.997, vmax=1.003)
+        i3 = ax3.imshow(gaussian_filter(ratio, smooth),
+                        interpolation='none', origin='lower', rasterized=True, vmin=-0.0003, vmax=0.0003)
+
+        txt = r'LEDs: ' + str([int(w) for w in LEDs])
+        d = ratio.flatten()
+        ax4.hist(d, bins=bins, weights=np.ones_like(d)/len(d))
+        ax4.set_xlim(-0.001, 0.001)
+        ax4.set_ylim(.0, 0.2)
+        ax4.set_xticks([-0.0005, 0, 0.0005])
+
+        ax4.set_title(txt, fontsize=10)
+        ax4.annotate(r'$\sigma(D-T) \sim %.2e$' % sigma, xycoords='axes fraction', xy=(0.05, 0.85))
+        plt.setp(ax1.get_xticklabels(), visible=False)
+        plt.setp(ax2.get_xticklabels(), visible=False)
+        plt.setp(ax3.get_xticklabels(), visible=False)
+        plt.setp(ax4.get_xticklabels(), visible=False)
+        plt.setp(ax2.get_yticklabels(), visible=False)
+        plt.setp(ax3.get_yticklabels(), visible=False)
+        plt.setp(ax4.get_yticklabels(), visible=False)
+
+        run += 4
+
+    plt.setp(ax1.get_xticklabels(), visible=True)
+    plt.setp(ax2.get_xticklabels(), visible=True)
+    plt.setp(ax3.get_xticklabels(), visible=True)
+    plt.setp(ax4.get_xticklabels(), visible=True)
+
+
+    #plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.3f', ticks=[0.997, 1, 1.003])
+    #plt.colorbar(i2, ax=ax2, orientation='horizontal', format='%.3f', ticks=[0.997, 1, 1.003])
+    #plt.colorbar(i3, ax=ax3, orientation='horizontal', format='%.4f', ticks=[-0.0005, 0, 0.0005])
+
+    plt.savefig('PRNUMasterRecovery.pdf')
+    plt.close()
+
+    #requirement plot
+    plt.figure()
+    plt.subplots_adjust(wspace=0.01, hspace=0.2, left=0.1, right=0.99, top=0.95, bottom=0.1)
+    plt.plot([3,4,5,6], sigmas, 'bo', label='Data')
+    plt.axhline(y=2e-4, color='r', label='Requirement')
+    plt.xlabel('Number of LEDs')
+    plt.ylabel(r'$\sigma(D-T)$')
+    plt.xlim(2.9, 6.1)
+    plt.ylim(5e-5, 5e-4)
+    plt.xticks([3, 4, 5, 6])
+    plt.ticklabel_format(axis='y', style='sci', scilimits=(-2,2))
+    plt.legend(shadow=True, fancybox=True, numpoints=1, scatterpoints=1)
+    plt.savefig('sigmaVsLEDs.pdf')
+    plt.close()
+
+
+def recoverMasterOnlyLowOrder(degree=5, smooth=2):
+    """
+    Recover a master PRNU using Singular Value Decomposition.
+    """
+    datad = _loadPRNUmaps()
+
+    data = []
+    w  = []
+    for i, wave in enumerate(sorted(datad.keys())):
+        data.append(datad[wave][1200:1250, 1200:1250])
+        w.append(int(wave))
+
+    data = np.asarray(data)
+    #master flat is the average of the independent PRNU maps
+    master = np.mean(data, axis=0)
+
+    three = [0, 4, 6]
+    four = [0, 1, 4, 6]
+    five = [0, 1, 3, 4, 6]
+    six = [0, 1, 2, 4, 5, 6]
+
+    LEDsets = (three, four, five, six)
+
+    #figure definitions
+    fig = plt.figure(figsize=(13, 13))
+    plt.subplots_adjust(wspace=0.01, hspace=0.2, left=0.05, right=0.99, top=0.95, bottom=0.05)
+
+    i = len(LEDsets)
+    run = 1
+    sigmas = []
+    for LEDs in LEDsets:
+        weff = []
+        deff = []
+        for l in LEDs:
+            weff.append(w[l])
+            deff.append(data[l])
+
+        print 'Trying to recover the low order part of a master PRNU map with', weff
+
+        recovered = _lowOrderPolynomialSurfaceRecovery(weff, deff, w, degree=degree)
+
+        x, y = np.mgrid[:master.shape[0], :master.shape[1]]
+        p_init = models.Polynomial2D(degree=degree)
+        f = fitting.NonLinearLSQFitter()
+        p = f(p_init, x, y, master)
+        master = p(x, y)
+
+        ratio = recovered / master
+        sigma = ratio.std()
+        print sigma
+        sigmas.append(sigma)
+
+        #plot
+        ax1 = fig.add_subplot(i, 4, run)
+        ax2 = fig.add_subplot(i, 4, run+1)
+        ax3 = fig.add_subplot(i, 4, run+2)
+        ax4 = fig.add_subplot(i, 4, run+3)
+
+        ax1.set_title('Target')
+        ax2.set_title('Derived')
+        ax3.set_title(r'Residual: (D/T)')
+
+        i1 = ax1.imshow(gaussian_filter(master, smooth),
+                        origin='lower', interpolation='none', rasterized=True, vmin=0.999, vmax=1.001)
+        i2 = ax2.imshow(gaussian_filter(recovered, smooth),
+                        interpolation='none', origin='lower', rasterized=True, vmin=0.999, vmax=1.001)
+        i3 = ax3.imshow(ratio,
+                        interpolation='none', origin='lower', rasterized=True, vmin=0.99999, vmax=1.00001)
+
+        txt = r'LEDs:' + str(weff)
+        ax4.hist(ratio.flatten(), bins=20)
+        ax4.set_title(txt)
+        ax4.annotate(r'$\sigma(D/T) \sim %.2e$' % sigma, xycoords='axes fraction', xy=(0.05, 0.85))
+
+        run += 4
+
+    plt.colorbar(i1, ax=ax1, orientation='horizontal', format='%.4f', ticks=[0.9995, 1, 1.0005])
+    plt.colorbar(i2, ax=ax2, orientation='horizontal', format='%.4f', ticks=[0.9995, 1, 1.0005])
+    plt.colorbar(i3, ax=ax3, orientation='horizontal', format='%.3f', ticks=[0.99995, 1, 1.00005])
+
+    plt.savefig('PRNUMasterRecoveryLowOrder.pdf')
+    plt.close()
+
+
+def simpleTestforRecovery(limits=(200, 3800, 200, 3800)):
+    """
+    Just averaged files.
+    """
+    #master flat is the average of the independent PRNU maps
+    master = pf.getdata('MasterFlat.fits')[limits[2]:limits[3], limits[0]:limits[1]]
+    # files = ['f545FlatField.L28.fits', 'f570FlatField.L28.fits', 'f600FlatField.L28.fits', 'f660FlatField.L28.fits',
+    #          'f700FlatField.L28.fits', 'f800FlatField.L28.fits', 'f850FlatField.L28.fits']
+    # master = np.asarray([pf.getdata(f)[limits[2]:limits[3], limits[0]:limits[1]] for f in files])
+    # master = np.mean(master, axis=0)
+
+    #wavelengths to use in the analysis
+    three = ['545', '700', '850']
+    four = ['545', '600', '700', '850']
+    five = ['545', '570', '660', '800', '850']
+    six = ['545', '570', '600', '660', '800', '850']
+    LEDsets = ((three, 28), (four, 21), (five, 17), (six, 14))
+
+    for LEDs, limit in LEDsets:
+        d = []
+        for l in LEDs:
+            t = pf.getdata('f%sFlatField.L%i.fits' % (l, limit))[limits[2]:limits[3], limits[0]:limits[1]]
+            d.append(t)
+
+        sigma1 = np.std(master - np.mean(d, axis=0))
+        sigma2 = np.std(master - np.median(d, axis=0))
+        print LEDs, sigma1, sigma2
+
+
 def _loadPRNUmaps(id='*FlatField.fits'):
     #load data
     data = {}
@@ -1088,9 +1490,23 @@ def _loadPRNUmaps(id='*FlatField.fits'):
     return data
 
 
+def generateMasterFlat():
+    files = g.glob('nominal/*FlatField.fits')
+    data = [pf.getdata(file).astype(np.float64) for file in files]
+    avg = np.mean(np.asarray(data), axis=0).astype(np.float64)
+    fileIO.writeFITS(avg, 'MasterFlat.fits', int=False)
+
+
 if __name__ == '__main__':
-    #generate flats
+    #generate flats from all available data
     #flats()
+
+    #generate flats with limited inputs, needed to have matched SNR in the combined PRNU maps
+    # for limit in [28, 21, 17, 14]:
+    #     flatsLimit(limit=limit)
+
+    #generate master flat, done from all input files
+    #generateMasterFlat()
 
     #plot generated flats
     #plot()
@@ -1140,4 +1556,12 @@ if __name__ == '__main__':
 
     #plotMissing(pf.getdata('small/recovered700.fits'), pf.getdata('small/hidden700.fits'), 700, out='TEST')
 
-    plotRecoveredResiduals()
+    #plotRecoveredResiduals()
+
+    #simple low order polynomial recovery
+    #recoverMasterOnlyLowOrder()
+
+    #try to recover the master PRNU map
+    recoverMaster()
+
+    #simpleTestforRecovery()

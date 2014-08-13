@@ -1,4 +1,11 @@
 import pymc
+import emcee
+import numpy as np
+import matplotlib.pyplot as plt
+from pymc.Matplot import plot
+from scipy import optimize
+import matplotlib.pyplot as plt
+
 
 def pymc_linear_fit_withoutliers(data1, data2, data1err=None, data2err=None,
                                  print_results=False, intercept=True, nsample=50000, burn=5000,
@@ -86,11 +93,7 @@ def pymc_linear_fit_withoutliers(data1, data2, data1err=None, data2err=None,
         return m
 
 
-if __name__ == "__main__":
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from pymc.Matplot import plot
-
+def run1():
     #fake data [x, y, yerr, xyerr]
     data = np.array([[201, 592, 61, 9],
                      [244, 401, 25, 4],
@@ -149,3 +152,92 @@ if __name__ == "__main__":
 
     #MCMC plot
     plot(MC)
+
+
+def run2():
+    #fake data
+    x = np.array([ 0,  3,  9, 14, 15, 19, 20, 21, 30, 35,
+                  40, 41, 42, 43, 54, 56, 67, 69, 72, 88])
+    y = np.array([33, 68, 34, 34, 37, 71, 37, 44, 48, 49,
+                  53, 49, 50, 48, 56, 60, 61, 63, 44, 71])
+    e = np.array([ 3.6, 3.9, 2.6, 3.4, 3.8, 3.8, 2.2, 2.1, 2.3, 3.8,
+                   2.2, 2.8, 3.9, 3.1, 3.4, 2.6, 3.4, 3.7, 2.0, 3.5])
+
+    def squared_loss(theta, x=x, y=y, e=e):
+        dy = y - theta[0] - theta[1] * x
+        return np.sum(0.5 * (dy / e) ** 2)
+
+    theta1 = optimize.fmin(squared_loss, [0, 0], disp=False)
+    xfit = np.linspace(0, 100)
+
+    def huber_loss(t, c=3):
+        return ((abs(t) < c) * 0.5 * t ** 2
+                + (abs(t) >= c) * -c * (0.5 * c - abs(t)))
+
+    def total_huber_loss(theta, x=x, y=y, e=e, c=3):
+        return huber_loss((y - theta[0] - theta[1] * x) / e, c).sum()
+
+    theta2 = optimize.fmin(total_huber_loss, [0, 0], disp=False)
+
+
+    # theta will be an array of length 2 + N, where N is the number of points
+    # theta[0] is the intercept, theta[1] is the slope,
+    # and theta[2 + i] is the weight g_i
+    def log_prior(theta):
+        #g_i needs to be between 0 and 1
+        if (all(theta[2:] > 0) and all(theta[2:] < 1)):
+            return 0
+        else:
+            return -np.inf  # recall log(0) = -inf
+
+    def log_likelihood(theta, x, y, e, sigma_B):
+        dy = y - theta[0] - theta[1] * x
+        g = np.clip(theta[2:], 0, 1)  # g<0 or g>1 leads to NaNs in logarithm
+        logL1 = np.log(g) - 0.5 * np.log(2 * np.pi * e ** 2) - 0.5 * (dy / e) ** 2
+        logL2 = np.log(1 - g) - 0.5 * np.log(2 * np.pi * sigma_B ** 2) - 0.5 * (dy / sigma_B) ** 2
+        return np.sum(np.logaddexp(logL1, logL2))
+
+    def log_posterior(theta, x, y, e, sigma_B):
+        return log_prior(theta) + log_likelihood(theta, x, y, e, sigma_B)
+
+
+    ndim = 2 + len(x)  # number of parameters in the model
+    nwalkers = 50  # number of MCMC walkers
+    nburn = 10000  # "burn-in" period to let chains stabilize
+    nsteps = 15000  # number of MCMC steps to take
+
+    # set theta near the maximum likelihood, with
+    np.random.seed(0)
+    starting_guesses = np.zeros((nwalkers, ndim))
+    starting_guesses[:, :2] = np.random.normal(theta1, 1, (nwalkers, 2))
+    starting_guesses[:, 2:] = np.random.normal(0.5, 0.1, (nwalkers, ndim - 2))
+
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[x, y, e, 50])
+    sampler.run_mcmc(starting_guesses, nsteps)
+
+    sample = sampler.chain  # shape = (nwalkers, nsteps, ndim)
+    sample = sampler.chain[:, nburn:, :].reshape(-1, ndim)
+
+    #traces
+    #plt.plot(sample[:, 0], sample[:, 1], ',k', alpha=0.1)
+    #plt.xlabel('intercept')
+    #plt.ylabel('slope')
+
+
+    theta3 = np.mean(sample[:, :2], 0)
+    g = np.mean(sample[:, 2:], 0)
+    outliers = (g < 0.5)
+
+    plt.errorbar(x, y, e, fmt='.k', ecolor='gray')
+    plt.plot(xfit, theta1[0] + theta1[1] * xfit, color='lightgray')
+    plt.plot(xfit, theta2[0] + theta2[1] * xfit, color='lightgray')
+    plt.plot(xfit, theta3[0] + theta3[1] * xfit, color='black')
+    plt.plot(x[outliers], y[outliers], 'ro', ms=20, mfc='none', mec='red')
+    plt.title('Maximum Likelihood fit: Bayesian Marginalization')
+    plt.savefig('test2.pdf')
+    plt.close()
+
+
+if __name__ == "__main__":
+    #run1()
+    run2()

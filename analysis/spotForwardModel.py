@@ -19,12 +19,13 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 import pyfits as pf
 import numpy as np
 import emcee
-from scipy import signal
-from support import files as fileIO
-from astropy.modeling import models, fitting, SerialCompositeModel
 import scipy.ndimage.measurements as m
 import triangle
 import pymc
+import glob as g
+from scipy import signal
+from support import files as fileIO
+from astropy.modeling import models, fitting, SerialCompositeModel
 
 
 def log_prior(theta, fixHeight=False):
@@ -41,14 +42,15 @@ def log_prior(theta, fixHeight=False):
 
     else:
         height, centre_x, centre_y, width_x, width_y, amp, x0, y0, rad = theta
-        if 0.1 < height < 2. and 7. < centre_x < 14. and 7. < centre_y < 14. and 0. < width_x < 2. and 0. < width_y < 2. \
-           and 4.e4 < amp < 1.e6 and 7. < x0 < 14. and 7. < y0 < 14. and 0. < rad < 3.:
+        if 0.5 < height < 5. and 8. < centre_x < 12. and 8. < centre_y < 12. and \
+           0.1 < width_x < 1. and 0.1 < width_y < 1. and \
+           1.e4 < amp < 1.e6 and 8. < x0 < 12. and 8. < y0 < 12. and 0.1 < rad < 1.5:
             return 0.
         else:
             return -np.inf
 
 
-def log_likelihood(theta, x, y, z, var, fixHeight=False):
+def log_likelihood(theta, x, y, data, var, fixHeight=False):
     """
     This is not quite right...
     """
@@ -66,15 +68,20 @@ def log_likelihood(theta, x, y, z, var, fixHeight=False):
     airy = models.AiryDisk2D(amp, x0, y0, rad)
     adata = airy.eval(x, y, amp, x0, y0, rad).reshape((21, 21))
 
-    #Convolve the Airy disc with the Gaussian broadening kernel
-    data = signal.convolve2d(adata, gdata, mode='same').flatten()
+    #Convolve the Airy disc with the Gaussian broadening kernel to derive the model
+    model = signal.convolve2d(adata, gdata, mode='same').flatten()
 
-    #true for Gaussian errors.. not really true here though, because of Poisson noise
-    chi2 = - 0.5 * np.sum((z - data)**2 / var)
-    #chi2 = - 0.5 * np.sum(np.log(2*np.pi*var) + ((z - data)**2 / var))
-    #chi2 = - 0.5 * np.sum(np.abs(z - data) / var)
+    #true for Gaussian errors, but not really true here because of mixture of Poisson and Gaussian noise
+    #lnL = - 0.5 * np.sum((data - model)**2 / var)
+    #others...
+    #lnL = - 2. * np.sum(data*np.log(((data - model)**2) / var) + np.abs(data - model)) #only peak matters
+    #lnL = - 2. * np.sum(np.log(((data - model)**2) / var) + np.abs(data - model))  #works pretty well
+    #lnL = - 2. * np.sum(((data - model)**2) / var + np.abs(data - model))  #similar as above, maybe slightly better
+    lnL = - 2. * np.sum((((data - model)**2) + np.abs(data - model))/var)  #similar as above, maybe slightly better
+    #using L1 norm would be true for exponential distribution
+    #lnL = - np.sum(np.abs(data - model) / var)
 
-    return chi2
+    return lnL
 
 
 def log_posterior(theta, x, y, z, var):
@@ -159,7 +166,7 @@ def testSimpleFit(file='16_12_39sEuclid.fits', gain=3.1, size=10, A=True):
     print 'Done'
 
 
-def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
+def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, burn=100, single=True):
     """
     A single file to quickly test if the method works
     """
@@ -174,6 +181,7 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
 
     #bias estimate
     bias = np.median(data[y-size: y+size, x-100:x-20])
+    print 'ADC offset:', bias
 
     #remove bias
     spot -= bias
@@ -207,12 +215,8 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
 
     #make a copy ot generate error array
     data = spot.copy().flatten()
-    #remove negatives
-    data[data < 0.] = 0.
-    #assume errors scale as sqrt of the values
-    sigma = np.sqrt(data)
-    sigma[sigma < 1.] = 1.
-    #sigma = np.ones_like(data) # no scaling with errors...
+    #assume errors scale as sqrt of the values + readnoise
+    sigma = np.sqrt(data + 4.5**2) #readnoise = 4.5
 
     #goodness of fit
     gof = (1./(len(data)-5.)) * np.sum((model.flatten() - data)**2 / sigma)
@@ -225,6 +229,7 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
     # Airy + Gaussian model has 9 free parameters
     ndim = 9
     #ndim = 8; height = 1.
+    #nwalkers = 2500
     nwalkers = 1000
 
     # Choose an initial set of positions for the walkers
@@ -244,18 +249,18 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
     yy = yy.flatten()
 
     #initiate sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, sigma], threads=6)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, sigma], threads=7)
 
     # Run a burn-in
     print "Burning-in..."
-    pos, prob, state = sampler.run_mcmc(p0, 2000)
+    pos, prob, state = sampler.run_mcmc(p0, burn)
 
     # Reset the chain to remove the burn-in samples.
     sampler.reset()
 
     # Starting from the final position in the burn-in chain
     print "Running MCMC..."
-    pos, prob, state = sampler.run_mcmc(pos, 10000, rstate0=state)
+    pos, prob, state = sampler.run_mcmc(pos, 1000, rstate0=state)
 
     # Print out the mean acceptance fraction
     print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
@@ -279,8 +284,9 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
     #save model
     fileIO.writeFITS(model, 'model.fits', int=False)
 
-    #residual
+    #residuals
     fileIO.writeFITS(model - spot, 'residual.fits', int=False)
+    fileIO.writeFITS(((model-spot)**2 / sigma.reshape(spot.shape)), 'residualSQ.fits', int=False)
 
     #goodness of fit
     gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / sigma)
@@ -293,7 +299,7 @@ def test(file='16_12_39sEuclid.fits', gain=3.1, size=10, single=True):
            round(width_y*2*np.sqrt(2*np.log(2))*12, 3), ' microns'
 
     #plot
-    samples = sampler.chain[:, 2000:, :].reshape((-1, ndim))
+    samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
     fig = triangle.corner(samples, labels=['height', 'X', 'Y', 'widthX', 'widthY', 'amp', 'x0', 'y0', 'rad'])
     fig.savefig('triangle.png')
 
@@ -316,8 +322,7 @@ def testPyMC(file='16_12_39sEuclid.fits', gain=3.1, size=10):
     spot = spot.copy() - bias
     spot[spot < 0] = 0.
     #assume errors scale as sqrt of the values
-    sigma = np.sqrt(spot)
-    sigma[sigma < 1.] = 1.
+    sigma = np.sqrt(data + 4.5**2) #readnoise = 4.5
 
     #save to file
     fileIO.writeFITS(spot, 'smallPyMC.fits', int=False)
@@ -340,7 +345,7 @@ def testPyMC(file='16_12_39sEuclid.fits', gain=3.1, size=10):
     centre_y = pymc.Uniform('GaussianCentreY', 0, 2*size, value=size)
     width_x = pymc.Uniform('GaussianWidthX', 0., 2., value=0.2)
     width_y = pymc.Uniform('GaussianWidthY', 0., 2., value=0.2)
-    amp = pymc.Uniform('AiryAmplitude', max*0.99, max*1.01, value=max)
+    amp = pymc.Uniform('AiryAmplitude', max*0.8, max*3, value=max)
     x0 = pymc.Uniform('AiryCentreX', 0, 2*size, value=size)
     y0 = pymc.Uniform('AiryCentreY', 0, 2*size, value=size)
     rad = pymc.Uniform('AiryRadius', 0.1, 1., value=0.4)
@@ -445,7 +450,197 @@ def testPyMC(file='16_12_39sEuclid.fits', gain=3.1, size=10):
            round(width_y*2*np.sqrt(2*np.log(2))*12, 3), ' microns'
 
 
-def averageGaussianAiry():
+def _simulate(theta=(1., 128.5, 128.3, 3., 3., 2.3e5, 128., 128., 5.), gain=3.1, bias=9000, rn=4.5, size=256,
+              out='simulated.fits'):
+    """
+    Simulate the process expected
+    """
+    #unpack the parameters
+    height, center_x, center_y, width_x, width_y, amp, x0, y0, rad = theta
+
+    #Create the coordinates x and y
+    x = np.arange(0, size)
+    y = np.arange(0, size)
+    #Put the coordinates in a mesh and flatten
+    x, y = np.meshgrid(x, y)
+
+    #generate a model:
+    #1)Airy convolve with a Gaussian
+    airy = models.AiryDisk2D(amp, x0, y0, rad)
+    adata = airy.eval(x, y, amp, x0, y0, rad).reshape((size, size))
+    gaussian = models.Gaussian2D(height, center_x, center_y, width_x, width_y, 0.)
+    gdata = gaussian.eval(x, y, height, center_x, center_y, width_x, width_y, 0.).reshape((size, size))
+    data = signal.convolve2d(adata, gdata, mode='same')
+
+    #2)Add Poisson noise
+    rounded = np.rint(data)
+    residual = data.copy() - rounded #ugly workaround for multiple rounding operations...
+    rounded[rounded < 0.0] = 0.0
+    data = np.random.poisson(rounded).astype(np.float64)
+    data += residual
+
+    #3)Add ADC offset level
+    data += bias
+
+    #4)Add readnoise
+    data += np.random.normal(loc=0.0, scale=rn, size=data.shape)
+
+    #5)Convert to DNs
+    data = np.round(data/gain)
+
+
+    #save model
+    fileIO.writeFITS(data, out, int=False)
+
+
+def fitSimulated(truth, file='simulated.fits', gain=3.1, size=128):
+    print 'Truth:', truth
+
+    #get data and convert to electrons
+    data = pf.getdata(file)*gain
+
+    #maximum position
+    y, x = m.maximum_position(data)
+
+    #spot
+    spot = data[y-size:y+size+1, x-size:x+size+1].copy()
+
+    #bias estimate
+    bias = np.median(data[y-size: y+size, x-100:x-20])
+    print 'ADC offset estimate:', bias
+
+    #remove bias
+    spot = spot.copy() - bias
+    spot[spot < 0] = 0.
+    #assume errors scale as sqrt of the values
+    sigma = np.sqrt(data + 4.5**2) #readnoise = 4.5
+
+    #save to file
+    fileIO.writeFITS(spot, 'smallPyMCsimulated.fits', int=False)
+
+    #maximum value
+    max = np.max(spot)
+    print 'Maximum Value:', max
+
+    #Create the coordinates x and y
+    x = np.arange(0, spot.shape[1])
+    y = np.arange(0, spot.shape[0])
+    #Put the coordinates in a mesh and flatten
+    xx, yy = np.meshgrid(x, y)
+    xx = xx.flatten()
+    yy = yy.flatten()
+
+    #priors
+    height = pymc.Uniform('GaussianHeight', 0.1, 2., value=1.)
+    centre_x = pymc.Uniform('GaussianCentreX', 0, 2*size, value=size)
+    centre_y = pymc.Uniform('GaussianCentreY', 0, 2*size, value=size)
+    width_x = pymc.Uniform('GaussianWidthX', 0., 2., value=0.3)
+    width_y = pymc.Uniform('GaussianWidthY', 0., 2., value=0.3)
+    amp = pymc.Uniform('AiryAmplitude', max*0.8, max*3, value=max)
+    x0 = pymc.Uniform('AiryCentreX', 0, 2*size, value=size)
+    y0 = pymc.Uniform('AiryCentreY', 0, 2*size, value=size)
+    rad = pymc.Uniform('AiryRadius', 0.1, size/2., value=1.)
+    #bias = pymc.Uniform('bias', 2000, 4000, value=bias) #this cannot be used with Poisson likelihood function
+
+    #model
+    @pymc.deterministic(plot=False, trace=False)
+    def model(height=height, centre_x=centre_x, centre_y=centre_y, width_x=width_x, width_y=width_y,
+              amp=amp, x0=x0, y0=y0, rad=rad):
+        #Gaussian
+        gaussian = models.Gaussian2D(height.item(), centre_x.item(), centre_y.item(), width_x.item(), width_y.item(), 0.)
+        gdata = gaussian.eval(xx, yy, height.item(), centre_x.item(), centre_y.item(), width_x.item(), width_y.item(), 0.).reshape(spot.shape)
+
+        #Airy disc
+        airy = models.AiryDisk2D(amp.item(), x0.item(), y0.item(), rad.item())
+        adata = airy.eval(xx, yy, amp.item(), x0.item(), y0.item(), rad.item()).reshape(spot.shape)
+
+        #Convolve the Airy disc with the Gaussian broadening kernel
+        model = signal.convolve2d(adata, gdata, mode='same').flatten()
+
+        #add ADC offset level
+        #model += bias.item()
+
+        return model
+
+    #likelihood function
+    y = pymc.Poisson('y', mu=model, value=spot.flatten(), observed=True, trace=False)
+    #y = pymc.Normal('y', mu=model, tau=1./sigma, value=spot.flatten(), observed=True, trace=False)
+
+    #store the model to a dictionary
+    d = {'height': height,
+         'centre_x': centre_x,
+         'centre_y': centre_y,
+         'width_x': width_x,
+         'width_y': width_y,
+         'amp': amp,
+         'x0': x0,
+         'y0': y0,
+         'rad': rad,
+         #'bias': bias,
+         'f': model,
+         'y': y}
+
+    R = pymc.MCMC(d)
+
+    #good starting position
+    print 'Finding the maximum a-posterior...'
+    map_ = pymc.MAP(d)
+    map_.fit()
+    print height.value, centre_x.value, centre_y.value, width_x.value, width_y.value, amp.value, x0.value, y0.value, rad.value#, bias.value
+
+    print 'Will start running a chain...'
+    R.sample(iter=20000, burn=1000, thin=2)
+
+    #print out summaries
+    R.height.summary()
+    R.centre_x.summary()
+    R.centre_y.summary()
+    R.width_x.summary()
+    R.width_y.summary()
+    R.amp.summary()
+    R.x0.summary()
+    R.y0.summary()
+    R.rad.summary()
+    #R.bias.summary()
+
+    #generate plots
+    pymc.Matplot.plot(R, common_scale=False)
+    pymc.Matplot.summary_plot(R)
+
+    #rename stats
+    Rs = R.stats()
+    height = Rs['GaussianHeight']['mean']
+    center_x = Rs['GaussianCentreX']['mean']
+    center_y = Rs['GaussianCentreY']['mean']
+    width_x = Rs['GaussianWidthX']['mean']
+    width_y = Rs['GaussianWidthY']['mean']
+    amp = Rs['AiryAmplitude']['mean']
+    x0 = Rs['AiryCentreX']['mean']
+    y0 = Rs['AiryCentreY']['mean']
+    rad = Rs['AiryRadius']['mean']
+
+    #model
+    gaussian = models.Gaussian2D(height, center_x, center_y, width_x, width_y, 0.)
+    gdata = gaussian.eval(xx, yy, height, center_x, center_y, width_x, width_y, 0.).reshape(spot.shape)
+    airy = models.AiryDisk2D(amp, x0, y0, rad)
+    adata = airy.eval(xx, yy, amp, x0, y0, rad).reshape(spot.shape)
+    model = signal.convolve2d(adata, gdata, mode='same') #+ bias
+
+    #save model
+    fileIO.writeFITS(model, 'modelPyMCsimulated.fits', int=False)
+
+    #residual
+    fileIO.writeFITS(model - spot, 'residualPyMCsimulated.fits', int=False)
+
+    #goodness of fit
+    gof = (1./(len(spot.flatten())-9.)) * np.sum((model - spot)**2 / sigma)
+    print 'GoF:', gof
+
+    print 'Gaussian FWHM (x, y) = ', round(width_x*2*np.sqrt(2*np.log(2))*12, 3), \
+           round(width_y*2*np.sqrt(2*np.log(2))*12, 3), ' microns'
+
+
+def _averageGaussianAiry():
     A = pf.getdata('SimpleModel.fits')
     G = pf.getdata('BasicModel.fits')
     mean = (A+G)/2.
@@ -455,9 +650,26 @@ def averageGaussianAiry():
     fileIO.writeFITS(mean-data, 'AveragedModelResidual.fits', int=False)
 
 
+def _stackFiles(id='15_4*.fits'):
+    data = np.asarray([pf.getdata(file) for file in g.glob(id)])
+    med = np.median(data, axis=0)
+    fileIO.writeFITS(med, 'stacked.fits', int=False)
+
+
 if __name__ == '__main__':
-    testSimpleFit()
-    testSimpleFit(A=False)
-    #averageGaussianAiry()
-    #testPyMC()
-    test()
+    #simulated spots and analysis
+    #_simulate()
+    theta = (1., 10., 10., 0.45, 0.45, 2.3e5, 10.1, 10.2, 0.52)
+    _simulate(theta=theta, size=21, out='simulatedSmall.fits')
+    test(file='simulatedSmall.fits')
+    print 'Truth:', theta
+
+    #basic fits
+    #testSimpleFit()
+    #testSimpleFit(A=False)
+    #_averageGaussianAiry()
+
+    #MCMC
+    #test()
+    #testPyMC(file='stacked.fits')
+    #test(file='stacked.fits')

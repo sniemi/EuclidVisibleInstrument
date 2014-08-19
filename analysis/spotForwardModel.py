@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.5
+:version: 0.6
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -28,7 +28,7 @@ from astropy.modeling import models, fitting
 import triangle
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, run=200, simulation=False):
+def forwardModel(file, out='Data', gain=3.1, size=10, burn=50, run=300, simulation=False):
     """
     A single file to quickly test if the method works
     """
@@ -45,9 +45,13 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, run=200, simulati
     #bias estimate
     if simulation:
         bias = 9000.
+        rn = 4.5
     else:
         bias = np.median(data[y-size: y+size, x-100:x-20]) #works for read data
-    print 'ADC offset:', bias
+        rn = np.std(data[y-size: y+size, x-100:x-20])
+
+    print 'Readnoise (e):', rn
+    print 'ADC offset (e):', bias
 
     #remove bias
     spot -= bias
@@ -77,10 +81,13 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, run=200, simulati
     #make a copy ot generate error array
     data = spot.copy().flatten()
     #assume errors scale as sqrt of the values + readnoise
-    sigma = np.sqrt(data + 4.5**2) #readnoise = 4.5
+    #sigma = np.sqrt(data/gain + rn**2)
+    sigma = np.sqrt(data + rn**2)
+
+    var = sigma**2
 
     #goodness of fit
-    gof = (1./(len(data)-5.)) * np.sum((model.flatten() - data)**2 / sigma)
+    gof = (1./(len(data)-5.)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof
     print 'Done'
 
@@ -111,7 +118,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, run=200, simulati
     yy = yy.flatten()
 
     #initiate sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, sigma], threads=7)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var], threads=7)
 
     # Run a burn-in
     print "Burning-in..."
@@ -150,10 +157,10 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, run=200, simulati
 
     #residuals
     fileIO.writeFITS(model - spot, out+'residual.fits', int=False)
-    fileIO.writeFITS(((model-spot)**2 / sigma.reshape(spot.shape)), out+'residualSQ.fits', int=False)
+    fileIO.writeFITS(((model-spot)**2 / var.reshape(spot.shape)), out+'residualSQ.fits', int=False)
 
     # a simple goodness of fit
-    gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / sigma)
+    gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof
 
     #results
@@ -183,7 +190,7 @@ def log_prior(theta):
     Priors, limit the values to a range but otherwise flat.
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 8. < center_x < 12. and 8. < center_y < 12. and 0. < width_x < 0.5 and 0. < width_y < 0.5 and \
+    if 8. < center_x < 12. and 8. < center_y < 12. and 0.1 < width_x < 0.5 and 0.1 < width_y < 0.5 and \
        1.e2 < amplitude < 1.e6 and 0. < radius < 1. and 0. < focus < 1.:
         return 0.
     else:
@@ -320,11 +327,11 @@ def RunTestSimulations():
     A set of simulated spots and analysis.
     """
     #different simulation sets
-    theta1 = (2.e5, 10., 10.3, 0.6, 0.5, 10., 10., 0.33, 0.35)
-    theta2 = (1.e5, 10., 10.1, 0.6, 0.45, 10., 10., 0.38, 0.36)
-    theta3 = (8.e4, 10., 10.2, 0.6, 0.55, 10., 10., 0.25, 0.35)
-    theta4 = (5.e4, 10., 10.3, 0.6, 0.48, 10., 10., 0.30, 0.28)
-    theta5 = (1.e5, 10., 10.2, 0.6, 0.45, 10., 10., 0.35, 0.31)
+    theta1 = (2.e5, 10., 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
+    theta2 = (1.e5, 10., 10.1, 0.55, 0.45, 10., 10., 0.38, 0.36)
+    theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
+    theta4 = (5.e4, 10., 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
+    theta5 = (1.e5, 10., 10.2, 0.5, 0.45, 10., 10., 0.35, 0.31)
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
     for i, theta in enumerate(thetas):
@@ -337,11 +344,25 @@ def RunTestSimulations():
         print("=" * 60)
 
 
+def RunTestData():
+    """
+    A set of test data to analyse.
+    """
+    files = ['15_40_07sEuclid.fits', '15_41_20sEuclid.fits',
+             '15_42_46sEuclid.fits', '15_44_00sEuclid.fits', '15_45_14sEuclid.fits']
+
+    for i, file in enumerate(files):
+        forwardModel(file='testdata/'+file, out='results/Data800nm%i' %i)
+
+    #MCMC - for real data
+    #forwardModel(file='testdata/15_41_20sEuclid.fits', out='results/Data800nm')
+    #forwardModel(file='testdata/stacked.fits', out='results/DataStack')
+    # forwardModel(file='testdata/15_22_00sEuclid.fits', out='results/Data600nmLow') #low counts, 600nm
+
+
 if __name__ == '__main__':
     #Simulated spots and analysis
     #RunTestSimulations()
 
-    #MCMC - for real data
-    # forwardModel(file='data/15_22_00sEuclid.fits', out='results/Data600nmLow') #low counts, 600nm
-    # forwardModel(file='data/15_41_20sEuclid.fits', out='results/Data800nm')
-    forwardModel(file='data/stacked.fits', out='results/DataStack')
+    #MCMC - test data set
+    RunTestData()

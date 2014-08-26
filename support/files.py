@@ -26,6 +26,13 @@ def cPickleDumpDictionary(dictionary, output):
     out.close()
 
 
+def cPicleRead(file):
+    """
+    Loads data from a pickled file.
+    """
+    return cPickle.load(open(file))
+
+
 def cPickleDump(data, output):
     """
     Dumps data to a cPickled file.

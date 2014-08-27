@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.7
+:version: 0.8
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -39,6 +39,7 @@ from support import files as fileIO
 from astropy.modeling import models, fitting
 import triangle
 import glob as g
+import os, datetime
 
 
 def forwardModel(file, out='Data', gain=3.1, size=10, burn=100, run=2000, simulation=False):
@@ -190,14 +191,17 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=100, run=2000, simula
     return width_x, width_y, errors_fit[5], errors_fit[6]
 
 
-def forwardModelJointFit(files, out='Data', gain=3.1, size=10, burn=50, run=500):
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100):
     """
     A single file to quickly test if the method works
     """
     images = len(files)
+    orig = []
     image = []
     noise = []
+    peakvalues = []
     for file in files:
+        print file
         #get data and convert to electrons
         data = pf.getdata(file)*gain
 
@@ -206,9 +210,10 @@ def forwardModelJointFit(files, out='Data', gain=3.1, size=10, burn=50, run=500)
 
         #spot and the peak pixel within the spot, this is also the CCD kernel position
         spot = data[y-size:y+size+1, x-size:x+size+1].copy()
+        orig.append(spot.copy())
         CCDy, CCDx = m.maximum_position(spot)
 
-        bias = np.median(data[y-size: y+size, x-100:x-20]) #works for read data
+        bias = np.median(data[y-size: y+size, x-100:x-20]) #works ok for real data
         rn = np.std(data[y-size: y+size, x-100:x-20])
 
         print 'Readnoise (e):', rn
@@ -221,6 +226,7 @@ def forwardModelJointFit(files, out='Data', gain=3.1, size=10, burn=50, run=500)
 
         max = np.max(spot)
         print 'Maximum Value:', max
+        peakvalues.append(max)
 
         #noise model
         variance = spot.copy() + rn**2
@@ -237,7 +243,7 @@ def forwardModelJointFit(files, out='Data', gain=3.1, size=10, burn=50, run=500)
 
     # Choose an initial set of positions for the walkers using the Gaussian fit
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    p0 = [np.asarray((([CCDx, CCDy]*images) +[max, 0.5, 0.5, 0.3, 0.3])) +
+    p0 = [np.asarray((([CCDx, CCDy]*images) +[max*1.1, 0.5, 0.5, 0.3, 0.3])) +
           1e-3*np.random.randn(ndim) for i in xrange(nwalkers)]
 
     # Initialize the sampler with the chosen specs.
@@ -274,41 +280,51 @@ def forwardModelJointFit(files, out='Data', gain=3.1, size=10, burn=50, run=500)
     #Get the best parameters and their respective errors and print best fits
     params_fit = pos[maxprob_index]
     errors_fit = [sampler.flatchain[:,i].std() for i in xrange(ndim)]
-    #print params_fit
-    #_printResults(params_fit, errors_fit)
+    print params_fit
 
+    #unpack the fixed parameters
+    amplitude, radius, focus, width_x, width_y = params_fit[-5:]
+    amplitudeE, radiusE, focusE, width_xE, width_yE = errors_fit[-5:]
 
-    # #Best fit model
-    # amplitude, center_x, center_y, radius, focus, width_x, width_y = params_fit
-    # airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
-    # adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape(spot.shape)
-    # f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
-    # focusdata = f.eval(xx, yy, 1., center_x, center_y, focus, focus, 0.).reshape(spot.shape)
-    # foc = signal.convolve2d(adata, focusdata, mode='same')
-    # CCD = models.Gaussian2D(1., CCDx, CCDy, width_x, width_y, 0.)
-    # CCDdata = CCD.eval(xx, yy, 1., CCDx, CCDy, width_x, width_y, 0.).reshape(spot.shape)
-    # model = signal.convolve2d(foc, CCDdata, mode='same')
-    # #save model
-    # fileIO.writeFITS(model, out+'model.fits', int=False)
-    #
-    # #residuals
-    # fileIO.writeFITS(model - spot, out+'residual.fits', int=False)
-    # fileIO.writeFITS(((model-spot)**2 / var.reshape(spot.shape)), out+'residualSQ.fits', int=False)
-    #
-    # # a simple goodness of fit
-    # gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / var)
-    # print 'GoF:', gof
-    #
-    # #results
-    # _printFWHM(width_x, width_y, errors_fit[5], errors_fit[6])
-    #
-    # #plot
-    # samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
-    # fig = triangle.corner(samples, labels=['amplitude', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y'])
-    # fig.savefig(out+'Triangle.png')
-    #
-    # return width_x, width_y, errors_fit[5], errors_fit[6]
+    #print results and store
+    _printFWHM(width_x, width_y, width_xE, width_yE)
+    res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
+               wavelength=wavelength, peakvalues=np.asarray(peakvalues))
+    fileIO.cPickleDumpDictionary(res, out+'.pkl')
 
+    #save the best models per file
+    size = size*2 + 1
+    for index, file in enumerate(files):
+        path, file = os.path.split(file)
+        id = 'results/' + file.replace('.fits', '')
+        #X and Y are always in pairs
+        center_x, center_y = params_fit[index:index+2]
+
+        #1)Generate a model Airy disc
+        airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
+        adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape((size, size))
+
+        #2)Apply Focus
+        f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
+        focusdata = f.eval(xx, yy, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
+        model = signal.convolve2d(adata, focusdata, mode='same')
+
+        #3)Apply CCD diffusion, approximated with a Gaussian
+        CCD = models.Gaussian2D(1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.)
+        CCDdata = CCD.eval(xx, yy, 1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.).reshape((size, size))
+        model = signal.convolve2d(model, CCDdata, mode='same')
+
+        #save the data, model and residuals
+        fileIO.writeFITS(orig[index], id+'data.fits', int=False)
+        fileIO.writeFITS(image[index], id+'datafit.fits', int=False)
+        fileIO.writeFITS(model, id+'model.fits', int=False)
+        fileIO.writeFITS(model - image[index], id+'residual.fits', int=False)
+        fileIO.writeFITS(((model - image[index])**2 / noise[index]), id+'residualSQ.fits', int=False)
+
+    #plot
+    samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
+    fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'])
+    fig.savefig(out+'Triangle.png')
 
 
 def log_posterior(theta, x, y, z, var):
@@ -321,6 +337,7 @@ def log_posterior(theta, x, y, z, var):
         return -np.inf
 
     return lp + log_likelihood(theta, x, y, z, var)
+
 
 def log_posteriorJoint(theta, x, y, z, var):
     """
@@ -339,7 +356,7 @@ def log_prior(theta):
     Priors, limit the values to a range but otherwise flat.
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 8. < center_x < 12. and 8. < center_y < 12. and 0.1 < width_x < 0.5 and 0.1 < width_y < 0.5 and \
+    if 8. < center_x < 12. and 8. < center_y < 12. and 0.25 < width_x < 0.5 and 0.25 < width_y < 0.5 and \
        1.e2 < amplitude < 1.e6 and 0. < radius < 1. and 0. < focus < 1.:
         return 0.
     else:
@@ -351,18 +368,9 @@ def log_priorJoint(theta):
     Priors, limit the values to a range but otherwise flat.
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    #tmp = theta[:-5]
-    # if 8. < all(tmp[::2]) < 12. and 8. < all(tmp[1::2]) < 12. and \
-    #    0.1 < theta[-2] < 0.5 and 0.1 < theta[-1] < 0.5 and \
-    #    1.e2 < theta[-5] < 1.e6 and 0. < theta[-4] < 1. and 0. < theta[-3] < 1.:
-    #     return 0.
-    if 3. < theta[0] < 16. and 3. < theta[1] < 16. and \
-       3. < theta[2] < 16. and 3. < theta[3] < 16. and \
-        3. < theta[4] < 16. and 3. < theta[5] < 16. and \
-        3. < theta[6] < 16. and 3. < theta[7] < 16. and \
-        3. < theta[8] < 16. and 3. < theta[9] < 16. and \
-       0. < theta[13] < 2. and 0. < theta[14] < 2. and \
-       1.e2 < theta[10] < 1.e6 and 0. < theta[11] < 2. and 0. < theta[12] < 2.:
+    tmp = theta[-5:] #these are the last five i.e. amplitude, radius, focus, sigmaX, and sigmaY
+    if all(3. < x < 16. for x in theta[:-5]) and 1.e2 < tmp[0] < 1.e6 and 0. < tmp[1] < 2. and 0. < tmp[2] < 2. and \
+       0.1 < tmp[3] < 2. and 0.1 < tmp[4] < 2.:
         return 0.
     else:
         return -np.inf
@@ -401,7 +409,7 @@ def log_likelihood(theta, x, y, data, var, size=21):
 
 def log_likelihoodJoint(theta, x, y, data, var, size=21):
     """
-    Logarithm of the likelihood function.
+    Logarithm of the likelihood function for joint fitting. Not really sure if this is right...
     """
     #unpack the parameters
     #[xpos, ypos]*images) +[amplitude, radius, focus])
@@ -427,7 +435,7 @@ def log_likelihoodJoint(theta, x, y, data, var, size=21):
         CCDdata = CCD.eval(x, y, 1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.).reshape((size, size))
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
-        lnL += - 0.5 * np.sum((data[tmp] - model)**2 / var[tmp])
+        lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
 
     return lnL
 
@@ -544,7 +552,7 @@ def RunTestSimulations():
         print("=" * 60)
 
 
-def RunTestData(files, out='testdata'):
+def RunData(files, out='testdata'):
     """
     A set of test data to analyse.
     """
@@ -564,7 +572,7 @@ def RunTestData(files, out='testdata'):
     wxe = _FWHMGauss(np.asarray(widthxerr))
     wy = _FWHMGauss(np.asarray(widthy))
     wye = _FWHMGauss(np.asarray(widthyerr))
-    res = dict(wx=wx, wy=wy, wxerr=wxe, wyerr=wye, files=files)
+    res = dict(wx=wx, wy=wy, wxerr=wxe, wyerr=wye, files=files, out=out)
     fileIO.cPickleDumpDictionary(res, out+'.pkl')
     testDataPlot(out+'.pkl', out=out)
 
@@ -580,6 +588,7 @@ def testDataPlot(file='testData.pkl', out='test'):
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
     fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
+    plt.title(data['out'])
 
     ax1.errorbar(xtmp, data['wx'], yerr=data['wxerr'], fmt='o')
     ax2.errorbar(xtmp, data['wy'], yerr=data['wyerr'], fmt='o')
@@ -604,13 +613,117 @@ def testDataPlot(file='testData.pkl', out='test'):
     plt.close()
 
 
-if __name__ == '__main__':
-    #MCMC - test data set
-    RunTestData(g.glob('testdata/17*.fits'), out='test700nm')
-    #RunTestData(g.glob('testdata/15*.fits'), out='test800nm')
+def getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'):
+    """
+    Find all files between a minimum time and maximum time from a given folder.
 
-    #Joint Fit
-    #forwardModelJointFit(g.glob('testdata/15*.fits'))
+    :param mintime: minimum time (h, min, s)
+    :type mintime: tuple
+    :param maxtime: maximum time (h, min, s)
+    :type maxtime: tuple
+    :param folder: folder from which FITS files are looked for
+    :type folder: str
+
+    :return: a list of file names that have been taken between the two times.
+    :rtype: list
+    """
+    start = datetime.time(*mintime)
+    stop = datetime.time(*maxtime)
+    all = g.glob(folder + '*.fits')
+    ret = []
+    for f in all:
+        path, file = os.path.split(f)
+        numbs = [int(x) for x in file.replace('sEuclid.fits', '').split('_')]
+        data = datetime.time(*numbs)
+        if start <= data <= stop:
+            ret.append(file)
+    return [folder + f for f in ret]
+
+
+def individualRuns():
+    """
+    Execute all spot data analysis runs individually.
+    """
+    #800 nm
+    RunData(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'), out='800nm5k')
+    RunData(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'), out='800nm10k')
+    RunData(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'), out='800nm20k')
+    RunData(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'), out='800nm30k')
+    RunData(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'), out='800nm38k')
+    RunData(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'), out='800nm50k')
+    RunData(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'), out='800nm54k')
+    #700 nm
+    RunData(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'), out='700nm5k')
+    RunData(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'), out='700nm9k')
+    RunData(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'), out='700nm52k')
+    RunData(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'), out='700nm32k')
+    #600 nm
+    RunData(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'), out='600nm5k')
+    RunData(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'), out='600nm54k')
+    RunData(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'), out='600nm10k')
+    #890 nm
+    RunData(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'), out='890nm5k')
+    RunData(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'), out='890nm10k')
+    RunData(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'), out='890nm30k')
+    RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='890nm50k')
+
+
+def jointRuns():
+    #800 nm
+    forwardModelJointFit(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'),
+                         out='800nm5k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'),
+                         out='800nm10k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'),
+                         out='800nm20k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'),
+                         out='800nm30k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'),
+                         out='800nm38k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'),
+                         out='800nm50k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'),
+                         out='800nm54k', wavelength='800nm')
+    #700 nm
+    forwardModelJointFit(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'),
+                         out='700nm5k', wavelength='700nm')
+    forwardModelJointFit(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'),
+                         out='700nm9k', wavelength='700nm')
+    forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
+                         out='700nm52k', wavelength='700nm')
+    forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
+                         out='700nm32k', wavelength='700nm')
+    #600 nm
+    forwardModelJointFit(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'),
+                         out='600nm5k', wavelength='600nm')
+    forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
+                         out='600nm54k', wavelength='600nm')
+    forwardModelJointFit(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'),
+                         out='600nm10k', wavelength='600nm')
+    #890 nm
+    forwardModelJointFit(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'),
+                         out='890nm5k', wavelength='890nm')
+    forwardModelJointFit(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'),
+                         out='890nm10k', wavelength='890nm')
+    forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
+                         out='890nm30k', wavelength='890nm')
+    forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
+                         out='890nm50k', wavelength='890nm')
+
+
+if __name__ == '__main__':
+    #jointRuns()
+    #individualRuns()
 
     #Simulated spots and analysis
     #RunTestSimulations()
+
+    #MCMC - test data set
+    #RunData(g.glob('testdata/17*.fits'), out='test700nm')
+    #RunData(g.glob('testdata/15*.fits'), out='test800nm')
+
+    #Joint Fit (same signal level and wavelength, but separate files) - test data set
+    forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
+    forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
+    forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
+                         out='test700nm32kJoint',  wavelength='700nm')

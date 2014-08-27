@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.8
+:version: 0.9
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -42,14 +42,17 @@ import glob as g
 import os, datetime
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=100, run=2000, simulation=False):
+def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty=3514, run=100, simulation=False):
     """
     A single file to quickly test if the method works
     """
     #get data and convert to electrons
-    data = pf.getdata(file)*gain
+    o = pf.getdata(file)*gain
 
-    #maximum position within the full frame
+    #roughly the correct location - to avoid identifying e.g. cosmic rays
+    data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
+
+    #maximum position within the cutout
     y, x = m.maximum_position(data)
 
     #spot and the peak pixel within the spot, this is also the CCD kernel position
@@ -61,8 +64,8 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=100, run=2000, simula
         bias = 9000.
         rn = 4.5
     else:
-        bias = np.median(data[y-size: y+size, x-100:x-20]) #works for read data
-        rn = np.std(data[y-size: y+size, x-100:x-20])
+        bias = np.median(o[spoty-size: spoty+size, spotx-220:spotx-20]) #works for read o
+        rn = np.std(o[spoty-size: spoty+size, spotx-220:spotx-20])
 
     print 'Readnoise (e):', rn
     if rn < 2. or rn > 6.:
@@ -191,7 +194,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=100, run=2000, simula
     return width_x, width_y, errors_fit[5], errors_fit[6]
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100):
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100, spotx=2888, spoty=3514):
     """
     A single file to quickly test if the method works
     """
@@ -203,9 +206,12 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
     for file in files:
         print file
         #get data and convert to electrons
-        data = pf.getdata(file)*gain
+        o = pf.getdata(file)*gain
 
-        #maximum position within the full frame
+        #roughly the correct location - to avoid identifying e.g. cosmic rays
+        data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
+
+        #maximum position within the cutout
         y, x = m.maximum_position(data)
 
         #spot and the peak pixel within the spot, this is also the CCD kernel position
@@ -213,8 +219,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
         orig.append(spot.copy())
         CCDy, CCDx = m.maximum_position(spot)
 
-        bias = np.median(data[y-size: y+size, x-100:x-20]) #works ok for real data
-        rn = np.std(data[y-size: y+size, x-100:x-20])
+        bias = np.median(o[spoty-size: spoty+size, spotx-220:spotx-20])
+        rn = np.std(o[spoty-size: spoty+size, spotx-220:spotx-20])
 
         print 'Readnoise (e):', rn
         if rn < 2. or rn > 6.:
@@ -290,7 +296,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
     _printFWHM(width_x, width_y, width_xE, width_yE)
     res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
                wavelength=wavelength, peakvalues=np.asarray(peakvalues))
-    fileIO.cPickleDumpDictionary(res, out+'.pkl')
+    fileIO.cPickleDumpDictionary(res, 'results/' + out + '.pkl')
 
     #save the best models per file
     size = size*2 + 1
@@ -573,8 +579,8 @@ def RunData(files, out='testdata'):
     wy = _FWHMGauss(np.asarray(widthy))
     wye = _FWHMGauss(np.asarray(widthyerr))
     res = dict(wx=wx, wy=wy, wxerr=wxe, wyerr=wye, files=files, out=out)
-    fileIO.cPickleDumpDictionary(res, out+'.pkl')
-    testDataPlot(out+'.pkl', out=out)
+    fileIO.cPickleDumpDictionary(res, 'results/' + out+'.pkl')
+    testDataPlot('results/' + out + '.pkl', out=out)
 
 
 def testDataPlot(file='testData.pkl', out='test'):
@@ -645,75 +651,79 @@ def individualRuns():
     Execute all spot data analysis runs individually.
     """
     #800 nm
-    RunData(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'), out='800nm5k')
-    RunData(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'), out='800nm10k')
-    RunData(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'), out='800nm20k')
-    RunData(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'), out='800nm30k')
-    RunData(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'), out='800nm38k')
-    RunData(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'), out='800nm50k')
-    RunData(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'), out='800nm54k')
+    RunData(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'), out='I800nm5k')
+    RunData(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'), out='I800nm10k')
+    RunData(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'), out='I800nm20k')
+    RunData(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'), out='I800nm30k')
+    RunData(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'), out='I800nm38k')
+    RunData(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'), out='I800nm50k')
+    RunData(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'), out='I800nm54k')
     #700 nm
-    RunData(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'), out='700nm5k')
-    RunData(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'), out='700nm9k')
-    RunData(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'), out='700nm52k')
-    RunData(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'), out='700nm32k')
+    RunData(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'), out='I700nm5k')
+    RunData(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'), out='I700nm9k')
+    RunData(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'), out='I700nm52k')
+    RunData(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'), out='I700nm32k')
     #600 nm
-    RunData(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'), out='600nm5k')
-    RunData(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'), out='600nm54k')
-    RunData(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'), out='600nm10k')
+    RunData(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'), out='I600nm5k')
+    RunData(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'), out='I600nm54k')
+    RunData(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'), out='I600nm10k')
     #890 nm
-    RunData(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'), out='890nm5k')
-    RunData(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'), out='890nm10k')
-    RunData(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'), out='890nm30k')
-    RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='890nm50k')
+    RunData(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'), out='I890nm5k')
+    RunData(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'), out='I890nm10k')
+    RunData(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'), out='I890nm30k')
+    RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='I890nm50k')
 
 
 def jointRuns():
+    """
+    Execute all spot data analysis runs fitting jointly.
+    """
     #800 nm
     forwardModelJointFit(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'),
-                         out='800nm5k', wavelength='800nm')
+                         out='J800nm5k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'),
-                         out='800nm10k', wavelength='800nm')
+                         out='J800nm10k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'),
-                         out='800nm20k', wavelength='800nm')
+                         out='J800nm20k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'),
-                         out='800nm30k', wavelength='800nm')
+                         out='J800nm30k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'),
-                         out='800nm38k', wavelength='800nm')
+                         out='J800nm38k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'),
-                         out='800nm50k', wavelength='800nm')
+                         out='J800nm50k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'),
-                         out='800nm54k', wavelength='800nm')
+                         out='J800nm54k', wavelength='800nm')
     #700 nm
     forwardModelJointFit(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'),
-                         out='700nm5k', wavelength='700nm')
+                         out='J700nm5k', wavelength='700nm')
     forwardModelJointFit(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'),
-                         out='700nm9k', wavelength='700nm')
+                         out='J700nm9k', wavelength='700nm')
     forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
-                         out='700nm52k', wavelength='700nm')
+                         out='J700nm52k', wavelength='700nm')
     forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
-                         out='700nm32k', wavelength='700nm')
+                         out='J700nm32k', wavelength='700nm')
     #600 nm
     forwardModelJointFit(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'),
-                         out='600nm5k', wavelength='600nm')
+                         out='J600nm5k', wavelength='600nm')
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                         out='600nm54k', wavelength='600nm')
+                         out='J600nm54k', wavelength='600nm')
     forwardModelJointFit(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'),
-                         out='600nm10k', wavelength='600nm')
+                         out='J600nm10k', wavelength='600nm')
     #890 nm
     forwardModelJointFit(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'),
-                         out='890nm5k', wavelength='890nm')
+                         out='J890nm5k', wavelength='890nm')
     forwardModelJointFit(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'),
-                         out='890nm10k', wavelength='890nm')
+                         out='J890nm10k', wavelength='890nm')
     forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
-                         out='890nm30k', wavelength='890nm')
+                         out='J890nm30k', wavelength='890nm')
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
-                         out='890nm50k', wavelength='890nm')
+                         out='J890nm50k', wavelength='890nm')
 
 
 if __name__ == '__main__':
-    #jointRuns()
-    #individualRuns()
+    #Real Runs
+    jointRuns()
+    individualRuns()
 
     #Simulated spots and analysis
     #RunTestSimulations()
@@ -723,7 +733,5 @@ if __name__ == '__main__':
     #RunData(g.glob('testdata/15*.fits'), out='test800nm')
 
     #Joint Fit (same signal level and wavelength, but separate files) - test data set
-    forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
-    forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
-    forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
-                         out='test700nm32kJoint',  wavelength='700nm')
+    #forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
+    #forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')

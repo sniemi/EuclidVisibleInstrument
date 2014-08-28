@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.9
+:version: 0.92
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -96,7 +96,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
     gaus = models.Gaussian2D(spot.max(), size, size, x_stddev=0.5, y_stddev=0.5)
     gaus.theta.fixed = True  #fix angle
     p_init = gaus
-    fit_p = fitting.NonLinearLSQFitter()
+    fit_p = fitting.LevMarLSQFitter()
     stopy, stopx = spot.shape
     X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
     p = fit_p(p_init, X, Y, spot)
@@ -122,7 +122,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
                       p.x_mean.value,
                       p.y_mean.value,
                       np.max([p.x_stddev.value, p.y_stddev.value]),
-                      0.3,
+                      0.5,
                       0.3,
                       0.3]) + 1e-3*np.random.randn(ndim) for i in xrange(nwalkers)]
 
@@ -292,11 +292,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
     amplitude, radius, focus, width_x, width_y = params_fit[-5:]
     amplitudeE, radiusE, focusE, width_xE, width_yE = errors_fit[-5:]
 
-    #print results and store
+    #print results
     _printFWHM(width_x, width_y, width_xE, width_yE)
-    res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
-               wavelength=wavelength, peakvalues=np.asarray(peakvalues))
-    fileIO.cPickleDumpDictionary(res, 'results/' + out + '.pkl')
 
     #save the best models per file
     size = size*2 + 1
@@ -326,6 +323,11 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
         fileIO.writeFITS(model, id+'model.fits', int=False)
         fileIO.writeFITS(model - image[index], id+'residual.fits', int=False)
         fileIO.writeFITS(((model - image[index])**2 / noise[index]), id+'residualSQ.fits', int=False)
+
+    #save results
+    res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
+               wavelength=wavelength, peakvalues=np.asarray(peakvalues), CCDmodel=CCD, CCDmodeldata=CCDdata)
+    fileIO.cPickleDumpDictionary(res, 'results/' + out + '.pkl')
 
     #plot
     samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
@@ -723,7 +725,7 @@ def jointRuns():
 if __name__ == '__main__':
     #Real Runs
     jointRuns()
-    individualRuns()
+    #individualRuns()
 
     #Simulated spots and analysis
     #RunTestSimulations()

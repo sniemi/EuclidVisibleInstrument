@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.92
+:version: 0.95
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -39,10 +39,10 @@ from support import files as fileIO
 from astropy.modeling import models, fitting
 import triangle
 import glob as g
-import os, datetime
+import os, sys, datetime
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty=3514, run=100, simulation=False):
+def forwardModel(file, out='Data', gain=3.1, size=10, burn=20, spotx=2888, spoty=3514, run=200, simulation=False):
     """
     A single file to quickly test if the method works
     """
@@ -160,6 +160,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
     #Get the best parameters and their respective errors and print best fits
     params_fit = pos[maxprob_index]
     errors_fit = [sampler.flatchain[:,i].std() for i in xrange(ndim)]
+    amplitudeE, center_xE, center_yE, radiusE, focusE, width_xE, width_yE = errors_fit
     _printResults(params_fit, errors_fit)
 
     #Best fit model
@@ -177,24 +178,26 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
 
     #residuals
     fileIO.writeFITS(model - spot, out+'residual.fits', int=False)
-    fileIO.writeFITS(((model-spot)**2 / var.reshape(spot.shape)), out+'residualSQ.fits', int=False)
+    fileIO.writeFITS(((model - spot)**2 / var.reshape(spot.shape)), out+'residualSQ.fits', int=False)
 
     # a simple goodness of fit
     gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / var)
-    print 'GoF:', gof
+    print 'GoF:', gof, ' Maximum difference:', np.max(np.abs(model - spot))
 
-    #results
+    #results and save results
     _printFWHM(width_x, width_y, errors_fit[5], errors_fit[6])
+    res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, out=out,
+               peakvalue=max, CCDmodel=CCD, CCDmodeldata=CCDdata, GoF=gof)
+    fileIO.cPickleDumpDictionary(res, out+'.pkl')
 
     #plot
     samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
     fig = triangle.corner(samples, labels=['amplitude', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y'])
     fig.savefig(out+'Triangle.png')
 
-    return width_x, width_y, errors_fit[5], errors_fit[6]
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100, spotx=2888, spoty=3514):
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run=200, spotx=2888, spoty=3514):
     """
     A single file to quickly test if the method works
     """
@@ -241,6 +244,11 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
         image.append(spot)
         noise.append(variance)
 
+    #sensibility test, try to check if all the files in the fit are of the same dataset
+    if np.std(peakvalues) > 2*np.sqrt(np.median(peakvalues)):
+        print 'POTENTIAL OUTLIER, please check the input files...'
+        print np.std(peakvalues), 2*np.sqrt(np.median(peakvalues))
+        sys.exit(-1)
 
     #MCMC based fitting
     ndim = 2*images + 5  #xpos, ypos for each image and single amplitude, radius, focus, and sigmaX and sigmaY
@@ -249,7 +257,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
 
     # Choose an initial set of positions for the walkers using the Gaussian fit
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    p0 = [np.asarray((([CCDx, CCDy]*images) +[max*1.1, 0.5, 0.5, 0.3, 0.3])) +
+    p0 = [np.asarray((([CCDx, CCDy]*images) +[max*1.05, 0.5, 0.5, 0.3, 0.3])) +
           1e-3*np.random.randn(ndim) for i in xrange(nwalkers)]
 
     # Initialize the sampler with the chosen specs.
@@ -297,9 +305,10 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
 
     #save the best models per file
     size = size*2 + 1
+    gofs = []
     for index, file in enumerate(files):
-        path, file = os.path.split(file)
-        id = 'results/' + file.replace('.fits', '')
+        #path, file = os.path.split(file)
+        id = 'results/' + out + str(index)
         #X and Y are always in pairs
         center_x, center_y = params_fit[index:index+2]
 
@@ -324,15 +333,21 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
         fileIO.writeFITS(model - image[index], id+'residual.fits', int=False)
         fileIO.writeFITS(((model - image[index])**2 / noise[index]), id+'residualSQ.fits', int=False)
 
+        #a simple goodness of fit
+        gof = (1./(len(image[index])-ndim)) * np.sum((model - image[index])**2 / noise[index])
+        print 'GoF:', gof, ' Max difference', np.max(np.abs(model - image[index]))
+        gofs.append(gof)
+
     #save results
     res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
-               wavelength=wavelength, peakvalues=np.asarray(peakvalues), CCDmodel=CCD, CCDmodeldata=CCDdata)
+               wavelength=wavelength, peakvalues=np.asarray(peakvalues), CCDmodel=CCD, CCDmodeldata=CCDdata,
+               GoFs=gofs)
     fileIO.cPickleDumpDictionary(res, 'results/' + out + '.pkl')
 
     #plot
     samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
     fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'])
-    fig.savefig(out+'Triangle.png')
+    fig.savefig('results/' + out + 'Triangle.png')
 
 
 def log_posterior(theta, x, y, z, var):
@@ -564,61 +579,9 @@ def RunData(files, out='testdata'):
     """
     A set of test data to analyse.
     """
-    widthx = []
-    widthxerr = []
-    widthy = []
-    widthyerr = []
     for i, file in enumerate(files):
         print 'Processing:', file
-        wx, wy, wxe, wye = forwardModel(file=file, out='results/%s%i' % (out, i))
-        widthx.append(wx)
-        widthxerr.append(wxe)
-        widthy.append(wy)
-        widthyerr.append(wye)
-
-    wx = _FWHMGauss(np.asarray(widthx))
-    wxe = _FWHMGauss(np.asarray(widthxerr))
-    wy = _FWHMGauss(np.asarray(widthy))
-    wye = _FWHMGauss(np.asarray(widthyerr))
-    res = dict(wx=wx, wy=wy, wxerr=wxe, wyerr=wye, files=files, out=out)
-    fileIO.cPickleDumpDictionary(res, 'results/' + out+'.pkl')
-    testDataPlot('results/' + out + '.pkl', out=out)
-
-
-def testDataPlot(file='testData.pkl', out='test'):
-    """
-    A simple plot to show test results.
-    """
-    data = fileIO.cPicleRead(file)
-    xtmp = np.arange(len(data['files'])) + 1
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
-    fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
-    plt.title(data['out'])
-
-    ax1.errorbar(xtmp, data['wx'], yerr=data['wxerr'], fmt='o')
-    ax2.errorbar(xtmp, data['wy'], yerr=data['wyerr'], fmt='o')
-    ax1.axhline(y=10.8, label='Requirement', c='r')
-    ax2.axhline(y=10.8, label='Requirement', c='r')
-
-    plt.sca(ax1)
-    plt.xticks(visible=False)
-    plt.sca(ax2)
-    plt.xticks(xtmp, [x.replace('.fits', '').replace('Euclid', '').replace('testdata/', '') for x in data['files']],
-               rotation=45)
-
-    ax1.set_ylim(0.2, 15)
-    ax2.set_ylim(0.2, 15)
-    ax1.set_xlim(xtmp.min()*0.9, xtmp.max()*1.05)
-    ax2.set_xlim(xtmp.min()*0.9, xtmp.max()*1.05)
-
-    ax1.set_ylabel('X FWHM [microns]')
-    ax2.set_ylabel('Y FWHM [microns]')
-    ax1.legend(shadow=True, fancybox=True)
-    plt.savefig(out+'.pdf')
-    plt.close()
+        forwardModel(file=file, out='results/%s%i' % (out, i))
 
 
 def getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'):
@@ -722,18 +685,69 @@ def jointRuns():
                          out='J890nm50k', wavelength='890nm')
 
 
+def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm'):
+    """
+    Simple plot
+    """
+    ind = []
+    for file in g.glob(individuals):
+        print file
+        ind.append(fileIO.cPicleRead(file))
+
+    join = fileIO.cPicleRead(joined)
+    xtmp = np.arange(len(ind)) + 1
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
+    plt.title(title)
+
+    ax1.errorbar(xtmp, [_FWHMGauss(data['wx']) for data in ind], yerr=[_FWHMGauss(data['wxerr']) for data in ind], fmt='o')
+    ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=_FWHMGauss(join['wxerr']), fmt='s')
+    ax2.errorbar(xtmp, [_FWHMGauss(data['wy']) for data in ind], yerr=[_FWHMGauss(data['wyerr']) for data in ind], fmt='o')
+    ax2.errorbar(xtmp[-1]+1, _FWHMGauss(join['wy']), yerr=_FWHMGauss(join['wyerr']), fmt='s')
+    ax1.axhline(y=10.8, label='Requirement', c='r')
+    ax2.axhline(y=10.8, label='Requirement', c='r')
+
+    plt.sca(ax1)
+    plt.xticks(visible=False)
+    plt.sca(ax2)
+    plt.xticks(xtmp, ['Individual%i' % x for x in xtmp], rotation=45)
+
+    ax1.set_ylim(5.5, 12.5)
+    ax2.set_ylim(5.5, 12.5)
+    ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
+    ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
+
+    ax1.set_ylabel('X FWHM [microns]')
+    ax2.set_ylabel('Y FWHM [microns]')
+    ax1.legend(shadow=True, fancybox=True)
+    plt.savefig('IndividualVsJoined%s.pdf' % title)
+    plt.close()
+
+
+def RunTest():
+    #MCMC - test data set
+    RunData(g.glob('testdata/17*.fits'), out='test700nm')
+    RunData(g.glob('testdata/15*.fits'), out='test800nm')
+
+    #Joint Fit (same signal level and wavelength, but separate files) - test data set
+    forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
+    forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
+
+    #test plots
+    _plotDifferenceIndividualVsJoined(individuals='results/test700nm?.pkl', joined='results/test700nmJoint.pkl', title='700nm')
+    _plotDifferenceIndividualVsJoined(individuals='results/test800nm?.pkl', joined='results/test800nmJoint.pkl', title='800nm')
+
+
 if __name__ == '__main__':
     #Real Runs
-    jointRuns()
+    #jointRuns()
     #individualRuns()
 
     #Simulated spots and analysis
     #RunTestSimulations()
 
-    #MCMC - test data set
-    #RunData(g.glob('testdata/17*.fits'), out='test700nm')
-    #RunData(g.glob('testdata/15*.fits'), out='test800nm')
-
-    #Joint Fit (same signal level and wavelength, but separate files) - test data set
-    #forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
-    #forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
+    #Testing set
+    RunTest()

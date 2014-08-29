@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.96
+:version: 0.97
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -39,7 +39,8 @@ from support import files as fileIO
 from astropy.modeling import models, fitting
 import triangle
 import glob as g
-import os, sys, datetime
+import os, datetime
+from multiprocessing import Pool
 
 
 def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty=3514, run=100,
@@ -145,7 +146,8 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
     yy = yy.flatten()
 
     #initiate sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var], threads=7)
+    pool = Pool(7) #A hack Dan gave me to not have ghost processes running as with threads keyword
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var], pool=pool)
 
     # Run a burn-in
     print "Burning-in..."
@@ -204,6 +206,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty
                           truths=truths)
     fig.savefig(out+'Triangle.png')
 
+    pool.close()
 
 
 def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100,
@@ -293,7 +296,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
     yy = yy.flatten()
 
     #initiate sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint, args=[xx, yy, image, noise], threads=7)
+    pool = Pool(7) #A hack Dan gave me to not have ghost processes running as with threads keyword
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint, args=[xx, yy, image, noise], pool=pool)
 
     # Run a burn-in
     print "Burning-in..."
@@ -370,6 +374,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
     fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)
     fig.savefig('results/' + out + 'Triangle.png')
+
+    pool.close()
 
 
 def log_posterior(theta, x, y, z, var):
@@ -481,6 +487,7 @@ def log_likelihoodJoint(theta, x, y, data, var, size=21):
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
+        #or numpy.logaddexp?
 
     return lnL
 
@@ -596,11 +603,11 @@ def RunTestSimulations(both=False):
     print("|" * 120)
     print 'Joint Fitting Simulation'
     #a joint fit test - vary only the x and y positions
-    theta1 = (2.e5, 9.9, 10.03, 0.45, 0.5, 10., 10., 0.296, 0.335)
-    theta2 = (2.e5, 10.05, 9.95, 0.45, 0.5, 10., 10., 0.296, 0.335)
-    theta3 = (2.e5, 9.98, 10.1, 0.45, 0.5, 10., 10., 0.296, 0.335)
-    theta4 = (2.e5, 10.0, 10.1, 0.45, 0.5, 10., 10., 0.296, 0.335)
-    theta5 = (2.e5, 10.1, 9.99, 0.45, 0.5, 10., 10., 0.296, 0.335)
+    theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    theta2 = (2.e5, 10.1, 9.97, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    theta3 = (2.e5, 9.96, 10.1, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    theta4 = (2.e5, 10.1, 10.01, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    theta5 = (2.e5, 10.1, 9.98, 0.44, 0.5, 10., 10., 0.296, 0.335)
 
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
@@ -622,11 +629,11 @@ def RunTestSimulations(both=False):
     print 'True width_x and widht_y:', theta1[7], theta1[8]
 
     #test plots
-    if both:
-        _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
-                                          joined='results/simulated800nmJoint.pkl',
-                                          title='Simulated', truthx=theta1[7], truthy=theta1[8])
+    _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
+                                      joined='results/simulated800nmJoint.pkl',
+                                      title='Simulated', truthx=theta1[7], truthy=theta1[8])
 
+    if both:
         #different simulation sets
         print("|" * 120)
         print 'Single Fitting Simulations'

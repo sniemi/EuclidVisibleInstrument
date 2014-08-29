@@ -12,7 +12,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: VISsim-Python
 :requires: emcee
 
-:version: 0.95
+:version: 0.96
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -42,15 +42,22 @@ import glob as g
 import os, sys, datetime
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=20, spotx=2888, spoty=3514, run=200, simulation=False):
+def forwardModel(file, out='Data', gain=3.1, size=10, burn=10, spotx=2888, spoty=3514, run=100,
+                 simulation=False, truths=None):
     """
     A single file to quickly test if the method works
     """
+    print '\n\n\n'
+    print '_'*120
+    print 'Processing:', file
     #get data and convert to electrons
     o = pf.getdata(file)*gain
 
-    #roughly the correct location - to avoid identifying e.g. cosmic rays
-    data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
+    if simulation:
+        data = o
+    else:
+        #roughly the correct location - to avoid identifying e.g. cosmic rays
+        data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
 
     #maximum position within the cutout
     y, x = m.maximum_position(data)
@@ -107,7 +114,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=20, spotx=2888, spoty
     fileIO.writeFITS(model - spot, out+'BasicModelResidual.fits', int=False)
 
     #goodness of fit
-    gof = (1./(len(data)-5.)) * np.sum((model.flatten() - data)**2 / var)
+    gof = (1./(np.size(data) - 5.)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof
     print 'Done'
 
@@ -181,7 +188,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=20, spotx=2888, spoty
     fileIO.writeFITS(((model - spot)**2 / var.reshape(spot.shape)), out+'residualSQ.fits', int=False)
 
     # a simple goodness of fit
-    gof = (1./(len(data)-ndim)) * np.sum((model.flatten() - data)**2 / var)
+    gof = (1./(np.size(data) - ndim)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof, ' Maximum difference:', np.max(np.abs(model - spot))
 
     #results and save results
@@ -192,15 +199,21 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=20, spotx=2888, spoty
 
     #plot
     samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
-    fig = triangle.corner(samples, labels=['amplitude', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y'])
+    fig = triangle.corner(samples,
+                          labels=['amplitude', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y'],
+                          truths=truths)
     fig.savefig(out+'Triangle.png')
 
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run=200, spotx=2888, spoty=3514):
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run=100,
+                         spotx=2888, spoty=3514, simulated=False, truths=None):
     """
     A single file to quickly test if the method works
     """
+    print '\n\n\n'
+    print '_'*120
+
     images = len(files)
     orig = []
     image = []
@@ -211,8 +224,11 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run
         #get data and convert to electrons
         o = pf.getdata(file)*gain
 
-        #roughly the correct location - to avoid identifying e.g. cosmic rays
-        data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
+        if simulated:
+            data = o
+        else:
+            #roughly the correct location - to avoid identifying e.g. cosmic rays
+            data = o[spoty-(size*3):spoty+(size*3)+1, spotx-(size*3):spotx+(size*3)+1].copy()
 
         #maximum position within the cutout
         y, x = m.maximum_position(data)
@@ -222,8 +238,13 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run
         orig.append(spot.copy())
         CCDy, CCDx = m.maximum_position(spot)
 
-        bias = np.median(o[spoty-size: spoty+size, spotx-220:spotx-20])
-        rn = np.std(o[spoty-size: spoty+size, spotx-220:spotx-20])
+        #bias estimate
+        if simulated:
+            bias = 9000.
+            rn = 4.5
+        else:
+            bias = np.median(o[spoty-size: spoty+size, spotx-220:spotx-20])
+            rn = np.std(o[spoty-size: spoty+size, spotx-220:spotx-20])
 
         print 'Readnoise (e):', rn
         if rn < 2. or rn > 6.:
@@ -245,10 +266,10 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run
         noise.append(variance)
 
     #sensibility test, try to check if all the files in the fit are of the same dataset
-    if np.std(peakvalues) > 2*np.sqrt(np.median(peakvalues)):
+    if np.std(peakvalues) > 3*np.sqrt(np.median(peakvalues)):
+        #check for more than 3sigma outliers...
         print 'POTENTIAL OUTLIER, please check the input files...'
-        print np.std(peakvalues), 2*np.sqrt(np.median(peakvalues))
-        sys.exit(-1)
+        print np.std(peakvalues), 3*np.sqrt(np.median(peakvalues))
 
     #MCMC based fitting
     ndim = 2*images + 5  #xpos, ypos for each image and single amplitude, radius, focus, and sigmaX and sigmaY
@@ -334,7 +355,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run
         fileIO.writeFITS(((model - image[index])**2 / noise[index]), id+'residualSQ.fits', int=False)
 
         #a simple goodness of fit
-        gof = (1./(len(image[index])-ndim)) * np.sum((model - image[index])**2 / noise[index])
+        gof = (1./(np.size(image[index])*images - ndim)) * np.sum((model - image[index])**2 / noise[index])
         print 'GoF:', gof, ' Max difference', np.max(np.abs(model - image[index]))
         gofs.append(gof)
 
@@ -346,7 +367,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=20, run
 
     #plot
     samples = sampler.chain[:, burn:, :].reshape((-1, ndim))
-    fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'])
+    fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'],
+                          truths=truths)
     fig.savefig('results/' + out + 'Triangle.png')
 
 
@@ -379,8 +401,8 @@ def log_prior(theta):
     Priors, limit the values to a range but otherwise flat.
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 8. < center_x < 12. and 8. < center_y < 12. and 0.25 < width_x < 0.5 and 0.25 < width_y < 0.5 and \
-       1.e2 < amplitude < 1.e6 and 0. < radius < 1. and 0. < focus < 1.:
+    if 8. < center_x < 12. and 8. < center_y < 12. and 0. < width_x < 1. and 0. < width_y < 1. and \
+       1.e2 < amplitude < 1.e6 and 0. < radius < 2. and 0. < focus < 1.:
         return 0.
     else:
         return -np.inf
@@ -392,8 +414,8 @@ def log_priorJoint(theta):
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
     tmp = theta[-5:] #these are the last five i.e. amplitude, radius, focus, sigmaX, and sigmaY
-    if all(3. < x < 16. for x in theta[:-5]) and 1.e2 < tmp[0] < 1.e6 and 0. < tmp[1] < 2. and 0. < tmp[2] < 2. and \
-       0.1 < tmp[3] < 2. and 0.1 < tmp[4] < 2.:
+    if all(3. < x < 16. for x in theta[:-5]) and 1.e2 < tmp[0] < 1.e6 and 0. < tmp[1] < 2. and 0. < tmp[2] < 1. and \
+       0. < tmp[3] < 1. and 0. < tmp[4] < 1.:
         return 0.
     else:
         return -np.inf
@@ -553,26 +575,77 @@ def _FWHMGauss(sigma, pixel=12):
     return sigma*2*np.sqrt(2*np.log(2))*pixel
 
 
-def RunTestSimulations():
+def _ellipticityFromGaussian(sigmax, sigmay):
+    """
+
+    """
+    return np.abs((sigmax**2 - sigmay**2) / (sigmax**2 + sigmay**2))
+
+
+def _R2FromGaussian(sigmax, sigmay, pixel=0.1):
+    """
+
+    """
+    return (sigmax*pixel)**2 + (sigmay*pixel)**2
+
+
+def RunTestSimulations(both=False):
     """
     A set of simulated spots and analysis.
     """
-    #different simulation sets
-    theta1 = (2.e5, 10., 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
-    theta2 = (1.e5, 10., 10.1, 0.55, 0.45, 10., 10., 0.38, 0.36)
-    theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
-    theta4 = (5.e4, 10., 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
-    theta5 = (1.e5, 10., 10.2, 0.5, 0.45, 10., 10., 0.35, 0.31)
+    print("|" * 120)
+    print 'Joint Fitting Simulation'
+    #a joint fit test - vary only the x and y positions
+    theta1 = (2.e5, 9.9, 10.03, 0.45, 0.5, 10., 10., 0.296, 0.335)
+    theta2 = (2.e5, 10.05, 9.95, 0.45, 0.5, 10., 10., 0.296, 0.335)
+    theta3 = (2.e5, 9.98, 10.1, 0.45, 0.5, 10., 10., 0.296, 0.335)
+    theta4 = (2.e5, 10.0, 10.1, 0.45, 0.5, 10., 10., 0.296, 0.335)
+    theta5 = (2.e5, 10.1, 9.99, 0.45, 0.5, 10., 10., 0.296, 0.335)
+
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
     for i, theta in enumerate(thetas):
-        _simulate(theta=theta, out='simulated/simulatedSmall%i.fits' %i)
-        forwardModel(file='simulated/simulatedSmall%i.fits' %i, out='results/Run%i' %i, simulation=True)
-        print("=" * 60)
+        _simulate(theta=theta, out='simulated/simulatedJoint%i.fits' %i)
+        forwardModel(file='simulated/simulatedJoint%i.fits' %i, out='simulatedResults/RunI%i' %i, simulation=True,
+                     truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
         print 'Simulation Parameters'
         print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
         print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
         print("=" * 60)
+
+    truths = [theta1[1], theta1[2], theta2[1], theta2[2], theta3[1], theta3[2], theta4[1], theta4[2],
+              theta5[1], theta5[2], theta1[0], theta4[3], theta1[4], theta1[7], theta1[8]]
+    forwardModelJointFit(g.glob('simulated/simulatedJoint?.fits'),
+                         out='simulated800nmJoint', wavelength='800nm', simulated=True,
+                         truths=truths)
+
+    print 'True width_x and widht_y:', theta1[7], theta1[8]
+
+    #test plots
+    if both:
+        _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
+                                          joined='results/simulated800nmJoint.pkl',
+                                          title='Simulated', truthx=theta1[7], truthy=theta1[8])
+
+        #different simulation sets
+        print("|" * 120)
+        print 'Single Fitting Simulations'
+        theta1 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
+        theta2 = (1.e5, 10.1, 10.1, 0.55, 0.45, 10., 10., 0.38, 0.36)
+        theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
+        theta4 = (5.e4, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
+        theta5 = (1.e5, 10., 10.2, 0.5, 0.45, 10., 10., 0.35, 0.31)
+        thetas = [theta1, theta2, theta3, theta4, theta5]
+
+        for i, theta in enumerate(thetas):
+            _simulate(theta=theta, out='simulated/simulatedSmall%i.fits' %i)
+            forwardModel(file='simulated/simulatedSmall%i.fits' %i, out='simulatedResults/Run%i' %i, simulation=True,
+                         truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
+            print("=" * 60)
+            print 'Simulation Parameters'
+            print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
+            print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
+            print("=" * 60)
 
 
 def RunData(files, out='testdata'):
@@ -580,7 +653,6 @@ def RunData(files, out='testdata'):
     A set of test data to analyse.
     """
     for i, file in enumerate(files):
-        print 'Processing:', file
         forwardModel(file=file, out='results/%s%i' % (out, i))
 
 
@@ -685,7 +757,7 @@ def jointRuns():
                          out='J890nm50k', wavelength='890nm')
 
 
-def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm'):
+def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx=None, truthy=None):
     """
     Simple plot
     """
@@ -697,6 +769,7 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm'):
     join = fileIO.cPicleRead(joined)
     xtmp = np.arange(len(ind)) + 1
 
+    #plot FWHM
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
@@ -707,6 +780,14 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm'):
     ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=_FWHMGauss(join['wxerr']), fmt='s')
     ax2.errorbar(xtmp, [_FWHMGauss(data['wy']) for data in ind], yerr=[_FWHMGauss(data['wyerr']) for data in ind], fmt='o')
     ax2.errorbar(xtmp[-1]+1, _FWHMGauss(join['wy']), yerr=_FWHMGauss(join['wyerr']), fmt='s')
+
+    #simulations
+    if truthx is not None:
+        ax1.axhline(y=_FWHMGauss(truthx), label='Truth', c='g')
+    if truthy is not None:
+        ax2.axhline(y=_FWHMGauss(truthy), label='Truth', c='g')
+
+    #requirements
     ax1.axhline(y=10.8, label='Requirement', c='r')
     ax2.axhline(y=10.8, label='Requirement', c='r')
 
@@ -723,31 +804,77 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm'):
     ax1.set_ylabel('X FWHM [microns]')
     ax2.set_ylabel('Y FWHM [microns]')
     ax1.legend(shadow=True, fancybox=True)
-    plt.savefig('IndividualVsJoined%s.pdf' % title)
+    plt.savefig('IndividualVsJoinedFWHM%s.pdf' % title)
+    plt.close()
+
+    #plot R2 and ellipticity
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
+    plt.title(title)
+
+    ax1.errorbar(xtmp, [_R2FromGaussian(data['wx'], data['wy'])*1e3 for data in ind],
+                 yerr=[_R2FromGaussian(data['wxerr'], data['wyerr'])*1e3 for data in ind], fmt='o')
+    ax1.errorbar(xtmp[-1]+1, _R2FromGaussian(join['wx'], join['wy'])*1e3,
+                 yerr=_R2FromGaussian(join['wxerr'], join['wyerr'])*1e3, fmt='s')
+
+    ax2.errorbar(xtmp, [_ellipticityFromGaussian(data['wy'], data['wx']) for data in ind],
+                 yerr=[_ellipticityFromGaussian(data['wyerr'], data['wxerr']) for data in ind], fmt='o')
+    ax2.errorbar(xtmp[-1]+1, _ellipticityFromGaussian(join['wy'], join['wx']),
+                 yerr=_ellipticityFromGaussian(join['wyerr'], join['wxerr']), fmt='s')
+
+    ax2.axhline(y=0.156, label='Requirement', c='r')
+    ax1.axhline(y=0.002*1e3, label='Requirement', c='r')
+
+    #simulations
+    if truthx and truthy is not None:
+        ax2.axhline(y=_ellipticityFromGaussian(truthx, truthy), label='Truth', c='g')
+        ax1.axhline(y= _R2FromGaussian(truthx, truthy)*1e3, label='Truth', c='g')
+
+    plt.sca(ax1)
+    plt.xticks(visible=False)
+    plt.sca(ax2)
+    plt.xticks(xtmp, ['Individual%i' % x for x in xtmp], rotation=45)
+
+    ax1.set_ylim(0.001*1e3, 0.004*1e3)
+    ax2.set_ylim(0., 0.33)
+    ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
+    ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
+
+    ax1.set_ylabel(r'$R^{2}$ [mas$^{2}$]')
+    ax2.set_ylabel('ellipticity')
+    ax1.legend(shadow=True, fancybox=True)
+    plt.savefig('IndividualVsJoinedR2e%s.pdf' % title)
     plt.close()
 
 
 def RunTest():
-    #MCMC - test data set
-    RunData(g.glob('testdata/17*.fits'), out='test700nm')
+    """
+    Test runs with test data sets
+    """
+    #Individual Fits
     RunData(g.glob('testdata/15*.fits'), out='test800nm')
+    RunData(g.glob('testdata/17*.fits'), out='test700nm')
 
     #Joint Fit (same signal level and wavelength, but separate files) - test data set
     forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
     forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
 
     #test plots
-    _plotDifferenceIndividualVsJoined(individuals='results/test700nm?.pkl', joined='results/test700nmJoint.pkl', title='700nm')
-    _plotDifferenceIndividualVsJoined(individuals='results/test800nm?.pkl', joined='results/test800nmJoint.pkl', title='800nm')
+    _plotDifferenceIndividualVsJoined(individuals='testresults/test700nm?.pkl', joined='testresults/test700nmJoint.pkl',
+                                      title='700nm')
+    _plotDifferenceIndividualVsJoined(individuals='testresults/test800nm?.pkl', joined='testresults/test800nmJoint.pkl',
+                                      title='800nm')
 
 
 if __name__ == '__main__':
-    #Real Runs
-    #jointRuns()
-    #individualRuns()
-
     #Simulated spots and analysis
-    #RunTestSimulations()
+    RunTestSimulations()
+
+    #Real Runs
+    jointRuns()
+    individualRuns()
 
     #Testing set
-    RunTest()
+    #RunTest()

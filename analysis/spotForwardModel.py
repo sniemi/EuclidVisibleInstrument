@@ -11,8 +11,9 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: matplotlib
 :requires: VISsim-Python
 :requires: emcee
+:requires: sklearn
 
-:version: 0.97
+:version: 0.98
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -29,12 +30,14 @@ matplotlib.rcParams['xtick.major.size'] = 5
 matplotlib.rcParams['ytick.major.size'] = 5
 matplotlib.rcParams['image.interpolation'] = 'none'
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pyfits as pf
 import numpy as np
 import emcee
 import scipy.ndimage.measurements as m
 from scipy import signal
 from scipy import ndimage
+from sklearn.gaussian_process import GaussianProcess
 from support import files as fileIO
 from astropy.modeling import models, fitting
 import triangle
@@ -281,7 +284,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=10, run
 
     # Choose an initial set of positions for the walkers using the Gaussian fit
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    p0 = [np.asarray((([CCDx, CCDy]*images) +[max*1.05, 0.5, 0.5, 0.3, 0.3])) +
+    p0 = [np.asarray((([CCDx, CCDy]*images) +[max*1.1, 0.5, 0.5, 0.3, 0.3])) +
           1e-3*np.random.randn(ndim) for i in xrange(nwalkers)]
 
     # Initialize the sampler with the chosen specs.
@@ -476,18 +479,18 @@ def log_likelihoodJoint(theta, x, y, data, var, size=21):
         airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
         adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape((size, size))
 
-        #2)Apply Focus
+        #2)Apply Focus, no normalisation as smoothing
         f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
         focusdata = f.eval(x, y, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
         model = signal.convolve2d(adata, focusdata, mode='same')
 
-        #3)Apply CCD diffusion, approximated with a Gaussian
+        #3)Apply CCD diffusion, approximated with a Gaussian -- max = 1 as centred
         CCD = models.Gaussian2D(1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.)
         CCDdata = CCD.eval(x, y, 1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.).reshape((size, size))
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
-        #or numpy.logaddexp?
+        #lnL = np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
 
     return lnL
 
@@ -533,7 +536,7 @@ def _simulate(theta=(1.e5, 10., 10.3, 0.6, 0.1, 10., 10., 0.33, 0.35), gain=3.1,
     if Gaussian:
         #full Gaussian
         CCD = models.Gaussian2D(1., xCCD, yCCD, width_x, width_y, 0.)
-        d = CCD.eval(x, y, 1.,xCCD, yCCD, width_x, width_y, 0.).reshape((size, size))
+        d = CCD.eval(x, y, 1.,xCCD, yCCD, width_x, width_y, 0.).reshape((size, size)) #max = 1 as centred
         CCDdata = signal.convolve2d(data, d, mode='same')
     else:
         #CCD kernel -- high flux
@@ -603,11 +606,11 @@ def RunTestSimulations(both=False):
     print("|" * 120)
     print 'Joint Fitting Simulation'
     #a joint fit test - vary only the x and y positions
-    theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
-    theta2 = (2.e5, 10.1, 9.97, 0.44, 0.5, 10., 10., 0.296, 0.335)
-    theta3 = (2.e5, 9.96, 10.1, 0.44, 0.5, 10., 10., 0.296, 0.335)
-    theta4 = (2.e5, 10.1, 10.01, 0.44, 0.5, 10., 10., 0.296, 0.335)
-    theta5 = (2.e5, 10.1, 9.98, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    theta1 = (2.e5, 9.9, 10.03, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta2 = (2.e5, 10.1, 9.97, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta3 = (2.e5, 9.97, 10.1, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta4 = (2.e5, 10.08, 10.04, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta5 = (2.e5, 10.1, 9.97, 0.41, 0.51, 10., 10., 0.296, 0.335)
 
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
@@ -631,7 +634,8 @@ def RunTestSimulations(both=False):
     #test plots
     _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
                                       joined='results/simulated800nmJoint.pkl',
-                                      title='Simulated', truthx=theta1[7], truthy=theta1[8])
+                                      title='Simulated Data', truthx=theta1[7], truthy=theta1[8],
+                                      requirementE=None, requirementFWHM=None, requirementR2=None)
 
     if both:
         #different simulation sets
@@ -764,7 +768,9 @@ def jointRuns():
                          out='J890nm50k', wavelength='890nm')
 
 
-def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx=None, truthy=None):
+def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm',
+                                      requirementFWHM=10.8, requirementE=0.156, requirementR2=0.002,
+                                      truthx=None, truthy=None, FWHMlims=(6.5, 11.5)):
     """
     Simple plot
     """
@@ -780,8 +786,8 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
-    fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
-    plt.title(title)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.98)
+    ax1.set_title(title)
 
     ax1.errorbar(xtmp, [_FWHMGauss(data['wx']) for data in ind], yerr=[_FWHMGauss(data['wxerr']) for data in ind], fmt='o')
     ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=_FWHMGauss(join['wxerr']), fmt='s')
@@ -795,21 +801,24 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx
         ax2.axhline(y=_FWHMGauss(truthy), label='Truth', c='g')
 
     #requirements
-    ax1.axhline(y=10.8, label='Requirement', c='r')
-    ax2.axhline(y=10.8, label='Requirement', c='r')
+    if requirementFWHM is not None:
+        ax1.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r')
+        ax2.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r')
 
     plt.sca(ax1)
     plt.xticks(visible=False)
     plt.sca(ax2)
-    plt.xticks(xtmp, ['Individual%i' % x for x in xtmp], rotation=45)
 
-    ax1.set_ylim(5.5, 12.5)
-    ax2.set_ylim(5.5, 12.5)
+    ltmp = np.hstack((xtmp, xtmp[-1]+1))
+    plt.xticks(ltmp, ['Individual %i' % x for x in ltmp[:-1]] + ['Joint',], rotation=45)
+
+    ax1.set_ylim(*FWHMlims)
+    ax2.set_ylim(*FWHMlims)
     ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
     ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
 
-    ax1.set_ylabel('X FWHM [microns]')
-    ax2.set_ylabel('Y FWHM [microns]')
+    ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
+    ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
     ax1.legend(shadow=True, fancybox=True)
     plt.savefig('IndividualVsJoinedFWHM%s.pdf' % title)
     plt.close()
@@ -818,8 +827,8 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
-    fig.subplots_adjust(hspace=0, top=0.95, bottom=0.15, left=0.12, right=0.93)
-    plt.title(title)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.98)
+    ax1.set_title(title)
 
     ax1.errorbar(xtmp, [_R2FromGaussian(data['wx'], data['wy'])*1e3 for data in ind],
                  yerr=[_R2FromGaussian(data['wxerr'], data['wyerr'])*1e3 for data in ind], fmt='o')
@@ -831,8 +840,10 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx
     ax2.errorbar(xtmp[-1]+1, _ellipticityFromGaussian(join['wy'], join['wx']),
                  yerr=_ellipticityFromGaussian(join['wyerr'], join['wxerr']), fmt='s')
 
-    ax2.axhline(y=0.156, label='Requirement', c='r')
-    ax1.axhline(y=0.002*1e3, label='Requirement', c='r')
+    if requirementE is not None:
+        ax2.axhline(y=requirementE, label='Requirement (800nm)', c='r')
+    if requirementR2 is not None:
+        ax1.axhline(y=requirementR2*1e3, label='Requirement (800nm)', c='r')
 
     #simulations
     if truthx and truthy is not None:
@@ -842,7 +853,8 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', truthx
     plt.sca(ax1)
     plt.xticks(visible=False)
     plt.sca(ax2)
-    plt.xticks(xtmp, ['Individual%i' % x for x in xtmp], rotation=45)
+    ltmp = np.hstack((xtmp, xtmp[-1]+1))
+    plt.xticks(ltmp, ['Individual%i' % x for x in ltmp[:-1]] + ['Joint',], rotation=45)
 
     ax1.set_ylim(0.001*1e3, 0.004*1e3)
     ax2.set_ylim(0., 0.33)
@@ -875,13 +887,362 @@ def RunTest():
                                       title='800nm')
 
 
+def generateTestPlots(folder='results/'):
+    #800nm
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm5k?.pkl', joined=folder+'J800nm5k.pkl', title='800nm5k')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm10k?.pkl', joined=folder+'J800nm10k.pkl', title='800nm10k')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm30k?.pkl', joined=folder+'J800nm30k.pkl', title='800nm30k')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm38k?.pkl', joined=folder+'J800nm38k.pkl', title='800nm38k')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm50k?.pkl', joined=folder+'J800nm50k.pkl', title='800nm50k')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm54k?.pkl', joined=folder+'J800nm54k.pkl', title='800nm54k')
+    #700nm
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I700nm5k?.pkl', joined=folder+'J700nm5k.pkl', title='700nm5k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I700nm9k?.pkl', joined=folder+'J700nm9k.pkl', title='700nm9k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I700nm32k?.pkl', joined=folder+'J700nm32k.pkl', title='700nm32k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I700nm52k?.pkl', joined=folder+'J700nm52k.pkl', title='700nm52k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    #600nm
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I600nm5k?.pkl', joined=folder+'J600nm5k.pkl', title='600nm5k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I600nm10k?.pkl', joined=folder+'J600nm10k.pkl', title='600nm10k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I600nm54k?.pkl', joined=folder+'J600nm54k.pkl', title='600nm54k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    #890nm
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I890nm5k?.pkl', joined=folder+'J890nm5k.pkl', title='890nm5k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I890nm10k?.pkl', joined=folder+'J890nm10k.pkl', title='890nm10k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I890nm30k?.pkl', joined=folder+'J890nm30k.pkl', title='890nm30k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I890nm50k?.pkl', joined=folder+'J890nm50k.pkl', title='890nm50k',
+                                      requirementE=None, requirementR2=None, requirementFWHM=None)
+
+
+def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, individual=False):
+    """
+    Plot the CCD PSF size intensity relation.
+    """
+    if individual:
+        print 'Individual Results'
+        fluxes = []
+        fluxerrs = []
+        datacontainer = []
+        for x in data:
+            tmp = np.asarray([d['peakvalue'] for d in x])
+            tmpx = np.asarray([d['wx'] for d in x])
+            tmpy = np.asarray([d['wy'] for d in x])
+
+            fluxes.append(tmp.mean())
+            fluxerrs.append(tmp.std() / np.sqrt(np.size(tmp)))
+
+            wx = tmpx.mean()
+            wxerr = tmpx.std() / np.sqrt(np.size(tmpx))
+            wy = tmpy.mean()
+            wyerr = tmpy.std() / np.sqrt(np.size(tmpy))
+
+            dat = dict(wx=wx, wy=wy, wxerr=wxerr, wyerr=wyerr)
+            datacontainer.append(dat)
+        data = datacontainer
+        fluxes = np.asarray(fluxes)
+        fluxerrs = np.asarray(fluxerrs)
+    else:
+        print 'Joint Results'
+        fluxes = np.asarray([d['peakvalues'].mean() for d in data])
+        fluxerrs = np.asarray([d['peakvalues'].std() for d in data])
+
+    #plot FWHM
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
+    ax1.set_title('PSF Intensity Dependency (800nm)')
+
+    ax1.errorbar(fluxes, [_FWHMGauss(d['wx']) for d in data],
+                 yerr=[_FWHMGauss(d['wxerr']) for d in data],
+                 xerr=fluxerrs, fmt='o')
+    ax2.errorbar(fluxes, [_FWHMGauss(d['wy']) for d in data],
+                 yerr=[_FWHMGauss(d['wyerr']) for d in data],
+                 xerr=fluxerrs, fmt='o')
+
+    #linear fits
+    z1 = np.polyfit(fluxes, [_FWHMGauss(d['wx']) for d in data], 1)
+    p1 = np.poly1d(z1)
+    z2 = np.polyfit(fluxes, [_FWHMGauss(d['wy']) for d in data], 1)
+    p2 = np.poly1d(z2)
+    x = np.linspace(0., fluxes.max()*1.02, 100)
+    ax1.plot(x, p1(x), 'g-')
+    ax2.plot(x, p2(x), 'g-')
+
+    #requirements
+    ax1.axhline(y=requirementFWHM, label='Requirement', c='r')
+    ax2.axhline(y=requirementFWHM, label='Requirement', c='r')
+
+    plt.sca(ax1)
+    plt.xticks(visible=False)
+    plt.sca(ax2)
+
+    ax1.set_ylim(3.5, 12.5)
+    ax2.set_ylim(3.5, 12.5)
+    ax1.set_xlim(0., fluxes.max()*1.02)
+    ax2.set_xlim(0., fluxes.max()*1.02)
+
+    ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
+    ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
+    ax2.set_xlabel(r'Intensity $\quad [e^{-}]$')
+    ax1.legend(shadow=True, fancybox=True)
+    plt.savefig(out)
+    plt.close()
+
+
+def plotLambdaDependency(folder='results/'):
+    """
+    Plot CCD PSF size as a function of wavelength and compare it to Euclid VIS requirement.
+    """
+    data800nm = fileIO.cPicleRead(folder+'J800nm54k.pkl')
+    #data800nm = fileIO.cPicleRead(folder+'J800nm50k.pkl')
+    data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
+    data700nm = fileIO.cPicleRead(folder+'J700nm32k.pkl')
+    data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
+
+    data = (data600nm, data700nm, data800nm, data890nm)
+    waves = [int(d['wavelength'].replace('nm', '')) for d in data]
+
+    #plot FWHM
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.95)
+    ax1.set_title('PSF Wavelength Dependency')
+
+    ax1.errorbar(waves, [_FWHMGauss(d['wx']) for d in data],
+                 yerr=[_FWHMGauss(d['wxerr']) for d in data],
+                 fmt='o')
+    ax2.errorbar(waves, [_FWHMGauss(d['wy']) for d in data],
+                 yerr=[_FWHMGauss(d['wyerr']) for d in data],
+                 fmt='o')
+
+    #fit a power law
+    powerlaw1 = models.PowerLaw1D(amplitude=10, x_0=1.e-3, alpha=-0.2)
+    powerlaw2 = models.PowerLaw1D(amplitude=10, x_0=1.e-3, alpha=-0.2)
+    fit_t1 = fitting.LevMarLSQFitter()
+    fit_t2 = fitting.LevMarLSQFitter()
+    p1 = fit_t1(powerlaw1, waves, [_FWHMGauss(d['wx']) for d in data])
+    p2 = fit_t2(powerlaw2, waves, [_FWHMGauss(d['wy']) for d in data])
+    x = np.linspace(500, 950)
+    powerlaw = models.PowerLaw1D(amplitude=1., x_0=0.009321, alpha=-0.2)
+    req = powerlaw.eval(x, amplitude=1., x_0=0.009321, alpha=-0.2)
+
+    ax1.plot(x, req, 'r-', label='Requirement')
+    ax1.plot(x, p1(x), 'g-', label='Powerlaw Fit')
+    ax2.plot(x, req, 'r-', label='Requirement')
+    ax2.plot(x, p2(x), 'g-', label='Powerlaw Fit')
+    print 'wy', p1
+    print 'wx', p2
+
+    #using a gaussian process
+    X = np.atleast_2d(waves).T
+    y = np.asarray([_FWHMGauss(d['wx']) for d in data])
+    std = [_FWHMGauss(d['wxerr']) for d in data]
+    ev = np.atleast_2d(np.linspace(500, 900, 1000)).T #points at which to evaluate
+    # Instanciate a Gaussian Process model
+    gp = GaussianProcess(corr='squared_exponential', theta0=1e-1, thetaL=1e-3, thetaU=1,
+                         nugget=(np.asarray(std)/y)**2, random_start=500)
+    # Fit to data using Maximum Likelihood Estimation of the parameters
+    gp.fit(X, y)
+    # Make the prediction on the meshed x-axis (ask for MSE as well)
+    y_pred, MSE = gp.predict(ev, eval_MSE=True)
+    sigma = np.sqrt(MSE)
+    ax1.plot(ev, y_pred, 'b-', label='Prediction')
+    ax1.fill(np.concatenate([ev, ev[::-1]]),
+             np.concatenate([y_pred - 1.9600 * sigma, (y_pred + 1.9600 * sigma)[::-1]]),
+             alpha=.2, fc='b', ec='None', label=u'95% confidence interval')
+
+    X = np.atleast_2d(waves).T
+    y = np.asarray([_FWHMGauss(d['wy']) for d in data])
+    std = [_FWHMGauss(d['wyerr']) for d in data]
+    ev = np.atleast_2d(np.linspace(500, 900, 1000)).T #points at which to evaluate
+    # Instanciate a Gaussian Process model
+    gp = GaussianProcess(corr='squared_exponential', theta0=1e-1, thetaL=1e-3, thetaU=1,
+                         nugget=(np.asarray(std)/y)**2, random_start=500)
+    # Fit to data using Maximum Likelihood Estimation of the parameters
+    gp.fit(X, y)
+    # Make the prediction on the meshed x-axis (ask for MSE as well)
+    y_pred, MSE = gp.predict(ev, eval_MSE=True)
+    sigma = np.sqrt(MSE)
+    ax2.plot(ev, y_pred, 'b-', label='Prediction')
+    ax2.fill(np.concatenate([ev, ev[::-1]]),
+             np.concatenate([y_pred - 1.9600 * sigma, (y_pred + 1.9600 * sigma)[::-1]]),
+             alpha=.2, fc='b', ec='None', label=u'95% confidence interval')
+
+    plt.sca(ax1)
+    plt.xticks(visible=False)
+    plt.sca(ax2)
+
+    ax1.set_ylim(4.5, 11.5)
+    ax2.set_ylim(4.5, 11.5)
+    ax1.set_xlim(550, 900)
+    ax2.set_xlim(550, 900)
+
+    ax1.set_ylabel('X FWHM [microns]')
+    ax2.set_ylabel('Y FWHM [microns]')
+    ax1.set_xlabel('Wavelength [nm]')
+    ax2.set_xlabel('Wavelength [nm]')
+    ax1.legend(shadow=True, fancybox=True)
+    plt.savefig('LambdaDependency.pdf')
+    plt.close()
+
+
+def _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='Residual.pdf', individual=False):
+    """
+    Generate a plot with data, model, and residuals.
+    """
+    #data
+    if individual:
+        data = pf.getdata(folder+id+'small.fits')
+        data[data < 1] = 1.
+        data = np.log10(data)
+    else:
+        data = pf.getdata(folder+id+'datafit.fits')
+        data[data < 1] = 1.
+        data = np.log10(data)
+    #model
+    model = pf.getdata(folder+id+'model.fits ')
+    model[model < 1] = 1.
+    model = np.log10(model)
+    #residual
+    residual = pf.getdata(folder+id+'residual.fits')
+    #squared residual
+    residualSQ = pf.getdata(folder+id+'residualSQ.fits')
+
+    max = np.max((data.max(), model.max()))
+
+    #figure
+    fig = plt.figure(figsize=(12, 12))
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax4 = fig.add_subplot(224)
+    ax = [ax1, ax2, ax3, ax4]
+    fig.subplots_adjust(hspace=0.05, wspace=0.3, top=0.95, bottom=0.02, left=0.02, right=0.9)
+    ax1.set_title('Data')
+    ax2.set_title('Model')
+    ax3.set_title('Residual')
+    ax4.set_title('Normalised Residual')
+
+    im1 = ax1.imshow(data, interpolation='none', vmax=max, origin='lower', vmin=0.1)
+    im2 = ax2.imshow(model, interpolation='none', vmax=max, origin='lower', vmin=0.1)
+    im3 = ax3.imshow(residual, interpolation='none', origin='lower', vmin=-100, vmax=100)
+    im4 = ax4.imshow(residualSQ, interpolation='none', origin='lower', vmin=0., vmax=20)
+
+    divider = make_axes_locatable(ax1)
+    cax1 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax2)
+    cax2 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax3)
+    cax3 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax4)
+    cax4 = divider.append_axes("right", size="5%", pad=0.05)
+    cbar1 = plt.colorbar(im1, cax=cax1)
+    cbar1.set_label(r'$\log_{10}(D_{i, j} \quad [e^{-}]$)')
+    cbar2 = plt.colorbar(im2, cax=cax2)
+    cbar2.set_label(r'$\log_{10}(M_{i, j} \quad [e^{-}]$)')
+    cbar3 = plt.colorbar(im3, cax=cax3)
+    cbar3.set_label(r'$D_{i, j} - M_{i, j} \quad [e^{-}]$')
+    cbar4 = plt.colorbar(im4, cax=cax4)
+    cbar4.set_label(r'$\frac{(D_{i, j} - M_{i, j})^{2}}{\sigma_{CCD}^{2}}$')
+
+    for tmp in ax:
+        plt.sca(tmp)
+        plt.xticks(visible=False)
+        plt.yticks(visible=False)
+
+    plt.savefig(out)
+    plt.close()
+
+
+def plotAllResiduals():
+    """
+    Plot residuals of all model fits.
+    """
+    #Joint fits
+    files = g.glob('results/J*.fits')
+    individuals = [file for file in files if 'datafit' in file]
+    for file in individuals:
+        id = file.replace('results/', '').replace('datafit.fits', '')
+        print 'processing:', id
+        _plotModelResiduals(id=id, folder='results/', out='results/%sResidual.pdf' % id)
+
+    #Individual fits
+    files = g.glob('results/I*.fits')
+    individuals = [file for file in files if 'model' in file]
+    for file in individuals:
+        id = file.replace('results/', '').replace('model.fits', '')
+        print 'processing:', id
+        _plotModelResiduals(id=id, folder='results/', out='results/%sResidual.pdf' % id, individual=True)
+
+
+def plotPaperFigures():
+    #simulation figures
+    theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
+                                      joined='results/simulated800nmJoint.pkl',
+                                      title='Simulated Data: PSF Recovery', truthx=theta1[7], truthy=theta1[8],
+                                      requirementE=None, requirementFWHM=None, requirementR2=None)
+
+    #joint fits
+    # _plotModelResiduals(id='simulated800nmJoint0', folder='results/', out='ResidualJ0.pdf')
+    # _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='ResidualJ1.pdf')
+    # _plotModelResiduals(id='simulated800nmJoint2', folder='results/', out='ResidualJ2.pdf')
+    # _plotModelResiduals(id='simulated800nmJoint3', folder='results/', out='ResidualJ3.pdf')
+    # _plotModelResiduals(id='simulated800nmJoint4', folder='results/', out='ResidualJ4.pdf')
+    #individual fits
+    # _plotModelResiduals(id='RunI0', folder='simulatedResults/', out='Residual0.pdf', individual=True)
+    _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
+    # _plotModelResiduals(id='RunI2', folder='simulatedResults/', out='Residual2.pdf', individual=True)
+    # _plotModelResiduals(id='RunI3', folder='simulatedResults/', out='Residual3.pdf', individual=True)
+    # _plotModelResiduals(id='RunI4', folder='simulatedResults/', out='Residual4.pdf', individual=True)
+
+    #real data
+
+    #brighter fatter
+    folder = 'results/'
+    data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
+    data10k = fileIO.cPicleRead(folder+'J800nm10k.pkl')
+    data30k = fileIO.cPicleRead(folder+'J800nm30k.pkl')
+    data38k = fileIO.cPicleRead(folder+'J800nm38k.pkl')
+    data50k = fileIO.cPicleRead(folder+'J800nm50k.pkl')
+    data54k = fileIO.cPicleRead(folder+'J800nm54k.pkl')
+    data = (data5k, data10k, data30k, data38k, data50k, data54k)
+    plotBrighterFatter(data, out='BrighterFatter.pdf')
+
+    # data5k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm5k*.pkl')]
+    # data10k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm10k*.pkl')]
+    # data30k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm30k*.pkl')]
+    # data38k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm38k*.pkl')]
+    # data50k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm50k*.pkl')]
+    # data54k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54k*.pkl')]
+    # data = (data5k, data10k, data30k, data38k, data50k, data54k)
+    # plotBrighterFatter(data, individual=True, out='BrighterFatterInd.pdf')
+
+    plotLambdaDependency()
+
+
 if __name__ == '__main__':
     #Simulated spots and analysis
-    RunTestSimulations()
+    #RunTestSimulations()
 
     #Real Runs
     jointRuns()
     individualRuns()
 
+    #plots
+    plotPaperFigures()
+    plotAllResiduals()
+    generateTestPlots()
+
     #Testing set
-    #RunTest()
+    RunTest()

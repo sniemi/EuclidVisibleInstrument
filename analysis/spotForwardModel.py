@@ -13,7 +13,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: emcee
 :requires: sklearn
 
-:version: 0.99
+:version: 1.0
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -34,6 +34,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import pyfits as pf
 import numpy as np
 import emcee
+import scipy
 import scipy.ndimage.measurements as m
 from scipy import signal
 from scipy import ndimage
@@ -133,7 +134,7 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
     #Choose an initial set of positions for the walkers - fairly large area not to bias the results
     #amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
     p0 = np.zeros((nwalkers, ndim))
-    p0[:, 0] = np.random.uniform(0.9*max, 2.*max, size=nwalkers) # amplitude
+    p0[:, 0] = np.random.uniform(max, 2.*max, size=nwalkers)     # amplitude
     p0[:, 1] = np.random.uniform(7., 14., size=nwalkers)         # x
     p0[:, 2] = np.random.uniform(7., 14., size=nwalkers)         # y
     p0[:, 3] = np.random.uniform(.1, 1., size=nwalkers)          # radius
@@ -303,13 +304,13 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     # Choose an initial set of positions for the walkers using the Gaussian fit
     p0 = np.zeros((nwalkers, ndim))
     for x in xrange(images):
-        p0[:, 2*x] = np.random.uniform(7., 14., size=nwalkers) #x
-        p0[:, 2*x+1] = np.random.uniform(7., 14., size=nwalkers) #y
-    p0[:, -5] = np.random.uniform(0.9*max, 2.*max, size=nwalkers) # amplitude
-    p0[:, -4] = np.random.uniform(.1, 1., size=nwalkers) #radius
-    p0[:, -3] = np.random.uniform(.1, 1., size=nwalkers) #focus
-    p0[:, -2] = np.random.uniform(.1, 0.5, size=nwalkers) #width_x
-    p0[:, -1] = np.random.uniform(.1, 0.5, size=nwalkers) #width_y
+        p0[:, 2*x] = np.random.uniform(7., 14., size=nwalkers)      # x
+        p0[:, 2*x+1] = np.random.uniform(7., 14., size=nwalkers)    # y
+    p0[:, -5] = np.random.uniform(max, 2.*max, size=nwalkers)       # amplitude
+    p0[:, -4] = np.random.uniform(.1, 1., size=nwalkers)            # radius
+    p0[:, -3] = np.random.uniform(.1, 1., size=nwalkers)            # focus
+    p0[:, -2] = np.random.uniform(.1, 0.5, size=nwalkers)           # width_x
+    p0[:, -1] = np.random.uniform(.1, 0.5, size=nwalkers)           # width_y
 
     # Initialize the sampler with the chosen specs.
     #Create the coordinates x and y
@@ -442,8 +443,8 @@ def log_prior(theta):
     Priors, limit the values to a range but otherwise flat.
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and 0. < width_x < 1. and 0. < width_y < 1. and \
-       1.e2 < amplitude < 1.e6 and 0. < radius < 2. and 0. < focus < 1.:
+    if 7. < center_x < 14. and 7. < center_y < 14. and 0.1 < width_x < 1. and 0.1 < width_y < 1. and \
+       8.e3 < amplitude < 3.e5 and 0. < radius < 2. and 0. < focus < 1.:
         return 0.
     else:
         return -np.inf
@@ -455,8 +456,8 @@ def log_priorJoint(theta):
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
     tmp = theta[-5:] #these are the last five i.e. amplitude, radius, focus, sigmaX, and sigmaY
-    if all(7. < x < 14. for x in theta[:-5]) and 1.e2 < tmp[0] < 1.e6 and 0. < tmp[1] < 2. and 0. < tmp[2] < 1. and \
-       0. < tmp[3] < 1. and 0. < tmp[4] < 1.:
+    if all(7. < x < 14. for x in theta[:-5]) and 8.e3 < tmp[0] < 3.e5 and 0. < tmp[1] < 2. and 0. < tmp[2] < 1. and \
+       0.1 < tmp[3] < 1. and 0.1 < tmp[4] < 1.:
         return 0.
     else:
         return -np.inf
@@ -620,16 +621,34 @@ def _FWHMGauss(sigma, pixel=12):
 
 def _ellipticityFromGaussian(sigmax, sigmay):
     """
-
+    Ellipticity
     """
     return np.abs((sigmax**2 - sigmay**2) / (sigmax**2 + sigmay**2))
 
 
+def _ellipticityerr(sigmax, sigmay, sigmaxerr, sigmayerr):
+    """
+    Error on ellipticity.
+    """
+    e = _ellipticityFromGaussian(sigmax, sigmay)
+    err = e * np.sqrt((sigmaxerr/e)**2 + (sigmayerr/e)**2)
+    return err
+
+
 def _R2FromGaussian(sigmax, sigmay, pixel=0.1):
     """
-
+    R2.
     """
     return (sigmax*pixel)**2 + (sigmay*pixel)**2
+
+
+def _R2err(sigmax, sigmay, sigmaxerr ,sigmayerr):
+    """
+    Error on R2.
+    """
+    err = np.sqrt((2*_R2FromGaussian(sigmax, sigmay))**2*sigmaxerr**2 +
+                  (2*_R2FromGaussian(sigmax, sigmay))**2*sigmayerr**2)
+    return err
 
 
 def RunTestSimulations(newfiles=False, both=False):
@@ -749,7 +768,7 @@ def getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'):
     return [folder + f for f in ret]
 
 
-def individualRuns():
+def AllindividualRuns():
     """
     Execute all spot data analysis runs individually.
     """
@@ -778,7 +797,63 @@ def individualRuns():
     RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='I890nm50k')
 
 
-def jointRuns():
+def analyseData():
+    """
+    Execute spot data analysis.
+    """
+    #800 nm
+    RunData(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'), out='I800nm')
+    RunData(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'), out='I800nm50k') #difficult
+    RunData(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'), out='I800nm54k') #difficult
+    #700 nm
+    RunData(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'), out='I700nm52k')
+    #RunData(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'), out='I700nm32k')
+    #600 nm
+    RunData(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'), out='I600nm54k')
+    #890 nm
+    #RunData(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'), out='I890nm30k')
+    RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='I890nm50k')
+
+   #800 nm
+    forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
+                         out='J800nm', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'),
+                         out='J800nm50k', wavelength='800nm') #difficult, often too high amplitude
+    forwardModelJointFit(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'),
+                         out='J800nm54k', wavelength='800nm') #difficult, often too high amplitude
+    #700 nm
+    forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
+                         out='J700nm52k', wavelength='700nm')
+    #forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
+    #                     out='J700nm32k', wavelength='700nm')
+    #600 nm
+    forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
+                         out='J600nm54k', wavelength='600nm')
+    #890 nm
+    #forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
+    #                     out='J890nm30k', wavelength='890nm')
+    forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
+                         out='J890nm50k', wavelength='890nm')
+
+    #For Brighter-Fatter
+    RunData(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'), out='I800nm5k')
+    RunData(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'), out='I800nm10k')
+    RunData(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'), out='I800nm20k') #not working well
+    RunData(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'), out='I800nm30k') #wrong
+    RunData(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'), out='I800nm38k') #wrong
+    forwardModelJointFit(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'),
+                         out='J800nm5k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'),
+                         out='J800nm10k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'),
+                         out='J800nm20k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'),
+                         out='J800nm30k', wavelength='800nm')
+    forwardModelJointFit(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'),
+                         out='J800nm38k', wavelength='800nm')
+
+
+def AlljointRuns():
     """
     Execute all spot data analysis runs fitting jointly.
     """
@@ -844,7 +919,7 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
-    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.98)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.12, right=0.98)
     ax1.set_title(title)
 
     ax1.errorbar(xtmp, [_FWHMGauss(data['wx']) for data in ind], yerr=[sigma*_FWHMGauss(data['wxerr']) for data in ind],
@@ -887,18 +962,20 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
     fig = plt.figure()
     ax1 = fig.add_subplot(211)
     ax2 = fig.add_subplot(212)
-    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.98)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.12, right=0.98)
     ax1.set_title(title)
 
-    ax1.errorbar(xtmp, [_R2FromGaussian(data['wx'], data['wy'])*1e3 for data in ind],
-                 yerr=[sigma*1.e3*_R2FromGaussian(data['wxerr'], data['wyerr']) for data in ind], fmt='o')
+    R2x = [_R2FromGaussian(data['wx'], data['wy'])*1e3 for data in ind]
+    errR2 = [sigma*1.e3*_R2err(data['wx'], data['wy'], data['wxerr'], data['wyerr']) for data in ind]
+    ax1.errorbar(xtmp, R2x, yerr=errR2, fmt='o')
     ax1.errorbar(xtmp[-1]+1, _R2FromGaussian(join['wx'], join['wy'])*1e3,
-                 yerr=sigma*1.e3*_R2FromGaussian(join['wxerr'], join['wyerr']), fmt='s')
+                 yerr=sigma*1.e3*_R2err(join['wx'], join['wy'], join['wxerr'], join['wyerr']), fmt='s')
 
-    ax2.errorbar(xtmp, [_ellipticityFromGaussian(data['wy'], data['wx']) for data in ind],
-                 yerr=[_ellipticityFromGaussian(data['wyerr'], data['wxerr'])/30. for data in ind], fmt='o')
-    ax2.errorbar(xtmp[-1]+1, _ellipticityFromGaussian(join['wy'], join['wx']),
-                 yerr=_ellipticityFromGaussian(join['wyerr'], join['wxerr'])/30., fmt='s')
+    ell = [_ellipticityFromGaussian(data['wx'], data['wy']) for data in ind]
+    ellerr = [sigma*_ellipticityerr(data['wx'], data['wy'], data['wxerr'], data['wyerr']) for data in ind]
+    ax2.errorbar(xtmp, ell, yerr=ellerr, fmt='o')
+    ax2.errorbar(xtmp[-1]+1, _ellipticityFromGaussian(join['wx'], join['wy']),
+                 yerr=sigma*_ellipticityerr(join['wx'], join['wy'], join['wxerr'], join['wyerr']), fmt='s')
 
     if requirementE is not None:
         ax2.axhline(y=requirementE, label='Requirement (800nm)', c='r')
@@ -916,8 +993,8 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
     ltmp = np.hstack((xtmp, xtmp[-1]+1))
     plt.xticks(ltmp, ['Individual%i' % x for x in ltmp[:-1]] + ['Joint',], rotation=45)
 
-    ax1.set_ylim(0.001*1e3, 0.004*1e3)
-    ax2.set_ylim(0., 0.33)
+    ax1.set_ylim(0.0011*1e3, 0.003*1e3)
+    ax2.set_ylim(0., 0.23)
     ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
     ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
 
@@ -932,19 +1009,16 @@ def RunTest():
     """
     Test runs with test data sets
     """
-    #Individual Fits
+    #800nm
     RunData(g.glob('testdata/15*.fits'), out='test800nm')
-    RunData(g.glob('testdata/17*.fits'), out='test700nm')
-
-    #Joint Fit (same signal level and wavelength, but separate files) - test data set
     forwardModelJointFit(g.glob('testdata/15*.fits'), out='test800nmJoint', wavelength='800nm')
-    forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
-
-    #test plots
-    _plotDifferenceIndividualVsJoined(individuals='results/test700nm?.pkl', joined='results/test700nmJoint.pkl',
-                                      title='700nm')
     _plotDifferenceIndividualVsJoined(individuals='results/test800nm?.pkl', joined='results/test800nmJoint.pkl',
                                       title='800nm')
+    #700nm
+    RunData(g.glob('testdata/17*.fits'), out='test700nm')
+    forwardModelJointFit(g.glob('testdata/17*.fits'), out='test700nmJoint', wavelength='700nm')
+    _plotDifferenceIndividualVsJoined(individuals='results/test700nm?.pkl', joined='results/test700nmJoint.pkl',
+                                      title='700nm')
 
 
 def generateTestPlots(folder='results/'):
@@ -1212,9 +1286,9 @@ def _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='Resid
     cbar2 = plt.colorbar(im2, cax=cax2)
     cbar2.set_label(r'$\log_{10}(M_{i, j} \quad [e^{-}]$)')
     cbar3 = plt.colorbar(im3, cax=cax3)
-    cbar3.set_label(r'$D_{i, j} - M_{i, j} \quad [e^{-}]$')
+    cbar3.set_label(r'$M_{i, j} - D_{i, j}  \quad [e^{-}]$')
     cbar4 = plt.colorbar(im4, cax=cax4)
-    cbar4.set_label(r'$\frac{(D_{i, j} - M_{i, j})^{2}}{\sigma_{CCD}^{2}}$')
+    cbar4.set_label(r'$\frac{(M_{i, j} - D_{i, j})^{2}}{\sigma_{CCD}^{2}}$')
 
     for tmp in ax:
         plt.sca(tmp)
@@ -1250,6 +1324,9 @@ def plotPaperFigures(folder = 'results/'):
     """
     Generate Figures of the Experimental Astronomy paper.
     """
+    #model Example
+    plotModelExample()
+
     #simulation figures
     theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
     _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
@@ -1258,10 +1335,12 @@ def plotPaperFigures(folder = 'results/'):
                                       requirementE=None, requirementFWHM=None, requirementR2=None)
 
     #individual fits
-    _plotModelResiduals(id='RunI0', folder='simulatedResults/', out='Residual0.pdf', individual=True)
+    _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
 
     #real data
-    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm?.pkl', joined=folder+'J800nm.pkl', title='800nm')
+    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm?.pkl', joined=folder+'J800nm.pkl', title='800nm',
+                                      FWHMlims=(7.3, 11.8))
+    _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
 
     #brighter fatter
     data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
@@ -1285,24 +1364,139 @@ def plotPaperFigures(folder = 'results/'):
     plotLambdaDependency()
 
 
+def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
+    """
+    Generate a CCD PSF using a 2D Gaussian and save it to file.
+    """
+    x = np.arange(0, size)
+    y = np.arange(0, size)
+    xx, yy = np.meshgrid(x, y)
+    xx = xx.flatten()
+    yy = yy.flatten()
+    CCD = models.Gaussian2D(1., CCDx, CCDy, width_x, width_y, 0.)
+    CCDdata = CCD.eval(xx, yy, 1., CCDx, CCDy, width_x, width_y, 0.).reshape((size, size))
+    fileIO.writeFITS(CCDdata, 'CCDPSF.fits', int=False)
+    return CCDdata
+
+
+def _AiryDisc(amplitude=1e5, center_x=10., center_y=10., radius=0.6, focus=0.44, size=21):
+    """
+    Generate a CCD PSF using a 2D Gaussian and save it to file.
+    """
+    x = np.arange(0, size)
+    y = np.arange(0, size)
+    xx, yy = np.meshgrid(x, y)
+    xx = xx.flatten()
+    yy = yy.flatten()
+    airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
+    adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape((size, size))
+    fileIO.writeFITS(adata, 'AiryDisc.fits', int=False)
+    f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
+    focusdata = f.eval(xx, yy, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
+    model1 = signal.convolve2d(adata.copy(), focusdata, mode='same')
+    model2 = scipy.ndimage.filters.gaussian_filter(adata, sigma=focus)
+    fileIO.writeFITS(model1, 'AiryDiscDefocused1.fits', int=False)
+    fileIO.writeFITS(model2, 'AiryDiscDefocused2.fits', int=False)
+    return adata, model1
+
+
+def plotModelExample(size=10):
+    data = pf.getdata('testdata/stacked.fits') * 3.1
+    y, x = m.maximum_position(data)
+    spot = data[y-size:y+size+1, x-size:x+size+1].copy()
+    bias = np.median(data[y-size: y+size, x-220:x-20])
+    print 'ADC offset (e):', bias
+    spot -= bias
+    spot[spot < 0.] = 1.
+
+    #CCD PSF and Airy disc
+    CCD = _CCDkernel()
+    airy, defocused = _AiryDisc()
+
+    #log all
+    spot = np.log10(spot + 1.)
+    CCD = np.log10(CCD + 1.)
+    airy = np.log10(airy + 1.)
+    defocused = np.log10(defocused + 1.)
+
+    #figure
+    matplotlib.rc('text', usetex=True)
+    fig = plt.figure(figsize=(12, 12))
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax4 = fig.add_subplot(224)
+    ax = [ax1, ax2, ax3, ax4]
+    fig.subplots_adjust(hspace=0.05, wspace=0.3, top=0.95, bottom=0.02, left=0.02, right=0.9)
+
+    ax1.set_title('Data')
+    ax2.set_title('Airy Disc')
+    ax3.set_title('CCD Kernel')
+    ax4.set_title('Defocused Airy Disc')
+
+    im1 = ax1.imshow(spot, interpolation='none', origin='lower', vmin=0., vmax=4.7)
+    im2 = ax2.imshow(airy, interpolation='none', origin='lower', vmin=0., vmax=4.7)
+    im3 = ax3.imshow(CCD, interpolation='none', origin='lower', vmin=0., vmax=0.05)
+    im4 = ax4.imshow(defocused, interpolation='none', origin='lower', vmin=0., vmax=4.7)
+
+    divider = make_axes_locatable(ax1)
+    cax1 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax2)
+    cax2 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax3)
+    cax3 = divider.append_axes("right", size="5%", pad=0.05)
+    divider = make_axes_locatable(ax4)
+    cax4 = divider.append_axes("right", size="5%", pad=0.05)
+    cbar1 = plt.colorbar(im1, cax=cax1)
+    cbar1.set_label(r'$\log_{10}(D_{i, j} + 1 \quad [e^{-}]$)')
+    cbar2 = plt.colorbar(im2, cax=cax2)
+    cbar2.set_label(r'$\log_{10}(A_{i, j} + 1 \quad [e^{-}]$)')
+    cbar3 = plt.colorbar(im3, cax=cax3)
+    cbar3.set_label(r'$\log_{10}(G_{\textrm{CCD}} + 1 \quad [e^{-}])$')
+    cbar4 = plt.colorbar(im4, cax=cax4)
+    cbar4.set_label(r'$\log_{10}(A_{i, j} \ast G_{\textrm{focus}} + 1 \quad [e^{-}])$')
+
+    for tmp in ax:
+        plt.sca(tmp)
+        plt.xticks(visible=False)
+        plt.yticks(visible=False)
+
+    plt.savefig('ModelExample.pdf')
+    plt.close()
+
+
+def _printAnalysedData(folder='results/', id='J*.pkl'):
+    print 'Wavelength   Median Intensity    Number of Files     SNR'
+    structure = '%i     &   %.1f    &   %i    &     %.0f \\'
+    for file in g.glob(folder+id):
+        tmp = fileIO.cPicleRead(file)
+        med = np.median(tmp['peakvalues'])
+        wave = int(tmp['wavelength'].replace('nm', ''))
+        out = structure %  (wave, med/1.e3, np.size(tmp['peakvalues']), med/(np.sqrt(med + 4.5**2)))
+        print out
+
+
 if __name__ == '__main__':
     #Simulated spots and analysis
-    RunTestSimulations()
+    #RunTestSimulations()
 
-    #Real Runs
-    jointRuns()
-    individualRuns()
+    #Real Data
+    analyseData()
 
-    #Special Run
+    #Special Runs
+    #forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
+    #                     out='J800nmDrift', wavelength='800nm', spotx=2985, spoty=3774)
     #forwardModelJointFit(getFiles(mintime=(14, 56, 18), maxtime=(15, 19, 42), folder='data/30Jul/'),
     #                     out='J600nm20', wavelength='600nm')
-    #forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
-    #                     out='J800nmDrift', wavelength='600nm')
 
     #plots
     plotPaperFigures()
     plotAllResiduals()
     generateTestPlots()
 
+    #All Data
+    #AlljointRuns()
+    #AllindividualRuns()
+
     #Testing set
-    RunTest()
+    #RunTest()

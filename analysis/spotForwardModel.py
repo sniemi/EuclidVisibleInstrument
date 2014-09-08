@@ -13,7 +13,7 @@ Analyse laboratory CCD PSF measurements by forward modelling.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.0
+:version: 1.1
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -38,6 +38,7 @@ import scipy
 import scipy.ndimage.measurements as m
 from scipy import signal
 from scipy import ndimage
+from scipy.special import j1, jn_zeros
 from sklearn.gaussian_process import GaussianProcess
 from support import files as fileIO
 from astropy.modeling import models, fitting
@@ -47,7 +48,11 @@ import os, datetime
 from multiprocessing import Pool
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spoty=3514, run=400,
+#fixed parameters
+cores = 8
+
+
+def forwardModel(file, out='Data', gain=3.1, size=10, burn=400, spotx=2888, spoty=3514, run=200,
                  simulation=False, truths=None):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
@@ -102,10 +107,6 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
     #sigma = np.sqrt(data/gain + rn**2)
     var = data.copy() + rn**2
 
-    #maximum value
-    max = np.max(spot)
-    print 'Maximum Value:', max
-
     #fit a simple model
     print 'Least Squares Fitting...'
     gaus = models.Gaussian2D(spot.max(), size, size, x_stddev=0.5, y_stddev=0.5)
@@ -117,14 +118,28 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
     p = fit_p(p_init, X, Y, spot)
     print p
     model = p(X, Y)
-
     fileIO.writeFITS(model, out+'BasicModel.fits', int=False)
     fileIO.writeFITS(model - spot, out+'BasicModelResidual.fits', int=False)
+    # airy = models.AiryDisk2D(spot.max(), size, size, 0.5)
+    # fit_p = fitting.LevMarLSQFitter()
+    # a = fit_p(airy, X, Y, spot)
+    # print a
 
     #goodness of fit
     gof = (1./(np.size(data) - 5.)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof
     print 'Done'
+
+    #maximum value
+    max = np.max(spot)
+    sum = np.sum(spot)
+    #amp = _amplitudeFromPeak(max, p.x_mean.value, p.y_mean.value, a.radius.value)
+    amp = _amplitudeFromPeak(max, p.x_mean.value, p.y_mean.value, 0.98*min(p.x_stddev.value, p.y_stddev.value))
+    amprange = (max, 2.*amp)
+    print 'Maximum Value:', max
+    print 'Sum of the values:', sum
+    print 'Airy amplitude estimate:', amp
+    print 'Airy amplitude range:', amprange  #key to success
 
     #MCMC based fitting
     print 'Bayesian Fitting...'
@@ -134,13 +149,13 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
     #Choose an initial set of positions for the walkers - fairly large area not to bias the results
     #amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
     p0 = np.zeros((nwalkers, ndim))
-    p0[:, 0] = np.random.uniform(max, 2.*max, size=nwalkers)     # amplitude
-    p0[:, 1] = np.random.uniform(7., 14., size=nwalkers)         # x
-    p0[:, 2] = np.random.uniform(7., 14., size=nwalkers)         # y
-    p0[:, 3] = np.random.uniform(.1, 1., size=nwalkers)          # radius
-    p0[:, 4] = np.random.uniform(.1, 1., size=nwalkers)          # focus
-    p0[:, 5] = np.random.uniform(.1, 0.5, size=nwalkers)         # width_x
-    p0[:, 6] = np.random.uniform(.1, 0.5, size=nwalkers)         # width_y
+    p0[:, 0] = np.random.uniform(amp, 1.2*amp, size=nwalkers)                 # amplitude
+    p0[:, 1] = np.random.uniform(8.5, 11.5, size=nwalkers)                    # x
+    p0[:, 2] = np.random.uniform(8.5, 11.5, size=nwalkers)                    # y
+    p0[:, 3] = np.random.uniform(.4, 0.7, size=nwalkers)                      # radius
+    p0[:, 4] = np.random.uniform(.2, 0.3, size=nwalkers)                      # focus
+    p0[:, 5] = np.random.uniform(.3, 0.4, size=nwalkers)                      # width_x
+    p0[:, 6] = np.random.uniform(.3, 0.4, size=nwalkers)                      # width_y
 
     # Initialize the sampler with the chosen specs.
     #Create the coordinates x and y
@@ -154,13 +169,15 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
     yy = yy.flatten()
 
     #initiate sampler
-    pool = Pool(7) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var], pool=pool)
+    pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, amprange, spot.shape],
+                                    pool=pool)
 
     # Run a burn-in and set new starting position
     print "Burning-in..."
     pos, prob, state = sampler.run_mcmc(p0, burn)
     best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
+    print best_pos
     pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
     # Reset the chain to remove the burn-in samples.
     sampler.reset()
@@ -202,12 +219,16 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
 
     # a simple goodness of fit
     gof = (1./(np.size(data) - ndim)) * np.sum((model.flatten() - data)**2 / var)
-    print 'GoF:', gof, ' Maximum difference:', np.max(np.abs(model - spot))
+    maxdiff = np.max(np.abs(model - spot))
+    print 'GoF:', gof, ' Maximum difference:', maxdiff
+    if maxdiff > 2e3 or gof > 4.:
+        print '\nFIT UNLIKELY TO BE GOOD...\n'
 
     #results and save results
     _printFWHM(width_x, width_y, errors_fit[5], errors_fit[6])
     res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, out=out,
-               peakvalue=max, CCDmodel=CCD, CCDmodeldata=CCDdata, GoF=gof)
+               peakvalue=max, CCDmodel=CCD, CCDmodeldata=CCDdata, GoF=gof,
+               maximumdiff=maxdiff, fit=params_fit)
     fileIO.cPickleDumpDictionary(res, out+'.pkl')
 
     #plot
@@ -221,13 +242,13 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=200, spotx=2888, spot
         extents[4] = (0.503, 0.517)
     fig = triangle.corner(samples,
                           labels=['amplitude', 'x', 'y', 'radius', 'focus', 'width_x', 'width_y'],
-                          truths=truths, extents=extents)
+                          truths=truths)#, extents=extents)
     fig.savefig(out+'Triangle.png')
-
+    plt.close()
     pool.close()
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, run=200,
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, run=200,
                          spotx=2888, spoty=3514, simulated=False, truths=None):
     """
     Forward models the spot data found from the input files. Models all data simultaneously so that the Airy
@@ -242,6 +263,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     image = []
     noise = []
     peakvalues = []
+    amps = []
     for file in files:
         print file
         #get data and convert to electrons
@@ -279,9 +301,24 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
         #set highly negative values to zero
         spot[spot + rn**2 < 0.] = 0.
 
+        print 'Least Squares Fitting...'
+        gaus = models.Gaussian2D(spot.max(), size, size, x_stddev=0.5, y_stddev=0.5)
+        gaus.theta.fixed = True  #fix angle
+        p_init = gaus
+        fit_p = fitting.LevMarLSQFitter()
+        stopy, stopx = spot.shape
+        X, Y = np.meshgrid(np.arange(0, stopx, 1), np.arange(0, stopy, 1))
+        p = fit_p(p_init, X, Y, spot)
+
         max = np.max(spot)
+        s = spot.sum()
+        amp = _amplitudeFromPeak(max, p.x_mean.value, p.y_mean.value, min(p.x_stddev.value, p.y_stddev.value))
         print 'Maximum Value:', max
+        print 'Sum:', s
+        print 'Airy amplitude estimate:', amp
+
         peakvalues.append(max)
+        amps.append(amp)
 
         #noise model
         variance = spot.copy() + rn**2
@@ -296,6 +333,12 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
         print 'POTENTIAL OUTLIER, please check the input files...'
         print np.std(peakvalues), 5*np.sqrt(np.median(peakvalues))
 
+    amps = np.asarray(amps)
+    amp = np.median(amps)
+    amprange = (np.min(peakvalues), 2.*np.max(amps))
+    print 'Airy amplitude estimate:', amp
+    print 'Airy amplitude range:', amprange  #key to success
+
     #MCMC based fitting
     ndim = 2*images + 5  #xpos, ypos for each image and single amplitude, radius, focus, and sigmaX and sigmaY
     nwalkers = 1000
@@ -304,13 +347,13 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     # Choose an initial set of positions for the walkers using the Gaussian fit
     p0 = np.zeros((nwalkers, ndim))
     for x in xrange(images):
-        p0[:, 2*x] = np.random.uniform(7., 14., size=nwalkers)      # x
-        p0[:, 2*x+1] = np.random.uniform(7., 14., size=nwalkers)    # y
-    p0[:, -5] = np.random.uniform(max, 2.*max, size=nwalkers)       # amplitude
-    p0[:, -4] = np.random.uniform(.1, 1., size=nwalkers)            # radius
-    p0[:, -3] = np.random.uniform(.1, 1., size=nwalkers)            # focus
-    p0[:, -2] = np.random.uniform(.1, 0.5, size=nwalkers)           # width_x
-    p0[:, -1] = np.random.uniform(.1, 0.5, size=nwalkers)           # width_y
+        p0[:, 2*x] = np.random.uniform(8.5, 11.5, size=nwalkers)      # x
+        p0[:, 2*x+1] = np.random.uniform(8.5, 11.5, size=nwalkers)    # y
+    p0[:, -5] = np.random.uniform(0.95*amp, 1.2*amp, size=nwalkers)   # amplitude
+    p0[:, -4] = np.random.uniform(.3, .7, size=nwalkers)              # radius
+    p0[:, -3] = np.random.uniform(.2, .5, size=nwalkers)              # focus
+    p0[:, -2] = np.random.uniform(.3, .4, size=nwalkers)              # width_x
+    p0[:, -1] = np.random.uniform(.3, .4, size=nwalkers)              # width_y
 
     # Initialize the sampler with the chosen specs.
     #Create the coordinates x and y
@@ -324,13 +367,15 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     yy = yy.flatten()
 
     #initiate sampler
-    pool = Pool(7) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint, args=[xx, yy, image, noise], pool=pool)
+    pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint, args=[xx, yy, image, noise, amprange, spot.shape],
+                                    pool=pool)
 
     # Run a burn-in and set new starting position
     print "Burning-in..."
     pos, prob, state = sampler.run_mcmc(p0, burn)
     best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
+    print best_pos
     pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
     # Reset the chain to remove the burn-in samples.
     sampler.reset()
@@ -362,6 +407,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     #save the best models per file
     size = size*2 + 1
     gofs = []
+    mdiff = []
     for index, file in enumerate(files):
         #path, file = os.path.split(file)
         id = 'results/' + out + str(index)
@@ -392,13 +438,18 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
 
         #a simple goodness of fit
         gof = (1./(np.size(image[index])*images - ndim)) * np.sum((model - image[index])**2 / noise[index])
-        print 'GoF:', gof, ' Max difference', np.max(np.abs(model - image[index]))
+        maxdiff = np.max(np.abs(model - image[index]))
+        print 'GoF:', gof, ' Max difference', maxdiff
         gofs.append(gof)
+        mdiff.append(maxdiff)
+
+    if np.asarray(mdiff).max() > 3e3 or np.asarray(gofs).max() > 4.:
+        print '\nFIT UNLIKELY TO BE GOOD...\n'
 
     #save results
     res = dict(wx=width_x, wy=width_y, wxerr=width_xE, wyerr=width_yE, files=files, out=out,
                wavelength=wavelength, peakvalues=np.asarray(peakvalues), CCDmodel=CCD, CCDmodeldata=CCDdata,
-               GoFs=gofs)
+               GoFs=gofs, fit=params_fit, maxdiff=mdiff)
     fileIO.cPickleDumpDictionary(res, 'results/' + out + '.pkl')
 
     #plot
@@ -410,60 +461,59 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)#, extents=extents)
     fig.savefig('results/' + out + 'Triangle.png')
-
+    plt.close()
     pool.close()
 
 
-def log_posterior(theta, x, y, z, var):
+def log_posterior(theta, x, y, z, var, amprange, size):
     """
     Posterior probability: combines the prior and likelihood.
     """
-    lp = log_prior(theta)
+    lp = log_prior(theta, amprange)
 
     if not np.isfinite(lp):
         return -np.inf
 
-    return lp + log_likelihood(theta, x, y, z, var)
+    return lp + log_likelihood(theta, x, y, z, var, size)
 
 
-def log_posteriorJoint(theta, x, y, z, var):
+def log_posteriorJoint(theta, x, y, z, var, amprange, size):
     """
     Posterior probability: combines the prior and likelihood.
     """
-    lp = log_priorJoint(theta)
+    lp = log_priorJoint(theta, amprange)
 
     if not np.isfinite(lp):
         return -np.inf
 
-    return lp + log_likelihoodJoint(theta, x, y, z, var)
+    return lp + log_likelihoodJoint(theta, x, y, z, var, size)
 
 
-def log_prior(theta):
+def log_prior(theta, amprange):
     """
     Priors, limit the values to a range but otherwise flat.
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and 0.1 < width_x < 1. and 0.1 < width_y < 1. and \
-       8.e3 < amplitude < 3.e5 and 0. < radius < 2. and 0. < focus < 1.:
+    if 7. < center_x < 14. and 7. < center_y < 14. and 0.2 < width_x < 0.6 and 0.2 < width_y < 0.6 and \
+       amprange[0] < amplitude < amprange[1] and 0.3 < radius < 1. and 0.1 < focus < 1.:
         return 0.
     else:
         return -np.inf
 
 
-def log_priorJoint(theta):
+def log_priorJoint(theta, amprange):
     """
     Priors, limit the values to a range but otherwise flat.
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    tmp = theta[-5:] #these are the last five i.e. amplitude, radius, focus, sigmaX, and sigmaY
-    if all(7. < x < 14. for x in theta[:-5]) and 8.e3 < tmp[0] < 3.e5 and 0. < tmp[1] < 2. and 0. < tmp[2] < 1. and \
-       0.1 < tmp[3] < 1. and 0.1 < tmp[4] < 1.:
+    if all(7. < x < 14. for x in theta[:-5]) and amprange[0] < theta[-5] < amprange[1] and 0.1 < theta[-4] < 1.5 and \
+       0.2 < theta[-3] < 1. and 0.2 < theta[-2] < 0.6 and 0.2 < theta[-1] < 0.6:
         return 0.
     else:
         return -np.inf
 
 
-def log_likelihood(theta, x, y, data, var, size=21):
+def log_likelihood(theta, x, y, data, var, size):
     """
     Logarithm of the likelihood function.
     """
@@ -472,17 +522,19 @@ def log_likelihood(theta, x, y, data, var, size=21):
 
     #1)Generate a model Airy disc
     airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
-    adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape((size, size))
+    adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape(size)
 
     #2)Apply Focus
     f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
-    focusdata = f.eval(x, y, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
+    focusdata = f.eval(x, y, 1., center_x, center_y, focus, focus, 0.).reshape(size)
     model = signal.convolve2d(adata, focusdata, mode='same')
 
     #3)Apply CCD diffusion, approximated with a Gaussian
-    CCD = models.Gaussian2D(1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.)
-    CCDdata = CCD.eval(x, y, 1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.).reshape((size, size))
+    CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
+    CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
     model = signal.convolve2d(model, CCDdata, mode='same').flatten()
+    #this does not shift centroid, simply smoothing...
+    #model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
 
     #true for Gaussian errors, but not really true here because of mixture of Poisson and Gaussian noise
     lnL = - 0.5 * np.sum((data - model)**2 / var)
@@ -494,7 +546,7 @@ def log_likelihood(theta, x, y, data, var, size=21):
     return lnL
 
 
-def log_likelihoodJoint(theta, x, y, data, var, size=21):
+def log_likelihoodJoint(theta, x, y, data, var, size):
     """
     Logarithm of the likelihood function for joint fitting. Not really sure if this is right...
     """
@@ -511,17 +563,18 @@ def log_likelihoodJoint(theta, x, y, data, var, size=21):
 
         #1)Generate a model Airy disc
         airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
-        adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape((size, size))
+        adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape(size)
 
         #2)Apply Focus, no normalisation as smoothing
         f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
-        focusdata = f.eval(x, y, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
+        focusdata = f.eval(x, y, 1., center_x, center_y, focus, focus, 0.).reshape(size)
         model = signal.convolve2d(adata, focusdata, mode='same')
 
         #3)Apply CCD diffusion, approximated with a Gaussian -- max = 1 as centred
-        CCD = models.Gaussian2D(1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.)
-        CCDdata = CCD.eval(x, y, 1., size/2.-0.5, size/2.-0.5, width_x, width_y, 0.).reshape((size, size))
-        model = signal.convolve2d(model, CCDdata, mode='same').flatten()
+        #CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
+        #CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
+        #model = signal.convolve2d(model, CCDdata, mode='same').flatten()
+        model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
         #lnL = np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
@@ -602,10 +655,12 @@ def _simulate(theta=(1.e5, 10., 10.3, 0.6, 0.1, 10., 10., 0.33, 0.35), gain=3.1,
 
 def _printFWHM(sigma_x, sigma_y, sigma_xerr, sigma_yerr, req=10.8):
     """
-    Print results and compare to the requirement
+    Print results and compare to the requirement at 800nm.
     """
     print("=" * 60)
     print 'FWHM (requirement %.1f microns):' % req
+    print round(np.sqrt(_FWHMGauss(sigma_x)*_FWHMGauss(sigma_y)), 2), ' +/- ', \
+          round(np.sqrt(_FWHMGauss(sigma_xerr)*_FWHMGauss(sigma_yerr)), 3) , ' microns'
     print 'x:', round(_FWHMGauss(sigma_x), 2), ' +/- ', round(_FWHMGauss(sigma_xerr), 3), ' microns'
     print 'y:', round(_FWHMGauss(sigma_y), 2), ' +/- ', round(_FWHMGauss(sigma_yerr), 3), ' microns'
     print("=" * 60)
@@ -651,7 +706,7 @@ def _R2err(sigmax, sigmay, sigmaxerr ,sigmayerr):
     return err
 
 
-def RunTestSimulations(newfiles=False, both=False):
+def RunTestSimulations(newfiles=False):
     """
     A set of simulated spots and analysis.
     """
@@ -711,26 +766,28 @@ def RunTestSimulations(newfiles=False, both=False):
                                       title='Simulated Data', truthx=theta1[7], truthy=theta1[8],
                                       requirementE=None, requirementFWHM=None, requirementR2=None)
 
-    if both:
-        #different simulation sets
-        print("|" * 120)
-        print 'Single Fitting Simulations'
-        theta1 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
-        theta2 = (1.e5, 10.1, 10.1, 0.55, 0.45, 10., 10., 0.38, 0.36)
-        theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
-        theta4 = (5.e4, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
-        theta5 = (1.e5, 10., 10.2, 0.5, 0.45, 10., 10., 0.35, 0.31)
-        thetas = [theta1, theta2, theta3, theta4, theta5]
 
-        for i, theta in enumerate(thetas):
+def RunTestSimulations2(newfiles=False):
+    #different simulation sets
+    print("|" * 120)
+    print 'Single Fitting Simulations'
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.2, 0.2)
+    theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)
+    theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
+    theta4 = (5.e4, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
+    theta5 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
+    thetas = [theta1, theta2, theta3, theta4, theta5]
+
+    for i, theta in enumerate(thetas):
+        if newfiles:
             _simulate(theta=theta, out='simulated/simulatedSmall%i.fits' %i)
-            forwardModel(file='simulated/simulatedSmall%i.fits' %i, out='simulatedResults/Run%i' %i, simulation=True,
-                         truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
-            print("=" * 60)
-            print 'Simulation Parameters'
-            print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
-            print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
-            print("=" * 60)
+        forwardModel(file='simulated/simulatedSmall%i.fits' %i, out='simulatedResults/Run%i' %i, simulation=True,
+                     truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
+        print("=" * 60)
+        print 'Simulation Parameters'
+        print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
+        print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
+        print("=" * 60)
 
 
 def RunData(files, out='testdata'):
@@ -814,26 +871,26 @@ def analyseData():
     #RunData(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'), out='I890nm30k')
     RunData(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'), out='I890nm50k')
 
-   #800 nm
+    #800 nm
     forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
-                         out='J800nm', wavelength='800nm')
+                     out='J800nm', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/'),
-                         out='J800nm50k', wavelength='800nm') #difficult, often too high amplitude
+                     out='J800nm50k', wavelength='800nm') #difficult, often too high amplitude
     forwardModelJointFit(getFiles(mintime=(16, 32, 02), maxtime=(16, 35, 23), folder='data/31Jul/'),
-                         out='J800nm54k', wavelength='800nm') #difficult, often too high amplitude
+                     out='J800nm54k', wavelength='800nm') #difficult, often too high amplitude
     #700 nm
     forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
-                         out='J700nm52k', wavelength='700nm')
+                     out='J700nm52k', wavelength='700nm')
     #forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
     #                     out='J700nm32k', wavelength='700nm')
     #600 nm
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                         out='J600nm54k', wavelength='600nm')
+                     out='J600nm54k', wavelength='600nm')
     #890 nm
     #forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
     #                     out='J890nm30k', wavelength='890nm')
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
-                         out='J890nm50k', wavelength='890nm')
+                     out='J890nm50k', wavelength='890nm')
 
     #For Brighter-Fatter
     RunData(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'), out='I800nm5k')
@@ -903,7 +960,7 @@ def AlljointRuns():
 
 def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=3,
                                       requirementFWHM=10.8, requirementE=0.156, requirementR2=0.002,
-                                      truthx=None, truthy=None, FWHMlims=(7.5, 10.3)):
+                                      truthx=None, truthy=None, FWHMlims=(7.6, 10.3)):
     """
     Simple plot
     """
@@ -917,43 +974,61 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
 
     #plot FWHM
     fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
+    ax1 = fig.add_subplot(311)
+    ax2 = fig.add_subplot(312)
+    ax3 = fig.add_subplot(313)
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.12, right=0.98)
     ax1.set_title(title)
 
-    ax1.errorbar(xtmp, [_FWHMGauss(data['wx']) for data in ind], yerr=[sigma*_FWHMGauss(data['wxerr']) for data in ind],
-                 fmt='o')
+    wxind = np.asarray([_FWHMGauss(data['wx']) for data in ind])
+    wyind = np.asarray([_FWHMGauss(data['wy']) for data in ind])
+    wxerr = np.asarray([sigma*_FWHMGauss(data['wxerr']) for data in ind])
+    wyerr = np.asarray([sigma*_FWHMGauss(data['wyerr']) for data in ind])
+
+    ax1.errorbar(xtmp, wxind, yerr=wxerr, fmt='o')
     ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=sigma*_FWHMGauss(join['wxerr']), fmt='s')
-    ax2.errorbar(xtmp, [_FWHMGauss(data['wy']) for data in ind], yerr=[sigma*_FWHMGauss(data['wyerr']) for data in ind],
-                 fmt='o')
+    ax2.errorbar(xtmp, wyind, yerr=wyerr, fmt='o')
     ax2.errorbar(xtmp[-1]+1, _FWHMGauss(join['wy']), yerr=sigma*_FWHMGauss(join['wyerr']), fmt='s')
+
+    geommean = np.sqrt(wxind*wyind)
+    err = np.sqrt(wxerr*wyerr)
+    ax3.errorbar(xtmp, geommean, yerr=err, fmt='o')
+    ax3.errorbar(xtmp[-1]+1, np.sqrt(_FWHMGauss(join['wx'])*_FWHMGauss(join['wy'])),
+                 yerr=sigma*np.sqrt(_FWHMGauss(join['wxerr'])*_FWHMGauss(join['wyerr'])), fmt='s')
 
     #simulations
     if truthx is not None:
         ax1.axhline(y=_FWHMGauss(truthx), label='Truth', c='g')
     if truthy is not None:
         ax2.axhline(y=_FWHMGauss(truthy), label='Truth', c='g')
+        ax3.axhline(y=np.sqrt(_FWHMGauss(truthx)*_FWHMGauss(truthy)), label='Truth', c='g')
 
     #requirements
     if requirementFWHM is not None:
-        ax1.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r')
-        ax2.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r')
+        ax1.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
+        ax2.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
+        ax3.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='-')
 
     plt.sca(ax1)
     plt.xticks(visible=False)
     plt.sca(ax2)
+    plt.xticks(visible=False)
+    plt.sca(ax3)
 
     ltmp = np.hstack((xtmp, xtmp[-1]+1))
     plt.xticks(ltmp, ['Individual %i' % x for x in ltmp[:-1]] + ['Joint',], rotation=45)
 
     ax1.set_ylim(*FWHMlims)
     ax2.set_ylim(*FWHMlims)
+    ax3.set_ylim(*FWHMlims)
     ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
     ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
+    ax3.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
 
-    ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
-    ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
+    ax1.set_ylabel(r'FWHM$_{X} \, [\mu$m$]$')
+    ax2.set_ylabel(r'FWHM$_{Y} \, [\mu$m$]$')
+    #ax3.set_ylabel(r'FWHM$=\sqrt{FWHM_{X}FWHM_{Y}} \quad [\mu$m$]$')
+    ax3.set_ylabel(r'FWHM$ \, [\mu$m$]$')
     ax1.legend(shadow=True, fancybox=True)
     plt.savefig('IndividualVsJoinedFWHM%s.pdf' % title)
     plt.close()
@@ -1057,19 +1132,26 @@ def generateTestPlots(folder='results/'):
                                       requirementE=None, requirementR2=None, requirementFWHM=None)
 
 
-def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, individual=False):
+def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, individual=False, GoFlimit=2000):
     """
     Plot the CCD PSF size intensity relation.
     """
+    matplotlib.rc('text', usetex=True)
     if individual:
         print 'Individual Results'
         fluxes = []
         fluxerrs = []
         datacontainer = []
         for x in data:
-            tmp = np.asarray([d['peakvalue'] for d in x])
-            tmpx = np.asarray([d['wx'] for d in x])
-            tmpy = np.asarray([d['wy'] for d in x])
+            GoF = np.asarray([d['GoF'] for d in x])
+            print 'GoFs:', GoF
+            msk = GoF < GoFlimit
+            tmp = np.asarray([d['peakvalue'] for d in x])[msk]
+            tmpx = np.asarray([d['wx'] for d in x])[msk]
+            tmpy = np.asarray([d['wy'] for d in x])[msk]
+
+            if len(tmp) < 1:
+                continue
 
             fluxes.append(tmp.mean())
             fluxerrs.append(tmp.std() / np.sqrt(np.size(tmp)))
@@ -1091,60 +1173,98 @@ def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, ind
 
     #plot FWHM
     fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    ax2 = fig.add_subplot(212)
+    ax = fig.add_subplot(111)
+    #ax1 = fig.add_subplot(211)
+    #ax2 = fig.add_subplot(212)
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
-    ax1.set_title('PSF Intensity Dependency (800nm)')
+    #ax1.set_title('PSF Intensity Dependency (800nm)')
+    ax.set_title('PSF Intensity Dependency (800nm)')
 
-    ax1.errorbar(fluxes, [_FWHMGauss(d['wx']) for d in data],
-                 yerr=[_FWHMGauss(d['wxerr']) for d in data],
-                 xerr=fluxerrs, fmt='o')
-    ax2.errorbar(fluxes, [_FWHMGauss(d['wy']) for d in data],
-                 yerr=[_FWHMGauss(d['wyerr']) for d in data],
-                 xerr=fluxerrs, fmt='o')
+    fx = np.asarray([_FWHMGauss(d['wx']) for d in data])
+    fxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])
+    fy = np.asarray([_FWHMGauss(d['wy']) for d in data])
+    fyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])
+    f = np.sqrt(fx*fy)
+    ferr = np.sqrt(fxerr*fyerr)
+
+    ax.errorbar(fluxes, f, yerr=ferr, xerr=fluxerrs, fmt='o')
+    #ax1.errorbar(fluxes, fx, yerr=fxerr, xerr=fluxerrs, fmt='o')
+    #ax2.errorbar(fluxes, fy, yerr=fyerr, xerr=fluxerrs, fmt='o')
 
     #linear fits
-    z1 = np.polyfit(fluxes, [_FWHMGauss(d['wx']) for d in data], 1)
-    p1 = np.poly1d(z1)
-    z2 = np.polyfit(fluxes, [_FWHMGauss(d['wy']) for d in data], 1)
-    p2 = np.poly1d(z2)
+    z = np.polyfit(fluxes, fx, 1)
+    p = np.poly1d(z)
+    # z1 = np.polyfit(fluxes, [_FWHMGauss(d['wx']) for d in data], 1)
+    # p1 = np.poly1d(z1)
+    # z2 = np.polyfit(fluxes, [_FWHMGauss(d['wy']) for d in data], 1)
+    # p2 = np.poly1d(z2)
     x = np.linspace(0., fluxes.max()*1.02, 100)
-    ax1.plot(x, p1(x), 'g-')
-    ax2.plot(x, p2(x), 'g-')
+    ax.plot(x, p(x), 'g-')
+    # ax1.plot(x, p1(x), 'g-')
+    # ax2.plot(x, p2(x), 'g-')
 
     #requirements
-    ax1.axhline(y=requirementFWHM, label='Requirement', c='r')
-    ax2.axhline(y=requirementFWHM, label='Requirement', c='r')
+    ax.axhline(y=requirementFWHM, label='Requirement', c='r')
+    #ax1.axhline(y=requirementFWHM, label='Requirement', c='r')
+    #ax2.axhline(y=requirementFWHM, label='Requirement', c='r')
 
-    plt.sca(ax1)
-    plt.xticks(visible=False)
-    plt.sca(ax2)
+    #plt.sca(ax1)
+    #plt.xticks(visible=False)
+    #plt.sca(ax2)
 
-    ax1.set_ylim(3.5, 12.5)
-    ax2.set_ylim(3.5, 12.5)
-    ax1.set_xlim(0., fluxes.max()*1.02)
-    ax2.set_xlim(0., fluxes.max()*1.02)
+    ax.set_ylim(3.5, 12.5)
+    #ax1.set_ylim(3.5, 12.5)
+    #ax2.set_ylim(3.5, 12.5)
+    ax.set_xlim(0., fluxes.max()*1.02)
+    #ax1.set_xlim(0., fluxes.max()*1.02)
+    #ax2.set_xlim(0., fluxes.max()*1.02)
 
-    ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
-    ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
-    ax2.set_xlabel(r'Intensity $\quad [e^{-}]$')
-    ax1.legend(shadow=True, fancybox=True)
+    ax.set_ylabel(r'$\sqrt{\textrm{FWHM}_{X} \textrm{FWHM}_{Y}} \quad [\mu$m$]$')
+    #ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
+    #ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
+    #ax2.set_xlabel(r'Intensity $\quad [e^{-}]$')
+    ax.set_xlabel(r'Intensity $\quad [e^{-}]$')
+    #ax1.legend(shadow=True, fancybox=True)
+    ax.legend(shadow=True, fancybox=True)
     plt.savefig(out)
     plt.close()
 
 
-def plotLambdaDependency(folder='results/'):
+def plotLambdaDependency(folder='results/', individual=True):
     """
     Plot CCD PSF size as a function of wavelength and compare it to Euclid VIS requirement.
     """
-    data800nm = fileIO.cPicleRead(folder+'J800nm54k.pkl')
-    #data800nm = fileIO.cPicleRead(folder+'J800nm50k.pkl')
-    data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
-    data700nm = fileIO.cPicleRead(folder+'J700nm32k.pkl')
-    data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
+    if individual:
+        data800 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm*.pkl')]
+        data600 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54*.pkl')]
+        data700 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm52*.pkl')]
+        data890 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm50*.pkl')]
+        #data = (data600, data700, data800, data890)
+        data = (data600, data800, data890)
 
-    data = (data600nm, data700nm, data800nm, data890nm)
-    waves = [int(d['wavelength'].replace('nm', '')) for d in data]
+        print 'Individual Results'
+
+        datacontainer = []
+        for x in data:
+            wx = np.median([d['wx'] for d in x])*2
+            wxerr = np.median([d['wxerr'] for d in x])
+            wy = np.median([d['wy'] for d in x])*2
+            wyerr = np.median([d['wyerr'] for d in x])
+            dat = dict(wx=wx, wy=wy, wxerr=wxerr, wyerr=wyerr)
+            datacontainer.append(dat)
+        data = datacontainer
+        #waves = [600, 700, 800, 890]
+        waves = [600, 800, 890]
+    else:
+        print 'Joint Results'
+        #data800nm = fileIO.cPicleRead(folder+'J800nm54k.pkl')
+        data800nm = fileIO.cPicleRead(folder+'J800nm.pkl')
+        data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
+        data700nm = fileIO.cPicleRead(folder+'J700nm52k.pkl')
+        data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
+
+        data = (data600nm, data700nm, data800nm, data890nm)
+        waves = [int(d['wavelength'].replace('nm', '')) for d in data]
 
     #plot FWHM
     fig = plt.figure()
@@ -1171,7 +1291,7 @@ def plotLambdaDependency(folder='results/'):
     powerlaw = models.PowerLaw1D(amplitude=1., x_0=0.009321, alpha=-0.2)
     req = powerlaw.eval(x, amplitude=1., x_0=0.009321, alpha=-0.2)
 
-    ax1.plot(x, req, 'r-', label='Requirement')
+    #ax1.plot(x, req, 'r-', label='Requirement')
     ax1.plot(x, p1(x), 'g-', label='Powerlaw Fit')
     ax2.plot(x, req, 'r-', label='Requirement')
     ax2.plot(x, p2(x), 'g-', label='Powerlaw Fit')
@@ -1194,7 +1314,7 @@ def plotLambdaDependency(folder='results/'):
     ax1.plot(ev, y_pred, 'b-', label='Prediction')
     ax1.fill(np.concatenate([ev, ev[::-1]]),
              np.concatenate([y_pred - 1.9600 * sigma, (y_pred + 1.9600 * sigma)[::-1]]),
-             alpha=.2, fc='b', ec='None', label=u'95% confidence interval')
+             alpha=.2, fc='b', ec='None', label=u'95\% confidence interval')
 
     X = np.atleast_2d(waves).T
     y = np.asarray([_FWHMGauss(d['wy']) for d in data])
@@ -1211,14 +1331,14 @@ def plotLambdaDependency(folder='results/'):
     ax2.plot(ev, y_pred, 'b-', label='Prediction')
     ax2.fill(np.concatenate([ev, ev[::-1]]),
              np.concatenate([y_pred - 1.9600 * sigma, (y_pred + 1.9600 * sigma)[::-1]]),
-             alpha=.2, fc='b', ec='None', label=u'95% confidence interval')
+             alpha=.2, fc='b', ec='None', label=u'95\% confidence interval')
 
     plt.sca(ax1)
     plt.xticks(visible=False)
     plt.sca(ax2)
 
-    ax1.set_ylim(4.5, 11.5)
-    ax2.set_ylim(4.5, 11.5)
+    ax1.set_ylim(6.2, 12.5)
+    ax2.set_ylim(6.2, 12.5)
     ax1.set_xlim(550, 900)
     ax2.set_xlim(550, 900)
 
@@ -1226,7 +1346,7 @@ def plotLambdaDependency(folder='results/'):
     ax2.set_ylabel('Y FWHM [microns]')
     ax1.set_xlabel('Wavelength [nm]')
     ax2.set_xlabel('Wavelength [nm]')
-    ax1.legend(shadow=True, fancybox=True)
+    ax1.legend(shadow=True, fancybox=True, loc='best')
     plt.savefig('LambdaDependency.pdf')
     plt.close()
 
@@ -1320,37 +1440,39 @@ def plotAllResiduals():
         _plotModelResiduals(id=id, folder='results/', out='results/%sResidual.pdf' % id, individual=True)
 
 
-def plotPaperFigures(folder = 'results/'):
+def plotPaperFigures(folder='results/'):
     """
     Generate Figures of the Experimental Astronomy paper.
     """
-    #model Example
-    plotModelExample()
-
-    #simulation figures
-    theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
-    _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
-                                      joined='results/simulated800nmJoint.pkl',
-                                      title='Simulated Data: PSF Recovery', truthx=theta1[7], truthy=theta1[8],
-                                      requirementE=None, requirementFWHM=None, requirementR2=None)
-
-    #individual fits
-    _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
-
-    #real data
-    _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm?.pkl', joined=folder+'J800nm.pkl', title='800nm',
-                                      FWHMlims=(7.3, 11.8))
-    _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
-
-    #brighter fatter
-    data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
-    data10k = fileIO.cPicleRead(folder+'J800nm10k.pkl')
-    data30k = fileIO.cPicleRead(folder+'J800nm30k.pkl')
-    data38k = fileIO.cPicleRead(folder+'J800nm38k.pkl')
-    data50k = fileIO.cPicleRead(folder+'J800nm50k.pkl')
-    data54k = fileIO.cPicleRead(folder+'J800nm54k.pkl')
-    data = (data5k, data10k, data30k, data38k, data50k, data54k)
-    plotBrighterFatter(data, out='BrighterFatter.pdf')
+    # #model Example
+    # _AiryDisc(amplitude=1e6, center_x=10.0, center_y=10.0, radius=0.5, focus=0.4, size=21)
+    # _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21)
+    # plotModelExample()
+    #
+    # #simulation figures
+    # theta1 = (2.e5, 9.9, 10.03, 0.44, 0.5, 10., 10., 0.296, 0.335)
+    # _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
+    #                                   joined='results/simulated800nmJoint.pkl',
+    #                                   title='Simulated Data: PSF Recovery', truthx=theta1[7], truthy=theta1[8],
+    #                                   requirementE=None, requirementFWHM=None, requirementR2=None)
+    #
+    # #individual fits
+    # _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
+    #
+    # #real data
+    # _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm?.pkl', joined=folder+'J800nm.pkl', title='800nm',
+    #                                   FWHMlims=(7.3, 11.8))
+    # _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
+    #
+    # #brighter fatter
+    # data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
+    # data10k = fileIO.cPicleRead(folder+'J800nm10k.pkl')
+    # data30k = fileIO.cPicleRead(folder+'J800nm30k.pkl')
+    # data38k = fileIO.cPicleRead(folder+'J800nm38k.pkl')
+    # data50k = fileIO.cPicleRead(folder+'J800nm50k.pkl')
+    # data54k = fileIO.cPicleRead(folder+'J800nm54k.pkl')
+    # data = (data5k, data10k, data30k, data38k, data50k, data54k)
+    # plotBrighterFatter(data, out='BrighterFatter.pdf')
 
     data5k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm5k*.pkl')]
     data10k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm10k*.pkl')]
@@ -1361,7 +1483,7 @@ def plotPaperFigures(folder = 'results/'):
     data = (data5k, data10k, data30k, data38k, data50k, data54k)
     plotBrighterFatter(data, individual=True, out='BrighterFatterInd.pdf')
 
-    plotLambdaDependency()
+    #plotLambdaDependency()
 
 
 def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
@@ -1379,7 +1501,7 @@ def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
     return CCDdata
 
 
-def _AiryDisc(amplitude=1e5, center_x=10., center_y=10., radius=0.6, focus=0.44, size=21):
+def _AiryDisc(amplitude=1e6, center_x=10.0, center_y=10.0, radius=0.5, focus=0.4, size=21):
     """
     Generate a CCD PSF using a 2D Gaussian and save it to file.
     """
@@ -1467,7 +1589,7 @@ def plotModelExample(size=10):
 
 def _printAnalysedData(folder='results/', id='J*.pkl'):
     print 'Wavelength   Median Intensity    Number of Files     SNR'
-    structure = '%i     &   %.1f    &   %i    &     %.0f \\'
+    structure = '%i     &   %.1f    &   %i    &     %.0f \\\\'
     for file in g.glob(folder+id):
         tmp = fileIO.cPicleRead(file)
         med = np.median(tmp['peakvalues'])
@@ -1476,12 +1598,83 @@ def _printAnalysedData(folder='results/', id='J*.pkl'):
         print out
 
 
+def _testDifficultCases():
+
+    #different simulation sets
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.2, 0.2)
+    theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)
+    theta3 = (8.e4, 10., 10.2, 0.4, 0.55, 10., 10., 0.25, 0.35)
+    theta4 = (5.e4, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)
+    theta5 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)
+    thetas = [theta1, theta2, theta3, theta4, theta5]
+
+    for i, theta in enumerate(thetas):
+        if i == 3 or i ==4:
+            forwardModel(file='simulated/simulatedSmall%i.fits' %i, out='simulatedResults/Run%i' %i, simulation=True,
+                         truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
+            print("=" * 60)
+            print 'Simulation Parameters'
+            print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
+            print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
+            print("=" * 60)
+
+    files = getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/')
+    RunData([files[0], ], out='I800nm50k')
+
+    files = getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/')
+    RunData([files[0], ], out='I800nm20k')
+    # """
+    # ============================================================
+    # Fitting with MCMC:
+    # ******************** Fitted parameters ********************
+    # amplitude = 5.564253e+05 +- 4.513667e+04
+    # center_x = 1.011409e+01 +- 5.362888e-02
+    # center_y = 9.789458e+00 +- 8.835926e-02
+    # radius = 3.423970e-01 +- 6.002914e-03
+    # focus = 4.409415e-01 +- 5.834299e-03
+    # width_x = 2.120287e-01 +- 1.291855e-02
+    # width_y = 2.050382e-01 +- 1.191833e-02
+    # ============================================================
+    # GoF: 3.60045607301  Maximum difference: 2357.09013991
+    # """
+
+    files = getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/')
+    RunData([files[0], ], out='I800nm20k')
+    # """
+    # ******************** Fitted parameters ********************
+    # amplitude = 2.424300e+05 +- 4.402245e+03
+    # center_x = 1.010508e+01 +- 3.910288e-02
+    # center_y = 9.761132e+00 +- 8.530081e-02
+    # radius = 4.585219e-01 +- 1.762515e-03
+    # focus = 4.390476e-01 +- 2.809536e-03
+    # width_x = 2.024940e-01 +- 1.080546e-02
+    # width_y = 2.116406e-01 +- 1.567963e-02
+    # ============================================================
+    # GoF: 3.18913554884  Maximum difference: 1620.64827584
+    # """
+
+
+def _amplitudeFromPeak(peak, x, y, radius, x_0=10, y_0=10):
+    """
+    This function can be used to estimate an Airy disc amplitude from the peak pixel, centroid and radius.
+    """
+    rz = jn_zeros(1, 1)[0] / np.pi
+    r = np.sqrt((x - x_0) ** 2 + (y - y_0) ** 2) / (radius / rz)
+    if r == 0.:
+        return peak
+    rt = np.pi * r
+    z = (2.0 * j1(rt) / rt)**2
+    amp = peak / z
+    return amp
+
+
 if __name__ == '__main__':
     #Simulated spots and analysis
     #RunTestSimulations()
+    #RunTestSimulations2()
 
     #Real Data
-    analyseData()
+    #analyseData()
 
     #Special Runs
     #forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
@@ -1490,9 +1683,9 @@ if __name__ == '__main__':
     #                     out='J600nm20', wavelength='600nm')
 
     #plots
-    plotPaperFigures()
-    plotAllResiduals()
-    generateTestPlots()
+    #plotPaperFigures()
+    #plotAllResiduals()
+    #generateTestPlots()
 
     #All Data
     #AlljointRuns()
@@ -1500,3 +1693,6 @@ if __name__ == '__main__':
 
     #Testing set
     #RunTest()
+
+    #test some of the cases, which seem to be more difficult to fit
+    _testDifficultCases()

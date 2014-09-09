@@ -20,7 +20,7 @@ be more appropriate to use "cross"-type kernel.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.2
+:version: 1.3
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -45,6 +45,7 @@ import scipy
 import scipy.ndimage.measurements as m
 from scipy import signal
 from scipy import ndimage
+from scipy import optimize
 from scipy.special import j1, jn_zeros
 from sklearn.gaussian_process import GaussianProcess
 from support import files as fileIO
@@ -59,7 +60,7 @@ from multiprocessing import Pool
 cores = 8
 
 
-def forwardModel(file, out='Data', gain=3.1, size=10, burn=400, spotx=2888, spoty=3514, run=200,
+def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400, spotx=2888, spoty=3514, run=200,
                  simulation=False, truths=None):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
@@ -173,62 +174,28 @@ def forwardModel(file, out='Data', gain=3.1, size=10, burn=400, spotx=2888, spot
     xx = xx.flatten()
     yy = yy.flatten()
 
-    # # #First fit only Airy disc to get a good estimate of the amplitude
-    # ndim = 4
-    # #Choose an initial set of positions for the walkers - fairly large area not to bias the results
-    # #amplitude, center_x, center_y, radius = theta
-    # p0 = np.zeros((nwalkers, ndim))
-    # p0[:, 0] = np.random.uniform(0.9*amp, 1.3*amp, size=nwalkers)             # amplitude
-    # p0[:, 1] = np.random.uniform(8.5, 11.5, size=nwalkers)                    # x
-    # p0[:, 2] = np.random.uniform(8.5, 11.5, size=nwalkers)                    # y
-    # p0[:, 3] = np.random.normal(radestimate, 0.1, size=nwalkers)              # radius
-    #
-    # #initiate sampler
-    # pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    # sampler = emcee.EnsembleSampler(nwalkers, ndim, lnPosteriorAiry,
-    #                                 args=[xx, yy, data, var, amprange, spot.shape],
-    #                                 pool=pool)
-    #
-    # # Run a burn-in and set new starting position
-    # print "Burning-in, Airy fitting"
-    # pos, prob, state = sampler.run_mcmc(p0, burn/2)
-    # best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
-    # print best_pos
-    # pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
-    # # Reset the chain to remove the burn-in samples.
-    # sampler.reset()
-    #
-    # # Starting from the final position in the burn-in chain
-    # print "Running MCMC for Airy fitting"
-    # pos, prob, state = sampler.run_mcmc(pos, burn/2)
-    # sampler.reset()
-    # pos, prob, state = sampler.run_mcmc(pos, run/2, rstate0=state)
-    #
-    # # Print out the mean acceptance fraction
-    # print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
-    #
-    # #Get the index with the highest probability
-    # maxprob_index = np.argmax(prob)
-    #
-    # #Get the best parameters and their respective errors and print best fits
-    # params_fit = pos[maxprob_index]
-    # amplitude, center_x, center_y, radius = params_fit
-    # print 'Airy disc estimation:'
-    # print params_fit
-
     print 'Fitting full model...'
     ndim = 7
 
     #Choose an initial set of positions for the walkers - fairly large area not to bias the results
-    #amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
     p0 = np.zeros((nwalkers, ndim))
+    #amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
     p0[:, 0] = np.random.uniform(amprangeF[0], amprangeF[1] , size=nwalkers)  # amplitude
-    p0[:, 1] = np.random.normal(p.x_mean.value, 0.5, size=nwalkers)           # x
-    p0[:, 2] = np.random.normal(p.y_mean.value, 0.5, size=nwalkers)           # y
-    p0[:, 3] = np.random.uniform(.4, 0.7, size=nwalkers)                      # radius
-    p0[:, 4] = np.random.uniform(.2, 0.3, size=nwalkers)                      # focus
-    p0[:, 5] = np.random.uniform(.3, 0.4, size=nwalkers)                      # width_x
-    p0[:, 6] = np.random.uniform(.3, 0.4, size=nwalkers)                      # width_y
+    p0[:, 1] = np.random.normal(p.x_mean.value, 0.1, size=nwalkers)           # x
+    p0[:, 2] = np.random.normal(p.y_mean.value, 0.1, size=nwalkers)           # y
+
+    if wavelength is None:
+        p0[:, 3] = np.random.uniform(.45, 0.55, size=nwalkers)                     # radius
+        p0[:, 4] = np.random.uniform(.40, 0.45, size=nwalkers)                     # focus
+        p0[:, 5] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_x
+        p0[:, 6] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_y
+    else:
+        tmp = _expectedValues()[wavelength]
+        print 'Using initial guess [radius, focus, width_x, width_y]:', tmp
+        p0[:, 3] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
+        p0[:, 4] = np.random.normal(tmp[1], 0.01, size=nwalkers)                   # focus
+        p0[:, 5] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
+        p0[:, 6] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
@@ -414,15 +381,17 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
     print '\n\nBayesian Fitting, model has %i dimensions' % ndim
 
     # Choose an initial set of positions for the walkers using the Gaussian fit
+    tmp = _expectedValues()['l' + wavelength.replace('nm', '')]
+    print 'Using initial guess [radius, focus, width_x, width_y]:', tmp
     p0 = np.zeros((nwalkers, ndim))
     for x in xrange(images):
-        p0[:, 2*x] = np.random.uniform(8.5, 11.5, size=nwalkers)      # x
-        p0[:, 2*x+1] = np.random.uniform(8.5, 11.5, size=nwalkers)    # y
-    p0[:, -5] = np.random.uniform(0.95*amp, 1.25*amp, size=nwalkers)  # amplitude
-    p0[:, -4] = np.random.uniform(.2, .5, size=nwalkers)              # radius
-    p0[:, -3] = np.random.uniform(.2, .4, size=nwalkers)              # focus
-    p0[:, -2] = np.random.uniform(.25, .3, size=nwalkers)             # width_x
-    p0[:, -1] = np.random.uniform(.25, .3, size=nwalkers)             # width_y
+        p0[:, 2*x] = np.random.uniform(8.5, 11.5, size=nwalkers)                # x
+        p0[:, 2*x+1] = np.random.uniform(8.5, 11.5, size=nwalkers)              # y
+    p0[:, -5] = np.random.uniform(0.95*amp, 1.25*amp, size=nwalkers)            # amplitude
+    p0[:, -4] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
+    p0[:, -3] = np.random.normal(tmp[1], 0.01, size=nwalkers)                   # focus
+    p0[:, -2] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
+    p0[:, -1] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
 
     # Initialize the sampler with the chosen specs.
     #Create the coordinates x and y
@@ -579,7 +548,7 @@ def log_prior(theta, amprange):
     """
     amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
     if 7. < center_x < 14. and 7. < center_y < 14. and 0.23 < width_x < 0.5 and 0.23 < width_y < 0.5 and \
-       amprange[0] < amplitude < amprange[1] and 0.3 < radius < 1. and 0.1 < focus < 1.:
+       amprange[0] < amplitude < amprange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
         return 0.
     else:
         return -np.inf
@@ -602,8 +571,8 @@ def log_priorJoint(theta, amprange):
     Priors, limit the values to a range but otherwise flat.
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    if all(7. < x < 14. for x in theta[:-5]) and amprange[0] < theta[-5] < amprange[1] and 0.1 < theta[-4] < 1.5 and \
-       0.2 < theta[-3] < 1. and 0.23 < theta[-2] < 0.5 and 0.23 < theta[-1] < 0.5:
+    if all(7. < x < 14. for x in theta[:-5]) and amprange[0] < theta[-5] < amprange[1] and 0.4 < theta[-4] < 0.7 and \
+       0.1 < theta[-3] < 0.7 and 0.2 < theta[-2] < 0.5 and 0.2 < theta[-1] < 0.5:
         return 0.
     else:
         return -np.inf
@@ -904,12 +873,12 @@ def RunTestSimulations2(newfiles=False):
         print("=" * 60)
 
 
-def RunData(files, out='testdata'):
+def RunData(files, wavelength=None, out='testdata'):
     """
     A set of test data to analyse.
     """
     for i, file in enumerate(files):
-        forwardModel(file=file, out='results/%s%i' % (out, i))
+        forwardModel(file=file, out='results/%s%i' % (out, i), wavelength=wavelength)
 
 
 def getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'):
@@ -1337,13 +1306,12 @@ def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, ind
     plt.close()
 
 
-def plotLambdaDependency(folder='results/', individual=False):
+def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     """
     Plot CCD PSF size as a function of wavelength and compare it to Euclid VIS requirement.
     """
-    from scipy import optimize
     matplotlib.rc('text', usetex=True)
-    if individual:
+    if 'ind' in analysis:
         print 'Individual Results'
         data800 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm*.pkl')]
         data600 = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54*.pkl')]
@@ -1360,7 +1328,7 @@ def plotLambdaDependency(folder='results/', individual=False):
             datacontainer.append(dat)
         data = datacontainer
         waves = [600, 700, 800, 890]
-    else:
+    elif 'join' in analysis:
         print 'Joint Results'
         #data800nm = fileIO.cPicleRead(folder+'J800nm54k.pkl')
         data800nm = fileIO.cPicleRead(folder+'J800nm.pkl')
@@ -1369,19 +1337,29 @@ def plotLambdaDependency(folder='results/', individual=False):
         data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
         data = (data600nm, data700nm, data800nm, data890nm)
         waves = [int(d['wavelength'].replace('nm', '')) for d in data]
+    else:
+        print 'Using subset of data'
+        data600nm = fileIO.cPicleRead(folder+'G600nm0.pkl')
+        data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
+        data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
+        data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
+        data = (data600nm, data700nm, data800nm, data890nm)
+        waves = [600, 700, 800, 890]
 
     wx = np.asarray([_FWHMGauss(d['wx']) for d in data])
-    wxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])
+    wxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])*sigma
     wy = np.asarray([_FWHMGauss(d['wy']) for d in data])
-    wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])
+    wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])*sigma
     #hand derived -- picked the best of the fits that are most reliable
-    # wx = np.asarray([_FWHMGauss(d) for d in [0.37, 0.34, 0.32, 0.3]])
+    # wx = np.asarray([_FWHMGauss(d) for d in [0.36, 0.34, 0.32, 0.3]])
     # wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
-    # wy = np.asarray([_FWHMGauss(d) for d in [0.39, 0.365, 0.315, 0.3]])
+    # wy = np.asarray([_FWHMGauss(d) for d in [0.38, 0.365, 0.315, 0.3]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
 
     w = np.sqrt(wx*wy)
     werr = np.sqrt(wxerr*wyerr)
+
+    print zip(waves, w)
 
     #plot FWHM
     fig = plt.figure()
@@ -1557,6 +1535,14 @@ def plotPaperFigures(folder='results/'):
                                       FWHMlims=(7.3, 11.8))
     _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
 
+    _plotModelResiduals(id='G600nm0', folder=folder, out='ResidualG600.pdf', individual=True)
+    _plotModelResiduals(id='G700nm0', folder=folder, out='ResidualG700.pdf', individual=True)
+    _plotModelResiduals(id='G800nm0', folder=folder, out='ResidualG800.pdf', individual=True)
+    _plotModelResiduals(id='G890nm0', folder=folder, out='ResidualG890.pdf', individual=True)
+
+    #wavelength dependency
+    plotLambdaDependency()
+
     #brighter fatter
     data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
     data10k = fileIO.cPicleRead(folder+'J800nm10k.pkl')
@@ -1575,8 +1561,6 @@ def plotPaperFigures(folder='results/'):
     # data54k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54k*.pkl')]
     # data = (data5k, data10k, data30k, data38k, data50k, data54k)
     # plotBrighterFatter(data, individual=True, out='BrighterFatterInd.pdf')
-
-    plotLambdaDependency()
 
 
 def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
@@ -1751,12 +1735,48 @@ def _amplitudeFromPeak(peak, x, y, radius, x_0=10, y_0=10):
     return amp
 
 
+def _expectedValues():
+    """
+    These values are expected for well exposed spot data. The dictionary has a tuple for each wavelength.
+    Note that for example focus is data set dependent and should be used only as an indicator of a possible value.
+
+    keys: l600, l700, l800, l890
+
+    tuple = [radius, focus, widthx, widthy]
+    """
+    out = dict(l600=(0.45, 0.40, 0.40, 0.41),
+               l700=(0.47, 0.40, 0.33, 0.35),
+               l800=(0.49, 0.41, 0.31, 0.315),
+               l890=(0.54, 0.38, 0.29, 0.3))
+
+    return out
+
+
+def runGood():
+    """
+    Analyse data that are well centred. These fits are more reliable.
+    """
+    RunData([getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/')[2],], out='G600nm',
+             wavelength='l600')
+    forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
+                     out='J600nm54k', wavelength='600nm', burn=50, run=100)
+    RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[2],], out='G700nm',
+             wavelength='l700')
+    RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
+             wavelength='l800')
+    RunData([getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/')[2],], out='G890nm',
+             wavelength='l890')
+    forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
+                         out='J800nm', wavelength='800nm')
+
+
 if __name__ == '__main__':
     #Simulated spots and analysis
     #RunTestSimulations()
     #RunTestSimulations2()
 
     #Data Analysis -- real spots
+    runGood()
     #analyseData600nm()
     #analyseData700nm()
     #analyseData800nm()
@@ -1782,4 +1802,5 @@ if __name__ == '__main__':
     #RunTest()
 
     #test some of the cases, which seem to be more difficult to fit
-    _testDifficultCases()
+    #_testDifficultCases()
+

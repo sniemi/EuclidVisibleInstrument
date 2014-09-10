@@ -11,11 +11,19 @@ rather far from the truth. Also, if when the width of the CCD PSF kernel becomes
 it is very difficult to recover. This most likely results from an inadequate sampling. In this case it might
 be more appropriate to use "cross"-type kernel.
 
-Because the amplitude can be very tricky to estimate, the version 1.4 (and later) implement a metaparameter
+Because the amplitude can be very tricky to estimate, the version 1.4 (and later) implement a meta-parameter
 called peak, which is the peak counts in the image. This is then converted to the amplitude by using the centroid
 estimate. Because the centroids are fitted for each image, the amplitude can also vary in the joint fits. This
 seems to improve the joint fitting constrains. Note however that this does couple the radius of the Airy disc
 as well, because the amplitude estimate uses the x, y, and radius information as well.
+
+One question to address is how the smoothing of the Airy disc is done. So far I have assumed that the Gaussian that
+represents defocus should be centred at the same location as the Airy disc. However, if the displacement if the
+Airy disc is large, then the defocus term will move the Airy disc to the direction of the displacement and make
+it more asymmetric. Another option is to use scipy.ndimage.filters.gaussian_filter which simply applies Gaussian
+smoothing to the input image. Based on the testing carried out this does not seem to make a huge difference. The
+latter (smoothing) will lead to more or less the same CCD PSF estimates, albeit with slightly higher residuals.
+We therefore adopt a Gaussian kernel that is centred with the Airy disc.
 
 :requires: PyFITS
 :requires: NumPy
@@ -26,7 +34,7 @@ as well, because the amplitude estimate uses the x, y, and radius information as
 :requires: emcee
 :requires: sklearn
 
-:version: 1.4
+:version: 1.5
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -62,6 +70,9 @@ import os, datetime
 from multiprocessing import Pool
 
 
+__author__ = 'Sami-Matias Niemi'
+__vesion__ = 1.5
+
 #fixed parameters
 cores = 8
 
@@ -72,8 +83,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     Forward models the spot data found from the input file. Can be used with simulated and real data.
 
     Notes:
-    - The emcee is run three times as it is important to have a good starting point for the final run.
-    - It is very important to have the amplitude well estimated, otherwise it is difficult to get good parameter estimates.
+    - emcee is run three times as it is important to have a good starting point for the final run.
     """
     print '\n\n\n'
     print '_'*120
@@ -571,15 +581,9 @@ def log_likelihood(theta, x, y, data, var, size):
     CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
     CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
     model = signal.convolve2d(model, CCDdata, mode='same').flatten()
-    #this does not shift centroid, simply smoothing...
-    #model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
 
-    #true for Gaussian errors, but not really true here because of mixture of Poisson and Gaussian noise
+    #true for Gaussian errors
     lnL = - 0.5 * np.sum((data - model)**2 / var)
-    #others...
-    #lnL = - 2. * np.sum((((data - model)**2) + np.abs(data - model))/var)
-    #using L1 norm would be true for exponential distribution
-    #lnL = - np.sum(np.abs(data - model) / var)
 
     return lnL
 
@@ -614,7 +618,6 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
         CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
         CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
-        #model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
         #lnL = np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
@@ -1303,6 +1306,7 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
         data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
         data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
+        #data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
         data = (data600nm, data700nm, data800nm, data890nm)
         waves = [600, 700, 800, 890]
 

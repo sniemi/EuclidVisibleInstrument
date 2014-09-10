@@ -11,6 +11,12 @@ rather far from the truth. Also, if when the width of the CCD PSF kernel becomes
 it is very difficult to recover. This most likely results from an inadequate sampling. In this case it might
 be more appropriate to use "cross"-type kernel.
 
+Because the amplitude can be very tricky to estimate, the version 1.4 (and later) implement a metaparameter
+called peak, which is the peak counts in the image. This is then converted to the amplitude by using the centroid
+estimate. Because the centroids are fitted for each image, the amplitude can also vary in the joint fits. This
+seems to improve the joint fitting constrains. Note however that this does couple the radius of the Airy disc
+as well, because the amplitude estimate uses the x, y, and radius information as well.
+
 :requires: PyFITS
 :requires: NumPy
 :requires: SciPy
@@ -20,7 +26,7 @@ be more appropriate to use "cross"-type kernel.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.3
+:version: 1.4
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -132,32 +138,16 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     #goodness of fit
     gof = (1./(np.size(data) - 5.)) * np.sum((model.flatten() - data)**2 / var)
     print 'GoF:', gof
-
-    airy = models.AiryDisk2D(spot.max(), p.x_mean.value, p.y_mean.value, 0.8*min(p.x_stddev.value, p.y_stddev.value),
-                             fixed=dict(x_0=True, y_0=True))
-    #use the Gaussian positions, these seem to be better constrained than the Airy
-    airy.x_0.fixed = True #does not seem to work in astropy 0.4.1
-    airy.y_0.fixed = True
-    fit_p = fitting.LevMarLSQFitter()
-    a = fit_p(airy, X, Y, spot)
-    print a
     print 'Done\n\n'
 
     #maximum value
     max = np.max(spot)
+    peakrange = (0.9*max, 1.7*max)
     sum = np.sum(spot)
-    radestimate = 0.9*min(p.x_stddev.value, p.y_stddev.value, a.radius.value)
-    amp = _amplitudeFromPeak(max, p.x_mean.value, p.y_mean.value, radestimate)
-    amp = np.min([amp, a.amplitude.value])
-    amprange = (0.95*max, 5.*amp)
-    amprangeF = (0.99*max, 1.5*amp)
 
     print 'Maximum Value:', max
     print 'Sum of the values:', sum
-    print 'Airy amplitude estimate:', amp
-    print 'Airy radius estimate:', radestimate
-    print 'Airy amplitude range:', amprange  #key to success
-    print 'Airy amplitude guess:', amprangeF
+    print 'Peak Range:', peakrange
 
     #MCMC based fitting
     print 'Bayesian Model Fitting...'
@@ -179,8 +169,8 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
 
     #Choose an initial set of positions for the walkers - fairly large area not to bias the results
     p0 = np.zeros((nwalkers, ndim))
-    #amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
-    p0[:, 0] = np.random.uniform(amprangeF[0], amprangeF[1] , size=nwalkers)  # amplitude
+    #peak, center_x, center_y, radius, focus, width_x, width_y = theta
+    p0[:, 0] = np.random.normal(max, max/100., size=nwalkers)                 # peak value
     p0[:, 1] = np.random.normal(p.x_mean.value, 0.1, size=nwalkers)           # x
     p0[:, 2] = np.random.normal(p.y_mean.value, 0.1, size=nwalkers)           # y
 
@@ -199,7 +189,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, amprange, spot.shape],
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, peakrange, spot.shape],
                                     pool=pool)
 
     # Run a burn-in and set new starting position
@@ -207,17 +197,16 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     pos, prob, state = sampler.run_mcmc(p0, burn)
     best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
     print best_pos
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
     pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
-    # Reset the chain to remove the burn-in samples.
     sampler.reset()
 
-    # Starting from the final position in the burn-in chain
-    print "Running MCMC..."
+    print "Running an improved estimate..."
     pos, prob, state = sampler.run_mcmc(pos, burn)
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
     sampler.reset()
+    print "Running MCMC..."
     pos, prob, state = sampler.run_mcmc(pos, run, rstate0=state)
-
-    # Print out the mean acceptance fraction
     print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
 
     #Get the index with the highest probability
@@ -230,7 +219,8 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     _printResults(params_fit, errors_fit)
 
     #Best fit model
-    amplitude, center_x, center_y, radius, focus, width_x, width_y = params_fit
+    peak, center_x, center_y, radius, focus, width_x, width_y = params_fit
+    amplitude = _amplitudeFromPeak(peak, center_x, center_y, radius, x_0=CCDx, y_0=CCDy)
     airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
     adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape(spot.shape)
     f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
@@ -252,6 +242,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     print 'GoF:', gof, ' Maximum difference:', maxdiff
     if maxdiff > 2e3 or gof > 4.:
         print '\nFIT UNLIKELY TO BE GOOD...\n'
+    print 'Amplitude estimate:', amplitude
 
     #results and save results
     _printFWHM(width_x, width_y, errors_fit[5], errors_fit[6])
@@ -269,8 +260,9 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
         extents[2] = (truths[2]*0.995, truths[2]*1.005)
         extents[3] = (0.395, 0.425)
         extents[4] = (0.503, 0.517)
+        truths[0] = max #this is not true
     fig = triangle.corner(samples,
-                          labels=['amplitude', 'x', 'y', 'radius', 'focus', 'width_x', 'width_y'],
+                          labels=['peak', 'x', 'y', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)#, extents=extents)
     fig.savefig(out+'Triangle.png')
     plt.close()
@@ -297,7 +289,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
     image = []
     noise = []
     peakvalues = []
-    amps = []
+    xestimate = []
+    yestimate = []
     for file in files:
         print file
         #get data and convert to electrons
@@ -347,14 +340,11 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
 
         max = np.max(spot)
         s = spot.sum()
-        amp = _amplitudeFromPeak(max, p.x_mean.value, p.y_mean.value, 0.98*min(p.x_stddev.value, p.y_stddev.value))
         print 'Maximum Value:', max
         print 'Sum:', s
-        print 'Airy amplitude estimate:', amp
         print ''
 
         peakvalues.append(max)
-        amps.append(amp)
 
         #noise model
         variance = spot.copy() + rn**2
@@ -362,18 +352,21 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
         #save to a list
         image.append(spot)
         noise.append(variance)
+        xestimate.append(p.x_mean.value)
+        yestimate.append(p.y_mean.value)
 
     #sensibility test, try to check if all the files in the fit are of the same dataset
     if np.std(peakvalues) > 5*np.sqrt(np.median(peakvalues)):
         #check for more than 5sigma outliers, however, this is very sensitive to the centroiding of the spot...
-        print 'POTENTIAL OUTLIER, please check the input files...'
+        print '\n\n\nPOTENTIAL OUTLIER, please check the input files...'
         print np.std(peakvalues), 5*np.sqrt(np.median(peakvalues))
 
-    amps = np.asarray(amps)
-    amp = np.median(amps)
-    amprange = (np.min(peakvalues), 3.*np.max(amps))
-    print '\n\nAiry amplitude estimate:', amp, ' +/- ', np.std(amps)
-    print 'Airy amplitude range:', amprange  #key to success
+    peakvalues = np.asarray(peakvalues)
+    peak = np.median(peakvalues)
+    peakrange = (0.95*np.min(peakvalues), 1.7*np.max(peakvalues))
+
+    print '\nPeak Estimate:', peak
+    print 'Peak Range:', peakrange
 
     #MCMC based fitting
     ndim = 2*images + 5  #xpos, ypos for each image and single amplitude, radius, focus, and sigmaX and sigmaY
@@ -385,9 +378,9 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
     print 'Using initial guess [radius, focus, width_x, width_y]:', tmp
     p0 = np.zeros((nwalkers, ndim))
     for x in xrange(images):
-        p0[:, 2*x] = np.random.uniform(8.5, 11.5, size=nwalkers)                # x
-        p0[:, 2*x+1] = np.random.uniform(8.5, 11.5, size=nwalkers)              # y
-    p0[:, -5] = np.random.uniform(0.95*amp, 1.25*amp, size=nwalkers)            # amplitude
+        p0[:, 2*x] = np.random.normal(xestimate[x], 0.1, size=nwalkers)         # x
+        p0[:, 2*x+1] = np.random.normal(yestimate[x], 0.1, size=nwalkers)       # y
+    p0[:, -5] = np.random.normal(peak, peak/100., size=nwalkers)                # amplitude
     p0[:, -4] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
     p0[:, -3] = np.random.normal(tmp[1], 0.01, size=nwalkers)                   # focus
     p0[:, -2] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
@@ -406,8 +399,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint, args=[xx, yy, image, noise, amprange, spot.shape],
-                                    pool=pool)
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint,
+                                    args=[xx, yy, image, noise, peakrange, spot.shape], pool=pool)
 
     # Run a burn-in and set new starting position
     print "Burning-in..."
@@ -439,8 +432,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
     print params_fit
 
     #unpack the fixed parameters
-    amplitude, radius, focus, width_x, width_y = params_fit[-5:]
-    amplitudeE, radiusE, focusE, width_xE, width_yE = errors_fit[-5:]
+    peak, radius, focus, width_x, width_y = params_fit[-5:]
+    peakE, radiusE, focusE, width_xE, width_yE = errors_fit[-5:]
 
     #print results
     _printFWHM(width_x, width_y, width_xE, width_yE)
@@ -457,6 +450,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
         center_y = params_fit[2*index+1]
 
         #1)Generate a model Airy disc
+        amplitude = _amplitudeFromPeak(peak, center_x, center_y, radius,
+                                       x_0=int(size/2.-0.5), y_0=int(size/2.-0.5))
         airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
         adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape((size, size))
 
@@ -483,6 +478,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
         print 'GoF:', gof, ' Max difference', maxdiff
         gofs.append(gof)
         mdiff.append(maxdiff)
+        print 'Amplitude Estimate:', amplitude
 
     if np.asarray(mdiff).max() > 3e3 or np.asarray(gofs).max() > 4.:
         print '\nFIT UNLIKELY TO BE GOOD...\n'
@@ -499,18 +495,18 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, r
     #if simulated:
     #    extents = [(0.9*truth, 1.1*truth) for truth in truths]
     #    print extents
-    fig = triangle.corner(samples, labels=['x', 'y']*images + ['amplitude', 'radius', 'focus', 'width_x', 'width_y'],
+    fig = triangle.corner(samples, labels=['x', 'y']*images + ['peak', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)#, extents=extents)
     fig.savefig('results/' + out + 'Triangle.png')
     plt.close()
     pool.close()
 
 
-def log_posterior(theta, x, y, z, var, amprange, size):
+def log_posterior(theta, x, y, z, var, peakrange, size):
     """
     Posterior probability: combines the prior and likelihood.
     """
-    lp = log_prior(theta, amprange)
+    lp = log_prior(theta, peakrange)
 
     if not np.isfinite(lp):
         return -np.inf
@@ -518,11 +514,11 @@ def log_posterior(theta, x, y, z, var, amprange, size):
     return lp + log_likelihood(theta, x, y, z, var, size)
 
 
-def log_posteriorJoint(theta, x, y, z, var, amprange, size):
+def log_posteriorJoint(theta, x, y, z, var, peakrange, size):
     """
     Posterior probability: combines the prior and likelihood.
     """
-    lp = log_priorJoint(theta, amprange)
+    lp = log_priorJoint(theta, peakrange)
 
     if not np.isfinite(lp):
         return -np.inf
@@ -530,70 +526,28 @@ def log_posteriorJoint(theta, x, y, z, var, amprange, size):
     return lp + log_likelihoodJoint(theta, x, y, z, var, size)
 
 
-def lnPosteriorAiry(theta, x, y, z, var, amprange, size):
-    """
-    Posterior probability: combines the prior and likelihood.
-    """
-    lp = lnPriorAiry(theta, amprange)
-
-    if not np.isfinite(lp):
-        return -np.inf
-
-    return lp + lnLikelihoodAiry(theta, x, y, z, var, size)
-
-
-def log_prior(theta, amprange):
+def log_prior(theta, peakrange):
     """
     Priors, limit the values to a range but otherwise flat.
     """
-    amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
+    peak, center_x, center_y, radius, focus, width_x, width_y = theta
     if 7. < center_x < 14. and 7. < center_y < 14. and 0.23 < width_x < 0.5 and 0.23 < width_y < 0.5 and \
-       amprange[0] < amplitude < amprange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
+       peakrange[0] < peak < peakrange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
         return 0.
     else:
         return -np.inf
 
 
-def lnPriorAiry(theta, amprange):
-    """
-    Priors, limit the values to a range but otherwise flat.
-    """
-    amplitude, center_x, center_y, radius = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and \
-       amprange[0] < amplitude < amprange[1] and 0.1 < radius < 1.:
-        return 0.
-    else:
-        return -np.inf
-
-
-def log_priorJoint(theta, amprange):
+def log_priorJoint(theta, peakrange):
     """
     Priors, limit the values to a range but otherwise flat.
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
-    if all(7. < x < 14. for x in theta[:-5]) and amprange[0] < theta[-5] < amprange[1] and 0.4 < theta[-4] < 0.7 and \
+    if all(7. < x < 14. for x in theta[:-5]) and peakrange[0] < theta[-5] < peakrange[1] and 0.4 < theta[-4] < 0.7 and \
        0.1 < theta[-3] < 0.7 and 0.2 < theta[-2] < 0.5 and 0.2 < theta[-1] < 0.5:
         return 0.
     else:
         return -np.inf
-
-
-def lnLikelihoodAiry(theta, x, y, data, var, size):
-    """
-    Logarithm of the likelihood function.
-    """
-    #unpack the parameters
-    amplitude, center_x, center_y, radius = theta
-
-    #Generate a model Airy disc
-    airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
-    model = airy.eval(x, y, amplitude, center_x, center_y, radius)
-
-    #true for Gaussian errors, but not really true here because of mixture of Poisson and Gaussian noise
-    #lnL = - 0.5 * np.sum((data - model)**2 / var)
-    lnL = - 2. * np.sum((((data - model)**2) + np.abs(data - model))/var)
-
-    return lnL
 
 
 def log_likelihood(theta, x, y, data, var, size):
@@ -601,9 +555,10 @@ def log_likelihood(theta, x, y, data, var, size):
     Logarithm of the likelihood function.
     """
     #unpack the parameters
-    amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
+    peak, center_x, center_y, radius, focus, width_x, width_y = theta
 
     #1)Generate a model Airy disc
+    amplitude = _amplitudeFromPeak(peak, center_x, center_y, radius, x_0=int(size[0]/2.-0.5), y_0=int(size[1]/2.-0.5))
     airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
     adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape(size)
 
@@ -636,7 +591,7 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
     #unpack the parameters
     #[xpos, ypos]*images) +[amplitude, radius, focus])
     images = len(theta[:-5]) / 2
-    amplitude, radius, focus, width_x, width_y = theta[-5:]
+    peak, radius, focus, width_x, width_y = theta[-5:]
 
     lnL = 0.
     for tmp in xrange(images):
@@ -645,6 +600,8 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
         center_y = theta[2*tmp+1]
 
         #1)Generate a model Airy disc
+        amplitude = _amplitudeFromPeak(peak, center_x, center_y, radius,
+                                       x_0=int(size[0]/2.-0.5), y_0=int(size[1]/2.-0.5))
         airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
         adata = airy.eval(x, y, amplitude, center_x, center_y, radius).reshape(size)
 
@@ -654,10 +611,10 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
         model = signal.convolve2d(adata, focusdata, mode='same')
 
         #3)Apply CCD diffusion, approximated with a Gaussian -- max = 1 as centred
-        #CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
-        #CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
-        #model = signal.convolve2d(model, CCDdata, mode='same').flatten()
-        model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
+        CCD = models.Gaussian2D(1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.)
+        CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
+        model = signal.convolve2d(model, CCDdata, mode='same').flatten()
+        #model = scipy.ndimage.filters.gaussian_filter(model, sigma=focus).flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
         #lnL = np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
@@ -671,7 +628,7 @@ def _printResults(best_params, errors):
     """
     print("=" * 60)
     print('Fitting with MCMC:')
-    pars = ['amplitude', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y']
+    pars = ['peak', 'center_x', 'center_y', 'radius', 'focus', 'width_x', 'width_y']
     print('*'*20 + ' Fitted parameters ' + '*'*20)
     for name, value, sig in zip(pars, best_params, errors):
         print("{:s} = {:e} +- {:e}" .format(name, value, sig))
@@ -796,6 +753,9 @@ def RunTestSimulations(newfiles=False):
     print("|" * 120)
     print 'SIMULATED DATA'
     #a joint fit test - vary only the x and y positions
+    #It is misleading to keep the amplitude fixed as it is the counts in the peak pixel that matters.
+    #If the Airy were centred perfectly then we could keep the amplitude fixed. In this case the individual
+    #fits will work and can recover the 200k amplitude, but it is more problematic for the joint fit.
     theta1 = (2.e5, 9.9, 10.03, 0.41, 0.51, 10., 10., 0.296, 0.335)
     theta2 = (2.e5, 10.1, 9.97, 0.41, 0.51, 10., 10., 0.296, 0.335)
     theta3 = (2.e5, 9.97, 10.1, 0.41, 0.51, 10., 10., 0.296, 0.335)
@@ -854,7 +814,7 @@ def RunTestSimulations2(newfiles=False):
     #different simulation sets
     print("|" * 120)
     print 'Single Fitting Simulations'
-    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # amplitude and width_x are very degenrate!
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # amplitude and width_x are very degenerate!
     theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)   # kernel easily recovered, amplitude not easy
     theta3 = (8.e4, 10.0, 10.1, 0.4, 0.55, 10., 10., 0.25, 0.35)    # width_x so narrow that difficult to recover!
     theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # amplitude way off!!!
@@ -1330,7 +1290,6 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         waves = [600, 700, 800, 890]
     elif 'join' in analysis:
         print 'Joint Results'
-        #data800nm = fileIO.cPicleRead(folder+'J800nm54k.pkl')
         data800nm = fileIO.cPicleRead(folder+'J800nm.pkl')
         data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
         data700nm = fileIO.cPicleRead(folder+'J700nm52k.pkl')
@@ -1339,7 +1298,8 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         waves = [int(d['wavelength'].replace('nm', '')) for d in data]
     else:
         print 'Using subset of data'
-        data600nm = fileIO.cPicleRead(folder+'G600nm0.pkl')
+        #data600nm = fileIO.cPicleRead(folder+'G600nm0.pkl')
+        data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
         data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
         data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
         data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
@@ -1351,9 +1311,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     wy = np.asarray([_FWHMGauss(d['wy']) for d in data])
     wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])*sigma
     #hand derived -- picked the best of the fits that are most reliable
-    # wx = np.asarray([_FWHMGauss(d) for d in [0.36, 0.34, 0.32, 0.3]])
+    # wx = np.asarray([_FWHMGauss(d) for d in [0.37, 0.34, 0.32, 0.3]])
     # wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
-    # wy = np.asarray([_FWHMGauss(d) for d in [0.38, 0.365, 0.315, 0.3]])
+    # wy = np.asarray([_FWHMGauss(d) for d in [0.39, 0.365, 0.315, 0.3]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
 
     w = np.sqrt(wx*wy)
@@ -1744,7 +1704,7 @@ def _expectedValues():
 
     tuple = [radius, focus, widthx, widthy]
     """
-    out = dict(l600=(0.45, 0.40, 0.40, 0.41),
+    out = dict(l600=(0.45, 0.40, 0.36, 0.38),
                l700=(0.47, 0.40, 0.33, 0.35),
                l800=(0.49, 0.41, 0.31, 0.315),
                l890=(0.54, 0.38, 0.29, 0.3))
@@ -1759,7 +1719,7 @@ def runGood():
     RunData([getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/')[2],], out='G600nm',
              wavelength='l600')
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                     out='J600nm54k', wavelength='600nm', burn=50, run=100)
+                     out='J600nm54k', wavelength='600nm')
     RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[2],], out='G700nm',
              wavelength='l700')
     RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
@@ -1772,16 +1732,16 @@ def runGood():
 
 if __name__ == '__main__':
     #Simulated spots and analysis
-    #RunTestSimulations()
+    RunTestSimulations()
     #RunTestSimulations2()
 
     #Data Analysis -- real spots
     runGood()
-    #analyseData600nm()
-    #analyseData700nm()
-    #analyseData800nm()
-    #analyseData890nm()
-    #analyseData800nmBrighterFatter()
+    analyseData600nm()
+    analyseData700nm()
+    analyseData800nm()
+    analyseData890nm()
+    analyseData800nmBrighterFatter()
 
     #Special Runs
     #forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
@@ -1790,13 +1750,13 @@ if __name__ == '__main__':
     #                     out='J600nm20', wavelength='600nm')
 
     #plots
-    #plotPaperFigures()
-    #plotAllResiduals()
+    plotPaperFigures()
     #generateTestPlots()
 
     #All Data
-    #AlljointRuns()
-    #AllindividualRuns()
+    AlljointRuns()
+    AllindividualRuns()
+    plotAllResiduals()
 
     #Testing set
     #RunTest()

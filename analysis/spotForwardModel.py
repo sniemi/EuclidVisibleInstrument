@@ -34,7 +34,7 @@ We therefore adopt a Gaussian kernel that is centred with the Airy disc.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.5
+:version: 1.6
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -71,13 +71,13 @@ from multiprocessing import Pool
 
 
 __author__ = 'Sami-Matias Niemi'
-__vesion__ = 1.5
+__vesion__ = 1.6
 
 #fixed parameters
 cores = 8
 
 
-def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500, spotx=2888, spoty=3514, run=500,
+def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500, spotx=2888, spoty=3514, run=700,
                  simulation=False, truths=None):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
@@ -280,7 +280,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
     pool.close()
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, run=600,
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, run=700,
                          spotx=2888, spoty=3514, simulated=False, truths=None):
     """
     Forward models the spot data found from the input files. Models all data simultaneously so that the Airy
@@ -506,6 +506,16 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, ru
     #if simulated:
     #    extents = [(0.9*truth, 1.1*truth) for truth in truths]
     #    print extents
+    if simulated:
+        tr = truths[:-5]
+        peaks = []
+        for x in xrange(images):
+            xcen = tr[2*x]
+            ycen = tr[2*x+1]
+            theta = [truths[-5], xcen, ycen, truths[-4], truths[-3], truths[-2], truths[-1]]
+            peaks.append(_peakFromTruth(theta))
+        print peaks
+        truths[-5] = np.median(np.asarray(peaks))
     fig = triangle.corner(samples, labels=['x', 'y']*images + ['peak', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)#, extents=extents)
     fig.savefig('results/' + out + 'Triangle.png')
@@ -621,7 +631,8 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
         lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
-        #lnL = np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
+        #lnL += np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
+        #this leads to a low acceptance ratio and very incorrect answers
 
     return lnL
 
@@ -750,9 +761,14 @@ def _R2err(sigmax, sigmay, sigmaxerr ,sigmayerr):
     return err
 
 
-def RunTestSimulations(newfiles=False):
+def RunTestSimulations(newfiles=True):
     """
     A set of simulated spots and analysis.
+
+    Note that this is not the best test case for the joint fitting, because the amplitudes are fixed.
+    This means that the peak pixels can have quite different values. With the ones selected here,
+    the fourth is actually somewhat different from the others. It is actually quite nice that we
+    can still recover the CCD PSF.
     """
     print("|" * 120)
     print 'SIMULATED DATA'
@@ -760,11 +776,11 @@ def RunTestSimulations(newfiles=False):
     #It is misleading to keep the amplitude fixed as it is the counts in the peak pixel that matters.
     #If the Airy were centred perfectly then we could keep the amplitude fixed. In this case the individual
     #fits will work and can recover the 200k amplitude, but it is more problematic for the joint fit.
-    theta1 = (2.e5, 9.9, 10.03, 0.41, 0.51, 10., 10., 0.296, 0.335)
-    theta2 = (2.e5, 10.1, 9.97, 0.41, 0.51, 10., 10., 0.296, 0.335)
-    theta3 = (2.e5, 9.97, 10.1, 0.41, 0.51, 10., 10., 0.296, 0.335)
-    theta4 = (2.e5, 10.08, 10.04, 0.41, 0.51, 10., 10., 0.296, 0.335)
-    theta5 = (2.e5, 10.1, 9.97, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta1 = (2.e5, 9.9, 10.03, 0.47, 0.41, 10., 10., 0.291, 0.335)
+    theta2 = (2.e5, 10.1, 9.97, 0.47, 0.41, 10., 10., 0.291, 0.335)
+    theta3 = (2.e5, 9.97, 10.1, 0.47, 0.41, 10., 10., 0.291, 0.335)
+    theta4 = (2.e5, 10.02, 9.9, 0.47, 0.41, 10., 10., 0.291, 0.335)
+    theta5 = (2.e5, 10.1, 10., 0.47, 0.41, 10., 10., 0.291, 0.335)
 
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
@@ -810,14 +826,14 @@ def RunTestSimulations(newfiles=False):
                                       requirementE=None, requirementFWHM=None, requirementR2=None)
 
 
-def RunTestSimulations2(newfiles=False):
+def RunTestSimulations2(newfiles=True):
     #different simulation sets
     print("|" * 120)
     print 'Single Fitting Simulations'
-    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    #
-    theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)   # kernel easily recovered, amplitude not easy
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # tricky to recover
+    theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)   # well recovered
     theta3 = (8.e4, 10.0, 10.1, 0.4, 0.55, 10., 10., 0.25, 0.35)    # width_x so narrow that difficult to recover!
-    theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # amplitude way off!!!
+    theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # amplitude/peak  somewhat difficult
     theta5 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)    # well recovered
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
@@ -1301,9 +1317,11 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         #data600nm = fileIO.cPicleRead(folder+'G600nm0.pkl')
         data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
         data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
-        data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
-        data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
-        #data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
+        #data700nm = fileIO.cPicleRead(folder+'J700nm52k.pkl')
+        #data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
+        data800nm = fileIO.cPicleRead(folder+'J800nm.pkl')
+        #data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
+        data890nm = fileIO.cPicleRead(folder+'J890nm50k.pkl')
         data = (data600nm, data700nm, data800nm, data890nm)
         waves = [600, 700, 800, 890]
 
@@ -1312,9 +1330,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     wy = np.asarray([_FWHMGauss(d['wy']) for d in data])
     wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])*sigma
     #hand derived -- picked the best of the fits that are most reliable
-    # wx = np.asarray([_FWHMGauss(d) for d in [0.37, 0.34, 0.32, 0.3]])
+    # wx = np.asarray([_FWHMGauss(d) for d in [0.32, 0.31, 0.30, 0.29]])
     # wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
-    # wy = np.asarray([_FWHMGauss(d) for d in [0.39, 0.365, 0.315, 0.3]])
+    # wy = np.asarray([_FWHMGauss(d) for d in [0.34, 0.32, 0.315, 0.3]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
 
     w = np.sqrt(wx*wy)
@@ -1344,7 +1362,7 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     #requirement
     alpha=0.2
     x = np.arange(500, 950, 1)
-    y = 40*x**-alpha
+    y = 37*x**-alpha
     # compute the best fit function from the best fit parameters
     corrfit1 = fitfunc(fit1, x)
     corrfit2 = fitfunc(fit2, x)
@@ -1353,10 +1371,10 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     print 'Slope:', fit2[1]
     print 'Slope [requirement < -0.2]:', fit3[1]
 
-    ax1.plot(x, corrfit1, 'g--', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
-    ax2.plot(x, corrfit2, 'g--', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit2[1]))
+    ax1.plot(x, corrfit1, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
+    ax2.plot(x, corrfit2, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit2[1]))
     ax3.plot(x, y, 'r-', label=r'Requirement: $\alpha \leq - %.1f$' % alpha)
-    ax3.plot(x, corrfit3, 'g--', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit3[1]))
+    ax3.plot(x, corrfit3, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit3[1]))
 
     plt.sca(ax1)
     plt.xticks(visible=False)
@@ -1364,9 +1382,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     plt.xticks(visible=False)
     plt.sca(ax3)
 
-    ax1.set_ylim(7.2, 14.5)
-    ax2.set_ylim(7.2, 14.5)
-    ax3.set_ylim(7.2, 14.5)
+    ax1.set_ylim(6.8, 13.5)
+    ax2.set_ylim(6.8, 13.5)
+    ax3.set_ylim(6.8, 13.5)
     ax1.set_xlim(550, 900)
     ax2.set_xlim(550, 900)
     ax3.set_xlim(550, 900)
@@ -1646,40 +1664,59 @@ def _printAnalysedData(folder='results/', id='J*.pkl'):
 
 
 def _testDifficultCases():
+    """
+    These are a few files that seem to be very difficult to fit. The main reason is that the spot
+    was rather off-centred making it difficult to estimate the amplitude of the Airy disc.
+    These files seem to give way too sharp kernels. This might be related to the fact that t
+    """
     files = getFiles(mintime=(16, 21, 52), maxtime=(16, 26, 16), folder='data/31Jul/')
-    RunData([files[0], ], out='I800nm50k')
-
-    files = getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/')
-    RunData([files[0], ], out='I800nm20k')
-    # """
+    RunData([files[0], ], out='I800nm50k', wavelength='l800')
     # ============================================================
     # Fitting with MCMC:
     # ******************** Fitted parameters ********************
-    # amplitude = 5.564253e+05 +- 4.513667e+04
-    # center_x = 1.011409e+01 +- 5.362888e-02
-    # center_y = 9.789458e+00 +- 8.835926e-02
-    # radius = 3.423970e-01 +- 6.002914e-03
-    # focus = 4.409415e-01 +- 5.834299e-03
-    # width_x = 2.120287e-01 +- 1.291855e-02
-    # width_y = 2.050382e-01 +- 1.191833e-02
+    # peak = 1.876476e+05 +- 5.178195e+03
+    # center_x = 1.013078e+01 +- 5.653792e-02
+    # center_y = 9.747014e+00 +- 7.721453e-02
+    # radius = 4.660135e-01 +- 7.392010e-03
+    # focus = 4.625621e-01 +- 2.905099e-02
+    # width_x = 1.339326e-01 +- 3.069773e-02
+    # width_y = 1.685128e-01 +- 2.864525e-02
     # ============================================================
-    # GoF: 3.60045607301  Maximum difference: 2357.09013991
-    # """
+    # GoF: 63.013339033  Maximum difference: 27583.5231737
+    #
+    # FIT UNLIKELY TO BE GOOD...
+    #
+    # Amplitude estimate: 908507.619723
+    # ============================================================
+    # FWHM (requirement 10.8 microns):
+    # 4.25  +/-  0.838  microns
+    # x: 3.78  +/-  0.867  microns
+    # y: 4.76  +/-  0.809  microns
+    # ============================================================
+
 
     files = getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/')
-    RunData([files[0], ], out='I800nm20k')
-    # """
-    # ******************** Fitted parameters ********************
-    # amplitude = 2.424300e+05 +- 4.402245e+03
-    # center_x = 1.010508e+01 +- 3.910288e-02
-    # center_y = 9.761132e+00 +- 8.530081e-02
-    # radius = 4.585219e-01 +- 1.762515e-03
-    # focus = 4.390476e-01 +- 2.809536e-03
-    # width_x = 2.024940e-01 +- 1.080546e-02
-    # width_y = 2.116406e-01 +- 1.567963e-02
+    RunData([files[0], ], out='I800nm20k', wavelength='l800')
+    #Kernel probably too narrow...
     # ============================================================
-    # GoF: 3.18913554884  Maximum difference: 1620.64827584
-    # """
+    # Fitting with MCMC:
+    # ******************** Fitted parameters ********************
+    # peak = 6.347887e+04 +- 7.413094e+02
+    # center_x = 1.010584e+01 +- 5.058798e-02
+    # center_y = 9.761372e+00 +- 5.927853e-02
+    # radius = 4.584184e-01 +- 3.703650e-03
+    # focus = 4.391148e-01 +- 7.021983e-03
+    # width_x = 1.519947e-01 +- 3.559739e-02
+    # width_y = 1.838032e-01 +- 4.041398e-02
+    # ============================================================
+    # GoF: 3.18858069585  Maximum difference: 1676.70415821
+    # Amplitude estimate: 242256.307521
+    # ============================================================
+    # FWHM (requirement 10.8 microns):
+    # 4.72  +/-  1.072  microns
+    # x: 4.3  +/-  1.006  microns
+    # y: 5.19  +/-  1.142  microns
+    # ============================================================
 
 
 def _amplitudeFromPeak(peak, x, y, radius, x_0=10, y_0=10):
@@ -1718,10 +1755,10 @@ def _expectedValues():
 
     tuple = [radius, focus, widthx, widthy]
     """
-    out = dict(l600=(0.45, 0.40, 0.36, 0.38),
-               l700=(0.47, 0.40, 0.33, 0.35),
-               l800=(0.49, 0.41, 0.31, 0.315),
-               l890=(0.54, 0.38, 0.29, 0.3))
+    out = dict(l600=(0.45, 0.40, 0.34, 0.32),
+               l700=(0.47, 0.40, 0.32, 0.31),
+               l800=(0.49, 0.41, 0.30, 0.30),
+               l890=(0.54, 0.38, 0.29, 0.29))
 
     return out
 
@@ -1730,32 +1767,111 @@ def runGood():
     """
     Analyse data that are well centred. These fits are more reliable.
     """
-    RunData([getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/')[2],], out='G600nm',
-             wavelength='l600')
-    forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                     out='J600nm54k', wavelength='600nm')
-    RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[0],], out='G700nm',
-             wavelength='l700')
-    RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
-             wavelength='l800')
-    RunData([getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/')[2],], out='G890nm',
-             wavelength='l890')
-    forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
-                         out='J800nm', wavelength='800nm')
+    # forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
+    #                  out='J600nm54k', wavelength='600nm') #kernel around 0.3, 0.33
+    forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
+                     out='J700nm52k', wavelength='700nm') #around
+    # RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
+    #          wavelength='l800') #around 0.305 and 0.295
+    # forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
+    #                      out='J800nm', wavelength='800nm') #around 0.31, 0.3
+    forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
+                     out='J890nm50k', wavelength='890nm') #around
+
+
+def doAll():
+    try:
+        RunTestSimulations()
+    except:
+        print 'Cannot run Simulations 1'
+    try:
+        RunTestSimulations2()
+    except:
+        print 'Cannot run Simulations 2'
+
+    #Data Analysis -- real spots
+    try:
+        runGood()
+    except:
+        print 'Cannot run goods'
+    try:
+        analyseData600nm()
+    except:
+        print 'Cannot run 600nm'
+    try:
+        analyseData700nm()
+    except:
+        print 'Cannot run 700nm'
+    try:
+        analyseData800nm()
+    except:
+        print 'Cannot run 800nm'
+    try:
+        analyseData890nm()
+    except:
+        print 'Cannot run 890nm'
+    try:
+        analyseData800nmBrighterFatter()
+    except:
+        print 'Cannot run Brighter-Fatter'
+
+    #plots
+    try:
+        plotPaperFigures()
+    except:
+        print 'Cannot generate paper figures'
+    try:
+        generateTestPlots()
+    except:
+        print 'Cannot generate test plots'
+
+    #All Data
+    try:
+        AlljointRuns()
+    except:
+        print 'Cannot run all joint runs'
+    try:
+        AllindividualRuns()
+    except:
+        print 'Cannot run all individual runs'
+    try:
+        plotAllResiduals()
+    except:
+        print 'Cannot plot all residuals'
+
+    #Special Runs
+    try:
+        forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
+                             out='J800nmDrift', wavelength='800nm', spotx=2985, spoty=3774)
+    except:
+        print 'Cannot run 800nm drift data'
+    try:
+        forwardModelJointFit(getFiles(mintime=(14, 56, 18), maxtime=(15, 19, 42), folder='data/30Jul/'),
+                             out='J600nm20', wavelength='600nm')
+    except:
+        print 'Cannot run 600nm special set'
+
+    #test some of the cases, which seem to be more difficult to fit
+    try:
+        _testDifficultCases()
+    except:
+        print 'Cannot run difficult cases'
 
 
 if __name__ == '__main__':
+    doAll()
+
     #Simulated spots and analysis
     #RunTestSimulations()
     #RunTestSimulations2()
 
     #Data Analysis -- real spots
-    runGood()
-    analyseData600nm()
-    analyseData700nm()
-    analyseData800nm()
-    analyseData890nm()
-    analyseData800nmBrighterFatter()
+    #runGood()
+    #analyseData600nm()
+    #analyseData700nm()
+    #analyseData800nm()
+    #analyseData890nm()
+    #analyseData800nmBrighterFatter()
 
     #Special Runs
     #forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
@@ -1764,17 +1880,16 @@ if __name__ == '__main__':
     #                     out='J600nm20', wavelength='600nm')
 
     #plots
-    plotPaperFigures()
+    #plotPaperFigures()
     #generateTestPlots()
 
     #All Data
-    AlljointRuns()
-    AllindividualRuns()
-    plotAllResiduals()
+    #AlljointRuns()
+    #AllindividualRuns()
+    #plotAllResiduals()
 
     #Testing set
     #RunTest()
 
     #test some of the cases, which seem to be more difficult to fit
     #_testDifficultCases()
-

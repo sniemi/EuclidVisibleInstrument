@@ -77,7 +77,7 @@ __vesion__ = 1.5
 cores = 8
 
 
-def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400, spotx=2888, spoty=3514, run=200,
+def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500, spotx=2888, spoty=3514, run=500,
                  simulation=False, truths=None):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
@@ -270,7 +270,8 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
         extents[2] = (truths[2]*0.995, truths[2]*1.005)
         extents[3] = (0.395, 0.425)
         extents[4] = (0.503, 0.517)
-        truths[0] = max #this is not true
+        truths[0] = _peakFromTruth(truths)
+        print truths
     fig = triangle.corner(samples,
                           labels=['peak', 'x', 'y', 'radius', 'focus', 'width_x', 'width_y'],
                           truths=truths)#, extents=extents)
@@ -279,7 +280,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=400,
     pool.close()
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=1000, run=500,
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, run=600,
                          spotx=2888, spoty=3514, simulated=False, truths=None):
     """
     Forward models the spot data found from the input files. Models all data simultaneously so that the Airy
@@ -541,7 +542,7 @@ def log_prior(theta, peakrange):
     Priors, limit the values to a range but otherwise flat.
     """
     peak, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and 0.23 < width_x < 0.5 and 0.23 < width_y < 0.5 and \
+    if 7. < center_x < 14. and 7. < center_y < 14. and 0.1 < width_x < 0.6 and 0.1 < width_y < 0.6 and \
        peakrange[0] < peak < peakrange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
         return 0.
     else:
@@ -554,7 +555,7 @@ def log_priorJoint(theta, peakrange):
     """
     #[xpos, ypos]*images) +[amplitude, radius, focus, sigmaX, sigmaY])
     if all(7. < x < 14. for x in theta[:-5]) and peakrange[0] < theta[-5] < peakrange[1] and 0.4 < theta[-4] < 0.7 and \
-       0.1 < theta[-3] < 0.7 and 0.2 < theta[-2] < 0.5 and 0.2 < theta[-1] < 0.5:
+       0.1 < theta[-3] < 0.7 and 0.1 < theta[-2] < 0.6 and 0.1 < theta[-1] < 0.6:
         return 0.
     else:
         return -np.inf
@@ -779,10 +780,6 @@ def RunTestSimulations(newfiles=False):
         forwardModel(file='simulated/simulatedJoint%i.fits' %i, out='simulatedResults/RunI%i' %i, simulation=True,
                      truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]])
 
-        print 'amplitude, x, y, radius, focus, width_x, width_y'
-        print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
-        print("=" * 60)
-
     #plot residuals
     _plotModelResiduals(id='RunI0', folder='simulatedResults/', out='Residual0.pdf', individual=True)
     _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
@@ -817,7 +814,7 @@ def RunTestSimulations2(newfiles=False):
     #different simulation sets
     print("|" * 120)
     print 'Single Fitting Simulations'
-    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # amplitude and width_x are very degenerate!
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    #
     theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)   # kernel easily recovered, amplitude not easy
     theta3 = (8.e4, 10.0, 10.1, 0.4, 0.55, 10., 10., 0.25, 0.35)    # width_x so narrow that difficult to recover!
     theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # amplitude way off!!!
@@ -1699,6 +1696,19 @@ def _amplitudeFromPeak(peak, x, y, radius, x_0=10, y_0=10):
     return amp
 
 
+def _peakFromTruth(theta, size=21):
+    """
+    Derive the peak value from the parameters used for simulations.
+    """
+    amplitude, center_x, center_y, radius, focus, width_x, width_y = theta
+    x = np.arange(0, size)
+    y = np.arange(0, size)
+    x, y = np.meshgrid(x, y)
+    airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
+    adata = airy.eval(x, y, amplitude, center_x, center_y, radius)
+    return adata.max()
+
+
 def _expectedValues():
     """
     These values are expected for well exposed spot data. The dictionary has a tuple for each wavelength.
@@ -1724,7 +1734,7 @@ def runGood():
              wavelength='l600')
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
                      out='J600nm54k', wavelength='600nm')
-    RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[2],], out='G700nm',
+    RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[0],], out='G700nm',
              wavelength='l700')
     RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
              wavelength='l800')
@@ -1736,7 +1746,7 @@ def runGood():
 
 if __name__ == '__main__':
     #Simulated spots and analysis
-    RunTestSimulations()
+    #RunTestSimulations()
     #RunTestSimulations2()
 
     #Data Analysis -- real spots

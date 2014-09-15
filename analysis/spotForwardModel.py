@@ -34,7 +34,7 @@ We therefore adopt a Gaussian kernel that is centred with the Airy disc.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.6
+:version: 1.7
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -71,7 +71,7 @@ from multiprocessing import Pool
 
 
 __author__ = 'Sami-Matias Niemi'
-__vesion__ = 1.6
+__vesion__ = 1.7
 
 #fixed parameters
 cores = 8
@@ -280,7 +280,7 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
     pool.close()
 
 
-def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=600, run=700,
+def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, run=800,
                          spotx=2888, spoty=3514, simulated=False, truths=None):
     """
     Forward models the spot data found from the input files. Models all data simultaneously so that the Airy
@@ -830,11 +830,11 @@ def RunTestSimulations2(newfiles=True):
     #different simulation sets
     print("|" * 120)
     print 'Single Fitting Simulations'
-    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # tricky to recover
+    theta1 = (1.e6, 9.65, 10.3, 0.6, 0.45, 10., 10., 0.28, 0.33)    # ok recovery, sigmax has long tail towards 0.
     theta2 = (5.e5, 10.3, 10.2, 0.55, 0.45, 10., 10., 0.38, 0.36)   # well recovered
-    theta3 = (8.e4, 10.0, 10.1, 0.4, 0.55, 10., 10., 0.25, 0.35)    # width_x so narrow that difficult to recover!
-    theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # amplitude/peak  somewhat difficult
-    theta5 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)    # well recovered
+    theta3 = (8.e4, 10.0, 10.1, 0.4, 0.55, 10., 10., 0.25, 0.35)    # ok, recovery, but sigmax has long tail towards 0.
+    theta4 = (5.e5, 10.1, 10.3, 0.42, 0.48, 10., 10., 0.30, 0.28)   # sigmax and sigmay not perfectly recovered
+    theta5 = (2.e5, 9.95, 10.3, 0.45, 0.5, 10., 10., 0.33, 0.35)    # good recovery
     thetas = [theta1, theta2, theta3, theta4, theta5]
 
     for i, theta in enumerate(thetas):
@@ -918,41 +918,41 @@ def analyseData800nm():
     Execute spot data analysis.
     """
     #800 nm
-    RunData(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'), out='I800nm')
+    RunData(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'), out='I800nm') #0.31, 0.3
     forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
-                         out='J800nm', wavelength='800nm')
+                         out='J800nm', wavelength='800nm') #0.31, 0.3
 
 
 def analyseData700nm():
     #700 nm
     forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
-                     out='J700nm52k', wavelength='700nm')
+                     out='J700nm52k', wavelength='700nm') #around 0.2, 0.307 (x not good)
     forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
-                         out='J700nm32k', wavelength='700nm')
+                         out='J700nm32k', wavelength='700nm') #
 
 
 def analyseData600nm():
     #600 nm
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                     out='J600nm54k', wavelength='600nm')
+                     out='J600nm54k', wavelength='600nm') #around 0.299, 0.333
 
 
 def analyseData890nm():
     #890 nm
     forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
-                         out='J890nm30k', wavelength='890nm')
+                         out='J890nm30k', wavelength='890nm') #0.33, 0.35, these are surprising...
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
-                     out='J890nm50k', wavelength='890nm')
+                     out='J890nm50k', wavelength='890nm') #around 0.28, 0.29, these are more realistic
 
 
 def analyseData800nmBrighterFatter():
     #For Brighter-Fatter
     forwardModelJointFit(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'),
-                         out='J800nm5k', wavelength='800nm')
+                         out='J800nm5k', wavelength='800nm') #0.21, 0.35, not probably reliable
     forwardModelJointFit(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'),
-                         out='J800nm10k', wavelength='800nm')
+                         out='J800nm10k', wavelength='800nm') #0.2, 0.325, not probably reliable
     forwardModelJointFit(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'),
-                         out='J800nm20k', wavelength='800nm')
+                         out='J800nm20k', wavelength='800nm') #
     forwardModelJointFit(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'),
                          out='J800nm30k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'),
@@ -968,13 +968,13 @@ def AlljointRuns():
     """
     #800 nm
     forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
-                         out='J800nm', wavelength='800nm')
+                         out='J800nm', wavelength='800nm') #0.31, 0.3
     forwardModelJointFit(getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/'),
-                         out='J800nm5k', wavelength='800nm')
+                         out='J800nm5k', wavelength='800nm') #0.28 0.31
     forwardModelJointFit(getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/'),
-                         out='J800nm10k', wavelength='800nm')
+                         out='J800nm10k', wavelength='800nm') #0.27 0.29
     forwardModelJointFit(getFiles(mintime=(15, 43, 24), maxtime=(15, 51, 47), folder='data/31Jul/'),
-                         out='J800nm20k', wavelength='800nm')
+                         out='J800nm20k', wavelength='800nm') #0.27 0.28
     forwardModelJointFit(getFiles(mintime=(15, 56, 11), maxtime=(16, 02, 58), folder='data/31Jul/'),
                          out='J800nm30k', wavelength='800nm')
     forwardModelJointFit(getFiles(mintime=(16, 12, 39), maxtime=(16, 18, 25), folder='data/31Jul/'),
@@ -985,29 +985,29 @@ def AlljointRuns():
                          out='J800nm54k', wavelength='800nm')
     #700 nm
     forwardModelJointFit(getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'),
-                         out='J700nm5k', wavelength='700nm')
+                         out='J700nm5k', wavelength='700nm') # 0.28 0.32
     forwardModelJointFit(getFiles(mintime=(17, 37, 35), maxtime=(17, 46, 51), folder='data/30Jul/'),
-                         out='J700nm9k', wavelength='700nm')
+                         out='J700nm9k', wavelength='700nm') # 0.27 0.32
     forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
-                         out='J700nm52k', wavelength='700nm')
+                         out='J700nm52k', wavelength='700nm') # 0.26 0.31
     forwardModelJointFit(getFiles(mintime=(17, 58, 18), maxtime=(17, 59, 31), folder='data/30Jul/'),
                          out='J700nm32k', wavelength='700nm')
     #600 nm
     forwardModelJointFit(getFiles(mintime=(15, 22, 00), maxtime=(15, 36, 32), folder='data/30Jul/'),
-                         out='J600nm5k', wavelength='600nm')
+                         out='J600nm5k', wavelength='600nm') #0.27 0.31
     forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-                         out='J600nm54k', wavelength='600nm')
+                         out='J600nm54k', wavelength='600nm') #0.299, 0.333
     forwardModelJointFit(getFiles(mintime=(15, 52, 07), maxtime=(16, 06, 32), folder='data/30Jul/'),
-                         out='J600nm10k', wavelength='600nm')
+                         out='J600nm10k', wavelength='600nm') #0.28 0.32
     #890 nm
     forwardModelJointFit(getFiles(mintime=(13, 37, 37), maxtime=(13, 50, 58), folder='data/01Aug/'),
-                         out='J890nm5k', wavelength='890nm')
+                         out='J890nm5k', wavelength='890nm') #0.28 0.35
     forwardModelJointFit(getFiles(mintime=(14, 00, 58), maxtime=(14, 11, 54), folder='data/01Aug/'),
-                         out='J890nm10k', wavelength='890nm')
+                         out='J890nm10k', wavelength='890nm') #0.28 0.33
     forwardModelJointFit(getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/'),
-                         out='J890nm30k', wavelength='890nm')
+                         out='J890nm30k', wavelength='890nm') #0.3 0.33
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
-                         out='J890nm50k', wavelength='890nm')
+                         out='J890nm50k', wavelength='890nm') #0.3 0.3
 
 
 def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=3,
@@ -1184,100 +1184,160 @@ def generateTestPlots(folder='results/'):
                                       requirementE=None, requirementR2=None, requirementFWHM=None)
 
 
-def plotBrighterFatter(data, out='BrighterFatter.pdf', requirementFWHM=10.8, individual=False, GoFlimit=2000):
+def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     """
     Plot the CCD PSF size intensity relation.
     """
     matplotlib.rc('text', usetex=True)
-    if individual:
-        print 'Individual Results'
-        fluxes = []
-        fluxerrs = []
-        datacontainer = []
-        for x in data:
-            GoF = np.asarray([d['GoF'] for d in x])
-            print 'GoFs:', GoF
-            msk = GoF < GoFlimit
-            tmp = np.asarray([d['peakvalue'] for d in x])[msk]
-            tmpx = np.asarray([d['wx'] for d in x])[msk]
-            tmpy = np.asarray([d['wy'] for d in x])[msk]
 
-            if len(tmp) < 1:
-                continue
+    #600nm
+    low = [fileIO.cPicleRead(file) for file in g.glob('results/I600nm5k*.pkl')]
+    med = [fileIO.cPicleRead(file) for file in g.glob('results/I600nm10k*.pkl')]
+    high = [fileIO.cPicleRead(file) for file in g.glob('results/I600nm54k*.pkl')]
+    data = (low, med, high)
+    fluxes600 = []
+    fluxes600err = []
+    wxs = []
+    wxerrs = []
+    wys = []
+    wyerrs = []
+    for x in data:
+        wx = np.median([d['wx'] for d in x])
+        wxerr = np.median([d['wxerr'] for d in x])
+        wy = np.median([d['wy'] for d in x])
+        wyerr = np.median([d['wyerr'] for d in x])
+        wxs.append(wx)
+        wxerrs.append(wxerr)
+        wys.append(wy)
+        wyerrs.append(wyerr)
+        fluxes600.append(np.median([d['peakvalue'] for d in x]))
+        fluxes600err.append(np.std([d['peakvalue'] for d in x]))
+    print wxs
+    print wys
+    print fluxes600
+    fluxes600 = np.asarray(fluxes600)
+    fluxes600err = np.asarray(fluxes600err)
+    #averaged over many runs
+    wx600 = _FWHMGauss(np.asarray([0.26, 0.28, 0.31]))
+    wx600err = sigma*_FWHMGauss(wxerr)
+    wy600 = _FWHMGauss(np.asarray([0.31, 0.32, 0.3315560]))
+    wy600err = sigma*_FWHMGauss(wyerr)
+    w600 = np.sqrt(wx600*wy600)
+    w600err = np.sqrt(wx600err*wy600err)
 
-            fluxes.append(tmp.mean())
-            fluxerrs.append(tmp.std() / np.sqrt(np.size(tmp)))
+    #800nm
+    nom = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm?.pkl')]
+    nom5k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm5k*.pkl')]
+    nom10k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm10k*.pkl')]
+    nom20k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm20k*.pkl')]
+    nom30k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm30k*.pkl')]
+    nom38k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm38k*.pkl')]
+    nom50k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm50k*.pkl')]
+    nom54k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54k*.pkl')]
 
-            wx = tmpx.mean()
-            wxerr = tmpx.std() / np.sqrt(np.size(tmpx))
-            wy = tmpy.mean()
-            wyerr = tmpy.std() / np.sqrt(np.size(tmpy))
-
-            dat = dict(wx=wx, wy=wy, wxerr=wxerr, wyerr=wyerr)
-            datacontainer.append(dat)
-        data = datacontainer
-        fluxes = np.asarray(fluxes)
-        fluxerrs = np.asarray(fluxerrs)
-    else:
-        print 'Joint Results'
-        fluxes = np.asarray([d['peakvalues'].mean() for d in data])
-        fluxerrs = np.asarray([d['peakvalues'].std() for d in data])
+    data = (nom5k, nom10k, nom20k, nom30k, nom38k, nom50k, nom54k, nom)
+    fluxes800 = []
+    fluxes800err = []
+    wx800 = []
+    wxerrs = []
+    wy800 = []
+    wyerrs = []
+    for x in data:
+        wx = np.max([d['wx'] for d in x])
+        wxerr = np.max([d['wxerr'] for d in x])
+        wy = np.max([d['wy'] for d in x])
+        wyerr = np.max([d['wyerr'] for d in x])
+        wx800.append(wx)
+        wxerrs.append(wxerr)
+        wy800.append(wy)
+        wyerrs.append(wyerr)
+        fluxes800.append(np.median([d['peakvalue'] for d in x]))
+        fluxes800err.append(np.std([d['peakvalue'] for d in x]))
+    print wx800
+    print wy800
+    print fluxes800
+    fluxes800 = np.asarray(fluxes800)
+    fluxes800err = np.asarray(fluxes800err)
+    #averaged over many runs
+    wx800 = _FWHMGauss(np.asarray([0.24, 0.25, 0.24, 0.26, 0.28, 0.29, 0.3, 0.30848382]))
+    wx800err = sigma*_FWHMGauss(wxerr)
+    wy800 = _FWHMGauss(np.asarray([0.24, 0.25, 0.24, 0.27, 0.28, 0.29, 0.3, 0.2972725]))
+    wy800err = sigma*_FWHMGauss(wyerr)
+    w800 = np.sqrt(wx800*wy800)
+    w800err = np.sqrt(wx800err*wy800err)
 
     #plot FWHM
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    #ax1 = fig.add_subplot(211)
-    #ax2 = fig.add_subplot(212)
+    ax1 = fig.add_subplot(311)
+    ax2 = fig.add_subplot(312)
+    ax3 = fig.add_subplot(313)
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
-    #ax1.set_title('PSF Intensity Dependency (800nm)')
-    ax.set_title('PSF Intensity Dependency (800nm)')
+    ax1.set_title('CCD273 PSF Intensity Dependency')
 
-    fx = np.asarray([_FWHMGauss(d['wx']) for d in data])
-    fxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])
-    fy = np.asarray([_FWHMGauss(d['wy']) for d in data])
-    fyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])
-    f = np.sqrt(fx*fy)
-    ferr = np.sqrt(fxerr*fyerr)
+    ax1.errorbar(fluxes600, wx600, yerr=wx600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
+    ax2.errorbar(fluxes600, wy600, yerr=wy600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
+    ax3.errorbar(fluxes600, w600, yerr=w600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
 
-    ax.errorbar(fluxes, f, yerr=ferr, xerr=fluxerrs, fmt='o')
-    #ax1.errorbar(fluxes, fx, yerr=fxerr, xerr=fluxerrs, fmt='o')
-    #ax2.errorbar(fluxes, fy, yerr=fyerr, xerr=fluxerrs, fmt='o')
+    ax1.errorbar(fluxes800, wx800, yerr=wx800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
+    ax2.errorbar(fluxes800, wy800, yerr=wy800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
+    ax3.errorbar(fluxes800, w800, yerr=w800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
 
     #linear fits
-    z = np.polyfit(fluxes, fx, 1)
-    p = np.poly1d(z)
-    # z1 = np.polyfit(fluxes, [_FWHMGauss(d['wx']) for d in data], 1)
-    # p1 = np.poly1d(z1)
-    # z2 = np.polyfit(fluxes, [_FWHMGauss(d['wy']) for d in data], 1)
-    # p2 = np.poly1d(z2)
-    x = np.linspace(0., fluxes.max()*1.02, 100)
-    ax.plot(x, p(x), 'g-')
-    # ax1.plot(x, p1(x), 'g-')
-    # ax2.plot(x, p2(x), 'g-')
+    z1 = np.polyfit(fluxes600, wx600, 1)
+    p1 = np.poly1d(z1)
+    z2 = np.polyfit(fluxes600, wy600, 1)
+    p2 = np.poly1d(z2)
+    z3 = np.polyfit(fluxes600, w600, 1)
+    p3 = np.poly1d(z3)
+    x = np.linspace(0., fluxes600.max()*1.02, 100)
+    ax1.plot(x, p1(x), 'g-')
+    ax2.plot(x, p2(x), 'g-')
+    ax3.plot(x, p3(x), 'g-')
+    print '600nm fits:'
+    print p1
+    print p2
+    print p3
 
+    z1 = np.polyfit(fluxes800, wx800, 1)
+    p1 = np.poly1d(z1)
+    z2 = np.polyfit(fluxes800, wy800, 1)
+    p2 = np.poly1d(z2)
+    z3 = np.polyfit(fluxes800, w800, 1)
+    p3 = np.poly1d(z3)
+    x = np.linspace(0., fluxes800.max()*1.02, 100)
+    ax1.plot(x, p1(x), 'm-')
+    ax2.plot(x, p2(x), 'm-')
+    ax3.plot(x, p3(x), 'm-')
+    print '800nm fits:'
+    print p1
+    print p2
+    print p3
+    
     #requirements
-    ax.axhline(y=requirementFWHM, label='Requirement', c='r')
-    #ax1.axhline(y=requirementFWHM, label='Requirement', c='r')
-    #ax2.axhline(y=requirementFWHM, label='Requirement', c='r')
+    #ax1.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
+    #ax2.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
+    #ax3.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='-')
 
-    #plt.sca(ax1)
-    #plt.xticks(visible=False)
-    #plt.sca(ax2)
+    plt.sca(ax1)
+    plt.xticks(visible=False)
+    plt.sca(ax2)
+    plt.xticks(visible=False)
+    plt.sca(ax3)
 
-    ax.set_ylim(3.5, 12.5)
-    #ax1.set_ylim(3.5, 12.5)
-    #ax2.set_ylim(3.5, 12.5)
-    ax.set_xlim(0., fluxes.max()*1.02)
-    #ax1.set_xlim(0., fluxes.max()*1.02)
-    #ax2.set_xlim(0., fluxes.max()*1.02)
+    ax1.set_ylim(3.1, 11.3)
+    ax2.set_ylim(3.1, 11.3)
+    ax3.set_ylim(3.1, 11.3)
+    ax1.set_xlim(0., fluxes800.max()*1.02)
+    ax2.set_xlim(0., fluxes800.max()*1.02)
+    ax3.set_xlim(0., fluxes800.max()*1.02)
 
-    ax.set_ylabel(r'$\sqrt{\textrm{FWHM}_{X} \textrm{FWHM}_{Y}} \quad [\mu$m$]$')
-    #ax1.set_ylabel(r'FWHM$_{X} \quad [\mu$m$]$')
-    #ax2.set_ylabel(r'FWHM$_{Y} \quad [\mu$m$]$')
-    #ax2.set_xlabel(r'Intensity $\quad [e^{-}]$')
-    ax.set_xlabel(r'Intensity $\quad [e^{-}]$')
-    #ax1.legend(shadow=True, fancybox=True)
-    ax.legend(shadow=True, fancybox=True)
+    ax3.set_ylabel(r'FWHM $\, [\mu$m$]$')
+    ax1.set_ylabel(r'FWHM$_{X} \, [\mu$m$]$')
+    ax2.set_ylabel(r'FWHM$_{Y} \, [\mu$m$]$')
+    ax3.set_xlabel(r'Intensity $\quad [e^{-}]$')
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
+    ax2.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
+    ax3.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
     plt.savefig(out)
     plt.close()
 
@@ -1296,9 +1356,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         data = (data600, data700, data800, data890)
         datacontainer = []
         for x in data:
-            wx = np.median([d['wx'] for d in x])*2
+            wx = np.median([d['wx'] for d in x])
             wxerr = np.median([d['wxerr'] for d in x])
-            wy = np.median([d['wy'] for d in x])*2
+            wy = np.median([d['wy'] for d in x])
             wyerr = np.median([d['wyerr'] for d in x])
             dat = dict(wx=wx, wy=wy, wxerr=wxerr, wyerr=wyerr)
             datacontainer.append(dat)
@@ -1316,8 +1376,8 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         print 'Using subset of data'
         #data600nm = fileIO.cPicleRead(folder+'G600nm0.pkl')
         data600nm = fileIO.cPicleRead(folder+'J600nm54k.pkl')
-        data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
-        #data700nm = fileIO.cPicleRead(folder+'J700nm52k.pkl')
+        #data700nm = fileIO.cPicleRead(folder+'G700nm0.pkl')
+        data700nm = fileIO.cPicleRead(folder+'J700nm52k.pkl')
         #data800nm = fileIO.cPicleRead(folder+'G800nm0.pkl')
         data800nm = fileIO.cPicleRead(folder+'J800nm.pkl')
         #data890nm = fileIO.cPicleRead(folder+'G890nm0.pkl')
@@ -1329,16 +1389,21 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     wxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])*sigma
     wy = np.asarray([_FWHMGauss(d['wy']) for d in data])
     wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])*sigma
-    #hand derived -- picked the best of the fits that are most reliable
-    # wx = np.asarray([_FWHMGauss(d) for d in [0.32, 0.31, 0.30, 0.29]])
-    # wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
-    # wy = np.asarray([_FWHMGauss(d) for d in [0.34, 0.32, 0.315, 0.3]])
+    #hand derived -- picked the averages of the fits from many many runs
+    wx = np.asarray([_FWHMGauss(d) for d in [0.31, 0.31, 0.305, 0.29]])
+    wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
+    # wy = np.asarray([_FWHMGauss(d) for d in [0.33, 0.31, 0.295, 0.29]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
 
     w = np.sqrt(wx*wy)
     werr = np.sqrt(wxerr*wyerr)
 
+    #ellipticity
+    e = _ellipticityFromGaussian(wx, wy)
+    eerr = _ellipticityerr(wx, wy, wxerr, wyerr)
+
     print zip(waves, w)
+    print zip(waves, e)
 
     #plot FWHM
     fig = plt.figure()
@@ -1398,6 +1463,41 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     ax3.legend(shadow=True, fancybox=True, loc='best', numpoints=1)
     plt.savefig('LambdaDependency.pdf')
     plt.close()
+
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.95)
+    ax1.set_title('CCD273 PSF Wavelength Dependency')
+
+    ax1.errorbar(waves, e, yerr=eerr, fmt='o', label='Data')
+
+    #fit a power law
+    fitfunc = lambda p, x: p[0] * x ** p[1]
+    errfunc = lambda p, x, y: fitfunc(p, x) - y
+    fit1, success = optimize.leastsq(errfunc, [1, -0.2],  args=(waves, wx))
+
+    #requirement
+    alpha=0.2
+    x = np.arange(500, 950, 1)
+    y = 1.*x**-alpha
+    # compute the best fit function from the best fit parameters
+    corrfit1 = fitfunc(fit1, x)
+    print 'Slope:', fit1[1]
+
+    ax1.plot(x, corrfit1, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
+
+    ax1.set_ylim(0., 0.2)
+    ax1.set_xlim(550, 900)
+
+
+    ax1.set_ylabel(r'Ellipticity')
+    ax3.set_xlabel('Wavelength [nm]')
+    ax1.legend(shadow=True, fancybox=True, loc='best', numpoints=1)
+
+    plt.savefig('LambdaDependencyE.pdf')
+    plt.close()
+
 
 
 def _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='Residual.pdf', individual=False):
@@ -1514,32 +1614,16 @@ def plotPaperFigures(folder='results/'):
                                       FWHMlims=(7.3, 11.8))
     _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
 
-    _plotModelResiduals(id='G600nm0', folder=folder, out='ResidualG600.pdf', individual=True)
-    _plotModelResiduals(id='G700nm0', folder=folder, out='ResidualG700.pdf', individual=True)
+    #_plotModelResiduals(id='G600nm0', folder=folder, out='ResidualG600.pdf', individual=True)
+    #_plotModelResiduals(id='G700nm0', folder=folder, out='ResidualG700.pdf', individual=True)
     _plotModelResiduals(id='G800nm0', folder=folder, out='ResidualG800.pdf', individual=True)
-    _plotModelResiduals(id='G890nm0', folder=folder, out='ResidualG890.pdf', individual=True)
+    #_plotModelResiduals(id='G890nm0', folder=folder, out='ResidualG890.pdf', individual=True)
 
     #wavelength dependency
     plotLambdaDependency()
 
     #brighter fatter
-    data5k = fileIO.cPicleRead(folder+'J800nm5k.pkl')
-    data10k = fileIO.cPicleRead(folder+'J800nm10k.pkl')
-    data30k = fileIO.cPicleRead(folder+'J800nm30k.pkl')
-    data38k = fileIO.cPicleRead(folder+'J800nm38k.pkl')
-    data50k = fileIO.cPicleRead(folder+'J800nm50k.pkl')
-    data54k = fileIO.cPicleRead(folder+'J800nm54k.pkl')
-    data = (data5k, data10k, data30k, data38k, data50k, data54k)
-    plotBrighterFatter(data, out='BrighterFatter.pdf')
-
-    # data5k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm5k*.pkl')]
-    # data10k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm10k*.pkl')]
-    # data30k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm30k*.pkl')]
-    # data38k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm38k*.pkl')]
-    # data50k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm50k*.pkl')]
-    # data54k = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm54k*.pkl')]
-    # data = (data5k, data10k, data30k, data38k, data50k, data54k)
-    # plotBrighterFatter(data, individual=True, out='BrighterFatterInd.pdf')
+    plotBrighterFatter()
 
 
 def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
@@ -1767,16 +1851,16 @@ def runGood():
     """
     Analyse data that are well centred. These fits are more reliable.
     """
-    # forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
-    #                  out='J600nm54k', wavelength='600nm') #kernel around 0.3, 0.33
+    forwardModelJointFit(getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/'),
+                     out='J600nm54k', wavelength='600nm') #kernel around 0.3, 0.33
     forwardModelJointFit(getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/'),
-                     out='J700nm52k', wavelength='700nm') #around
-    # RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
-    #          wavelength='l800') #around 0.305 and 0.295
-    # forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
-    #                      out='J800nm', wavelength='800nm') #around 0.31, 0.3
+                     out='J700nm52k', wavelength='700nm') #around 0.3, 0.31
+    RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[2],], out='G800nm',
+             wavelength='l800') #around 0.305/315 and 0.295/0.3
+    forwardModelJointFit(getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/'),
+                         out='J800nm', wavelength='800nm') #around 0.3, 0.3
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
-                     out='J890nm50k', wavelength='890nm') #around
+                     out='J890nm50k', wavelength='890nm') #around 0.285, 0.29
 
 
 def doAll():
@@ -1842,12 +1926,12 @@ def doAll():
     #Special Runs
     try:
         forwardModelJointFit(getFiles(mintime=(15, 03, 29), maxtime=(15, 41, 01), folder='data/22Jul/'),
-                             out='J800nmDrift', wavelength='800nm', spotx=2985, spoty=3774)
+                             out='J800nmDrift', wavelength='800nm', spotx=2985, spoty=3774) #0.3, 0.3
     except:
         print 'Cannot run 800nm drift data'
     try:
         forwardModelJointFit(getFiles(mintime=(14, 56, 18), maxtime=(15, 19, 42), folder='data/30Jul/'),
-                             out='J600nm20', wavelength='600nm')
+                             out='J600nm20', wavelength='600nm') #0.295, 0.33
     except:
         print 'Cannot run 600nm special set'
 
@@ -1860,6 +1944,7 @@ def doAll():
 
 if __name__ == '__main__':
     doAll()
+    _printAnalysedData('results/')
 
     #Simulated spots and analysis
     #RunTestSimulations()
@@ -1880,8 +1965,10 @@ if __name__ == '__main__':
     #                     out='J600nm20', wavelength='600nm')
 
     #plots
-    #plotPaperFigures()
+    plotPaperFigures()
     #generateTestPlots()
+    #plotBrighterFatter()
+    #plotLambdaDependency()
 
     #All Data
     #AlljointRuns()

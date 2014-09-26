@@ -1184,7 +1184,7 @@ def generateTestPlots(folder='results/'):
                                       requirementE=None, requirementR2=None, requirementFWHM=None)
 
 
-def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
+def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=3):
     """
     Plot the CCD PSF size intensity relation.
     """
@@ -1197,33 +1197,36 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     data = (low, med, high)
     fluxes600 = []
     fluxes600err = []
-    wxs = []
+    wx600 = []
     wxerrs = []
-    wys = []
+    wy600 = []
     wyerrs = []
     for x in data:
         wx = np.median([d['wx'] for d in x])
         wxerr = np.median([d['wxerr'] for d in x])
         wy = np.median([d['wy'] for d in x])
         wyerr = np.median([d['wyerr'] for d in x])
-        wxs.append(wx)
+        wx600.append(wx)
         wxerrs.append(wxerr)
-        wys.append(wy)
+        wy600.append(wy)
         wyerrs.append(wyerr)
         fluxes600.append(np.median([d['peakvalue'] for d in x]))
         fluxes600err.append(np.std([d['peakvalue'] for d in x]))
-    print wxs
-    print wys
-    print fluxes600
+
+    #wx600 = _FWHMGauss(np.asarray(wx600))
+    #wy600 = _FWHMGauss(np.asarray(wy600))
     fluxes600 = np.asarray(fluxes600)
     fluxes600err = np.asarray(fluxes600err)
     #averaged over many runs
-    wx600 = _FWHMGauss(np.asarray([0.26, 0.28, 0.31]))
-    wx600err = sigma*_FWHMGauss(wxerr)
-    wy600 = _FWHMGauss(np.asarray([0.31, 0.32, 0.3315560]))
-    wy600err = sigma*_FWHMGauss(wyerr)
+    wx600 = _FWHMGauss(np.asarray([0.26, 0.28, 0.316]))
+    wx600err = _FWHMGauss(np.asarray(wxerr))
+    wy600 = _FWHMGauss(np.asarray([0.30, 0.31, 0.3315560]))
+    wy600err = _FWHMGauss(np.asarray(wyerr))
     w600 = np.sqrt(wx600*wy600)
     w600err = np.sqrt(wx600err*wy600err)
+    print wx600
+    print wy600
+    print fluxes600
 
     #800nm
     nom = [fileIO.cPicleRead(file) for file in g.glob('results/I800nm?.pkl')]
@@ -1253,18 +1256,23 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
         wyerrs.append(wyerr)
         fluxes800.append(np.median([d['peakvalue'] for d in x]))
         fluxes800err.append(np.std([d['peakvalue'] for d in x]))
-    print wx800
-    print wy800
-    print fluxes800
+
+    #wx800 = _FWHMGauss(np.asarray(wx800))
+    #wy800 = _FWHMGauss(np.asarray(wy800))
     fluxes800 = np.asarray(fluxes800)
     fluxes800err = np.asarray(fluxes800err)
     #averaged over many runs
-    wx800 = _FWHMGauss(np.asarray([0.24, 0.25, 0.24, 0.26, 0.28, 0.29, 0.3, 0.30848382]))
-    wx800err = sigma*_FWHMGauss(wxerr)
-    wy800 = _FWHMGauss(np.asarray([0.24, 0.25, 0.24, 0.27, 0.28, 0.29, 0.3, 0.2972725]))
-    wy800err = sigma*_FWHMGauss(wyerr)
+    wx800pix = np.asarray([0.241, 0.248, 0.245, 0.26, 0.28, 0.29, 0.304, 0.30848382])
+    wx800 = _FWHMGauss(wx800pix)
+    wx800err = _FWHMGauss(np.asarray(wxerr))
+    wy800pix = np.asarray([0.2401, 0.251, 0.246, 0.27, 0.285, 0.294, 0.298, 0.2972725])
+    wy800 = _FWHMGauss(wy800pix)
+    wy800err = _FWHMGauss(np.asarray(wyerr))
     w800 = np.sqrt(wx800*wy800)
     w800err = np.sqrt(wx800err*wy800err)
+    print wx800
+    print wy800
+    print fluxes800
 
     #plot FWHM
     fig = plt.figure()
@@ -1274,13 +1282,13 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
     ax1.set_title('CCD273 PSF Intensity Dependency')
 
-    ax1.errorbar(fluxes600, wx600, yerr=wx600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
-    ax2.errorbar(fluxes600, wy600, yerr=wy600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
-    ax3.errorbar(fluxes600, w600, yerr=w600err, xerr=fluxes600err, fmt='o', label='600nm', c='g')
+    ax1.errorbar(fluxes600, wx600, yerr=sigma*wx600err, xerr=sigma*fluxes600err, fmt='o', label='600nm', c='g')
+    ax2.errorbar(fluxes600, wy600, yerr=sigma*wy600err, xerr=sigma*fluxes600err, fmt='o', label='600nm', c='g')
+    ax3.errorbar(fluxes600, w600, yerr=sigma*w600err, xerr=sigma*fluxes600err, fmt='o', label='600nm', c='g')
 
-    ax1.errorbar(fluxes800, wx800, yerr=wx800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
-    ax2.errorbar(fluxes800, wy800, yerr=wy800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
-    ax3.errorbar(fluxes800, w800, yerr=w800err, xerr=fluxes800err, fmt='s', label='800nm', c='m')
+    ax1.errorbar(fluxes800, wx800, yerr=sigma*wx800err, xerr=sigma*fluxes800err, fmt='s', label='800nm', c='m')
+    ax2.errorbar(fluxes800, wy800, yerr=sigma*wy800err, xerr=sigma*fluxes800err, fmt='s', label='800nm', c='m')
+    ax3.errorbar(fluxes800, w800, yerr=sigma*w800err, xerr=sigma*fluxes800err, fmt='s', label='800nm', c='m')
 
     #linear fits
     z1 = np.polyfit(fluxes600, wx600, 1)
@@ -1289,14 +1297,32 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     p2 = np.poly1d(z2)
     z3 = np.polyfit(fluxes600, w600, 1)
     p3 = np.poly1d(z3)
-    x = np.linspace(0., fluxes600.max()*1.02, 100)
-    ax1.plot(x, p1(x), 'g-')
-    ax2.plot(x, p2(x), 'g-')
-    ax3.plot(x, p3(x), 'g-')
+    x = np.linspace(0., fluxes600.max()*1.05, 100)
+    #ax1.plot(x, p1(x), 'g-')
+    #ax2.plot(x, p2(x), 'g-')
+    #ax3.plot(x, p3(x), 'g-')
     print '600nm fits:'
     print p1
     print p2
     print p3
+
+    # Bayesian
+    p600x, params600x, errors600x, outliers600x = linearFitWithOutliers(fluxes600, wx600, wx600err,
+                                                                        outtriangle='BF600FWHMx.png')
+    p600y, params600y, errors600y, outliers600y = linearFitWithOutliers(fluxes600, wy600, wy600err,
+                                                                        outtriangle='BF600FWHMy.png')
+    p600, params600, errors600, outliers600 = linearFitWithOutliers(fluxes600, w600, w600err,
+                                                                    outtriangle='BF600FWHM.png')
+    print params600x[::-1], errors600x[::-1]
+    print params600y[::-1], errors600y[::-1]
+    print params600[::-1], errors600[::-1]
+
+    ax1.plot(x, params600x[0] + params600x[1]*x, 'g-')
+    #ax1.plot(fluxes600[outliers600x], wx600[outliers600x], 'ro', ms=20, mfc='none', mec='red')
+    ax2.plot(x, params600y[0] + params600y[1]*x, 'g-')
+    #ax2.plot(fluxes600[outliers600y], wy600[outliers600y], 'ro', ms=20, mfc='none', mec='red')
+    ax3.plot(x, params600[0] + params600[1]*x, 'g-')
+    #ax3.plot(fluxes600[outliers600], w600[outliers600], 'ro', ms=20, mfc='none', mec='red')
 
     z1 = np.polyfit(fluxes800, wx800, 1)
     p1 = np.poly1d(z1)
@@ -1304,15 +1330,33 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     p2 = np.poly1d(z2)
     z3 = np.polyfit(fluxes800, w800, 1)
     p3 = np.poly1d(z3)
-    x = np.linspace(0., fluxes800.max()*1.02, 100)
-    ax1.plot(x, p1(x), 'm-')
-    ax2.plot(x, p2(x), 'm-')
-    ax3.plot(x, p3(x), 'm-')
+    x = np.linspace(0., fluxes800.max()*1.05, 100)
+    #ax1.plot(x, p1(x), 'm-')
+    #ax2.plot(x, p2(x), 'm-')
+    #ax3.plot(x, p3(x), 'm-')
     print '800nm fits:'
     print p1
     print p2
     print p3
-    
+
+    # Bayesian
+    p800x, params800x, errors800x, outliers800x = linearFitWithOutliers(fluxes800, wx800, wx800err,
+                                                                        outtriangle='BF800FWHMx.png')
+    p800y, params800y, errors800y, outliers800y = linearFitWithOutliers(fluxes800, wy800, wy800err,
+                                                                        outtriangle='BF800FWHMy.png')
+    p800, params800, errors800, outliers800 = linearFitWithOutliers(fluxes800, w800, w800err,
+                                                                    outtriangle='BF800FWHM.png')
+    print params800x[::-1], errors800x[::-1]
+    print params800y[::-1], errors800y[::-1]
+    print params800[::-1], errors800[::-1]
+
+    ax1.plot(x, params800x[0] + params800x[1]*x, 'm-')
+    #ax1.plot(fluxes800[outliers800x], wx800[outliers800x], 'ro', ms=20, mfc='none', mec='red')
+    ax2.plot(x, params800y[0] + params800y[1]*x, 'm-')
+    #ax2.plot(fluxes800[outliers800y], wy800[outliers800y], 'ro', ms=20, mfc='none', mec='red')
+    ax3.plot(x, params800[0] + params800[1]*x, 'm-')
+    #ax3.plot(fluxes800[outliers800], w800[outliers800], 'ro', ms=20, mfc='none', mec='red')
+
     #requirements
     #ax1.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
     #ax2.axhline(y=requirementFWHM, label='Requirement (800nm)', c='r', ls='--')
@@ -1324,12 +1368,12 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     plt.xticks(visible=False)
     plt.sca(ax3)
 
-    ax1.set_ylim(3.1, 11.3)
-    ax2.set_ylim(3.1, 11.3)
-    ax3.set_ylim(3.1, 11.3)
-    ax1.set_xlim(0., fluxes800.max()*1.02)
-    ax2.set_xlim(0., fluxes800.max()*1.02)
-    ax3.set_xlim(0., fluxes800.max()*1.02)
+    ax1.set_ylim(4.3, 10.8)
+    ax2.set_ylim(4.3, 10.8)
+    ax3.set_ylim(4.3, 10.8)
+    ax1.set_xlim(0., fluxes800.max()*1.05)
+    ax2.set_xlim(0., fluxes800.max()*1.05)
+    ax3.set_xlim(0., fluxes800.max()*1.05)
 
     ax3.set_ylabel(r'FWHM $\, [\mu$m$]$')
     ax1.set_ylabel(r'FWHM$_{X} \, [\mu$m$]$')
@@ -1340,6 +1384,211 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=5):
     ax3.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
     plt.savefig(out)
     plt.close()
+
+    print 'R2:'
+    R2 = _R2FromGaussian(wx800pix, wy800pix)*1e3
+    errR2 = _R2err(wx800pix, wy800pix, wxerr, wyerr)*1e3
+    print R2
+    p, params, errors, outliers = linearFitWithOutliers(fluxes800, R2, errR2, outtriangle='BF800R2.png')
+    print params[::-1], errors[::-1]
+
+    fig = plt.figure()
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
+    ax1.set_title('CCD273 PSF Intensity Dependency')
+    ax1.errorbar(fluxes800, R2, yerr=sigma*errR2, fmt='o', label='800nm', c='b')
+    ax1.plot(x, params[0] + params[1]*x, 'm-')
+    ax1.plot(fluxes800[outliers], R2[outliers], 'ro', ms=20, mfc='none', mec='red')
+    ax1.set_ylabel(r'$R^{2} \, [$mas$^{2}]$')
+
+    print 'Ellipticity'
+    ell = _ellipticityFromGaussian(wx800pix, wy800pix)
+    print ell
+    ellerr = _ellipticityerr(wx800pix, wy800pix, wxerr, wyerr)
+    p, params, errors, outliers = linearFitWithOutliers(fluxes800, ell, ellerr, outtriangle='BF800ell.png')
+    print params[::-1], errors[::-1]
+
+    ax2.errorbar(fluxes800, ell, yerr=sigma*ellerr, fmt='s', label='800nm', c='m')
+    ax2.plot(x, params[0] + params[1]*x, 'm-')
+    ax2.plot(fluxes800[outliers], ell[outliers], 'ro', ms=20, mfc='none', mec='red')
+    ax2.axhline(y=0.156, label='Requirement', c='r')
+    ax1.axhline(y=2., label='Requirement', c='r')
+    ax1.set_xlim(0., fluxes800.max()*1.05)
+    ax2.set_xlim(0., fluxes800.max()*1.05)
+    ax1.set_ylim(0.8, 2.1)
+    ax2.set_ylim(-0.01, 0.165)
+    ax2.set_ylabel('Ellipticity')
+    ax2.set_xlabel(r'Intensity $\quad [e^{-}]$')
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
+    ax2.legend(shadow=True, fancybox=True, numpoints=1)
+
+    plt.savefig('R2ellIntensity.pdf')
+    plt.close()
+
+
+def linearFitWithOutliers(x, y, e, outtriangle='linear.png'):
+    """
+    Linear fitting with outliers
+    """
+    # theta will be an array of length 2 + N, where N is the number of points
+    # theta[0] is the intercept, theta[1] is the slope,
+    # and theta[2 + i] is the weight g_i
+    def log_prior(theta):
+        #g_i needs to be between 0 and 1
+        if (all(x > 0. for x in theta[2:]) and all(x < 1. for x in theta[2:])) and \
+            0. < theta[0] < 10. and 0. < theta[1] < 0.1:
+            return 0
+        else:
+            return -np.inf  # recall log(0) = -inf
+
+    def log_likelihood(theta, x, y, e, sigma_B):
+        dy = y - theta[0] - theta[1] * x
+        g = np.clip(theta[2:], 0, 1)  # g<0 or g>1 leads to NaNs in logarithm
+        logL1 = np.log(g) - 0.5 * np.log(2 * np.pi * e ** 2) - 0.5 * (dy / e) ** 2
+        logL2 = np.log(1 - g) - 0.5 * np.log(2 * np.pi * sigma_B ** 2) - 0.5 * (dy / sigma_B) ** 2
+        return np.sum(np.logaddexp(logL1, logL2))
+
+    def log_posterior(theta, x, y, e, sigma_B):
+        return log_prior(theta) + log_likelihood(theta, x, y, e, sigma_B)
+
+
+    #find starting point
+    def squared_loss(theta, x=x, y=y, e=e):
+        dy = y - theta[0] - theta[1] * x
+        return np.sum(0.5 * (dy / e) ** 2)
+    theta1 = optimize.fmin(squared_loss, [0, 0], disp=False)
+
+    ndim = 2 + len(x)   # number of parameters in the model
+    nwalkers = 200      # number of MCMC walkers
+    nburn = 5000        # "burn-in" period to let chains stabilize
+    nsteps = 50000      # number of MCMC steps to take
+
+    # set theta near the maximum likelihood, with
+    starting_guesses = np.zeros((nwalkers, ndim))
+    starting_guesses[:, :2] = np.random.normal(theta1, 1, (nwalkers, 2))
+    starting_guesses[:, 2:] = np.random.normal(0.5, 0.1, (nwalkers, ndim - 2))
+
+    #initiate sampler
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[x, y, e, 20])
+
+    # Run a burn-in and set new starting position
+    print "Burning-in..."
+    pos, prob, state = sampler.run_mcmc(starting_guesses, nburn)
+    best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+    pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
+    sampler.reset()
+
+    print "Running an improved estimate..."
+    pos, prob, state = sampler.run_mcmc(pos, nburn)
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+    sampler.reset()
+    print "Running MCMC..."
+    pos, prob, state = sampler.run_mcmc(pos, nsteps, rstate0=state)
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+
+    #sample shape = (nwalkers, nsteps, ndim)
+    sample = sampler.chain.reshape(-1, ndim)
+
+    params = np.mean(sample[:, :2], 0)
+    g = np.mean(sample[:, 2:], 0)
+    outliers = (g < 0.5)
+
+    #Get the index with the highest probability
+    maxprob_index = np.argmax(prob)
+
+    #Get the best parameters and their respective errors and print best fits
+    params_fit = pos[maxprob_index][:2]
+    errors = [sampler.flatchain[:, i].std() for i in xrange(ndim)][:2]
+
+    fig = triangle.corner(sample, labels=['intercept' , 'slope'] + len(x)*['Gi',])
+    fig.savefig(outtriangle)
+    plt.close()
+
+
+    return params, params_fit, errors, outliers
+
+
+def powerlawFitWithOutliers(x, y, e, outtriangle='power.png'):
+    """
+    Linear fitting with outliers
+    """
+    # theta will be an array of length 2 + N, where N is the number of points
+    # theta[0] is the amplitude, theta[1] is the power,
+    # and theta[2 + i] is the weight g_i
+    def log_prior(theta):
+        #g_i needs to be between 0 and 1 and limits for the amplitude and power
+        if (all(x > 0. for x in theta[2:]) and all(x < 1. for x in theta[2:])) and \
+            -2. < theta[1] < -0.05 and 0. < theta[0] < 3.e2:
+            return 0
+        else:
+            return -np.inf  # recall log(0) = -inf
+
+    def log_likelihood(theta, x, y, e, sigma_B):
+        dy = y - theta[0] * x**theta[1]
+        g = np.clip(theta[2:], 0, 1)  # g<0 or g>1 leads to NaNs in logarithm
+        logL1 = np.log(g) - 0.5 * np.log(2 * np.pi * e ** 2) - 0.5 * (dy / e) ** 2
+        logL2 = np.log(1 - g) - 0.5 * np.log(2 * np.pi * sigma_B ** 2) - 0.5 * (dy / sigma_B) ** 2
+        return np.sum(np.logaddexp(logL1, logL2))
+
+    def log_posterior(theta, x, y, e, sigma_B):
+        return log_prior(theta) + log_likelihood(theta, x, y, e, sigma_B)
+
+    #find starting point
+    def squared_loss(theta, x=x, y=y, e=e):
+        dy = y - theta[0] * x**theta[1]
+        return np.sum(0.5 * (dy / e) ** 2)
+    theta1 = optimize.fmin(squared_loss, [10, -0.3], disp=False)
+
+    ndim = 2 + len(x)   # number of parameters in the model
+    nwalkers = 300      # number of MCMC walkers
+    nburn = 5000        # "burn-in" period to let chains stabilize
+    nsteps = 30000      # number of MCMC steps to take
+
+    # set theta near the maximum likelihood, with
+    starting_guesses = np.zeros((nwalkers, ndim))
+    starting_guesses[:, :2] = np.random.normal(theta1, 1, (nwalkers, 2))
+    starting_guesses[:, 2:] = np.random.normal(0.5, 0.1, (nwalkers, ndim - 2))
+
+    #initiate sampler
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[x, y, e, 10])
+
+    # Run a burn-in and set new starting position
+    print "Burning-in..."
+    pos, prob, state = sampler.run_mcmc(starting_guesses, nburn)
+    best_pos = sampler.flatchain[sampler.flatlnprobability.argmax()]
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+    pos = emcee.utils.sample_ball(best_pos, best_pos/100., size=nwalkers)
+    sampler.reset()
+
+    print "Running an improved estimate..."
+    pos, prob, state = sampler.run_mcmc(pos, nburn)
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+    sampler.reset()
+    print "Running MCMC..."
+    pos, prob, state = sampler.run_mcmc(pos, nsteps, rstate0=state)
+    print "Mean acceptance fraction:", np.mean(sampler.acceptance_fraction)
+
+    #sample shape = (nwalkers, nsteps, ndim)
+    sample = sampler.chain.reshape(-1, ndim)
+
+    params = np.mean(sample[:, :2], 0)
+    g = np.mean(sample[:, 2:], 0)
+    outliers = (g < 0.5)
+
+    #Get the index with the highest probability
+    maxprob_index = np.argmax(prob)
+
+    #Get the best parameters and their respective errors and print best fits
+    params_fit = pos[maxprob_index][:2]
+    errors = [sampler.flatchain[:, i].std() for i in xrange(ndim)][:2]
+
+    fig = triangle.corner(sample, labels=['amplitude' , 'power'] + len(x)*['Gi',])
+    fig.savefig(outtriangle)
+    plt.close()
+
+    return params, params_fit, errors, outliers
 
 
 def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
@@ -1386,24 +1635,23 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
         waves = [600, 700, 800, 890]
 
     wx = np.asarray([_FWHMGauss(d['wx']) for d in data])
-    wxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])*sigma
-    wy = np.asarray([_FWHMGauss(d['wy']) for d in data])
-    wyerr = np.asarray([_FWHMGauss(d['wyerr']) for d in data])*sigma
+    wxerr = np.asarray([_FWHMGauss(d['wxerr']) for d in data])
+    wypix = np.asarray([d['wy'] for d in data])
+    wy = _FWHMGauss(wypix)
+    wyerrpix = np.asarray([d['wyerr'] for d in data])
+    wyerr = _FWHMGauss(wyerrpix)
     #hand derived -- picked the averages of the fits from many many runs
-    wx = np.asarray([_FWHMGauss(d) for d in [0.31, 0.31, 0.305, 0.29]])
-    wxerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.012, 0.015]])
+    wxpix = np.asarray([0.315, 0.31, 0.305, 0.29])
+    wx = _FWHMGauss(wxpix)
+    wxerrpix = np.asarray([0.01, 0.011, 0.012, 0.015])
+    wxerr = _FWHMGauss(wxerrpix)
     # wy = np.asarray([_FWHMGauss(d) for d in [0.33, 0.31, 0.295, 0.29]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
 
     w = np.sqrt(wx*wy)
     werr = np.sqrt(wxerr*wyerr)
 
-    #ellipticity
-    e = _ellipticityFromGaussian(wx, wy)
-    eerr = _ellipticityerr(wx, wy, wxerr, wyerr)
-
     print zip(waves, w)
-    print zip(waves, e)
 
     #plot FWHM
     fig = plt.figure()
@@ -1413,9 +1661,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.95)
     ax1.set_title('CCD273 PSF Wavelength Dependency')
 
-    ax1.errorbar(waves, wx, yerr=wxerr, fmt='o', label='Data')
-    ax2.errorbar(waves, wy, yerr=wyerr, fmt='o', label='Data')
-    ax3.errorbar(waves, w, yerr=werr, fmt='o', label='Data')
+    ax1.errorbar(waves, wx, yerr=sigma*wxerr/3., fmt='o', label='Data')
+    ax2.errorbar(waves, wy, yerr=sigma**wyerr/3., fmt='o', label='Data')
+    ax3.errorbar(waves, w, yerr=sigma*werr, fmt='o', label='Data')
 
     #fit a power law
     fitfunc = lambda p, x: p[0] * x ** p[1]
@@ -1436,10 +1684,22 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     print 'Slope:', fit2[1]
     print 'Slope [requirement < -0.2]:', fit3[1]
 
-    ax1.plot(x, corrfit1, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
-    ax2.plot(x, corrfit2, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit2[1]))
+    #ax1.plot(x, corrfit1, 'k-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
+    #ax2.plot(x, corrfit2, 'k-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit2[1]))
     ax3.plot(x, y, 'r-', label=r'Requirement: $\alpha \leq - %.1f$' % alpha)
-    ax3.plot(x, corrfit3, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit3[1]))
+    #ax3.plot(x, corrfit3, 'k-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit3[1]))
+
+    # Bayesian
+    px, paramsx, errorsx, outliersx = powerlawFitWithOutliers(waves, wx, wxerr, outtriangle='WFWHMx.png')
+    py, paramsy, errorsy, outliersy = powerlawFitWithOutliers(waves, wy, wyerr, outtriangle='WFWHMy.png')
+    p, params, errors, outliers = powerlawFitWithOutliers(waves, w, werr, outtriangle='WFWHM.png')
+    print paramsx[::-1], errorsx[::-1]
+    print paramsy[::-1], errorsy[::-1]
+    print params[::-1], errors[::-1]
+
+    ax1.plot(x, paramsx[0]*x**paramsx[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsx[1]))
+    ax2.plot(x, paramsy[0]*x**paramsy[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsy[1]))
+    ax3.plot(x,  params[0]*x**params[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
 
     plt.sca(ax1)
     plt.xticks(visible=False)
@@ -1447,9 +1707,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     plt.xticks(visible=False)
     plt.sca(ax3)
 
-    ax1.set_ylim(6.8, 13.5)
-    ax2.set_ylim(6.8, 13.5)
-    ax3.set_ylim(6.8, 13.5)
+    ax1.set_ylim(6.6, 13.5)
+    ax2.set_ylim(6.6, 13.5)
+    ax3.set_ylim(6.6, 13.5)
     ax1.set_xlim(550, 900)
     ax2.set_xlim(550, 900)
     ax3.set_xlim(550, 900)
@@ -1464,40 +1724,51 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     plt.savefig('LambdaDependency.pdf')
     plt.close()
 
+    print 'R2:'
+    R2 = _R2FromGaussian(wxpix, wypix)*1e3
+    print zip(waves, R2)
+    errR2 = _R2err(wxpix, wypix, wxerrpix, wyerrpix)*1e3
+    p, params, errors, outliers = powerlawFitWithOutliers(waves, R2, errR2, outtriangle='WR2.png')
+    print params[::-1], errors[::-1]
 
     fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.95)
+    ax1 = fig.add_subplot(211)
+    ax2 = fig.add_subplot(212)
+    fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
     ax1.set_title('CCD273 PSF Wavelength Dependency')
+    ax1.errorbar(waves, R2, yerr=sigma*errR2, fmt='o', label='Data')
+    ax1.plot(x, params[0] * x**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
+    #ax1.plot(waves[outliers], R2[outliers], 'ro', ms=20, mfc='none', mec='red')
+    ax1.set_ylabel(r'R^{2} \, [$mas$^{2}]$')
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
 
-    ax1.errorbar(waves, e, yerr=eerr, fmt='o', label='Data')
+    print 'Ellipticity:'
+    ell = _ellipticityFromGaussian(wxpix, wypix) + 1
+    print zip(waves, ell)
+    ellerr = _ellipticityerr(wxpix, wypix, wxerrpix, wyerrpix)
+    p, params, errors, outliers = powerlawFitWithOutliers(waves, ell, ellerr, outtriangle='Well.png')
+    print params[::-1], errors[::-1]
 
-    #fit a power law
     fitfunc = lambda p, x: p[0] * x ** p[1]
     errfunc = lambda p, x, y: fitfunc(p, x) - y
-    fit1, success = optimize.leastsq(errfunc, [1, -0.2],  args=(waves, wx))
+    fit1, success = optimize.leastsq(errfunc, [2., -0.1],  args=(waves, ell), maxfev=100000)
+    print fit1[::-1]
 
-    #requirement
-    alpha=0.2
-    x = np.arange(500, 950, 1)
-    y = 1.*x**-alpha
-    # compute the best fit function from the best fit parameters
-    corrfit1 = fitfunc(fit1, x)
-    print 'Slope:', fit1[1]
+    ax2.errorbar(waves, ell, yerr=sigma*ellerr, fmt='o', label='Data')
+    ax2.plot(x, params[0] * x**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
+    #ax2.plot(waves[outliers], ell[outliers], 'ro', ms=20, mfc='none', mec='red')
+    ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
+    ax2.legend(shadow=True, fancybox=True, numpoints=1)
+    ax2.set_ylabel('Ellipticity')
 
-    ax1.plot(x, corrfit1, 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit1[1]))
+    ax1.set_ylim(0.65, 2.5)
+    ax2.set_ylim(1+-0.01, 1+0.16)
 
-    ax1.set_ylim(0., 0.2)
-    ax1.set_xlim(550, 900)
+    plt.sca(ax1)
+    plt.xticks(visible=False)
 
-
-    ax1.set_ylabel(r'Ellipticity')
-    ax3.set_xlabel('Wavelength [nm]')
-    ax1.legend(shadow=True, fancybox=True, loc='best', numpoints=1)
-
-    plt.savefig('LambdaDependencyE.pdf')
+    plt.savefig('LambdaR2ell.pdf')
     plt.close()
-
 
 
 def _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='Residual.pdf', individual=False):
@@ -1535,7 +1806,7 @@ def _plotModelResiduals(id='simulated800nmJoint1', folder='results/', out='Resid
     ax1.set_title('Data')
     ax2.set_title('Model')
     ax3.set_title('Residual')
-    ax4.set_title('Normalised Residual')
+    ax4.set_title('$L^{2}$ Residual')
 
     im1 = ax1.imshow(data, interpolation='none', vmax=max, origin='lower', vmin=0.1)
     im2 = ax2.imshow(model, interpolation='none', vmax=max, origin='lower', vmin=0.1)
@@ -1612,7 +1883,9 @@ def plotPaperFigures(folder='results/'):
     #real data
     _plotDifferenceIndividualVsJoined(individuals=folder+'I800nm?.pkl', joined=folder+'J800nm.pkl', title='800nm',
                                       FWHMlims=(7.3, 11.8))
-    _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData2.pdf', individual=True)
+
+    _plotModelResiduals(id='I800nm2', folder=folder, out='ResidualData.pdf', individual=True)
+    _plotModelResiduals(id='RunI2', folder='simulatedResults/', out='Residual2.pdf', individual=True)
 
     #_plotModelResiduals(id='G600nm0', folder=folder, out='ResidualG600.pdf', individual=True)
     #_plotModelResiduals(id='G700nm0', folder=folder, out='ResidualG700.pdf', individual=True)
@@ -1842,6 +2115,9 @@ def _expectedValues():
     out = dict(l600=(0.45, 0.40, 0.34, 0.32),
                l700=(0.47, 0.40, 0.32, 0.31),
                l800=(0.49, 0.41, 0.30, 0.30),
+               l800l=(0.49, 0.41, 0.27, 0.27),
+               l800m=(0.49, 0.41, 0.30, 0.30),
+               l800h=(0.49, 0.41, 0.31, 0.31),
                l890=(0.54, 0.38, 0.29, 0.29))
 
     return out
@@ -1861,6 +2137,33 @@ def runGood():
                          out='J800nm', wavelength='800nm') #around 0.3, 0.3
     forwardModelJointFit(getFiles(mintime=(14, 30, 03), maxtime=(14, 34, 37), folder='data/01Aug/'),
                      out='J890nm50k', wavelength='890nm') #around 0.285, 0.29
+
+
+def runBrighterFatter():
+    """
+    Special runs for brighter-fatter effect.
+    Most of the 800nm data were very poorly centred.
+    """
+    RunData([getFiles(mintime=(15, 12, 20), maxtime=(15, 24, 16), folder='data/31Jul/')[0],], out='I800nmlow',
+            wavelength='l800l')
+    RunData([getFiles(mintime=(15, 28, 40), maxtime=(15, 39, 21), folder='data/31Jul/')[2],], out='I800nmmed',
+            wavelength='l800m')
+    RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[4],], out='I800nmhigh',
+            wavelength='l800h')
+
+
+def runWavelengthDependency():
+    """
+    Run the best for the wavelength dependency.
+    """
+    RunData([getFiles(mintime=(15, 39, 58), maxtime=(15, 47, 58), folder='data/30Jul/')[0],], out='I600nmwave',
+            wavelength='l600')
+    RunData([getFiles(mintime=(17, 48, 35), maxtime=(17, 56, 03), folder='data/30Jul/')[0],], out='I700nmwave',
+            wavelength='l700')
+    RunData([getFiles(mintime=(15, 40, 07), maxtime=(15, 45, 14), folder='data/29Jul/')[0],], out='I800nmwave',
+            wavelength='l800')
+    RunData([getFiles(mintime=(14, 17, 57), maxtime=(14, 25, 49), folder='data/01Aug/')[4],], out='I890nmwave',
+            wavelength='l890')
 
 
 def doAll():
@@ -1951,6 +2254,8 @@ if __name__ == '__main__':
     #RunTestSimulations2()
 
     #Data Analysis -- real spots
+    #runBrighterFatter()
+    #runWavelengthDependency()
     #runGood()
     #analyseData600nm()
     #analyseData700nm()

@@ -6,7 +6,7 @@ http://www.pymvpa.org/generated/mvpa2.mappers.som.SimpleSOMMapper.html#mvpa2.map
 import matplotlib.pyplot as plt
 import numpy as np
 import pyfits as pf
-from mvpa2.suite import SimpleSOMMapper
+#from mvpa2.suite import SimpleSOMMapper
 from support import files as fileIO
 import glob
 
@@ -84,6 +84,39 @@ def simplePSFexample():
     fileIO.writeFITS(som.K, '/mapped.fits', int=False)
 
 
+def testSOMs():
+    from sklearn import datasets
+    from minisom import MiniSom
+
+    d = datasets.load_iris()
+    data = np.apply_along_axis(lambda x: x/np.linalg.norm(x), 1, d['data']) # data normalization
+
+    som = MiniSom(7, 7, 4, sigma=1.0, learning_rate=0.5)
+
+    som.random_weights_init(data)
+    print("Training...")
+    som.train_random(data, 1000) # random training
+    print("\n...ready!")
+
+    ### Plotting the response for each pattern in the iris dataset ###
+    from pylab import plot,axis,show,pcolor,colorbar,bone
+    bone()
+    pcolor(som.distance_map().T) # plotting the distance map as background
+    colorbar()
+    t = d['target']
+    # use different colors and markers for each label
+    markers = ['o','s','D']
+    colors = ['r','g','b']
+    for cnt,xx in enumerate(data):
+     w = som.winner(xx) # getting the winner
+     # palce a marker on the winning position for the sample xx
+     plot(w[0]+.5,w[1]+.5,markers[t[cnt]],markerfacecolor='None',
+        markeredgecolor=colors[t[cnt]],markersize=12,markeredgewidth=2)
+    axis([0,som.weights.shape[0],0,som.weights.shape[1]])
+    show() # show the figure
+
+
 if __name__ == '__main__':
     #example()
-    simplePSFexample()
+    #simplePSFexample()
+    testSOMs()

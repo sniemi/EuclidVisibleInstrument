@@ -34,7 +34,7 @@ We therefore adopt a Gaussian kernel that is centred with the Airy disc.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.7
+:version: 1.8
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -71,7 +71,7 @@ from multiprocessing import Pool
 
 
 __author__ = 'Sami-Matias Niemi'
-__vesion__ = 1.7
+__vesion__ = 1.8
 
 #fixed parameters
 cores = 8
@@ -126,10 +126,13 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
 
     #make a copy ot generate error array
     data = spot.copy().flatten()
-    data[data + rn**2 < 0.] = 0.  #set highly negative values to zero
-    #assume errors scale as sqrt of the values + readnoise
+    #assume that uncertanties scale as sqrt of the values + readnoise
     #sigma = np.sqrt(data/gain + rn**2)
-    var = data.copy() + rn**2
+    tmp = data.copy()
+    tmp[tmp + rn**2 < 0.] = 0.  #set highly negative values to zero
+    var = tmp.copy() + rn**2
+    #Gary B. said that actually this should be from the model or is biased,
+    #so I only pass the readout noise part now
 
     #fit a simple model
     print 'Least Squares Fitting...'
@@ -199,7 +202,8 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, peakrange, spot.shape],
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, peakrange, spot.shape],
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, rn**2, peakrange, spot.shape],
                                     pool=pool)
 
     # Run a burn-in and set new starting position
@@ -299,6 +303,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     orig = []
     image = []
     noise = []
+    rns = []
     peakvalues = []
     xestimate = []
     yestimate = []
@@ -365,6 +370,7 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
         noise.append(variance)
         xestimate.append(p.x_mean.value)
         yestimate.append(p.y_mean.value)
+        rns.append(rn**2)
 
     #sensibility test, try to check if all the files in the fit are of the same dataset
     if np.std(peakvalues) > 5*np.sqrt(np.median(peakvalues)):
@@ -411,7 +417,8 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posteriorJoint,
-                                    args=[xx, yy, image, noise, peakrange, spot.shape], pool=pool)
+                                    args=[xx, yy, image, rns, peakrange, spot.shape], pool=pool)
+                                   # args=[xx, yy, image, noise, peakrange, spot.shape], pool=pool)
 
     # Run a burn-in and set new starting position
     print "Burning-in..."
@@ -594,6 +601,9 @@ def log_likelihood(theta, x, y, data, var, size):
     model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
     #true for Gaussian errors
+    #lnL = - 0.5 * np.sum((data - model)**2 / var)
+    #Gary B. said that this should be from the model not data so recompute var (now contains rn**2)
+    var += model.copy()
     lnL = - 0.5 * np.sum((data - model)**2 / var)
 
     return lnL
@@ -630,9 +640,10 @@ def log_likelihoodJoint(theta, x, y, data, var, size):
         CCDdata = CCD.eval(x, y, 1., size[0]/2.-0.5, size[1]/2.-0.5, width_x, width_y, 0.).reshape(size)
         model = signal.convolve2d(model, CCDdata, mode='same').flatten()
 
-        lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
-        #lnL += np.logaddexp(lnL, - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten()))
-        #this leads to a low acceptance ratio and very incorrect answers
+        #lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var[tmp].flatten())
+        #Gary B. said that this should be from the model not data so recompute var (now contains rn**2)
+        var = var[tmp] + model.copy()
+        lnL += - 0.5 * np.sum((data[tmp].flatten() - model)**2 / var)
 
     return lnL
 
@@ -1038,22 +1049,22 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
     wyerr = np.asarray([sigma*_FWHMGauss(data['wyerr']) for data in ind])
 
     ax1.errorbar(xtmp, wxind, yerr=wxerr, fmt='o')
-    ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=sigma*_FWHMGauss(join['wxerr']), fmt='s')
+    ax1.errorbar(xtmp[-1]+1, _FWHMGauss(join['wx']), yerr=sigma*_FWHMGauss(join['wxerr']), fmt='s', c='r')
     ax2.errorbar(xtmp, wyind, yerr=wyerr, fmt='o')
-    ax2.errorbar(xtmp[-1]+1, _FWHMGauss(join['wy']), yerr=sigma*_FWHMGauss(join['wyerr']), fmt='s')
+    ax2.errorbar(xtmp[-1]+1, _FWHMGauss(join['wy']), yerr=sigma*_FWHMGauss(join['wyerr']), fmt='s', c='r')
 
     geommean = np.sqrt(wxind*wyind)
     err = np.sqrt(wxerr*wyerr)
     ax3.errorbar(xtmp, geommean, yerr=err, fmt='o')
     ax3.errorbar(xtmp[-1]+1, np.sqrt(_FWHMGauss(join['wx'])*_FWHMGauss(join['wy'])),
-                 yerr=sigma*np.sqrt(_FWHMGauss(join['wxerr'])*_FWHMGauss(join['wyerr'])), fmt='s')
+                 yerr=sigma*np.sqrt(_FWHMGauss(join['wxerr'])*_FWHMGauss(join['wyerr'])), fmt='s', c='r')
 
     #simulations
     if truthx is not None:
-        ax1.axhline(y=_FWHMGauss(truthx), label='Truth', c='g')
+        ax1.axhline(y=_FWHMGauss(truthx), label='Input', c='g')
     if truthy is not None:
-        ax2.axhline(y=_FWHMGauss(truthy), label='Truth', c='g')
-        ax3.axhline(y=np.sqrt(_FWHMGauss(truthx)*_FWHMGauss(truthy)), label='Truth', c='g')
+        ax2.axhline(y=_FWHMGauss(truthy), label='Input', c='g')
+        ax3.axhline(y=np.sqrt(_FWHMGauss(truthx)*_FWHMGauss(truthy)), label='Input', c='g')
 
     #requirements
     if requirementFWHM is not None:
@@ -1070,8 +1081,10 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
     ltmp = np.hstack((xtmp, xtmp[-1]+1))
     plt.xticks(ltmp, ['Individual %i' % x for x in ltmp[:-1]] + ['Joint',], rotation=45)
 
+    #ax1.set_ylim(7.1, 10.2)
     ax1.set_ylim(*FWHMlims)
     ax2.set_ylim(*FWHMlims)
+    #ax2.set_ylim(8.6, 10.7)
     ax3.set_ylim(*FWHMlims)
     ax1.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
     ax2.set_xlim(xtmp.min()*0.9, (xtmp.max() + 1)*1.05)
@@ -1111,8 +1124,8 @@ def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=
 
     #simulations
     if truthx and truthy is not None:
-        ax2.axhline(y=_ellipticityFromGaussian(truthx, truthy), label='Truth', c='g')
-        ax1.axhline(y= _R2FromGaussian(truthx, truthy)*1e3, label='Truth', c='g')
+        ax2.axhline(y=_ellipticityFromGaussian(truthx, truthy), label='Input', c='g')
+        ax1.axhline(y= _R2FromGaussian(truthx, truthy)*1e3, label='Input', c='g')
 
     plt.sca(ax1)
     plt.xticks(visible=False)
@@ -1514,12 +1527,15 @@ def powerlawFitWithOutliers(x, y, e, outtriangle='power.png'):
     """
     Linear fitting with outliers
     """
+    x = np.asarray(x)
+    y = np.asarray(y)
+    e = np.asarray(e)
     # theta will be an array of length 2 + N, where N is the number of points
     # theta[0] is the amplitude, theta[1] is the power,
     # and theta[2 + i] is the weight g_i
     def log_prior(theta):
         #g_i needs to be between 0 and 1 and limits for the amplitude and power
-        if (all(x > 0. for x in theta[2:]) and all(x < 1. for x in theta[2:])) and \
+        if (all(tmp > 0. for tmp in theta[2:]) and all(tmp < 1. for tmp in theta[2:])) and \
             -2. < theta[1] < -0.05 and 0. < theta[0] < 3.e2:
             return 0
         else:
@@ -1539,12 +1555,13 @@ def powerlawFitWithOutliers(x, y, e, outtriangle='power.png'):
     def squared_loss(theta, x=x, y=y, e=e):
         dy = y - theta[0] * x**theta[1]
         return np.sum(0.5 * (dy / e) ** 2)
+
     theta1 = optimize.fmin(squared_loss, [10, -0.3], disp=False)
 
     ndim = 2 + len(x)   # number of parameters in the model
-    nwalkers = 300      # number of MCMC walkers
-    nburn = 5000        # "burn-in" period to let chains stabilize
-    nsteps = 30000      # number of MCMC steps to take
+    nwalkers = 400      # number of MCMC walkers
+    nburn = 1000        # "burn-in" period to let chains stabilize
+    nsteps = 10000      # number of MCMC steps to take
 
     # set theta near the maximum likelihood, with
     starting_guesses = np.zeros((nwalkers, ndim))
@@ -1584,7 +1601,7 @@ def powerlawFitWithOutliers(x, y, e, outtriangle='power.png'):
     params_fit = pos[maxprob_index][:2]
     errors = [sampler.flatchain[:, i].std() for i in xrange(ndim)][:2]
 
-    fig = triangle.corner(sample, labels=['amplitude' , 'power'] + len(x)*['Gi',])
+    fig = triangle.corner(sample, labels=['amplitude', 'power'] + len(x)*['Gi', ])
     fig.savefig(outtriangle)
     plt.close()
 
@@ -1647,6 +1664,7 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     wxerr = _FWHMGauss(wxerrpix)
     # wy = np.asarray([_FWHMGauss(d) for d in [0.33, 0.31, 0.295, 0.29]])
     # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
+    waves = np.asarray(waves)
 
     w = np.sqrt(wx*wy)
     werr = np.sqrt(wxerr*wyerr)
@@ -1690,6 +1708,8 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     #ax3.plot(x, corrfit3, 'k-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (fit3[1]))
 
     # Bayesian
+    shift = 0.
+    waves -= shift
     px, paramsx, errorsx, outliersx = powerlawFitWithOutliers(waves, wx, wxerr, outtriangle='WFWHMx.png')
     py, paramsy, errorsy, outliersy = powerlawFitWithOutliers(waves, wy, wyerr, outtriangle='WFWHMy.png')
     p, params, errors, outliers = powerlawFitWithOutliers(waves, w, werr, outtriangle='WFWHM.png')
@@ -1697,9 +1717,9 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     print paramsy[::-1], errorsy[::-1]
     print params[::-1], errors[::-1]
 
-    ax1.plot(x, paramsx[0]*x**paramsx[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsx[1]))
-    ax2.plot(x, paramsy[0]*x**paramsy[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsy[1]))
-    ax3.plot(x,  params[0]*x**params[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
+    ax1.plot(x, paramsx[0]*(x-shift)**paramsx[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsx[1]))
+    ax2.plot(x, paramsy[0]*(x-shift)**paramsy[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (paramsy[1]))
+    ax3.plot(x, params[0]*(x-shift)**params[1], 'g-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
 
     plt.sca(ax1)
     plt.xticks(visible=False)
@@ -1737,7 +1757,7 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     fig.subplots_adjust(hspace=0, top=0.93, bottom=0.17, left=0.11, right=0.93)
     ax1.set_title('CCD273 PSF Wavelength Dependency')
     ax1.errorbar(waves, R2, yerr=sigma*errR2, fmt='o', label='Data')
-    ax1.plot(x, params[0] * x**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
+    ax1.plot(x, params[0] * (x - shift)**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
     #ax1.plot(waves[outliers], R2[outliers], 'ro', ms=20, mfc='none', mec='red')
     ax1.set_ylabel(r'R^{2} \, [$mas$^{2}]$')
     ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
@@ -1755,7 +1775,7 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     print fit1[::-1]
 
     ax2.errorbar(waves, ell, yerr=sigma*ellerr, fmt='o', label='Data')
-    ax2.plot(x, params[0] * x**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
+    ax2.plot(x, params[0] * (x - shift)**params[1], 'm-', label=r'Power Law Fit: $\alpha \sim %.2f $' % (params[1]))
     #ax2.plot(waves[outliers], ell[outliers], 'ro', ms=20, mfc='none', mec='red')
     ax1.legend(shadow=True, fancybox=True, numpoints=1, loc='lower right')
     ax2.legend(shadow=True, fancybox=True, numpoints=1)
@@ -1870,11 +1890,11 @@ def plotPaperFigures(folder='results/'):
     plotModelExample()
 
     #simulation figures
-    theta1 = (2.e5, 9.9, 10.03, 0.41, 0.51, 10., 10., 0.296, 0.335)
+    theta1 = (2.e5, 9.9, 10.03, 0.41, 0.51, 10., 10., 0.291, 0.335)
     try:
         _plotDifferenceIndividualVsJoined(individuals='simulatedResults/RunI*.pkl',
                                           joined='results/simulated800nmJoint.pkl',
-                                          title='Simulated Data: PSF Recovery', truthx=theta1[7], truthy=theta1[8],
+                                          title='Simulated Data: CCD PSF Recovery', truthx=theta1[7], truthy=theta1[8],
                                           requirementE=None, requirementFWHM=None, requirementR2=None)
         _plotModelResiduals(id='RunI1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
     except:
@@ -2246,8 +2266,8 @@ def doAll():
 
 
 if __name__ == '__main__':
-    doAll()
-    _printAnalysedData('results/')
+    #doAll()
+    #_printAnalysedData('results/')
 
     #Simulated spots and analysis
     #RunTestSimulations()
@@ -2270,10 +2290,10 @@ if __name__ == '__main__':
     #                     out='J600nm20', wavelength='600nm')
 
     #plots
-    plotPaperFigures()
+    #plotPaperFigures()
     #generateTestPlots()
     #plotBrighterFatter()
-    #plotLambdaDependency()
+    plotLambdaDependency()
 
     #All Data
     #AlljointRuns()

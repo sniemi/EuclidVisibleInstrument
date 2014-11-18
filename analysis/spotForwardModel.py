@@ -34,7 +34,7 @@ We therefore adopt a Gaussian kernel that is centred with the Airy disc.
 :requires: emcee
 :requires: sklearn
 
-:version: 1.8
+:version: 1.9
 
 :author: Sami-Matias Niemi
 :contact: s.niemi@ucl.ac.uk
@@ -78,7 +78,7 @@ cores = 8
 
 
 def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500, spotx=2888, spoty=3514, run=700,
-                 simulation=False, truths=None):
+                 simulation=False, truths=None, blurred=False):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
 
@@ -194,16 +194,24 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
         p0[:, 6] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_y
     else:
         tmp = _expectedValues()[wavelength]
-        print 'Using initial guess [radius, focus, width_x, width_y]:', tmp
-        p0[:, 3] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
-        p0[:, 4] = np.random.normal(tmp[1], 0.01, size=nwalkers)                   # focus
-        p0[:, 5] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
-        p0[:, 6] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
+        if blurred:
+            print 'Using initial guess [radius, focus, width_x, width_y]:', [tmp[0], 1.2, tmp[2], tmp[3]]
+            p0[:, 3] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
+            p0[:, 4] = np.random.normal(1.2, 0.01, size=nwalkers)                       # focus
+            p0[:, 5] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
+            p0[:, 6] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
+        else:
+            print 'Using initial guess [radius, focus, width_x, width_y]:', tmp
+            p0[:, 3] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
+            p0[:, 4] = np.random.normal(tmp[1], 0.01, size=nwalkers)                   # focus
+            p0[:, 5] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
+            p0[:, 6] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
     #sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, var, peakrange, spot.shape],
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior, args=[xx, yy, data, rn**2, peakrange, spot.shape],
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_posterior,
+                                    args=[xx, yy, data, rn**2, peakrange, spot.shape, blurred],
                                     pool=pool)
 
     # Run a burn-in and set new starting position
@@ -530,11 +538,11 @@ def forwardModelJointFit(files, out, wavelength, gain=3.1, size=10, burn=500, ru
     pool.close()
 
 
-def log_posterior(theta, x, y, z, var, peakrange, size):
+def log_posterior(theta, x, y, z, var, peakrange, size, blurred):
     """
     Posterior probability: combines the prior and likelihood.
     """
-    lp = log_prior(theta, peakrange)
+    lp = log_prior(theta, peakrange, blurred)
 
     if not np.isfinite(lp):
         return -np.inf
@@ -554,16 +562,23 @@ def log_posteriorJoint(theta, x, y, z, var, peakrange, size):
     return lp + log_likelihoodJoint(theta, x, y, z, var, size)
 
 
-def log_prior(theta, peakrange):
+def log_prior(theta, peakrange, blurred):
     """
     Priors, limit the values to a range but otherwise flat.
     """
     peak, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and 0.1 < width_x < 0.6 and 0.1 < width_y < 0.6 and \
-       peakrange[0] < peak < peakrange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
-        return 0.
+    if blurred:
+        if 14. < center_x < 28. and 14. < center_y < 28. and 0.1 < width_x < 0.6 and 0.1 < width_y < 0.6 and \
+           peakrange[0] < peak < peakrange[1] and 0.4 < radius < 3.5 and 0.1 < focus < 3.5:
+            return 0.
+        else:
+            return -np.inf
     else:
-        return -np.inf
+        if 7. < center_x < 14. and 7. < center_y < 14. and 0.1 < width_x < 0.6 and 0.1 < width_y < 0.6 and \
+           peakrange[0] < peak < peakrange[1] and 0.4 < radius < 0.7 and 0.1 < focus < 0.7:
+            return 0.
+        else:
+            return -np.inf
 
 
 def log_priorJoint(theta, peakrange):
@@ -2265,6 +2280,16 @@ def doAll():
         print 'Cannot run difficult cases'
 
 
+def analyseOutofFocus():
+    """
+
+    """
+    forwardModel('data/13_59_05sEuclid.fits', wavelength='l700', out='blurred700',
+                 spotx=2985, spoty=3774, size=20, blurred=True)
+    forwardModel('data/13_24_53sEuclid.fits', wavelength='l800', out='blurred800',
+                 spotx=2983, spoty=3760, size=10, blurred=True)
+
+
 if __name__ == '__main__':
     #doAll()
     #_printAnalysedData('results/')
@@ -2293,7 +2318,7 @@ if __name__ == '__main__':
     #plotPaperFigures()
     #generateTestPlots()
     #plotBrighterFatter()
-    plotLambdaDependency()
+    #plotLambdaDependency()
 
     #All Data
     #AlljointRuns()
@@ -2305,3 +2330,5 @@ if __name__ == '__main__':
 
     #test some of the cases, which seem to be more difficult to fit
     #_testDifficultCases()
+
+    analyseOutofFocus()

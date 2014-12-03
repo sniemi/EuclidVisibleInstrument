@@ -188,16 +188,23 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
     p0[:, 2] = np.random.normal(p.y_mean.value, 0.1, size=nwalkers)           # y
 
     if wavelength is None:
-        p0[:, 3] = np.random.uniform(.45, 0.55, size=nwalkers)                     # radius
-        p0[:, 4] = np.random.uniform(.40, 0.45, size=nwalkers)                     # focus
-        p0[:, 5] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_x
-        p0[:, 6] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_y
+        if blurred:
+            print 'Using initial guess [radius, focus, width_x, width_y]:', [0.5, 1., 0.3, 0.3]
+            p0[:, 3] = np.random.normal(0.5, 0.01, size=nwalkers)                   # radius
+            p0[:, 4] = np.random.normal(1., 0.01, size=nwalkers)                    # focus
+            p0[:, 5] = np.random.normal(0.3, 0.01, size=nwalkers)                   # width_x
+            p0[:, 6] = np.random.normal(0.3, 0.01, size=nwalkers)                   # width_y
+        else:
+            p0[:, 3] = np.random.uniform(.45, 0.55, size=nwalkers)                     # radius
+            p0[:, 4] = np.random.uniform(.40, 0.45, size=nwalkers)                     # focus
+            p0[:, 5] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_x
+            p0[:, 6] = np.random.uniform(.35, 0.45, size=nwalkers)                     # width_y
     else:
         tmp = _expectedValues()[wavelength]
         if blurred:
-            print 'Using initial guess [radius, focus, width_x, width_y]:', [tmp[0], 1.2, tmp[2], tmp[3]]
+            print 'Using initial guess [radius, focus, width_x, width_y]:', [tmp[0], 0.9, tmp[2], tmp[3]]
             p0[:, 3] = np.random.normal(tmp[0], 0.01, size=nwalkers)                   # radius
-            p0[:, 4] = np.random.normal(1.2, 0.01, size=nwalkers)                       # focus
+            p0[:, 4] = np.random.normal(0.9, 0.01, size=nwalkers)                       # focus
             p0[:, 5] = np.random.normal(tmp[2], 0.01, size=nwalkers)                   # width_x
             p0[:, 6] = np.random.normal(tmp[3], 0.01, size=nwalkers)                   # width_y
         else:
@@ -568,8 +575,8 @@ def log_prior(theta, peakrange, blurred):
     """
     peak, center_x, center_y, radius, focus, width_x, width_y = theta
     if blurred:
-        if 14. < center_x < 28. and 14. < center_y < 28. and 0.1 < width_x < 0.6 and 0.1 < width_y < 0.6 and \
-           peakrange[0] < peak < peakrange[1] and 0.4 < radius < 3.5 and 0.1 < focus < 3.5:
+        if 4. < center_x < 28. and 4. < center_y < 28. and 0.22 < width_x < 0.55 and 0.22 < width_y < 0.55 and \
+           peakrange[0] < peak < peakrange[1] and 0.4 < radius < 1.0 and 0.5 < focus < 2.0:
             return 0.
         else:
             return -np.inf
@@ -873,6 +880,51 @@ def RunTestSimulations2(newfiles=True):
         print 'amplitude, center_x, center_y, radius, focus, width_x, width_y'
         print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
         print("=" * 60)
+
+
+def RunTestSimulationsBlurred(fname='simulated/simulatedBlurred', newfiles=True):
+    """
+    A set of simulated spots and analysis.
+
+    Note that this is not the best test case for the joint fitting, because the amplitudes are fixed.
+    This means that the peak pixels can have quite different values. With the ones selected here,
+    the fourth is actually somewhat different from the others. It is actually quite nice that we
+    can still recover the CCD PSF.
+    """
+    print("|" * 120)
+    print 'SIMULATED DATA'
+    #a joint fit test - vary only the x and y positions
+    #It is misleading to keep the amplitude fixed as it is the counts in the peak pixel that matters.
+    #If the Airy were centred perfectly then we could keep the amplitude fixed. In this case the individual
+    #fits will work and can recover the 200k amplitude, but it is more problematic for the joint fit.
+    #amplitude, center_x, center_y, radius, focus, xCCD, yCCD, width_x, width_y = theta
+    theta1 = (2.e5, 9.9, 10.03, 0.53, 1.1, 10., 10., 0.291, 0.335)
+    theta2 = (2.e5, 10.1, 9.97, 0.53, 1.1, 10., 10., 0.291, 0.335)
+    theta3 = (2.e5, 9.97, 10.1, 0.53, 1.1, 10., 10., 0.291, 0.335)
+    theta4 = (2.e5, 10.02, 9.9, 0.53, 1.1, 10., 10., 0.291, 0.335)
+    theta5 = (2.e5, 10.1, 10., 0.53, 1.1, 10., 10., 0.291, 0.335)
+
+    thetas = [theta1, theta2, theta3, theta4, theta5]
+
+    for i, theta in enumerate(thetas):
+        if newfiles:
+            print 'Generating a new file with the following parameters:'
+            _simulate(theta=theta, out='%s%i.fits' % (fname, i))
+
+            print 'amplitude, x, y, radius, focus, width_x, width_y'
+            print theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]
+            print("=" * 60)
+
+        forwardModel(file='%s%i.fits' %(fname, i), out='simulatedResults/RunIBlurred%i' %i, simulation=True,
+                     truths=[theta[0], theta[1], theta[2], theta[3], theta[4], theta[7], theta[8]],
+                     blurred=True)
+
+    #plot residuals
+    _plotModelResiduals(id='RunIBlurred0', folder='simulatedResults/', out='Residual0.pdf', individual=True)
+    _plotModelResiduals(id='RunIBlurred1', folder='simulatedResults/', out='Residual1.pdf', individual=True)
+    _plotModelResiduals(id='RunIBlurred2', folder='simulatedResults/', out='Residual2.pdf', individual=True)
+    _plotModelResiduals(id='RunIBlurred3', folder='simulatedResults/', out='Residual3.pdf', individual=True)
+    _plotModelResiduals(id='RunIBlurred4', folder='simulatedResults/', out='Residual4.pdf', individual=True)
 
 
 def RunData(files, wavelength=None, out='testdata'):
@@ -2284,10 +2336,10 @@ def analyseOutofFocus():
     """
 
     """
-    forwardModel('data/13_59_05sEuclid.fits', wavelength='l700', out='blurred700',
-                 spotx=2985, spoty=3774, size=20, blurred=True)
+    #forwardModel('data/13_59_05sEuclid.fits', wavelength='l700', out='blurred700',
+    #             spotx=2985, spoty=3774, size=20, blurred=True)
     forwardModel('data/13_24_53sEuclid.fits', wavelength='l800', out='blurred800',
-                 spotx=2983, spoty=3760, size=10, blurred=True)
+                 spotx=2983, spoty=3760, size=10, blurred=True, burn=2000)
 
 
 if __name__ == '__main__':
@@ -2331,4 +2383,5 @@ if __name__ == '__main__':
     #test some of the cases, which seem to be more difficult to fit
     #_testDifficultCases()
 
-    analyseOutofFocus()
+    #analyseOutofFocus()
+    RunTestSimulationsBlurred()

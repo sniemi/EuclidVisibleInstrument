@@ -60,10 +60,10 @@ Dependencies
 
 This script depends on the following packages:
 
-:requires: PyFITS (tested with 3.0.6)
-:requires: NumPy (tested with 1.6.1, 1.7.1, and 1.8.0)
-:requires: numexpr (tested with 2.0.1)
-:requires: SciPy (tested with 0.10.1, 0.12, and 0.13)
+:requires: PyFITS (tested with 3.0.6 and 3.3)
+:requires: NumPy (tested with 1.6.1, 1.7.1, 1.8.0, and 1.9.1)
+:requires: numexpr (tested with 2.0.1 and 2.4)
+:requires: SciPy (tested with 0.10.1, 0.12, 0.13, and 0.14)
 :requires: vissim-python package
 
 .. Note:: This class is not Python 3 compatible. For example, xrange does not exist
@@ -101,12 +101,12 @@ Benchmarking
 
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file::
 
-    Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+    Galaxy: 26753/26753 magnitude=26.710577 intscale=185.424955025 FWHM=0.117285374813 arc sec
     7091 objects were place on the detector
 
-    real	1m40.464s
-    user	1m38.389s
-    sys	        0m1.749s
+    real	0m53.545s
+    user	0m51.249s
+    sys	        0m2.228s
 
 
 These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
@@ -137,7 +137,7 @@ Instead, if we use an NVIDIA GPU for the convolution (and code that has not been
 Change Log
 ----------
 
-:version: 1.32
+:version: 1.4
 
 Version and change logs::
 
@@ -187,6 +187,7 @@ Version and change logs::
           point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
           more suitable for the correct input model.
     1.32: option to fix the random number generator seed using -f flag.
+    1.4: included an option to simulate an image with the shutter open leading to readout trails.
 
 
 Future Work
@@ -239,7 +240,7 @@ except:
 FOLDER = '/Users/sammy/EUCLID/vissim-python/'
 
 __author__ = 'Sami-Matias Niemi'
-__version__ = 1.32
+__version__ = 1.4
 
 
 class VISsimulator():
@@ -309,6 +310,7 @@ class VISsimulator():
                                      magzero=15861729325.3279,
                                      exposures=1,
                                      exptime=565.0,
+                                     readouttime=78.,
                                      rdose=8.0e9,
                                      ra=123.0,
                                      dec=45.0,
@@ -367,6 +369,7 @@ class VISsimulator():
             magzero = 15182880871.225231
             exposures = 1
             exptime = 565.0
+            readouttime = 78.0
             rdose = 8.0e9
             RA = 145.95
             DEC = -38.16
@@ -390,6 +393,7 @@ class VISsimulator():
             random = yes
             background = yes
             ghosts = no
+            shutterOpen = no
 
         For explanation of each field, see /data/test.config. Note that if an input field does not exist,
         then the values are taken from the default instrument model as described in
@@ -473,6 +477,10 @@ class VISsimulator():
             self.ghosts = self.config.getboolean(self.section, 'ghosts')
         except:
             self.ghosts = False
+        try:
+            self.shutterOpen = self.config.getboolean(self.section, 'shutterOpen')
+        except:
+            self.shutterOpen = False
 
         self.information['variablePSF'] = False
 
@@ -490,7 +498,8 @@ class VISsimulator():
                              overscans=self.overscans,
                              random=self.random,
                              background=self.background,
-                             intscale=self.intscale)
+                             intscale=self.intscale,
+                             shutterOpen=self.shutterOpen)
 
         if self.debug:
             pprint.pprint(self.information)
@@ -793,10 +802,10 @@ class VISsimulator():
             if len(key) > 8:
                 key = key[:7]
             try:
-                hdu.header.update(key.upper(), value)
+                hdu.header.set(key.upper(), value)
             except:
                 try:
-                    hdu.header.update(key.upper(), str(value))
+                    hdu.header.set(key.upper(), str(value))
                 except:
                     pass
 
@@ -805,7 +814,7 @@ class VISsimulator():
             #truncate long keys
             if len(key) > 8:
                 key = key[:7]
-            hdu.header.update(key.upper(), str(value), 'Boolean Flags')
+            hdu.header.set(key.upper(), str(value), 'Boolean Flags')
 
         #update and verify the header
         hdu.header.add_history('This is an itermediate data product no the final output!')
@@ -1853,6 +1862,39 @@ class VISsimulator():
         self.writeFITSfile(self.cosmicMap, 'cosmicraymap' + self.information['output'])
 
 
+    def addReadoutTrails(self):
+        """
+        Add readout trails resulting from reading out the shutter open.
+
+        Quadrants assumed to be numbered:
+        2 3
+        0 1
+        """
+        flux_ratio = self.information['readouttime'] / float(self.information['ysize']) / self.information['exptime']
+
+        #make a copy, this will be updated
+        data = self.image.copy()
+
+        #Amplifier at different positions depending on the quadrant number !
+        #left side is 0, 2 and right side is 1, 3 starting from bottom i.e.
+        #going clock wise from lower left we have 0, 2, 3, and 1 quadrants.
+        if self.information['quadrant'] in (2, 3):
+            data = data[::-1, :]
+
+        data_shift = data.copy() * flux_ratio
+
+        size1, size2 = data.shape
+        for i in range(1, size2, 1):
+            data_shift2 = np.roll(data_shift, i, axis=0)
+            data_shift2[:i, :] = 0.0
+            data += data_shift2
+
+        if self.information['quadrant'] in (2, 3):
+            self.image = data[::-1, :]
+        else:
+            self.image = data
+
+
     def applyDarkCurrent(self):
         """
         Apply dark current. Scales the dark with the exposure time.
@@ -2174,21 +2216,21 @@ class VISsimulator():
             hdu.header.add_history('Scaled to unsigned 16bit integer!')
 
         #add WCS to the header
-        hdu.header.update('WCSAXES', 2)
-        hdu.header.update('CRPIX1', self.image.shape[1]/2.)
-        hdu.header.update('CRPIX2', self.image.shape[0]/2.)
-        hdu.header.update('CRVAL1', self.information['ra'])
-        hdu.header.update('CRVAL2', self.information['dec'])
-        hdu.header.update('CTYPE1', 'RA---TAN')
-        hdu.header.update('CTYPE2', 'DEC--TAN')
+        hdu.header.set('WCSAXES', 2)
+        hdu.header.set('CRPIX1', self.image.shape[1]/2.)
+        hdu.header.set('CRPIX2', self.image.shape[0]/2.)
+        hdu.header.set('CRVAL1', self.information['ra'])
+        hdu.header.set('CRVAL2', self.information['dec'])
+        hdu.header.set('CTYPE1', 'RA---TAN')
+        hdu.header.set('CTYPE2', 'DEC--TAN')
         #north is up, east is left
-        hdu.header.update('CD1_1', -0.1 / 3600.) #pix size in arc sec / deg
-        hdu.header.update('CD1_2', 0.0)
-        hdu.header.update('CD2_1', 0.0)
-        hdu.header.update('CD2_2', 0.1 / 3600.)
+        hdu.header.set('CD1_1', -0.1 / 3600.) #pix size in arc sec / deg
+        hdu.header.set('CD1_2', 0.0)
+        hdu.header.set('CD2_1', 0.0)
+        hdu.header.set('CD2_2', 0.1 / 3600.)
 
-        hdu.header.update('DATE-OBS', datetime.datetime.isoformat(datetime.datetime.now()))
-        hdu.header.update('INSTRUME', 'VISSim%s' % str(__version__))
+        hdu.header.set('DATE-OBS', datetime.datetime.isoformat(datetime.datetime.now()))
+        hdu.header.set('INSTRUME', 'VISSim%s' % str(__version__))
 
         #add input keywords to the header
         for key, value in self.information.iteritems():
@@ -2196,21 +2238,21 @@ class VISsimulator():
             if len(key) > 8:
                 key = key[:7]
             try:
-                hdu.header.update(key.upper(), value)
+                hdu.header.set(key.upper(), value)
             except:
                 try:
-                    hdu.header.update(key.upper(), str(value))
+                    hdu.header.set(key.upper(), str(value))
                 except:
                     pass
 
-        hdu.header.update('NRPUFILE', self.information['flatfieldfile'])
+        hdu.header.set('NRPUFILE', self.information['flatfieldfile'])
 
         #write booleans
         for key, value in self.booleans.iteritems():
             #truncate long keys
             if len(key) > 8:
                 key = key[:7]
-            hdu.header.update(key.upper(), str(value), 'Boolean Flags')
+            hdu.header.set(key.upper(), str(value), 'Boolean Flags')
 
         hdu.header.add_history('If questions, please contact Sami-Matias Niemi (s.niemi at ucl.ac.uk).')
         hdu.header.add_history('Created by VISSim (version=%.2f) at %s' % (__version__,
@@ -2276,6 +2318,9 @@ class VISsimulator():
 
         if self.overscans:
             self.addPreOverScans()
+
+        if self.shutterOpen:
+            self.addReadoutTrails()
 
         if self.radiationDamage:
             self.applyRadiationDamage()

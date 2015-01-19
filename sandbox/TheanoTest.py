@@ -8,7 +8,6 @@ THEANO_FLAGS='floatX=float64,device=cpu' python TheanoTest.py
 
 @author: sammy
 """
-
 from theano import function, config, shared, sandbox
 import theano.tensor as T
 import numpy

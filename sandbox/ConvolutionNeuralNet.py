@@ -128,6 +128,7 @@ def model(X, w, w2, w3, w4, p_drop_conv, p_drop_hidden):
 
 
 if __name__ == '__main__':
+    print theano.config.device
     print theano.config.floatX
     
     trX, teX, trY, teY = mnist(onehot=True)

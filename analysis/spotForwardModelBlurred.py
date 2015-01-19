@@ -69,14 +69,14 @@ from multiprocessing import Pool
 
 
 __author__ = 'Sami-Matias Niemi'
-__vesion__ = 1.1
+__vesion__ = 0.1
 
 #fixed parameters
 cores = 8
 
 
 def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500, spotx=2888, spoty=3514, run=700,
-                 simulation=False, truths=None, blurred=False):
+                 simulation=False, truths=None):
     """
     Forward models the spot data found from the input file. Can be used with simulated and real data.
 
@@ -184,11 +184,11 @@ def forwardModel(file, out='Data', wavelength=None, gain=3.1, size=10, burn=500,
     p0[:, 0] = np.random.normal(max, max/100., size=nwalkers)                 # peak value
     p0[:, 1] = np.random.normal(p.x_mean.value, 0.1, size=nwalkers)           # x
     p0[:, 2] = np.random.normal(p.y_mean.value, 0.1, size=nwalkers)           # y
-    print 'Using initial guess [radius, focus, width_x, width_y]:', [0.5, 0.6, 0.05, 0.09]
-    p0[:, 3] = np.random.normal(0.5, 0.01, size=nwalkers)                   # radius
+    print 'Using initial guess [radius, focus, width_x, width_y]:', [1.5, 0.6, 0.02, 0.03]
+    p0[:, 3] = np.random.normal(1.5, 0.01, size=nwalkers)                   # radius
     p0[:, 4] = np.random.normal(0.6, 0.01, size=nwalkers)                    # focus
-    p0[:, 5] = np.random.normal(0.05, 0.001, size=nwalkers)                   # width_x
-    p0[:, 6] = np.random.normal(0.09, 0.001, size=nwalkers)                   # width_y
+    p0[:, 5] = np.random.normal(0.02, 0.0001, size=nwalkers)                   # width_x
+    p0[:, 6] = np.random.normal(0.03, 0.0001, size=nwalkers)                   # width_y
 
     #initiate sampler
     pool = Pool(cores) #A hack Dan gave me to not have ghost processes running as with threads keyword
@@ -282,8 +282,8 @@ def log_prior(theta, peakrange):
     Priors, limit the values to a range but otherwise flat.
     """
     peak, center_x, center_y, radius, focus, width_x, width_y = theta
-    if 7. < center_x < 14. and 7. < center_y < 14. and 1.e-4 < width_x < 0.25 and 1.e-4 < width_y < 0.3 and \
-       peakrange[0] < peak < peakrange[1] and 0.4 < radius < 1. and 0.2 < focus < 1.5:
+    if 7. < center_x < 14. and 7. < center_y < 14. and 0. < width_x < 0.25 and 0. < width_y < 0.3 and \
+       peakrange[0] < peak < peakrange[1] and 0.4 < radius < 2. and 0.3 < focus < 2.:
         return 0.
     else:
         return -np.inf
@@ -316,7 +316,7 @@ def log_likelihood(theta, x, y, data, var, size):
     #lnL = - 0.5 * np.sum((data - model)**2 / var)
     #Gary B. said that this should be from the model not data so recompute var (now contains rn**2)
     var += model.copy()
-    lnL = - 0.5 * np.sum((data - model)**2 / var)
+    lnL = - (np.size(var)*np.sum(np.log(var))) - (0.5 * np.sum((data - model)**2 / var))
 
     return lnL
 
@@ -385,33 +385,6 @@ def _R2err(sigmax, sigmay, sigmaxerr ,sigmayerr):
     err = np.sqrt((2*_R2FromGaussian(sigmax, sigmay))**2*sigmaxerr**2 +
                   (2*_R2FromGaussian(sigmax, sigmay))**2*sigmayerr**2)
     return err
-
-
-def getFiles(mintime=(17, 20, 17), maxtime=(17, 33, 17), folder='data/30Jul/'):
-    """
-    Find all files between a minimum time and maximum time from a given folder.
-
-    :param mintime: minimum time (h, min, s)
-    :type mintime: tuple
-    :param maxtime: maximum time (h, min, s)
-    :type maxtime: tuple
-    :param folder: folder from which FITS files are looked for
-    :type folder: str
-
-    :return: a list of file names that have been taken between the two times.
-    :rtype: list
-    """
-    start = datetime.time(*mintime)
-    stop = datetime.time(*maxtime)
-    all = g.glob(folder + '*.fits')
-    ret = []
-    for f in all:
-        path, file = os.path.split(f)
-        numbs = [int(x) for x in file.replace('sEuclid.fits', '').split('_')]
-        data = datetime.time(*numbs)
-        if start <= data <= stop:
-            ret.append(file)
-    return [folder + f for f in ret]
 
 
 def _plotDifferenceIndividualVsJoined(individuals, joined, title='800nm', sigma=3,
@@ -627,127 +600,6 @@ def plotAllResiduals():
         _plotModelResiduals(id=id, folder='results/', out='results/%sResidual.pdf' % id, individual=True)
 
 
-def _CCDkernel(CCDx=10, CCDy=10, width_x=0.35, width_y=0.4, size=21):
-    """
-    Generate a CCD PSF using a 2D Gaussian and save it to file.
-    """
-    x = np.arange(0, size)
-    y = np.arange(0, size)
-    xx, yy = np.meshgrid(x, y)
-    xx = xx.flatten()
-    yy = yy.flatten()
-    CCD = models.Gaussian2D(1., CCDx, CCDy, width_x, width_y, 0.)
-    CCDdata = CCD.eval(xx, yy, 1., CCDx, CCDy, width_x, width_y, 0.).reshape((size, size))
-    fileIO.writeFITS(CCDdata, 'CCDPSF.fits', int=False)
-    return CCDdata
-
-
-def _AiryDisc(amplitude=1.5e5, center_x=10.0, center_y=10.0, radius=0.5, focus=0.4, size=21,
-              resample=False):
-    """
-    Generate a CCD PSF using a 2D Gaussian and save it to file.
-    """
-    x = np.arange(0, size)
-    y = np.arange(0, size)
-    xx, yy = np.meshgrid(x, y)
-    xx = xx.flatten()
-    yy = yy.flatten()
-    airy = models.AiryDisk2D(amplitude, center_x, center_y, radius)
-    adata = airy.eval(xx, yy, amplitude, center_x, center_y, radius).reshape((size, size))
-    fileIO.writeFITS(adata, 'AiryDisc.fits', int=False)
-    f = models.Gaussian2D(1., center_x, center_y, focus, focus, 0.)
-    focusdata = f.eval(xx, yy, 1., center_x, center_y, focus, focus, 0.).reshape((size, size))
-    model1 = signal.convolve2d(adata.copy(), focusdata, mode='same')
-    model2 = scipy.ndimage.filters.gaussian_filter(adata, sigma=focus)
-    fileIO.writeFITS(model1, 'AiryDiscDefocused1.fits', int=False)
-    fileIO.writeFITS(model2, 'AiryDiscDefocused2.fits', int=False)
-
-    if resample:
-        import SamPy.image.manipulation as m
-        tmp = m.frebin(model2, 21, nlout=21, total=False)
-        tmp /= tmp.max()
-        tmp *= 1.5e5
-        fileIO.writeFITS(tmp, 'AiryDiscDefocused1Rebin.fits', int=False)
-
-    return adata, model1
-
-
-def plotModelExample(size=10):
-    data = pf.getdata('testdata/stacked.fits') * 3.1
-    y, x = m.maximum_position(data)
-    spot = data[y-size:y+size+1, x-size:x+size+1].copy()
-    bias = np.median(data[y-size: y+size, x-220:x-20])
-    print 'ADC offset (e):', bias
-    spot -= bias
-    spot[spot < 0.] = 1.
-
-    #CCD PSF and Airy disc
-    CCD = _CCDkernel()
-    airy, defocused = _AiryDisc()
-
-    #log all
-    spot = np.log10(spot + 1.)
-    CCD = np.log10(CCD + 1.)
-    airy = np.log10(airy + 1.)
-    defocused = np.log10(defocused + 1.)
-
-    #figure
-    matplotlib.rc('text', usetex=True)
-    fig = plt.figure(figsize=(12, 12))
-    ax1 = fig.add_subplot(221)
-    ax2 = fig.add_subplot(222)
-    ax3 = fig.add_subplot(223)
-    ax4 = fig.add_subplot(224)
-    ax = [ax1, ax2, ax3, ax4]
-    fig.subplots_adjust(hspace=0.05, wspace=0.3, top=0.95, bottom=0.02, left=0.02, right=0.9)
-
-    ax1.set_title('Data')
-    ax2.set_title('Airy Disc')
-    ax3.set_title('CCD Kernel')
-    ax4.set_title('Defocused Airy Disc')
-
-    im1 = ax1.imshow(spot, interpolation='none', origin='lower', vmin=0., vmax=4.7)
-    im2 = ax2.imshow(airy, interpolation='none', origin='lower', vmin=0., vmax=4.7)
-    im3 = ax3.imshow(CCD, interpolation='none', origin='lower', vmin=0., vmax=0.05)
-    im4 = ax4.imshow(defocused, interpolation='none', origin='lower', vmin=0., vmax=4.7)
-
-    divider = make_axes_locatable(ax1)
-    cax1 = divider.append_axes("right", size="5%", pad=0.05)
-    divider = make_axes_locatable(ax2)
-    cax2 = divider.append_axes("right", size="5%", pad=0.05)
-    divider = make_axes_locatable(ax3)
-    cax3 = divider.append_axes("right", size="5%", pad=0.05)
-    divider = make_axes_locatable(ax4)
-    cax4 = divider.append_axes("right", size="5%", pad=0.05)
-    cbar1 = plt.colorbar(im1, cax=cax1)
-    cbar1.set_label(r'$\log_{10}(D_{i, j} + 1 \quad [e^{-}]$)')
-    cbar2 = plt.colorbar(im2, cax=cax2)
-    cbar2.set_label(r'$\log_{10}(A_{i, j} + 1 \quad [e^{-}]$)')
-    cbar3 = plt.colorbar(im3, cax=cax3)
-    cbar3.set_label(r'$\log_{10}(G_{\textrm{CCD}} + 1 \quad [e^{-}])$')
-    cbar4 = plt.colorbar(im4, cax=cax4)
-    cbar4.set_label(r'$\log_{10}(A_{i, j} \ast G_{\textrm{focus}} + 1 \quad [e^{-}])$')
-
-    for tmp in ax:
-        plt.sca(tmp)
-        plt.xticks(visible=False)
-        plt.yticks(visible=False)
-
-    plt.savefig('ModelExample.pdf')
-    plt.close()
-
-
-def _printAnalysedData(folder='results/', id='J*.pkl'):
-    print 'Wavelength   Median Intensity    Number of Files     SNR'
-    structure = '%i     &   %.1f    &   %i    &     %.0f \\\\'
-    for file in g.glob(folder+id):
-        tmp = fileIO.cPicleRead(file)
-        med = np.median(tmp['peakvalues'])
-        wave = int(tmp['wavelength'].replace('nm', ''))
-        out = structure %  (wave, med/1.e3, np.size(tmp['peakvalues']), med/(np.sqrt(med + 4.5**2)))
-        print out
-
-
 def _amplitudeFromPeak(peak, x, y, radius, x_0=10, y_0=10):
     """
     This function can be used to estimate an Airy disc amplitude from the peak pixel, centroid and radius.
@@ -774,25 +626,6 @@ def _peakFromTruth(theta, size=21):
     adata = airy.eval(x, y, amplitude, center_x, center_y, radius)
     return adata.max()
 
-
-def _expectedValues():
-    """
-    These values are expected for well exposed spot data. The dictionary has a tuple for each wavelength.
-    Note that for example focus is data set dependent and should be used only as an indicator of a possible value.
-
-    keys: l600, l700, l800, l890
-
-    tuple = [radius, focus, widthx, widthy]
-    """
-    out = dict(l600=(0.45, 0.40, 0.34, 0.32),
-               l700=(0.47, 0.40, 0.32, 0.31),
-               l800=(0.49, 0.41, 0.30, 0.30),
-               l800l=(0.49, 0.41, 0.27, 0.27),
-               l800m=(0.49, 0.41, 0.30, 0.30),
-               l800h=(0.49, 0.41, 0.31, 0.31),
-               l890=(0.54, 0.38, 0.29, 0.29))
-
-    return out
 
 
 def _simpleExample(CCDx=10, CCDy=10):
@@ -825,7 +658,7 @@ def analyseOutofFocus():
 
     """
     forwardModel('data/13_24_53sEuclid.fits', wavelength='l800', out='blurred800',
-                 spotx=2983, spoty=3760, size=10, blurred=True, burn=10000, run=10000)
+                 spotx=2983, spoty=3760, size=10, burn=10000, run=20000)
 
 
 if __name__ == '__main__':

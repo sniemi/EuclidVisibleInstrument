@@ -5,11 +5,12 @@ Photometric Redshifts
 This scripts shows simple methods to derive photometric redshifts using machine learning.
 
 :requires: pandas
+:requires: numpy
 :requires: scikit-learn
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.2
+:version: 0.3
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -25,6 +26,7 @@ matplotlib.rcParams['image.interpolation'] = 'none'
 import matplotlib as mpl
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestRegressor
@@ -172,15 +174,17 @@ def plotResults(predicted, expected, output):
     mae = metrics.mean_absolute_error(expected, predicted)
     mse = metrics.mean_squared_error(expected, predicted)
     r2 = metrics.r2_score(expected, predicted)
+    rms = np.sqrt(np.mean((expected - predicted) ** 2))
 
     print output
     print 'Explained variance (best possible score is 1.0, lower values are worse):', var
     print 'Mean Absolute Error (best is 0.0):', mae
     print 'Mean Squred Error (best is 0.0):', mse
     print 'R2 score (best is 1.0):', r2
+    print 'RMS:', rms
     print '\n\n\n'
 
-    title = 'Var=%.3f, MAE=%.3f, MSE=%.3f, R2=%.3f' % (var, mae, mse, r2)
+    title = 'RMS=%.4f, MSE=%.4f, R2=%.3f' % (rms, mse, r2)
 
     fig = plt.figure()
     ax1 = fig.add_subplot(111)

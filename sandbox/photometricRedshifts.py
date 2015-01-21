@@ -10,7 +10,7 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.3
+:version: 0.4
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -30,7 +30,9 @@ import numpy as np
 import pandas as pd
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor as GBR
 from sklearn import linear_model
+from sklearn.svm import SVR
 from sklearn import grid_search
 from sklearn.cross_validation import cross_val_score
 from sklearn import metrics
@@ -151,10 +153,67 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     return predicted, expected
     
     
+def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
+    """
+    
+    """
+    if search:
+        # parameter values over which we will search
+        parameters = {'C': [0.1, 0.5, 1., 1.5, 2.],
+                     'kernel': ['rbf', 'sigmoid', 'poly'],
+                     'degree': [3, 5]}
+        s = SVR()
+        #note: one can run out of memory if using n_jobs=-1..
+        clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
+                                       n_jobs=4, verbose=1, cv=3)
+    else:
+        clf = SVR(verbose=1)
+    
+    print '\nTraining...'
+    clf.fit(X_train, y_train)
+    print 'Done'
+    
+    print '\nPredicting...'
+    predicted = clf.predict(X_test)
+    expected = y_test.copy()    
+    print 'Done'
+
+    return predicted, expected    
+ 
+    
 def BayesianRidge(X_train, X_test, y_train, y_test, search=True):
+    """
+    """
     print '\nTraining...'
     clf = linear_model.BayesianRidge(n_iter=1000, tol=1e-3, alpha_1=1., 
                                      fit_intercept=True, normalize=False, verbose=1)
+    clf.fit(X_train, y_train)
+    print 'Done'
+    
+    print '\nPredicting...'
+    predicted = clf.predict(X_test)
+    expected = y_test.copy()    
+    print 'Done'
+
+    return predicted, expected    
+
+
+def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
+    if search:
+        # parameter values over which we will search
+        parameters = {'loss': ['ls', 'lad', 'huber'],
+                     'learning_rate': [0.05, 0.1, 0.2],
+                     'n_estimators': [50, 100, 300, 500],
+                     'max_depth': [3, 5, 8],
+                     'max_features':['auto', 'sqrt', None]}
+        s = SVR()
+        #note: one can run out of memory if using n_jobs=-1..
+        clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
+                                       n_jobs=-1, verbose=1, cv=3)
+    else:
+        clf = GBR(verbose=1, n_estimators=400, max_depth=8)
+        
+    print '\nTraining...'    
     clf.fit(X_train, y_train)
     print 'Done'
     
@@ -222,9 +281,26 @@ def runBayesianRidgeKaggle(useErrors=True):
     predicted, expected = BayesianRidge(X_train, X_test, y_train, y_test)
     plotResults(predicted, expected, output='BayesianRidgeKaggleErrors')
     
+    
+def runSupportVectorRegression(useErrors=False, search=False):
+    """
+    Really slow, not worth..
+    """
+    X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
+    predicted, expected = SupportVectorRegression(X_train, X_test, y_train, y_test, search)
+    plotResults(predicted, expected, output='SVRKaggleErrors')    
 
+
+def runGradientBoostingRegressor(useErrors=True, search=False):
+    X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
+    predicted, expected = GradientBoostingRegressor(X_train, X_test, y_train, y_test, search)
+    plotResults(predicted, expected, output='GBRKaggleErrors')    
+
+    
 if __name__ == '__main__':
     #runRandomForestKaggle(search=True)
     #runRandomForestSDSSQSO()
-    runRandomForestKaggle()
+    #runRandomForestKaggle()
     #runBayesianRidgeKaggle()
+    #runSupportVectorRegression()
+    runGradientBoostingRegressor()

@@ -9,7 +9,7 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.1
+:version: 0.2
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestRegressor
+from sklearn import linear_model
 from sklearn import grid_search
 from sklearn.cross_validation import cross_val_score
 from sklearn import metrics
@@ -146,6 +147,21 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     print 'Done'
 
     return predicted, expected
+    
+    
+def BayesianRidge(X_train, X_test, y_train, y_test, search=True):
+    print '\nTraining...'
+    clf = linear_model.BayesianRidge(n_iter=1000, tol=1e-3, alpha_1=1., 
+                                     fit_intercept=True, normalize=False, verbose=1)
+    clf.fit(X_train, y_train)
+    print 'Done'
+    
+    print '\nPredicting...'
+    predicted = clf.predict(X_test)
+    expected = y_test.copy()    
+    print 'Done'
+
+    return predicted, expected    
 
 
 def plotResults(predicted, expected, output):
@@ -197,7 +213,14 @@ def runRandomForestKaggle(useErrors=True, search=False):
     plotResults(predictedRF, expectedRF, output='RandomForestKaggleErrors')
 
 
+def runBayesianRidgeKaggle(useErrors=True):
+    X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
+    predicted, expected = BayesianRidge(X_train, X_test, y_train, y_test)
+    plotResults(predicted, expected, output='BayesianRidgeKaggleErrors')
+    
+
 if __name__ == '__main__':
     #runRandomForestKaggle(search=True)
     #runRandomForestSDSSQSO()
     runRandomForestKaggle()
+    #runBayesianRidgeKaggle()

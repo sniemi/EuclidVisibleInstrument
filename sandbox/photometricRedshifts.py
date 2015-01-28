@@ -10,7 +10,7 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.5
+:version: 0.6
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -126,17 +126,19 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     """
     if search:
         # parameter values over which we will search
-        parameters = {'n_estimators': [10, 50, 100, 200, 500, 1000],
+        parameters = {'min_samples_split': [2, 8, 15],
+                      'min_samples_leaf': [1, 3, 10],
                      'max_features': [None, 'auto', 'sqrt'],
                      'max_depth': [None, 5, 10]}
-        rf = RandomForestRegressor()
+        rf = RandomForestRegressor(n_estimators=1000, n_jobs=-1, verbose=1)
         #note: one can run out of memory if using n_jobs=-1..
         rf_tuned = grid_search.GridSearchCV(rf, parameters, scoring='r2', n_jobs=2, verbose=1, cv=3)
     else:
-        #ok for QSO sample:
-        rf_tuned = RandomForestRegressor(n_estimators=1000, max_depth=None, max_features='sqrt',
+        rf_tuned = RandomForestRegressor(n_estimators=5000, max_depth=None,
+                                         max_features='sqrt',
+                                         min_samples_split=5, min_samples_leaf=3,
                                          n_jobs=-1, verbose=1)
-        #ok for kaggle sample:
+       #n_estimators=5000 will take about 36GB of RAM
 
     print '\nTraining...'
     rf_optimised = rf_tuned.fit(X_train, y=y_train)
@@ -157,7 +159,7 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     
 def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
     """
-    
+    Support Vector Regression.
     """
     if search:
         # parameter values over which we will search
@@ -165,15 +167,21 @@ def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
                      'kernel': ['rbf', 'sigmoid', 'poly'],
                      'degree': [3, 5]}
         s = SVR()
-        #note: one can run out of memory if using n_jobs=-1..
         clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
-                                       n_jobs=4, verbose=1, cv=3)
+                                       n_jobs=-1, verbose=1, cv=3)
     else:
         clf = SVR(verbose=1)
     
     print '\nTraining...'
     clf.fit(X_train, y_train)
     print 'Done'
+
+    if search:
+        print 'The best score and estimator:'
+        print(clf.best_score_)
+        print(clf.best_estimator_)
+        print 'Best hyperparameters:'
+        print clf.best_params_
     
     print '\nPredicting...'
     predicted = clf.predict(X_test)
@@ -216,17 +224,18 @@ def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
     """
     if search:
         # parameter values over which we will search
-        parameters = {'loss': ['ls', 'lad', 'huber'],
+        parameters = {'loss': ['ls', 'huber'],
                      'learning_rate': [0.01, 0.2, 0.4, 0.6, 1.0],
-                     'max_depth': [3, 5, 7],
-                     'max_features': ['auto', 'sqrt', None]}
+                     'max_depth': [3, 5, 7, 9],
+                     'max_features': ['auto', None]}
         s = GBR(n_estimators=1000, verbose=1)
         #note: one can run out of memory if using n_jobs=-1..
         clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
                                        n_jobs=-1, verbose=1, cv=3)
     else:
         clf = GBR(verbose=1, n_estimators=5000, min_samples_leaf=3,
-                  learning_rate=0.5)
+                  learning_rate=0.05, max_features='auto', loss='huber',
+                  max_depth=7)
         
     print '\nTraining...'    
     clf.fit(X_train, y_train)
@@ -379,7 +388,7 @@ def runBayesianRidgeKaggle(useErrors=True):
     
 def runSupportVectorRegression(useErrors=False, search=False):
     """
-    Really slow, not worth..
+    Really slow...
     """
     X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
     predicted, expected = SupportVectorRegression(X_train, X_test, y_train, y_test, search)
@@ -387,6 +396,9 @@ def runSupportVectorRegression(useErrors=False, search=False):
 
 
 def runGradientBoostingRegressor(useErrors=True, search=False):
+    """
+    Run Gradient Boosting on Kaggle training data.
+    """
     X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
     GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test)
     predicted, expected = GradientBoostingRegressor(X_train, X_test, y_train, y_test, search)
@@ -396,7 +408,7 @@ def runGradientBoostingRegressor(useErrors=True, search=False):
 if __name__ == '__main__':
     #runRandomForestKaggle(search=True)
     #runRandomForestSDSSQSO()
-    #runRandomForestKaggle()
+    runRandomForestKaggle()
     #runBayesianRidgeKaggle()
     #runSupportVectorRegression()
-    runGradientBoostingRegressor()
+    #runGradientBoostingRegressor()

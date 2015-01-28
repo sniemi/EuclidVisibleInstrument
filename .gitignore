@@ -57,3 +57,6 @@ support/sextutils.pyc
 support/surfaceFitting.pyc
 .idea/other.xml
 .idea/testrunner.xml
+objects/objects.dat
+sandbox/SOMPY.pyc
+support/GPUconvolution.pyc

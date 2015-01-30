@@ -10,7 +10,7 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.6
+:version: 0.7
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -28,6 +28,7 @@ import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn import cross_validation
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor as GBR
@@ -35,8 +36,12 @@ from sklearn import linear_model
 from sklearn.svm import SVR
 from sklearn import grid_search
 from sklearn.cross_validation import cross_val_score
+from sklearn.learning_curve import validation_curve
+from sklearn.learning_curve import learning_curve
 from sklearn import metrics
+from sklearn import preprocessing
 import copy
+import cPickle
 
 
 def loadKaggledata(folder='/Users/sammy/Google Drive/MachineLearning/photo-z/kaggleData/',
@@ -62,10 +67,18 @@ def loadKaggledata(folder='/Users/sammy/Google Drive/MachineLearning/photo-z/kag
         data_features = data[['u', 'g', 'r', 'i', 'z']]
     data_redshifts = data[['redshift']]
 
-    X_train, X_test, y_train, y_test = train_test_split(data_features.values, data_redshifts.values,
+    X_train, X_test, y_train, y_test = train_test_split(data_features.values,
+                                                        data_redshifts.values,
+                                                        test_size=0.35,
                                                         random_state=42)
-    y_test = y_test.ravel()
+    # remove mean dn scale to unit variance
+    scaler = preprocessing.StandardScaler().fit(X_train)    
+    X_train = scaler.transform(X_train)                                                    
+    X_test = scaler.transform(X_test)                                                    
+
+    #make 1D vectors
     y_train = y_train.ravel()
+    y_test = y_test.ravel()
 
     print "feature vector shape=", data_features.values.shape
     print 'Training sample shape=', X_train.shape
@@ -112,6 +125,65 @@ def loadSDSSdata(folder='/Users/sammy/Google Drive/MachineLearning/AstroSDSS/', 
     return X_train, X_test, y_train, y_test
 
 
+def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+                        n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+    """
+    Generate a simple plot of the test and traning learning curve.
+
+    Parameters
+    ----------
+    estimator : object type that implements the "fit" and "predict" methods
+        An object of that type which is cloned for each validation.
+
+    title : string
+        Title for the chart.
+
+    X : array-like, shape (n_samples, n_features)
+        Training vector, where n_samples is the number of samples and
+        n_features is the number of features.
+
+    y : array-like, shape (n_samples) or (n_samples, n_features), optional
+        Target relative to X for classification or regression;
+        None for unsupervised learning.
+
+    ylim : tuple, shape (ymin, ymax), optional
+        Defines minimum and maximum yvalues plotted.
+
+    cv : integer, cross-validation generator, optional
+        If an integer is passed, it is the number of folds (defaults to 3).
+        Specific cross-validation objects can be passed, see
+        sklearn.cross_validation module for the list of possible objects
+
+    n_jobs : integer, optional
+        Number of jobs to run in parallel (default 1).
+    """
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    plt.xlabel("Training examples")
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
+    plt.legend(loc="best", shadow=True, fancybox=True)
+    return plt
+    
+
 def randomForest(X_train, X_test, y_train, y_test, search=True):
     """
     A random forest regressor.
@@ -120,34 +192,40 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     trees on various sub-samples of the dataset and use averaging to improve the
     predictive accuracy and control over-fitting.
 
-    Runs a grid search to look for the best parameters. For the test case, these
-    were found to be the best:
-
+    Runs a grid search to look for the best parameters.
     """
     if search:
         # parameter values over which we will search
-        parameters = {'min_samples_split': [2, 8, 15],
-                      'min_samples_leaf': [1, 3, 10],
-                     'max_features': [None, 'auto', 'sqrt'],
-                     'max_depth': [None, 5, 10]}
-        rf = RandomForestRegressor(n_estimators=1000, n_jobs=-1, verbose=1)
+        parameters = {'min_samples_split': [1, 2, 3, 5, 10],
+                      'min_samples_leaf': [1, 2, 3, 5, 10],
+                     'max_features': [None, 'sqrt', 7],
+                     'max_depth': [None, 10, 30, 40]}
+        rf = RandomForestRegressor(n_estimators=1000, n_jobs=4, verbose=1)
         #note: one can run out of memory if using n_jobs=-1..
         rf_tuned = grid_search.GridSearchCV(rf, parameters, scoring='r2', n_jobs=2, verbose=1, cv=3)
     else:
-        rf_tuned = RandomForestRegressor(n_estimators=5000, max_depth=None,
-                                         max_features='sqrt',
-                                         min_samples_split=5, min_samples_leaf=3,
+        rf_tuned = RandomForestRegressor(n_estimators=2000,
+                                         max_depth=28,
+                                         max_features=7,
+                                         min_samples_split=2,
+                                         min_samples_leaf=2,
                                          n_jobs=-1, verbose=1)
        #n_estimators=5000 will take about 36GB of RAM
 
     print '\nTraining...'
     rf_optimised = rf_tuned.fit(X_train, y=y_train)
     print 'Done'
-
+    
     if search:
         print 'The best score and estimator:'
         print(rf_optimised.best_score_)
         print(rf_optimised.best_estimator_)
+        rf_optimised = rf_optimised.best_estimator
+
+    #save to a pickled file
+    fp = open('mode/RF.pkl', 'w')
+    cPickle.dump(rf_optimised, fp)
+    fp.close()
 
     print '\nPredicting...'
     predicted = rf_optimised.predict(X_test)
@@ -182,7 +260,8 @@ def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
         print(clf.best_estimator_)
         print 'Best hyperparameters:'
         print clf.best_params_
-    
+        clf = clf.best_estimator
+
     print '\nPredicting...'
     predicted = clf.predict(X_test)
     expected = y_test.copy()    
@@ -225,11 +304,10 @@ def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
     if search:
         # parameter values over which we will search
         parameters = {'loss': ['ls', 'huber'],
-                     'learning_rate': [0.01, 0.2, 0.4, 0.6, 1.0],
-                     'max_depth': [3, 5, 7, 9],
-                     'max_features': ['auto', None]}
-        s = GBR(n_estimators=1000, verbose=1)
-        #note: one can run out of memory if using n_jobs=-1..
+                     'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.5, 1.0],
+                     'max_depth': [3, 5, 7, 15, None],
+                     'max_features': ['sqrt', None]}
+        s = GBR(n_estimators=500, verbose=1)
         clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
                                        n_jobs=-1, verbose=1, cv=3)
     else:
@@ -247,13 +325,84 @@ def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
         print(clf.best_estimator_)
         print 'Best hyperparameters:'
         print clf.best_params_
-    
+        clf = clf.best_estimator
+
+    #save to a pickled file
+    fp = open('mode/GBR.pkl', 'w')
+    cPickle.dump(clf, fp)
+    fp.close()
+ 
     print '\nPredicting...'
     predicted = clf.predict(X_test)
     expected = y_test.copy()    
     print 'Done'
 
     return predicted, expected    
+
+
+def randomForestTestPlots(X_train, X_test, y_train, y_test):
+    """
+    Validation Curve
+    ================
+    Underfitting - both the training and the validation score are low. 
+    Overfitting - training score is good but the validation score is low.
+    When the score is high for both, the method is working pretty well.
+    
+    Learning Curve
+    ==============
+    learning curve shows the validation and training score of an estimator
+    for varying numbers of training samples. It is a tool to find out how much
+    we benefit from adding more training data and whether the estimator
+    suffers more from a variance error or a bias error. If both the validation
+    score and the training score converge to a value that is too low with
+    increasing size of the training set, we will not benefit much from more
+    training data.
+    """
+    title = "Validation Curve (Random Forest)"
+    print title
+    param_range = np.round(np.linspace(0, 60, 15) + 1).astype(np.int)
+    rf = RandomForestRegressor(n_estimators=100,
+                               max_features=6,
+                               min_samples_split=2,
+                               n_jobs=2, verbose=1)
+    #validation curve
+    train_scores, test_scores = validation_curve(rf,
+                                                 X_train,
+                                                 y_train,
+                                                 'max_depth',
+                                                 param_range,
+                                                 n_jobs=-1,
+                                                 verbose=1)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+
+    plt.title(title)
+    plt.xlabel("max_depth")
+    plt.ylabel("Score")
+    plt.ylim(0.8, 1.01)
+    plt.plot(param_range, train_scores_mean, label="Training score", color="r")
+    plt.fill_between(param_range, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.2, color="r")
+    plt.plot(param_range, test_scores_mean, label="Cross-validation score",
+                 color="g")
+    plt.fill_between(param_range, test_scores_mean - test_scores_std,
+             test_scores_mean + test_scores_std, alpha=0.2, color="g")
+    plt.legend(loc="best")
+    plt.savefig('RandomForestValidationCurve.pdf')
+    plt.close()
+
+    #learning curve
+    title = "Learning Curves (Random Forest)"
+    print title
+    cv = cross_validation.ShuffleSplit(X_train.shape[0], n_iter=50,
+                                       test_size=0.2, random_state=0)
+    
+    plot_learning_curve(rf, title, X_train, y_train, ylim=(0.85, 1.01), cv=cv, n_jobs=-1)
+    plt.savefig('RandomForestLearningCurve.pdf')
+    plt.close()
+
 
 
 def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estimators=100):
@@ -371,16 +520,20 @@ def runRandomForestSDSSQSO(search=False):
     plotResults(predictedRF, expectedRF, output='RandomForestSDSSQSOs')
 
 
-def runRandomForestKaggle(useErrors=True, search=False):
+def runRandomForestKaggle(useErrors=True, search=False, test=False):
     """
     Simple Random Forest on Kaggle training data.
     """
     X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
+    if test: randomForestTestPlots(X_train, X_test, y_train, y_test)
     predictedRF, expectedRF = randomForest(X_train, X_test, y_train, y_test, search=search)
     plotResults(predictedRF, expectedRF, output='RandomForestKaggleErrors')
 
 
 def runBayesianRidgeKaggle(useErrors=True):
+    """
+    Run Bayesian Ridge on Kaggle training data.
+    """
     X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
     predicted, expected = BayesianRidge(X_train, X_test, y_train, y_test)
     plotResults(predicted, expected, output='BayesianRidgeKaggleErrors')
@@ -395,20 +548,19 @@ def runSupportVectorRegression(useErrors=False, search=False):
     plotResults(predicted, expected, output='SVRKaggleErrors')    
 
 
-def runGradientBoostingRegressor(useErrors=True, search=False):
+def runGradientBoostingRegressor(useErrors=True, search=False, test=False):
     """
     Run Gradient Boosting on Kaggle training data.
     """
     X_train, X_test, y_train, y_test = loadKaggledata(useErrors=useErrors)
-    GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test)
+    if test: GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test)
     predicted, expected = GradientBoostingRegressor(X_train, X_test, y_train, y_test, search)
     plotResults(predicted, expected, output='GBRKaggleErrors')    
 
     
 if __name__ == '__main__':
-    #runRandomForestKaggle(search=True)
-    #runRandomForestSDSSQSO()
-    runRandomForestKaggle()
     #runBayesianRidgeKaggle()
+    runRandomForestKaggle(search=True)
+    runGradientBoostingRegressor(search=True)
     #runSupportVectorRegression()
-    #runGradientBoostingRegressor()
+    #runRandomForestSDSSQSO()    

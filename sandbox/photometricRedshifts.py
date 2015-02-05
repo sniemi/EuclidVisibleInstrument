@@ -10,7 +10,7 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: matplotlib
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.7
+:version: 0.8
 """
 import matplotlib
 #matplotlib.use('pdf')
@@ -184,7 +184,7 @@ def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
     return plt
     
 
-def randomForest(X_train, X_test, y_train, y_test, search=True):
+def randomForest(X_train, X_test, y_train, y_test, search=True, save=False):
     """
     A random forest regressor.
 
@@ -192,15 +192,16 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     trees on various sub-samples of the dataset and use averaging to improve the
     predictive accuracy and control over-fitting.
 
-    Runs a grid search to look for the best parameters.
+    Can run a grid search to look for the best parameters (search=True) and
+    save the model to a file (save=True).
     """
     if search:
         # parameter values over which we will search
-        parameters = {'min_samples_split': [1, 2, 3, 5, 10],
-                      'min_samples_leaf': [1, 2, 3, 5, 10],
+        parameters = {'min_samples_split': [1, 2, 3, 10],
+                      'min_samples_leaf': [1, 2, 3, 10],
                      'max_features': [None, 'sqrt', 7],
-                     'max_depth': [None, 10, 30, 40]}
-        rf = RandomForestRegressor(n_estimators=1000, n_jobs=4, verbose=1)
+                     'max_depth': [None, 15, 30, 40]}
+        rf = RandomForestRegressor(n_estimators=100, n_jobs=4, verbose=1)
         #note: one can run out of memory if using n_jobs=-1..
         rf_tuned = grid_search.GridSearchCV(rf, parameters, scoring='r2', n_jobs=2, verbose=1, cv=3)
     else:
@@ -220,12 +221,13 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
         print 'The best score and estimator:'
         print(rf_optimised.best_score_)
         print(rf_optimised.best_estimator_)
-        rf_optimised = rf_optimised.best_estimator
+        rf_optimised = rf_optimised.best_estimator_
 
-    #save to a pickled file
-    fp = open('mode/RF.pkl', 'w')
-    cPickle.dump(rf_optimised, fp)
-    fp.close()
+    if save:
+        print 'Save the Random Forest to a pickled file; note that the model can quickly take 100G'
+        fp = open('model/RF.pkl', 'w')
+        cPickle.dump(rf_optimised, fp)
+        fp.close()
 
     print '\nPredicting...'
     predicted = rf_optimised.predict(X_test)
@@ -235,9 +237,12 @@ def randomForest(X_train, X_test, y_train, y_test, search=True):
     return predicted, expected
     
     
-def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
+def SupportVectorRegression(X_train, X_test, y_train, y_test, search, save=False):
     """
     Support Vector Regression.
+    
+    Can run a grid search to look for the best parameters (search=True) and
+    save the model to a file (save=True).    
     """
     if search:
         # parameter values over which we will search
@@ -261,6 +266,12 @@ def SupportVectorRegression(X_train, X_test, y_train, y_test, search):
         print 'Best hyperparameters:'
         print clf.best_params_
         clf = clf.best_estimator
+
+    if save:
+        print 'Save the SVR model to a pickled file...'
+        fp = open('model/SVR.pkl', 'w')
+        cPickle.dump(clf, fp)
+        fp.close()
 
     print '\nPredicting...'
     predicted = clf.predict(X_test)
@@ -287,20 +298,23 @@ def BayesianRidge(X_train, X_test, y_train, y_test, search=True):
     return predicted, expected    
 
 
-def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
+def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search, save=False):
     """
     GB builds an additive model in a forward stage-wise fashion;
     it allows for the optimization of arbitrary differentiable loss functions.
     In each stage a regression tree is fit on the negative gradient of the
     given loss function.
-    
-     Among the most important hyperparameters for GBRT are:
+
+    Can run a grid search to look for the best parameters (search=True) and
+    save the model to a file (save=True).    
+    Among the most important hyperparameters for GBRT are:
 
         #. number of regression trees (n_estimators)
         #. depth of each individual tree (max_depth)
         #. loss function (loss)
         #. learning rate (learning_rate)
-    """
+
+    """   
     if search:
         # parameter values over which we will search
         parameters = {'loss': ['ls', 'huber'],
@@ -325,12 +339,13 @@ def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search):
         print(clf.best_estimator_)
         print 'Best hyperparameters:'
         print clf.best_params_
-        clf = clf.best_estimator
+        clf = clf.best_estimator_
 
-    #save to a pickled file
-    fp = open('mode/GBR.pkl', 'w')
-    cPickle.dump(clf, fp)
-    fp.close()
+    if save:
+        print 'Save the BGR model to a pickled file...'
+        fp = open('model/GBR.pkl', 'w')
+        cPickle.dump(clf, fp)
+        fp.close()
  
     print '\nPredicting...'
     predicted = clf.predict(X_test)
@@ -560,7 +575,7 @@ def runGradientBoostingRegressor(useErrors=True, search=False, test=False):
     
 if __name__ == '__main__':
     #runBayesianRidgeKaggle()
-    runRandomForestKaggle(search=True)
-    runGradientBoostingRegressor(search=True)
+    runRandomForestKaggle()
+    runGradientBoostingRegressor()
     #runSupportVectorRegression()
     #runRandomForestSDSSQSO()    

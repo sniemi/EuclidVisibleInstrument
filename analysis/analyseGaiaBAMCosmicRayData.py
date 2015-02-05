@@ -13,7 +13,7 @@ This scripts derives simple cosmic ray statististics from Gaia BAM data.
 :requires: skimage (scikit-image)
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.2
+:version: 0.3
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -101,7 +101,9 @@ def _findCosmicRays(log, array, output, sigma=2.):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(16, 6))
     ax1.imshow(array, cmap=plt.cm.gray, interpolation='none', vmin=0, vmax=500)
     ax1.axis('off')
+    ax2.set_title('Pixel Values')
     ax2.hist(array.ravel(), bins=np.linspace(0, 500., 100), normed=True)
+    ax2.set_xlabel('DNs')
     plt.savefig(output+'histogram.png')
     plt.close()
     
@@ -117,6 +119,7 @@ def _findCosmicRays(log, array, output, sigma=2.):
     plt.close()
     
     #energy and track lengths
+    plt.title(output.replace('_', '\_')) #needed for LaTeX
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
     ax1.hist(energy, bins=20, normed=True)
     ax2.hist(tracks, bins=20, normed=True)
@@ -161,14 +164,15 @@ def analyseData(log, files, data):
         labels, tracks, energy = _findCosmicRays(log, d, out)
         allD.append([d, labels, tracks, energy])
         
-    tracks = [x[2] for x in allD]
-    energies = [x[3] for x in allD]
-    
+    #pull out the information from the individual files and join to a single array
+    tracks = np.concatenate(np.asarray([x[2] for x in allD]))
+    energies = np.concatenate(np.asarray([x[3] for x in allD]))
+ 
     #energy and track lengths
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
-    ax1.hist(energies, bins=np.linspace(0, 2000, 25), normed=True)
-    ax2.hist(tracks, bins=np.linspace(1, 40, 20), normed=True)
-    ax1.set_xlabel('Energy [DN]')
+    ax1.hist(energies, bins=np.linspace(0, 2000, 50), normed=True)
+    ax2.hist(tracks, bins=np.linspace(1, 40, 40), normed=True)
+    ax1.set_xlabel('$\Sigma$Energy [DN]')
     ax1.set_ylabel('PDF')
     ax2.set_xlabel('Track Lengths [pix]')
     plt.savefig('CRPDFs.png')

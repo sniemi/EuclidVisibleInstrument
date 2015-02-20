@@ -71,7 +71,7 @@ from multiprocessing import Pool
 
 
 __author__ = 'Sami-Matias Niemi'
-__vesion__ = 1.8
+__vesion__ = 1.9
 
 #fixed parameters
 cores = 8
@@ -1293,14 +1293,12 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=3):
         fluxes600.append(np.median([d['peakvalue'] for d in x]))
         fluxes600err.append(np.std([d['peakvalue'] for d in x]))
 
-    #wx600 = _FWHMGauss(np.asarray(wx600))
-    #wy600 = _FWHMGauss(np.asarray(wy600))
+    wx600 = _FWHMGauss(np.asarray(wx600))
+    wy600 = _FWHMGauss(np.asarray(wy600))
     fluxes600 = np.asarray(fluxes600)
     fluxes600err = np.asarray(fluxes600err)
     #averaged over many runs
-    wx600 = _FWHMGauss(np.asarray([0.26, 0.28, 0.316]))
     wx600err = _FWHMGauss(np.asarray(wxerr))
-    wy600 = _FWHMGauss(np.asarray([0.30, 0.31, 0.3315560]))
     wy600err = _FWHMGauss(np.asarray(wyerr))
     w600 = np.sqrt(wx600*wy600)
     w600err = np.sqrt(wx600err*wy600err)
@@ -1337,16 +1335,12 @@ def plotBrighterFatter(out='BrighterFatter.pdf', requirementFWHM=10.8, sigma=3):
         fluxes800.append(np.median([d['peakvalue'] for d in x]))
         fluxes800err.append(np.std([d['peakvalue'] for d in x]))
 
-    #wx800 = _FWHMGauss(np.asarray(wx800))
-    #wy800 = _FWHMGauss(np.asarray(wy800))
+    wx800 = _FWHMGauss(np.asarray(wx800))
+    wy800 = _FWHMGauss(np.asarray(wy800))
     fluxes800 = np.asarray(fluxes800)
     fluxes800err = np.asarray(fluxes800err)
     #averaged over many runs
-    wx800pix = np.asarray([0.241, 0.248, 0.245, 0.26, 0.28, 0.29, 0.304, 0.30848382])
-    wx800 = _FWHMGauss(wx800pix)
     wx800err = _FWHMGauss(np.asarray(wxerr))
-    wy800pix = np.asarray([0.2401, 0.251, 0.246, 0.27, 0.285, 0.294, 0.298, 0.2972725])
-    wy800 = _FWHMGauss(wy800pix)
     wy800err = _FWHMGauss(np.asarray(wyerr))
     w800 = np.sqrt(wx800*wy800)
     w800err = np.sqrt(wx800err*wy800err)
@@ -1724,13 +1718,6 @@ def plotLambdaDependency(folder='results/', analysis='good', sigma=3):
     wy = _FWHMGauss(wypix)
     wyerrpix = np.asarray([d['wyerr'] for d in data])
     wyerr = _FWHMGauss(wyerrpix)
-    #hand derived -- picked the averages of the fits from many many runs
-    wxpix = np.asarray([0.315, 0.31, 0.305, 0.29])
-    wx = _FWHMGauss(wxpix)
-    wxerrpix = np.asarray([0.01, 0.011, 0.012, 0.015])
-    wxerr = _FWHMGauss(wxerrpix)
-    # wy = np.asarray([_FWHMGauss(d) for d in [0.33, 0.31, 0.295, 0.29]])
-    # wyerr = np.asarray([_FWHMGauss(d) for d in [0.01, 0.011, 0.013, 0.015]])
     waves = np.asarray(waves)
 
     w = np.sqrt(wx*wy)

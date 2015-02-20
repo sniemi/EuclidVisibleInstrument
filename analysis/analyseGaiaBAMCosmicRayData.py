@@ -78,6 +78,8 @@ def readData(log, files):
 
 def preProcessData(log, data, info, rebin=True):
     """
+    Removes the first line, transposes the array, subtracts the median (derived ADC offset),
+    and rebins (optinal) to the unbinned frame.
     """
     out = []
     for d, i in zip(data, info):

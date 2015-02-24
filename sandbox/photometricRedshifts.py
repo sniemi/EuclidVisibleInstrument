@@ -9,6 +9,12 @@ This scripts shows simple methods to derive photometric redshifts using machine 
 :requires: scikit-learn
 :requires: matplotlib
 
+tested with:
+pandas 0.15.2
+Numpy 1.9.1
+sklearn 0.15.2
+matplotlib 1.4.2
+
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
 :version: 0.8
 """
@@ -318,16 +324,14 @@ def GradientBoostingRegressor(X_train, X_test, y_train, y_test, search, save=Fal
     if search:
         # parameter values over which we will search
         parameters = {'loss': ['ls', 'huber'],
-                     'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.5, 1.0],
-                     'max_depth': [3, 5, 7, 15, None],
+                     'learning_rate': [0.001, 0.01, 0.05, 0.1, 0.5],
+                     'max_depth': [1, 2, 3, 5, 7, None],
                      'max_features': ['sqrt', None]}
         s = GBR(n_estimators=500, verbose=1)
         clf = grid_search.GridSearchCV(s, parameters, scoring='r2',
                                        n_jobs=-1, verbose=1, cv=3)
     else:
-        clf = GBR(verbose=1, n_estimators=5000, min_samples_leaf=3,
-                  learning_rate=0.05, max_features='auto', loss='huber',
-                  max_depth=7)
+        clf = GBR(verbose=1, n_estimators=5000,learning_rate=0.05, loss='huber', max_depth=3, subsample=0.8)
         
     print '\nTraining...'    
     clf.fit(X_train, y_train)
@@ -420,7 +424,7 @@ def randomForestTestPlots(X_train, X_test, y_train, y_test):
 
 
 
-def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estimators=100):
+def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estimators=1000):
     """
     An important diagnostic when using GBRT in practise is the so-called deviance
     plot that shows the training/testing error (or deviance) as a function of the
@@ -451,6 +455,7 @@ def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estim
 
     est = GBR(n_estimators=n_estimators, verbose=1)
     est.fit(X_train, y_train)
+    feature_importance = est.feature_importances_
     
     test_dev, ax = deviance_plot(est, X_test, y_test)
     ax.legend(loc='upper right')
@@ -460,6 +465,7 @@ def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estim
     plt.savefig('GBRdeviance.pdf')
     plt.close()
         
+    #sample leaves
     fig = plt.figure(figsize=(8, 5))
     ax = plt.gca()
     for params, (test_color, train_color) in [({'min_samples_leaf': 1},
@@ -476,11 +482,12 @@ def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estim
     plt.savefig('GBRTree.pdf')
     plt.close()
     
+    #lerning rate
     fig = plt.figure(figsize=(8, 5))
     ax = plt.gca()
-    for params, (test_color, train_color) in [({'learning_rate': 0.5},
+    for params, (test_color, train_color) in [({'learning_rate': 0.2},
                                                 ('#d7191c', '#2c7bb6')),
-                                              ({'learning_rate': 1.},
+                                              ({'learning_rate': 0.7},
                                                ('#fdae61', '#abd9e9'))]:
         est = GBR(n_estimators=n_estimators, verbose=1)
         est.set_params(**params)
@@ -490,6 +497,38 @@ def GradientBoostingRegressorTestPlots(X_train, X_test, y_train, y_test, n_estim
                                      train_color=train_color, test_color=test_color)
     plt.legend(loc='upper right')
     plt.savefig('GBRShrinkage.pdf')
+    plt.close()
+    
+    #sub-samples
+    fig = plt.figure(figsize=(8, 5))
+    ax = plt.gca()
+    for params, (test_color, train_color) in [({'subsample': 1.},
+                                                ('#d7191c', '#2c7bb6')),
+                                              ({'subsample': 0.7},
+                                               ('#fdae61', '#abd9e9'))]:
+        est = GBR(n_estimators=n_estimators, verbose=1)
+        est.set_params(**params)
+        est.fit(X_train, y_train)
+        
+        test_dev, ax = deviance_plot(est, X_test, y_test, ax=ax, label=fmt_params(params),
+                                     train_color=train_color, test_color=test_color)
+    plt.legend(loc='upper right')
+    plt.savefig('GBRSubsample.pdf')
+    plt.close()    
+    
+    #feature importance
+    feature_names = ['u', 'g', 'r', 'i', 'z', 'modelmagerr_u', 'modelmagerr_g',
+                     'modelmagerr_r', 'modelmagerr_i', 'modelmagerr_z']
+    feature_names = np.asarray(feature_names)
+    feature_importance = 100.0 * (feature_importance / feature_importance.max())
+    sorted_idx = np.argsort(feature_importance)
+    pos = np.arange(sorted_idx.shape[0]) + .5
+    plt.subplot(1, 1, 1)
+    plt.barh(pos, feature_importance[sorted_idx], align='center')
+    plt.yticks(pos, feature_names[sorted_idx])
+    plt.xlabel('Relative Importance')
+    plt.title('Variable Importance')
+    plt.savefig('GBRImportance.pdf')
     plt.close()
 
 
@@ -563,7 +602,7 @@ def runSupportVectorRegression(useErrors=False, search=False):
     plotResults(predicted, expected, output='SVRKaggleErrors')    
 
 
-def runGradientBoostingRegressor(useErrors=True, search=False, test=False):
+def runGradientBoostingRegressor(useErrors=True, search=False, test=True):
     """
     Run Gradient Boosting on Kaggle training data.
     """
@@ -575,7 +614,7 @@ def runGradientBoostingRegressor(useErrors=True, search=False, test=False):
     
 if __name__ == '__main__':
     #runBayesianRidgeKaggle()
-    runRandomForestKaggle()
+    #runRandomForestKaggle()
     runGradientBoostingRegressor()
     #runSupportVectorRegression()
     #runRandomForestSDSSQSO()    

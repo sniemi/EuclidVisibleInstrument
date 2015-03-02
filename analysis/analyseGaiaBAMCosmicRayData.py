@@ -14,7 +14,7 @@ This scripts derives simple cosmic ray statististics from Gaia BAM data.
 :requires: vissim-python
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.5
+:version: 0.6
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -76,7 +76,7 @@ def readData(log, files):
     return data, info
 
 
-def preProcessData(log, data, info, rebin=True):
+def preProcessData(log, data, info, rebin=False):
     """
     Removes the first line, transposes the array, subtracts the median (derived ADC offset),
     and rebins (optinal) to the unbinned frame.
@@ -103,7 +103,7 @@ def preProcessData(log, data, info, rebin=True):
             msg = 'Rebinning by %i x %i' % (i['binningx'], i['binningy'])
             print msg
             log.info(msg)
-            #TODO: not sure if this is correct...
+            #TODO: this is not correct, we should treat the tracks probabilistically
             sm = d.sum()
             d = ndimage.zoom(d, (i['binningx'], i['binningy']), order=1) #bilinear
             d = d*(sm / d.sum())
@@ -158,7 +158,8 @@ def _findCosmicRays(log, array, info, output, sigma=2.):
     plt.close()
     
     #threshold image
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+#    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))    
     ax1.set_title('Data')
     ax2.set_title('Found CRs')
     ax1.imshow(array, cmap=plt.cm.gray, interpolation='none', vmin=0, vmax=2000)
@@ -228,6 +229,65 @@ def analyseData(log, files, data, info):
     plt.savefig('CRPDFs.png')
     plt.close()
     
+    
+def generateBAMdatagridImage():
+    """
+    Generates an example plot showing the Gaia BAM detector geometry
+    and binning used. A simple illustration.
+    """
+    #grid
+    x = np.linspace(0, 30*10, 11) #30 micron pixels
+    y = np.linspace(0, 10*10, 11) #10 micron pixels
+
+
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    plt.title('Gaia BAM Data: CR Tracks')
+
+    for v in y:        
+        ax.axhline(y=v)
+    for v in x:
+        ax.axvline(x=v)
+        
+    #binning area 1
+    plt.fill_between([0, 120], y1=[10, 10], y2=[20, 20], facecolor='r', alpha=0.1)
+    plt.text(60, 14, 'Binned Pixel N+1', horizontalalignment='center', verticalalignment='center')
+    plt.fill_between([0, 120], y1=[20, 20], y2=[30, 30], facecolor='g', alpha=0.1)
+    plt.text(60, 24, 'Binned Pixel N+2', horizontalalignment='center', verticalalignment='center')
+    plt.fill_between([0, 120], y1=[30, 30], y2=[40, 40], facecolor='m', alpha=0.1)
+    plt.text(60, 34, 'Binned Pixel N+3', horizontalalignment='center', verticalalignment='center')
+
+    #CR examples
+    plt.fill_between([120, 240], y1=[70, 70], y2=[80, 80], facecolor='k', alpha=0.1)
+    plt.plot([120, 240], [70, 80], 'k:', lw=1.)
+    plt.text(230, 73, '4 Pix', horizontalalignment='center', verticalalignment='center')
+    plt.fill_between([120, 240], y1=[60, 60], y2=[70, 70], facecolor='k', alpha=0.1)
+    plt.plot([120, 190], [60, 70], 'k:', lw=1.)
+    plt.text(230, 63, '3 Pix', horizontalalignment='center', verticalalignment='center')
+    plt.fill_between([120, 240], y1=[50, 50], y2=[60, 60], facecolor='k', alpha=0.1)
+    plt.plot([120, 170], [50, 60], 'k:', lw=1.)
+    plt.text(230, 53, '2 Pix', horizontalalignment='center', verticalalignment='center')
+    plt.fill_between([120, 240], y1=[40, 40], y2=[50, 50], facecolor='k', alpha=0.1)
+    plt.plot([120, 140], [40, 50], 'k:', lw=1.)
+    plt.text(230, 43, '1 Pix', horizontalalignment='center', verticalalignment='center')
+    
+    #possible CRs
+    plt.fill_between([120, 240], y1=[20, 20], y2=[30, 30], facecolor='k', alpha=0.1)
+    for xval in np.linspace(-60, 60, 31):
+        plt.plot([180, 180+xval], [20, 30], 'k:', lw=0.5)
+    for yval in np.linspace(20, 30, 11):
+        plt.plot([180, 120], [20, yval], 'k:', lw=0.5)
+        plt.plot([180, 240], [20, yval], 'k:', lw=0.5)      
+      
+    ax.set_xticks(x)    
+    ax.set_yticks(y)    
+    plt.xlabel('Physical X [microns]')     
+    plt.ylabel('Physical Y [microns]')     
+    plt.axis('scaled')
+    plt.xlim(0, 300)
+    plt.ylim(0, 100)
+    plt.savefig('BAMccdGrid.pdf')
+    plt.close()
+    
 
 def runAll():
     """
@@ -242,4 +302,5 @@ def runAll():
 
 
 if __name__ == '__main__':
-    runAll()
+#    runAll()
+    generateBAMdatagridImage()

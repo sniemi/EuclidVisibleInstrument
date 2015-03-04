@@ -59,7 +59,7 @@ def readData(log, files):
         exptime = float(hdr['EXP_TIME'].split()[0])
         tditime = float(hdr['TRO_TIME'].split()[0])
         gain = float(hdr['CONVGAIN'].split()[0])
-        pixels = hdr['PIX_GEOM']
+        pixels = hdr['PIX_GEOM'].split()[::2]
         binningx, binningy = hdr['BINNING'].strip().split('x')
         binningx = int(binningx)
         binningy = int(binningy)
@@ -112,7 +112,7 @@ def preProcessData(log, data, info, rebin=False):
     return out
 
 
-def _findCosmicRays(log, array, info, output, sigma=2.):
+def _findCosmicRays(log, array, info, output, sigma=4.):
     """
     
     :param sigma: the thershold (std) above which the cosmic rays are identified
@@ -138,12 +138,14 @@ def _findCosmicRays(log, array, info, output, sigma=2.):
     tracks = np.asarray(tracks)
     energy = np.asarray(energy)
     sm = float(tracks.sum())
-    rate = sm / info['exptime'] /array.size
+    rate = sm / (info['exptime'] + info['tditime']) /array.size  #not sure if it should be half of the TDI time
+    fluence = rate / (float(info['pixels'][0])*info['binningx']*float(info['pixels'][1])*info['binningy']) / 1e-8
 
     print 'The longest track covers %i pixels' % tracks.max()
     print 'Average track length is %.1f pixels' % tracks.mean()
     print 'In total, %i pixels were affected, i.e. %.1f per cent' % (sm, 100.*sm/array.size)
     print 'The rate of cosmic rays is %.2e CR / second / pixel' % rate
+    print 'The fluence of cosmic rays is %.1f events / second / cm**2' % fluence
     print 'Most energetic cosmic ray deposited %.1f photoelectrons' % energy.max()
     print 'Average track energy is %.1f photoelectrons' % energy.mean()
 
@@ -180,11 +182,12 @@ def _findCosmicRays(log, array, info, output, sigma=2.):
     plt.savefig(output+'CRs.png')
     plt.close()
 
-    return labels, tracks, energy
+    return labels, tracks, energy, fluence
     
 
 def analyseData(log, files, data, info):
     """
+    Analyse all BAM data.
     """
     allD = []
     for f, d, i in zip(files, data, info):
@@ -192,12 +195,16 @@ def analyseData(log, files, data, info):
         out = f.split('/')[-1].replace('.fits', '')
         print msg
         log.info(msg)
-        labels, tracks, energy = _findCosmicRays(log, d, i, out)
-        allD.append([d, labels, tracks, energy])
+        labels, tracks, energy, fluence = _findCosmicRays(log, d, i, out)
+        allD.append([d, labels, tracks, energy, fluence])
         
     #pull out the information from the individual files and join to a single array
     tracks = np.concatenate(np.asarray([x[2] for x in allD]))
     energies = np.concatenate(np.asarray([x[3] for x in allD]))
+    fluences = np.asarray([x[4] for x in allD])    
+    
+    print '\n\n\nCR fluences in events / cm**2 / second (min, max, average, std):'
+    print fluences.min(), fluences.max(), fluences.mean(), fluences.std()
     
     #histogram bins
     esample = np.linspace(0, 3000, 50)
@@ -302,5 +309,5 @@ def runAll():
 
 
 if __name__ == '__main__':
-#    runAll()
-    generateBAMdatagridImage()
+    runAll()
+#    generateBAMdatagridImage()

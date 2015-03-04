@@ -11,10 +11,11 @@ This scripts derives simple cosmic ray statististics from Gaia BAM data.
 :requires: matplotlib (tested with 1.4.2)
 :requires: skimage (scikit-image, tested with 0.10.1)
 :requires: sklearn (scikit-learn, tested with 0.15.2)
+:requires: statsmodels (tested with 0.6.1)
 :requires: vissim-python
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.6
+:version: 0.7
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -31,7 +32,9 @@ import matplotlib.pyplot as plt
 import pyfits as pf
 import numpy as np
 import scipy as sp
+import scipy.interpolate as interpolate
 from sklearn.neighbors import KernelDensity
+from statsmodels.distributions.empirical_distribution import ECDF
 from scipy import ndimage
 import glob as g
 from support import logger as lg
@@ -76,10 +79,9 @@ def readData(log, files):
     return data, info
 
 
-def preProcessData(log, data, info, rebin=False):
+def preProcessData(log, data, info):
     """
-    Removes the first line, transposes the array, subtracts the median (derived ADC offset),
-    and rebins (optinal) to the unbinned frame.
+    Removes the first line, transposes the array, and subtracts the median (derived ADC offset).
     """
     out = []
     for d, i in zip(data, info):
@@ -98,21 +100,32 @@ def preProcessData(log, data, info, rebin=False):
         print msg
         log.info(msg)
         d *= i['gain']
-        
-        if rebin:
-            msg = 'Rebinning by %i x %i' % (i['binningx'], i['binningy'])
-            print msg
-            log.info(msg)
-            #TODO: this is not correct, we should treat the tracks probabilistically
-            sm = d.sum()
-            d = ndimage.zoom(d, (i['binningx'], i['binningy']), order=1) #bilinear
-            d = d*(sm / d.sum())
-        
+                
         out.append(d)
+    return out
+    
+    
+def _drawFromCumulativeDistributionFunction(cpdf, x, number):
+    """
+    Draw a number of random x values from a cumulative distribution function.
+
+    :param cpdf: cumulative distribution function
+    :type cpdf: numpy array
+    :param x: values of the abscissa
+    :type x: numpy array
+    :param number: number of draws
+    :type number: int
+
+    :return: randomly drawn x value
+    :rtype: ndarray
+    """
+    luck = np.random.random(number)
+    tck = interpolate.splrep(cpdf, x)
+    out = interpolate.splev(luck, tck)
     return out
 
 
-def _findCosmicRays(log, array, info, output, sigma=4.):
+def _findCosmicRays(log, array, info, output, sigma=3.5, correctLengths=True):
     """
     
     :param sigma: the thershold (std) above which the cosmic rays are identified
@@ -124,30 +137,73 @@ def _findCosmicRays(log, array, info, output, sigma=4.):
     #label the pixels
     labels, numb = ndimage.label(thresholded)
     print 'Found %i cosmic rays' % numb    
+    #find locations    
+    locations = ndimage.measurements.find_objects(labels)
+
+    if correctLengths:
+        print 'Trying to correct for the track lengths, loading a track length PDF'
+        #read in the PDF of lengths
+        data = np.loadtxt('trackLengthPDF.txt', delimiter=' ')
+        pix = data[:, 0]
+        PDF = data[:, 1]
+        #convert to CDF
+        dx = pix[1] - pix[0] #assume equal size steps
+        cdf = np.cumsum(PDF*dx)    
     
-    #count the track lengths
+    #count the track lengths and energies
     tracks = []
     energy = []
-    for x in range(numb):
-        selected = labels[labels == x+1]
-        num = selected.shape[0]
-        enrg = selected.sum()
-        tracks.append(num)
-        energy.append(enrg)
+    for loc in locations:
+        pixels = array[loc]     
+        num = pixels.size
 
+        #TODO: check that this is correct, tno sure...
+        #correct for the fact that the data heavily binned
+        if correctLengths:        
+            if num == 1:
+                #if single pixel event, then make a correction to the track length
+                tmp = _drawFromCumulativeDistributionFunction(cdf, pix, num)
+                num = tmp[0] / info['binningx']
+            else:
+                #multiple pixels, need to know direction
+                x, y = pixels.shape #we transposed the array earlier when loading data
+                if x > 1:
+                    #need to draw a correction for each pixel covered
+                    tmp = _drawFromCumulativeDistributionFunction(cdf, pix, x)
+                    x = np.sum(tmp)                                
+                #total number of pixels covered
+                num = x + y
+            
+        #store information
+        tracks.append(num)
+        energy.append(pixels.sum())
+
+    #convert to NumPy array
     tracks = np.asarray(tracks)
     energy = np.asarray(energy)
+    
+    #calculate statitics
     sm = float(tracks.sum())
     rate = sm / (info['exptime'] + info['tditime']) /array.size  #not sure if it should be half of the TDI time
     fluence = rate / (float(info['pixels'][0])*info['binningx']*float(info['pixels'][1])*info['binningy']) / 1e-8
 
-    print 'The longest track covers %i pixels' % tracks.max()
-    print 'Average track length is %.1f pixels' % tracks.mean()
-    print 'In total, %i pixels were affected, i.e. %.1f per cent' % (sm, 100.*sm/array.size)
-    print 'The rate of cosmic rays is %.2e CR / second / pixel' % rate
-    print 'The fluence of cosmic rays is %.1f events / second / cm**2' % fluence
-    print 'Most energetic cosmic ray deposited %.1f photoelectrons' % energy.max()
-    print 'Average track energy is %.1f photoelectrons' % energy.mean()
+    if correctLengths: 
+        print 'The longest track covers %i unbinned pixels' % tracks.max()
+        print 'Average track length is %.1f unbinned pixels' % tracks.mean()
+        print 'In total, %i unbinned pixels were affected, i.e. %.1f per cent' % (sm, 100.*sm/array.size)
+        print 'The rate of cosmic rays is %.2e CR / second / unbinned pixel' % rate
+        print 'The fluence of cosmic rays is %.1f events / second / cm**2' % fluence
+        print 'Most energetic cosmic ray deposited %.1f photoelectrons' % energy.max()
+        print 'Average track energy is %.1f photoelectrons' % energy.mean()
+
+    else:
+        print 'The longest track covers %i binned pixels' % tracks.max()
+        print 'Average track length is %.1f binned pixels' % tracks.mean()
+        print 'In total, %i binned pixels were affected, i.e. %.1f per cent' % (sm, 100.*sm/array.size)
+        print 'The rate of cosmic rays is %.2e CR / second / binned pixel' % rate
+        print 'The fluence of cosmic rays is %.1f events / second / cm**2' % fluence
+        print 'Most energetic cosmic ray deposited %.1f photoelectrons' % energy.max()
+        print 'Average track energy is %.1f photoelectrons' % energy.mean()
 
     #plot simple histogram of the pixel values
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
@@ -206,21 +262,25 @@ def analyseData(log, files, data, info):
     print '\n\n\nCR fluences in events / cm**2 / second (min, max, average, std):'
     print fluences.min(), fluences.max(), fluences.mean(), fluences.std()
     
+    #take a log10, better for visualisation and comparison against Stardust modelling
+    tracks = np.log10(tracks)
+    energies = np.log10(energies)    
+    
     #histogram bins
-    esample = np.linspace(0, 3000, 50)
-    tsample = np.linspace(1, 60, 30)
+    esample = np.linspace(0., 7, 30)
+    tsample = np.linspace(0., 3.5, 20)
  
     #KDE for energy
     d2d = energies[:, np.newaxis]
-    x_gride = np.linspace(0.0, esample.max(), 1000)
-    kde_skl = KernelDensity(kernel='gaussian', bandwidth=40.)
+    x_gride = np.linspace(0.0, esample.max(), 500)
+    kde_skl = KernelDensity(kernel='gaussian', bandwidth=0.1)
     kde_skl.fit(d2d)
     log_pdfe = kde_skl.score_samples(x_gride[:, np.newaxis])
 
     #KDE for track lengts
     d2d = tracks[:, np.newaxis]
     x_gridt = np.linspace(0.0, tsample.max(), 500)
-    kde_skl = KernelDensity(kernel='gaussian', bandwidth=1.5)
+    kde_skl = KernelDensity(kernel='gaussian', bandwidth=0.05)
     kde_skl.fit(d2d)
     log_pdft = kde_skl.score_samples(x_gridt[:, np.newaxis])
 
@@ -230,9 +290,10 @@ def analyseData(log, files, data, info):
     ax1.plot(x_gride, np.exp(log_pdfe), lw=3, c='r')
     ax2.hist(tracks, bins=tsample, normed=True, alpha=0.2)
     ax2.plot(x_gridt, np.exp(log_pdft), lw=3, c='r')    
-    ax1.set_xlabel('$\Sigma$Energy [e$^{-}$]')
+    ax1.set_xlabel('$\log_{10}(\Sigma$Energy [e$^{-}$]$)$')
+    ax1.set_xlim(2.5, 7.)
     ax1.set_ylabel('PDF')
-    ax2.set_xlabel('Track Lengths [pix]')
+    ax2.set_xlabel('$\log_{10}($Track Lengths [pix]$)$')
     plt.savefig('CRPDFs.png')
     plt.close()
     
@@ -296,11 +357,82 @@ def generateBAMdatagridImage():
     plt.close()
     
 
-def runAll():
+def deriveCumulativeFunctionsforBinning(xbin=4, ybin=1, xsize=1, ysize=1, mc=100000, dx=0.1):
+    """
+    Because the original BAM data are binned 4 x 1, we do not know the track lengths.
+    One can try to derive a statistical correction by randomizing the position and the
+    angle a cosmic ray may have arrived. This function derives a probability density
+    function for the track lengths by Monte Carloing over the random locations and 
+    angles.
+    """
+    #pixel sizes, unbinned
+    ys = ysize * ybin
+    xs = xsize * xbin
+    #random location, random angle
+    xloc = np.random.random(size=mc)*xbin
+    yloc = np.random.random(size=mc)*ybin    
+    angle = np.deg2rad(np.random.random(size=mc)*90)
+    
+    #maximum distance in y direction is either location or size - location
+    ymax = np.maximum(yloc, ys - yloc)
+    xmax = np.maximum(xloc, xs - xloc)
+    
+    #x length is the minimum of travel distance or the distance from the edge, but no smaller than 1
+    xtravel = np.minimum(ymax / np.tan(angle), xmax)
+    xtravel = np.maximum(xtravel, 1)
+    
+    #covering full pixels, but no more than xs
+    covering = np.minimum(np.ceil(xtravel), xs)
+    
+    print 'Track lengths (mean, median, std):'
+    print covering.mean(), np.median(covering), covering.std()
+    
+    #PDF for track lengths
+    d2d = covering[:, np.newaxis]
+    x_grid = np.linspace(0.0, xs+0.5, 1000)
+    kde_skl = KernelDensity(kernel='gaussian', bandwidth=0.4)
+    kde_skl.fit(d2d)
+    log_pdf = kde_skl.score_samples(x_grid[:, np.newaxis])
+    PDF = np.exp(log_pdf)
+    #save to file
+    np.savetxt('trackLengthPDF.txt', np.vstack([x_grid, PDF]).T)
+    #get CDF using cumulative sum of the PDF
+    dx = x_grid[1] - x_grid[0]
+    CD = np.cumsum(PDF*dx)
+
+    #derive empirical CDF and add unity stopping point
+    CDF = ECDF(covering)
+    CDF.y.put(-1, 1)
+    CDF.x.put(-1, xs+1)
+    CDFx = CDF.x
+    CDFy = CDF.y
+    
+    #plot
+    bins = np.arange(0, xs+1)+0.5
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    plt.title('Probabilistic Track Lengths: Binning %i x %i' % (xbin, ybin))
+    plt.plot(x_grid, PDF, lw=2, c='r', label='PDF')
+    plt.plot(CDFx-0.5, CDFy, lw=1.5, c='m', alpha=0.7, label='CDF')
+    plt.plot(x_grid, CD, lw=1.4, c='r', ls='--')
+    plt.hist(covering, bins, normed=True, facecolor='green', alpha=0.35)
+    ax.set_xticks(bins+0.5)
+    plt.xlim(0.5, xs+0.5)
+    plt.ylim(0, 1.05)
+    plt.xlabel('Track Length')
+    plt.ylabel('PDF / CDF')
+    plt.legend(shadow=True, fancybox=True)
+    plt.savefig('TrackLengths.pdf')
+    plt.close()
+    
+
+def runAll(deriveCDF=False, examplePlot=False):
     """
     """
     log = lg.setUpLogger('analyse.log')
     log.info('\n\nStarting to analyse')
+
+    if deriveCDF: deriveCumulativeFunctionsforBinning()
+    if examplePlot: generateBAMdatagridImage()
 
     files = findFiles(log)
     data, info = readData(log, files)
@@ -309,5 +441,5 @@ def runAll():
 
 
 if __name__ == '__main__':
-    runAll()
-#    generateBAMdatagridImage()
+    runAll()  
+#    deriveCumulativeFunctionsforBinning()

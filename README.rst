@@ -181,7 +181,7 @@ The following figures show that the photometric accuracy with realistic noise an
 about 0.08 mag. Please note, however, that the derived magnitudes are based on a
 single 565 second exposure, and therefore the scatter is large in case of fainter objects.
 
-.. figure:: doc/figs/Magnitudes15.*
+.. figure:: doc/figs/Magnitudes15.png
      :width: 800 px
      :align: center
      :figclass: align-center
@@ -190,7 +190,7 @@ single 565 second exposure, and therefore the scatter is large in case of fainte
      and end-of-life radiation damage, but without aperture correction. The offset is about 0.08mag.
 
 
-.. figure:: doc/figs/magnitudes.*
+.. figure:: doc/figs/magnitudes.png
      :width: 800 px
      :align: center
      :figclass: align-center

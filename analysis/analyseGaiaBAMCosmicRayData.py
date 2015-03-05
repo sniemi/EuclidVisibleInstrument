@@ -15,7 +15,7 @@ This scripts derives simple cosmic ray statististics from Gaia BAM data.
 :requires: vissim-python
 
 :author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.7
+:version: 0.8
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -185,7 +185,7 @@ def _findCosmicRays(log, array, info, output, sigma=3.5, correctLengths=True):
     #calculate statitics
     sm = float(tracks.sum())
     rate = sm / (info['exptime'] + info['tditime']) /array.size  #not sure if it should be half of the TDI time
-    fluence = rate / (float(info['pixels'][0])*info['binningx']*float(info['pixels'][1])*info['binningy']) / 1e-8
+    fluence = rate / (float(info['pixels'][0])*info['binningx']*float(info['pixels'][1])*info['binningy']) / 1e-8 / tracks.mean()
 
     if correctLengths: 
         print 'The longest track covers %i unbinned pixels' % tracks.max()
@@ -427,6 +427,7 @@ def deriveCumulativeFunctionsforBinning(xbin=4, ybin=1, xsize=1, ysize=1, mc=100
 
 def runAll(deriveCDF=False, examplePlot=False):
     """
+    Run all steps from finding files to analysis.
     """
     log = lg.setUpLogger('analyse.log')
     log.info('\n\nStarting to analyse')
@@ -441,5 +442,4 @@ def runAll(deriveCDF=False, examplePlot=False):
 
 
 if __name__ == '__main__':
-    runAll()  
-#    deriveCumulativeFunctionsforBinning()
+    runAll()

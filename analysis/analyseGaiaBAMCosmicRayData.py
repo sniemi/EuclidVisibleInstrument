@@ -4,18 +4,25 @@ Cosmic Rays
 ===========
 
 This scripts derives simple cosmic ray statististics from Gaia BAM data.
+Note that the Gaia BAM data are binned 4 x 1 leading to pixel geometries
+that are 120 x 10 microns. One can derive a statistical correction to
+take into account the binning. Further corrections are needed to scale
+e.g. to VIS CCD273 pixels, which are 12 x 12 microns. Thus, the results
+will necessarily contain some uncertainties.
 
 :requires: pyfits (tested with 3.3)
-:requires: numpy (tested with 1.9.1)
+:requires: numpy (tested with 1.9.2)
 :requires: scipy (tested with 0.15.1)
-:requires: matplotlib (tested with 1.4.2)
+:requires: matplotlib (tested with 1.4.3)
 :requires: skimage (scikit-image, tested with 0.10.1)
 :requires: sklearn (scikit-learn, tested with 0.15.2)
 :requires: statsmodels (tested with 0.6.1)
 :requires: vissim-python
 
-:author: Sami-Matias Niemi (s.niemi@ucl.ac.uk)
-:version: 0.8
+:author: Sami-Matias Niemi
+:contact: s.niemi@icloud.com
+
+:version: 0.9
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -42,6 +49,15 @@ from support import logger as lg
 
 def findFiles(log, fileID='/Users/sammy/EUCLID/CCD273/CR/data/BAM_0000*.fits'):
     """
+    Find all files that match the ID.
+    
+    :param log: a logger instance
+    :type log: instance
+    :param fileID: identification with a wild card to find the files
+    :type fileID: str
+    
+    :return: a list containing all files matching the wild card.
+    :rtype: lst
     """
     files = g.glob(fileID)
     msg = 'Found %i files' % len(files)
@@ -52,7 +68,15 @@ def findFiles(log, fileID='/Users/sammy/EUCLID/CCD273/CR/data/BAM_0000*.fits'):
 
 def readData(log, files):
     """
-    Read data and gather information from the header.
+    Read data and gather information from the header from all files given.
+
+    :param log: a logger instance
+    :type log: instance    
+    :param files: a list of FITS file names
+    :type files: lst
+    
+    :return: NumPy array contaning pixel data and a list containing dictionaries that hold header information
+    :rtype: ndarray, lst
     """
     info = []
     data = []
@@ -82,6 +106,16 @@ def readData(log, files):
 def preProcessData(log, data, info):
     """
     Removes the first line, transposes the array, and subtracts the median (derived ADC offset).
+    
+    :param log: a logger instance
+    :type log: instance    
+    :param data: a list of pixel data arrays to process
+    :type data: lst
+    :param info: a list of dictionaries that contain the header information
+    :type info: lst
+    
+    :return: list of pixel data arrays
+    :rtype: lst
     """
     out = []
     for d, i in zip(data, info):
@@ -127,9 +161,24 @@ def _drawFromCumulativeDistributionFunction(cpdf, x, number):
 
 def _findCosmicRays(log, array, info, output, sigma=3.5, correctLengths=True):
     """
+    Find all cosmic rays from data. A simple threshold above the noise level is used.
+    All pixels above the given sigma limit are assumed to be cosmic ray events.
     
+    :param log: a logger instance
+    :type log: instance    
+    :param array: pixel data array
+    :type array: ndarray
+    :param info: dictionary containg the header information of the pixel data
+    :type info: dict
+    :param output: name of the output file
+    :type output: str
     :param sigma: the thershold (std) above which the cosmic rays are identified
     :type sigma: float
+    :param correctLenghts: whether or not correct for the binning.
+    :type correctLengths: bool
+    
+    :return: a list containing CR labels, tracks, energies, and fluence
+    :rtype: lst
     """
     #find all pixels above a threshold
     thresholded = array > array.std()*sigma
@@ -243,7 +292,18 @@ def _findCosmicRays(log, array, info, output, sigma=3.5, correctLengths=True):
 
 def analyseData(log, files, data, info):
     """
-    Analyse all BAM data.
+    Analyse all BAM data held in files.
+    
+    :param log: a logger instance
+    :type log: instance    
+    :param files: a list of file names
+    :type files: lst
+    :param data: a list of pixel data
+    :type data: lst
+    :parama info: a list of meta data dictionaries
+    :type info: dict
+    
+    :return: None
     """
     allD = []
     for f, d, i in zip(files, data, info):
@@ -258,6 +318,10 @@ def analyseData(log, files, data, info):
     tracks = np.concatenate(np.asarray([x[2] for x in allD]))
     energies = np.concatenate(np.asarray([x[3] for x in allD]))
     fluences = np.asarray([x[4] for x in allD])    
+
+    #scale the track lengths to VIS 12 micron square pixels, assumes that the tracks
+    #are unbinned lengths
+    tracks *= ((float(info[0]['pixels'][0]) * float(info[0]['pixels'][1])) / (12.*12.))
     
     print '\n\n\nCR fluences in events / cm**2 / second (min, max, average, std):'
     print fluences.min(), fluences.max(), fluences.mean(), fluences.std()
@@ -302,6 +366,8 @@ def generateBAMdatagridImage():
     """
     Generates an example plot showing the Gaia BAM detector geometry
     and binning used. A simple illustration.
+    
+    :return: None
     """
     #grid
     x = np.linspace(0, 30*10, 11) #30 micron pixels
@@ -364,6 +430,21 @@ def deriveCumulativeFunctionsforBinning(xbin=4, ybin=1, xsize=1, ysize=1, mc=100
     angle a cosmic ray may have arrived. This function derives a probability density
     function for the track lengths by Monte Carloing over the random locations and 
     angles.
+    
+    :param xbin: number of pixels binned in x-direction
+    :type xbin: int
+    :param ybin: number of pixels binned in y-direction
+    :type ybin: int
+    :param xsize: how many binned pixels to use in the derivation
+    :type xsize: int
+    :param ysize:how many binned pixels to use in the derivation
+    :type ysize: int
+    :param mc: number of random realisations to generate
+    :type mc: int
+    :param dx: size of the steps to adopt when deriving CDF
+    :type dx: float
+    
+    :return: None
     """
     #pixel sizes, unbinned
     ys = ysize * ybin
@@ -427,7 +508,9 @@ def deriveCumulativeFunctionsforBinning(xbin=4, ybin=1, xsize=1, ysize=1, mc=100
 
 def runAll(deriveCDF=False, examplePlot=False):
     """
-    Run all steps from finding files to analysis.
+    Run all steps from finding suitable Gaia BAM files to analysing them.
+    
+    :return: None
     """
     log = lg.setUpLogger('analyse.log')
     log.info('\n\nStarting to analyse')

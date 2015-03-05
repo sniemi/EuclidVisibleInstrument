@@ -293,7 +293,7 @@ class cosmicrays():
         print text
 
 
-    def _drawEventsToCoveringFactor(self, coveringFraction=1.4, limit=1000, verbose=False):
+    def _drawEventsToCoveringFactor(self, coveringFraction=3.0, limit=1000, verbose=False):
         """
         Generate cosmic ray events up to a covering fraction and include it to a cosmic ray map (self.cosmicrayMap).
 

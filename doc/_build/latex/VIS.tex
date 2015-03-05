@@ -3,6 +3,7 @@
 \documentclass[a4paper,11pt,english]{sphinxmanual}
 \usepackage[utf8]{inputenc}
 \DeclareUnicodeCharacter{00A0}{\nobreakspace}
+\usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{babel}
 \usepackage{times}
@@ -13,7 +14,7 @@
 \setcounter{tocdepth}{3}
 
 \title{VIS Python Package Documentation}
-\date{January 20, 2014}
+\date{March 05, 2015}
 \release{1.1}
 \author{Sami-Matias Niemi}
 \newcommand{\sphinxlogo}{}
@@ -74,10 +75,11 @@
 \expandafter\def\csname PYG@tok@c\endcsname{\let\PYG@it=\textit\def\PYG@tc##1{\textcolor[rgb]{0.25,0.50,0.56}{##1}}}
 \expandafter\def\csname PYG@tok@mf\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.13,0.50,0.31}{##1}}}
 \expandafter\def\csname PYG@tok@err\endcsname{\def\PYG@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
-\expandafter\def\csname PYG@tok@kd\endcsname{\let\PYG@bf=\textbf\def\PYG@tc##1{\textcolor[rgb]{0.00,0.44,0.13}{##1}}}
+\expandafter\def\csname PYG@tok@mb\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.13,0.50,0.31}{##1}}}
 \expandafter\def\csname PYG@tok@ss\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.32,0.47,0.09}{##1}}}
 \expandafter\def\csname PYG@tok@sr\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.14,0.33,0.53}{##1}}}
 \expandafter\def\csname PYG@tok@mo\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.13,0.50,0.31}{##1}}}
+\expandafter\def\csname PYG@tok@kd\endcsname{\let\PYG@bf=\textbf\def\PYG@tc##1{\textcolor[rgb]{0.00,0.44,0.13}{##1}}}
 \expandafter\def\csname PYG@tok@mi\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.13,0.50,0.31}{##1}}}
 \expandafter\def\csname PYG@tok@kn\endcsname{\let\PYG@bf=\textbf\def\PYG@tc##1{\textcolor[rgb]{0.00,0.44,0.13}{##1}}}
 \expandafter\def\csname PYG@tok@o\endcsname{\def\PYG@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
@@ -113,6 +115,8 @@
 \def\PYGZrb{]}
 \makeatother
 
+\renewcommand\PYGZsq{\textquotesingle}
+
 \begin{document}
 
 \maketitle
@@ -124,16 +128,16 @@
 Sami-Matias Niemi
 
 \item[{Contact}] \leavevmode
-\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
+\href{mailto:s.niemi@icloud.com}{s.niemi@icloud.com}
 
 \item[{issue}] \leavevmode
-1.1
+1.2
 
 \item[{version}] \leavevmode
-1.3
+1.4
 
 \item[{date}] \leavevmode
-January 20, 2014
+March 05, 2015
 
 \end{description}\end{quote}
 
@@ -150,15 +154,14 @@ The documentation is also available in PDF format, please download the \href{htt
 
 \chapter{Installation}
 \label{index:welcome-to-euclid-visible-instrument-vis-python-package-vis-pp-documentation}\label{index:installation}
-The VIS Python Package (VIS-PP) is held in a GIT repository. You can download or fork the repository
-\href{https://bitbucket.org/niemi/vissim-python/overview}{here}. The package contains a mixture of classes
+The VIS Python Package (VIS-PP) is held in a GIT repository. The package contains a mixture of classes
 and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
 installation instructions yet. To get most scripts working you should place
 the path to the root directory of the package to your PYTHONPATH environment variable. In addition, it is
 useful to compile the Fortran code available in the fortran subdirectory with the following command:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-f2py -c -m cdm03 cdm03.f90
+f2py \PYGZhy{}c \PYGZhy{}m cdm03 cdm03.f90
 \end{Verbatim}
 
 and then copy the .so file to the CTI directory. Please note that f2py is available in the NumPy package,
@@ -271,44 +274,44 @@ ndarray
 Returns a dictionary describing VIS. The following information is provided (id: value - reference):
 
 \begin{Verbatim}[commandchars=\\\{\}]
-apCorrection: 0.925969 - derived using VIS system PSF (see EUCL-MSS-RP-6-001)
-aperture\_size: 132.73228961416876 - derived (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
-beta: 0.6 - CDM03 (Short et al. 2010)
-bias: 1000.0 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
-cosmic\_bkgd: 0.172 - derived  (radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version)
-dark: 0.001 - CCD spec EUCL-EST-RS-6-002
-diameter: 1.3 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-dob: 0 - CDM03 (Short et al. 2010)
-e\_adu: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
-fullwellcapacity: 200000 - CCD spec (for simulator)
-fwc: 200000 - CCD spec EUCL-EST-RS-6-002 (for CDM03)
-gain: 3.1 - ROE Requirements Specification (EUCL-MSS-RD-6-009)
-galaxy\_fraction: 0.836 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-magzero: 15861729325.3279 - derived, see belowCDM (VIS ETC)
-ovrscanx: 20 - ROE Requirements Specification (EUCL-MSS-RD-6-009) (req: CalCD-B)
-peak\_fraction: 0.261179 - derived
-pixel\_size: 0.1 - CCD spec EUCL-EST-RS-6-002
-prescanx: 50 - CCD spec EUCL-EST-RS-6-002 (also in CalCD-B)
-rdose: 30000000000.0 - derived (above the PLM requirement)
-readnoise: 4.5 - WL requirement (PERD R-VIS-P-021)
-readout: 4.5 - WL requirement (PERD R-VIS-P-021)
-readtime: 88.0 - derived; ROE Requirements Specification (EUCL-MSS-RD-6-009)
-sfwc: 730000.0 - CDM03 (Short et al. 2010), see also the CCD spec EUCL-EST-RS-6-002
-sky\_background: 22.3203 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-sky\_high: 21.7206 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-sky\_low: 22.9207 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-st: 5e-06 - CDM03 (Short et al. 2010)
-star\_fraction: 0.928243 -  derived using VIS system PSF (see EUCL-MSS-RP-6-001)
-svg: 1e-10 - CDM03 (Short et al. 2010)
-t: 0.01024 - CDM03 (Short et al. 2010)
-trapfile: cdm\_euclid.dat - CDM03 (derived, refitted to CCD204 data)
-vg: 6e-11 - CDM03 (Short et al. 2010)
-vth: 11680000.0 - CDM03 (Short et al. 2010)
-xsize: 2048 - CCD spec EUCL-EST-RS-6-002
-ysize: 2066 - CCD spec EUCL-EST-RS-6-002
-zeropoint: 25.50087633632 - VIS ETC
-zeropointNoObscuration: 25.57991044453 - radiometric\_model\_reference\_phase4\_JA110415\_2\_MSSL\_version
-zodiacal: 22.3203 - VIS ETC
+apCorrection: 0.925969 \PYGZhy{} derived using VIS system PSF (see EUCL\PYGZhy{}MSS\PYGZhy{}RP\PYGZhy{}6\PYGZhy{}001)
+aperture\PYGZus{}size: 132.73228961416876 \PYGZhy{} derived (radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version)
+beta: 0.6 \PYGZhy{} CDM03 (Short et al. 2010)
+bias: 500.0 \PYGZhy{} ROE Requirements Specification (EUCL\PYGZhy{}MSS\PYGZhy{}RD\PYGZhy{}6\PYGZhy{}009)
+cosmic\PYGZus{}bkgd: 0.172 \PYGZhy{} derived (radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version)
+dark: 0.001 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002
+diameter: 1.3 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+dob: 0 \PYGZhy{} CDM03 (Short et al. 2010)
+e\PYGZus{}adu: 3.1 \PYGZhy{} ROE Requirements Specification (EUCL\PYGZhy{}MSS\PYGZhy{}RD\PYGZhy{}6\PYGZhy{}009)
+fullwellcapacity: 200000 \PYGZhy{} CCD spec (for simulator)
+fwc: 200000 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002 (for CDM03)
+gain: 3.1 \PYGZhy{} ROE Requirements Specification (EUCL\PYGZhy{}MSS\PYGZhy{}RD\PYGZhy{}6\PYGZhy{}009)
+galaxy\PYGZus{}fraction: 0.836 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+magzero: 15861729325.3279 \PYGZhy{} derived, see belowCDM (VIS ETC)
+ovrscanx: 20 \PYGZhy{} ROE Requirements Specification (EUCL\PYGZhy{}MSS\PYGZhy{}RD\PYGZhy{}6\PYGZhy{}009) (req: CalCD\PYGZhy{}B)
+peak\PYGZus{}fraction: 0.261179 \PYGZhy{} derived
+pixel\PYGZus{}size: 0.1 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002
+prescanx: 50 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002 (also in CalCD\PYGZhy{}B)
+rdose: 30000000000.0 \PYGZhy{} derived (above the PLM requirement)
+readnoise: 4.5 \PYGZhy{} WL requirement (PERD R\PYGZhy{}VIS\PYGZhy{}P\PYGZhy{}021)
+readout: 4.5 \PYGZhy{} WL requirement (PERD R\PYGZhy{}VIS\PYGZhy{}P\PYGZhy{}021)
+readtime: 88.0 \PYGZhy{} derived; ROE Requirements Specification (EUCL\PYGZhy{}MSS\PYGZhy{}RD\PYGZhy{}6\PYGZhy{}009)
+sfwc: 730000.0 \PYGZhy{} CDM03 (Short et al. 2010), see also the CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002
+sky\PYGZus{}background: 22.3203 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+sky\PYGZus{}high: 21.7206 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+sky\PYGZus{}low: 22.9207 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+st: 5e\PYGZhy{}06 \PYGZhy{} CDM03 (Short et al. 2010)
+star\PYGZus{}fraction: 0.928243 \PYGZhy{}  derived using VIS system PSF (see EUCL\PYGZhy{}MSS\PYGZhy{}RP\PYGZhy{}6\PYGZhy{}001)
+svg: 1e\PYGZhy{}10 \PYGZhy{} CDM03 (Short et al. 2010)
+t: 0.01024 \PYGZhy{} CDM03 (Short et al. 2010)
+trapfile: cdm\PYGZus{}euclid.dat \PYGZhy{} CDM03 (derived, refitted to CCD204 data)
+vg: 6e\PYGZhy{}11 \PYGZhy{} CDM03 (Short et al. 2010)
+vth: 11680000.0 \PYGZhy{} CDM03 (Short et al. 2010)
+xsize: 2048 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002
+ysize: 2066 \PYGZhy{} CCD spec EUCL\PYGZhy{}EST\PYGZhy{}RS\PYGZhy{}6\PYGZhy{}002
+zeropoint: 25.50087633632 \PYGZhy{} VIS ETC
+zeropointNoObscuration: 25.57991044453 \PYGZhy{} radiometric\PYGZus{}model\PYGZus{}reference\PYGZus{}phase4\PYGZus{}JA110415\PYGZus{}2\PYGZus{}MSSL\PYGZus{}version
+zodiacal: 22.3203 \PYGZhy{} VIS ETC
 \end{Verbatim}
 
 The magzero was calculated as follows:
@@ -929,7 +932,7 @@ Sami-Matias Niemi
 To execute:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python tileCCD.py -f 'Q*science.fits' -e 1
+python tileCCD.py \PYGZhy{}f \PYGZsq{}Q*science.fits\PYGZsq{} \PYGZhy{}e 1
 \end{Verbatim}
 
 where -f argument defines the input files to be tiled and the -e argument marks the
@@ -1051,7 +1054,7 @@ Sami-Matias Niemi
 To execute:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python tileFPA.py -f 'CCD*science.fits' -e 1
+python tileFPA.py \PYGZhy{}f \PYGZsq{}CCD*science.fits\PYGZsq{} \PYGZhy{}e 1
 \end{Verbatim}
 
 where -f argument defines the input files to be tiled and the -e argument marks the
@@ -1375,107 +1378,6 @@ float or ndarray
 
 \end{fulllineitems}
 
-\phantomsection\label{ETC:module-ETC.fluxEstimates}\index{ETC.fluxEstimates (module)}
-This file provides simple functions to calculate wavelength dependent effects.
-
-The functions can also be used to estimate the Weak Lensing Channel ghosts as a function
-of spectral type.
-\begin{quote}\begin{description}
-\item[{requires}] \leavevmode
-NumPy
-
-\item[{requires}] \leavevmode
-matplotlib
-
-\item[{requires}] \leavevmode
-pysynphot
-
-\item[{version}] \leavevmode
-0.1
-
-\item[{author}] \leavevmode
-Sami-Matias Niemi
-
-\item[{contact}] \leavevmode
-\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
-
-\end{description}\end{quote}
-\index{ghostCalculations() (in module ETC.fluxEstimates)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:ETC.fluxEstimates.ghostCalculations}\pysiglinewithargsret{\code{ETC.fluxEstimates.}\bfcode{ghostCalculations}}{\emph{sourceSpectrum}, \emph{title}, \emph{output}}{}
-Weak Lensing Channel Ghost calculations.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode\begin{itemize}
-\item {} 
-\textbf{sourceSpectrum} (\emph{object}) -- pysynphot spectrum object
-
-\item {} 
-\textbf{title} (\emph{str}) -- title of the plot
-
-\item {} 
-\textbf{output} (\emph{str}) -- name of the output file
-
-\end{itemize}
-
-\item[{Returns}] \leavevmode
-pysynphot observation object for VIS and Ghost
-
-\item[{Return type}] \leavevmode
-list of objects
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{ghostResults() (in module ETC.fluxEstimates)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:ETC.fluxEstimates.ghostResults}\pysiglinewithargsret{\code{ETC.fluxEstimates.}\bfcode{ghostResults}}{}{}
-Calculate the VIS channel ghost contribution.
-
-Synphot table for the Pickles stellar library:
-\href{http://www.stsci.edu/hst/HST\_overview/documents/synphot/AppA\_Catalogs5.html}{http://www.stsci.edu/hst/HST\_overview/documents/synphot/AppA\_Catalogs5.html}
-\begin{quote}\begin{description}
-\item[{Returns}] \leavevmode
-
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{testFlatSpectrum() (in module ETC.fluxEstimates)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:ETC.fluxEstimates.testFlatSpectrum}\pysiglinewithargsret{\code{ETC.fluxEstimates.}\bfcode{testFlatSpectrum}}{\emph{mag=18}}{}
-Test the pysynphot flat spectra, how to make flat in lambda and nu.
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{mag} -- 
-
-\item[{Returns}] \leavevmode
-
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
-\index{throughputs() (in module ETC.fluxEstimates)}
-
-\begin{fulllineitems}
-\phantomsection\label{ETC:ETC.fluxEstimates.throughputs}\pysiglinewithargsret{\code{ETC.fluxEstimates.}\bfcode{throughputs}}{\emph{output='throughputs.pdf'}}{}
-Plot throughputs, compares to HST WFC3 UVIS F600LP
-\begin{quote}\begin{description}
-\item[{Parameters}] \leavevmode
-\textbf{output} (\emph{str}) -- name of the output file
-
-\item[{Returns}] \leavevmode
-None
-
-\end{description}\end{quote}
-
-\end{fulllineitems}
-
 
 
 \chapter{Creating Object Catalogs}
@@ -1516,7 +1418,7 @@ Sami-Matias Niemi
 
 
 \begin{fulllineitems}
-\pysigline{\bfcode{CatalogueBachallSoneira(magnitudeLimit=28,~b=25,~l=0,~sqdeg=0.496,~xmax=26000,~ymax=26000,~types=array({[}~17,~~18,~~19,~~20,~~21,~~22,~~23,~~24,~~25,~~26,~~27,~~28,~~29,}}\pysigline{\bfcode{30,~~31,~~32,~~33,~~34,~~35,~~36,~~37,~~38,~~39,~~40,~~41,~~42,}}\pysigline{\bfcode{43,~~44,~~45,~~46,~~47,~~48,~~49,~~50,~~51,~~52,~~53,~~54,~~55,}}\pysigline{\bfcode{56,~~57,~~58,~~59,~~60,~~61,~~62,~~63,~~64,~~65,~~66,~~67,~~68,}}\pysigline{\bfcode{69,~~70,~~71,~~72,~~73,~~74,~~75,~~76,~~77,~~78,~~79,~~80,~~81,}}\pysigline{\bfcode{82,~~83,~~84,~~85,~~86,~~87,~~88,~~89,~~90,~~91,~~92,~~93,~~94,}}\pysigline{\bfcode{95,~~96,~~97,~~98,~~99,~100,~101,~102{]}))}}
+\pysigline{\bfcode{CatalogueBachallSoneira(magnitudeLimit=28,~b=25,~l=0,~sqdeg=0.496,~xmax=26000,~ymax=29000,~types=array({[}~17,~~18,~~19,~~20,~~21,~~22,~~23,~~24,~~25,~~26,~~27,~~28,~~29,}}\pysigline{\bfcode{30,~~31,~~32,~~33,~~34,~~35,~~36,~~37,~~38,~~39,~~40,~~41,~~42,}}\pysigline{\bfcode{43,~~44,~~45,~~46,~~47,~~48,~~49,~~50,~~51,~~52,~~53,~~54,~~55,}}\pysigline{\bfcode{56,~~57,~~58,~~59,~~60,~~61,~~62,~~63,~~64,~~65,~~66,~~67,~~68,}}\pysigline{\bfcode{69,~~70,~~71,~~72,~~73,~~74,~~75,~~76,~~77,~~78,~~79,~~80,~~81,}}\pysigline{\bfcode{82,~~83,~~84,~~85,~~86,~~87,~~88,~~89,~~90,~~91,~~92,~~93,~~94,}}\pysigline{\bfcode{95,~~96,~~97,~~98,~~99,~100,~101,~102{]}),~output='catalogue.dat')}}
 Generate an object catalogue with random positions using the Bachall and Soneira stellar model.
 Includes also galaxies.
 \begin{quote}\begin{description}
@@ -1538,6 +1440,12 @@ Includes also galaxies.
 
 \item {} 
 \textbf{ymax} (\emph{int}) -- highest pixel value to use for the random positions in y
+
+\item {} 
+\textbf{types} (\emph{list}) -- a list of galaxy types corresponding to the postage stamp images
+
+\item {} 
+\textbf{output} (\emph{str}) -- name of the output file
 
 \end{itemize}
 
@@ -1982,16 +1890,16 @@ please report any weird or inconsistent simulations to the author.
 This script depends on the following packages:
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
-PyFITS (tested with 3.0.6)
+PyFITS (tested with 3.0.6 and 3.3)
 
 \item[{requires}] \leavevmode
-NumPy (tested with 1.6.1, 1.7.1, and 1.8.0)
+NumPy (tested with 1.6.1, 1.7.1, 1.8.0, 1.9.1, and 1.9.2)
 
 \item[{requires}] \leavevmode
-numexpr (tested with 2.0.1)
+numexpr (tested with 2.0.1 and 2.3.1)
 
 \item[{requires}] \leavevmode
-SciPy (tested with 0.10.1, 0.12, and 0.13)
+SciPy (tested with 0.10.1, 0.12, 0.13, 0.14, and 0.15.1)
 
 \item[{requires}] \leavevmode
 vissim-python package
@@ -2021,7 +1929,7 @@ the CTI folder. For testing,
 please run the unittest as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python simulator.py -t
+python simulator.py \PYGZhy{}t
 \end{Verbatim}
 
 This will run the unittest and compare the result to a previously calculated image.
@@ -2039,12 +1947,12 @@ any noise or cosmic rays.
 A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+Galaxy: 26753/26753 magnitude=26.710577 intscale=185.424955025 FWHM=0.117285374813 arc sec
 7091 objects were place on the detector
 
-real        1m40.464s
-user        1m38.389s
-sys         0m1.749s
+real        0m53.545s
+user        0m51.249s
+sys         0m2.228s
 \end{Verbatim}
 
 These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
@@ -2052,7 +1960,7 @@ These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32G
 as follows:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
+python \PYGZhy{}m cProfile \PYGZhy{}o vissim.profile simulator.py \PYGZhy{}c data/test.config \PYGZhy{}s TESTSCIENCE3X
 \end{Verbatim}
 
 and then analysing the results with e.g. snakeviz or RunSnakeRun.
@@ -2081,22 +1989,22 @@ sys         0m9.535s
 \subsubsection{Change Log}
 \label{simulator:change-log}\begin{quote}\begin{description}
 \item[{version}] \leavevmode
-1.32
+1.4
 
 \end{description}\end{quote}
 
 Version and change logs:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-0.1: pre-development backbone.
+0.1: pre\PYGZhy{}development backbone.
 0.4: first version with most pieces together.
 0.5: this version has all the basic features present, but not fully tested.
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
-     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non-uniformity).
+     image it was not overlaid correctly. Included multiplicative flat fielding effect (pixel non\PYGZhy{}uniformity).
 0.7: implemented bleeding.
 0.8: cleaned up the code and improved documentation. Fixed a bug related to checking if object falls on the CCD.
      Improved the information that is being written to the FITS header.
-0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre- and overscan to
+0.9: fixed a problem with the CTI model swapping Q1 with Q2. Fixed a bug that caused the pre\PYGZhy{} and overscan to
      be identical for each quadrant even though Q1 and 3 needs the regions to be mirrored.
 1.0: First release. The code can now take an over sampled PSF and use that for convolutions. Implemented a WCS
      to the header.
@@ -2106,7 +2014,7 @@ Version and change logs:
 1.06: changed how stars are laid down on the CCD. Now the PSF is interpolated to a new coordinate grid in the
       oversampled frame after which it is downsampled to the CCD grid. This should increase the centroiding
       accuracy.
-1.07: included an option to apply non-linearity model. Cleaned the documentation.
+1.07: included an option to apply non\PYGZhy{}linearity model. Cleaned the documentation.
 1.08: optimised some of the operations with numexpr (only a minor improvement).
 1.1: Fixed a bug related to adding the system readout noise. In previous versions the readout noise was
      being underestimated due to the fact that it was included as a variance not standard deviation.
@@ -2119,8 +2027,8 @@ Version and change logs:
       the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
       (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
 1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available. Convolution mode
-      is now controlled using a single parameter. Change from 'full' to 'same' as full provides no valid information
-      over 'same'. In principle the 'valid' mode would give all valid information, but in practise it leads to
+      is now controlled using a single parameter. Change from \PYGZsq{}full\PYGZsq{} to \PYGZsq{}same\PYGZsq{} as full provides no valid information
+      over \PYGZsq{}same\PYGZsq{}. In principle the \PYGZsq{}valid\PYGZsq{} mode would give all valid information, but in practise it leads to
       truncated convolved galaxy images if the image and the kernel are of similar size.
 1.28: Moved the cosmic ray event generation to a separate class for easier management. Updated the code to
       generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
@@ -2129,11 +2037,12 @@ Version and change logs:
       the CCD, while cosmic rays can come from any direction and penetrate to any depth).
 1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
       were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
-1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information['mode']
+1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information[\PYGZsq{}mode\PYGZsq{}]
 1.31: now a single FOLDER variable at the beginning of the program that should be set to
-      point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
+      point to the location of the vissim\PYGZhy{}python. Modified the ghost function, a fixed offset from the source, but
       more suitable for the correct input model.
-1.32: option to fix the random number generator seed using -f flag.
+1.32: option to fix the random number generator seed using \PYGZhy{}f flag.
+1.4: included an option to simulate an image with the shutter open leading to readout trails.
 \end{Verbatim}
 
 
@@ -2172,7 +2081,7 @@ CCD273 has 4 pixel row gap between the top and bottom half, this is not taken in
 Sami-Matias Niemi
 
 \item[{contact}] \leavevmode
-\href{mailto:s.niemi@ucl.ac.uk}{s.niemi@ucl.ac.uk}
+\href{mailto:s.niemi@icloud.com}{s.niemi@icloud.com}
 
 \end{description}\end{quote}
 \index{VISsimulator (class in simulator.simulator)}
@@ -2266,6 +2175,18 @@ Because the 1st and 3rd quadrant are read out in to a different serial direction
 orientation, in these images the regions are mirrored.
 
 The size of prescan and overscan regions are defined by the prescanx and overscanx keywords, respectively.
+
+\end{fulllineitems}
+
+\index{addReadoutTrails() (simulator.simulator.VISsimulator method)}
+
+\begin{fulllineitems}
+\phantomsection\label{simulator:simulator.simulator.VISsimulator.addReadoutTrails}\pysiglinewithargsret{\bfcode{addReadoutTrails}}{}{}
+Add readout trails resulting from reading out the shutter open.
+
+Quadrants assumed to be numbered:
+2 3
+0 1
 
 \end{fulllineitems}
 
@@ -2363,7 +2284,7 @@ Add Poisson noise to the image.
 Applies CDM03 radiation model to the image being constructed.
 
 
-\strong{See Also:}
+\strong{See also:}
 
 
 Class :\emph{CDM03}
@@ -2499,6 +2420,7 @@ The configuration file may look as follows:
 \PYG{n}{magzero} \PYG{o}{=} \PYG{l+m+mf}{15182880871.225231}
 \PYG{n}{exposures} \PYG{o}{=} \PYG{l+m+mi}{1}
 \PYG{n}{exptime} \PYG{o}{=} \PYG{l+m+mf}{565.0}
+\PYG{n}{readouttime} \PYG{o}{=} \PYG{l+m+mf}{78.0}
 \PYG{n}{rdose} \PYG{o}{=} \PYG{l+m+mf}{8.0e9}
 \PYG{n}{RA} \PYG{o}{=} \PYG{l+m+mf}{145.95}
 \PYG{n}{DEC} \PYG{o}{=} \PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{38.16}
@@ -2522,6 +2444,7 @@ The configuration file may look as follows:
 \PYG{n}{random} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{background} \PYG{o}{=} \PYG{n}{yes}
 \PYG{n}{ghosts} \PYG{o}{=} \PYG{n}{no}
+\PYG{n}{shutterOpen} \PYG{o}{=} \PYG{n}{no}
 \end{Verbatim}
 
 For explanation of each field, see /data/test.config. Note that if an input field does not exist,
@@ -2855,7 +2778,7 @@ The script performs the following data reduction steps:
 To Run:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-python reduceVISdata.py -i VISCCD.fits -b superBiasVIS.fits -f SuperFlatField.fits
+python reduceVISdata.py \PYGZhy{}i VISCCD.fits \PYGZhy{}b superBiasVIS.fits \PYGZhy{}f SuperFlatField.fits
 \end{Verbatim}
 \begin{quote}\begin{description}
 \item[{requires}] \leavevmode
@@ -4504,7 +4427,7 @@ is in SExtractor format and contains the following columns:
 1. X coordinate
 2. Y coordinate
 3. ellipticity
-4. R\_\PYGZob{}2\PYGZcb{}
+4. R\PYGZus{}\PYGZob{}2\PYGZcb{}
 \end{Verbatim}
 
 \end{fulllineitems}
@@ -4605,7 +4528,7 @@ is in SExtractor format and contains the following columns:
 1. X coordinate
 2. Y coordinate
 3. ellipticity
-4. R\_\PYGZob{}2\PYGZcb{}
+4. R\PYGZus{}\PYGZob{}2\PYGZcb{}
 \end{Verbatim}
 
 \end{fulllineitems}
@@ -5601,7 +5524,7 @@ Parse information from the input file name.
 Example name:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-detector\_jitter-1\_TOL05\_MC\_T0074\_50arcmin2\_grid\_Nim=16384x16384\_pixsize=1.000um\_lbda=800nm\_fieldX=-0.306\_fieldY=1.042.fits
+detector\PYGZus{}jitter\PYGZhy{}1\PYGZus{}TOL05\PYGZus{}MC\PYGZus{}T0074\PYGZus{}50arcmin2\PYGZus{}grid\PYGZus{}Nim=16384x16384\PYGZus{}pixsize=1.000um\PYGZus{}lbda=800nm\PYGZus{}fieldX=\PYGZhy{}0.306\PYGZus{}fieldY=1.042.fits
 \end{Verbatim}
 
 \end{fulllineitems}
@@ -5985,7 +5908,7 @@ Sami-Matias Niemi
 \phantomsection\label{analysis:analysis.fitPSF.BaysianPCAfitting}\pysiglinewithargsret{\code{analysis.fitPSF.}\bfcode{BaysianPCAfitting}}{}{}
 Perform PCA basis set fitting using Bayesian Markov Chain Monte Carlo fitting technique.
 \begin{quote}\begin{description}
-\item[{Requires }] \leavevmode
+\item[{Requires}] \leavevmode
 pyMC
 
 \item[{Returns}] \leavevmode
@@ -6346,7 +6269,7 @@ radial profile
 This function plots the CTI impact on shear. The Data is assumed to be in the following format:
 
 \begin{Verbatim}[commandchars=\\\{\}]
-x [deg]     y [deg] g1\_parallel   g1\_serial    g1\_total    g2\_total
+x [deg]     y [deg] g1\PYGZus{}parallel   g1\PYGZus{}serial    g1\PYGZus{}total    g2\PYGZus{}total
 \end{Verbatim}
 \begin{quote}\begin{description}
 \item[{Parameters}] \leavevmode
@@ -6482,6 +6405,222 @@ Sami-Matias Niemi
 \phantomsection\label{analysis:analysis.saturatedArea.pixelsImpacted}\pysiglinewithargsret{\code{analysis.saturatedArea.}\bfcode{pixelsImpacted}}{\emph{magnitude}, \emph{exptime=565}, \emph{pixelFractions=(0.65}, \emph{0.4}, \emph{0.35}, \emph{0.18}, \emph{0.09}, \emph{0.05)}, \emph{star=False}, \emph{lookup=True}}{}
 This potentially overestimates because does not consider the fact that bleeding is along the column
 and hence some saturated pixels may be double counted.
+
+\end{fulllineitems}
+
+\phantomsection\label{analysis:module-analysis.analyseGaiaBAMCosmicRayData}\index{analysis.analyseGaiaBAMCosmicRayData (module)}
+
+\subsection{Cosmic Rays}
+\label{analysis:cosmic-rays}
+This scripts derives simple cosmic ray statististics from Gaia BAM data.
+Note that the Gaia BAM data are binned 4 x 1 leading to pixel geometries
+that are 120 x 10 microns. One can derive a statistical correction to
+take into account the binning. Further corrections are needed to scale
+e.g. to VIS CCD273 pixels, which are 12 x 12 microns. Thus, the results
+will necessarily contain some uncertainties.
+\begin{quote}\begin{description}
+\item[{requires}] \leavevmode
+pyfits (tested with 3.3)
+
+\item[{requires}] \leavevmode
+numpy (tested with 1.9.2)
+
+\item[{requires}] \leavevmode
+scipy (tested with 0.15.1)
+
+\item[{requires}] \leavevmode
+matplotlib (tested with 1.4.3)
+
+\item[{requires}] \leavevmode
+skimage (scikit-image, tested with 0.10.1)
+
+\item[{requires}] \leavevmode
+sklearn (scikit-learn, tested with 0.15.2)
+
+\item[{requires}] \leavevmode
+statsmodels (tested with 0.6.1)
+
+\item[{requires}] \leavevmode
+vissim-python
+
+\item[{author}] \leavevmode
+Sami-Matias Niemi
+
+\item[{contact}] \leavevmode
+\href{mailto:s.niemi@icloud.com}{s.niemi@icloud.com}
+
+\item[{version}] \leavevmode
+1.0
+
+\end{description}\end{quote}
+\index{analyseData() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.analyseData}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{analyseData}}{\emph{log}, \emph{files}, \emph{data}, \emph{info}}{}
+Analyse all BAM data held in files.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- a logger instance
+
+\item {} 
+\textbf{files} (\emph{lst}) -- a list of file names
+
+\item {} 
+\textbf{data} (\emph{lst}) -- a list of pixel data
+
+\end{itemize}
+
+\item[{Parama info}] \leavevmode
+a list of meta data dictionaries
+
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{deriveCumulativeFunctionsforBinning() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.deriveCumulativeFunctionsforBinning}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{deriveCumulativeFunctionsforBinning}}{\emph{xbin=4}, \emph{ybin=1}, \emph{xsize=1}, \emph{ysize=1}, \emph{mc=100000}, \emph{dx=0.1}}{}
+Because the original BAM data are binned 4 x 1, we do not know the track lengths.
+One can try to derive a statistical correction by randomizing the position and the
+angle a cosmic ray may have arrived. This function derives a probability density
+function for the track lengths by Monte Carloing over the random locations and 
+angles.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{xbin} (\emph{int}) -- number of pixels binned in x-direction
+
+\item {} 
+\textbf{ybin} (\emph{int}) -- number of pixels binned in y-direction
+
+\item {} 
+\textbf{xsize} (\emph{int}) -- how many binned pixels to use in the derivation
+
+\end{itemize}
+
+\end{description}\end{quote}
+
+:param ysize:how many binned pixels to use in the derivation
+:type ysize: int
+:param mc: number of random realisations to generate
+:type mc: int
+:param dx: size of the steps to adopt when deriving CDF
+:type dx: float
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{findFiles() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.findFiles}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{findFiles}}{\emph{log}, \emph{fileID='/Users/sammy/EUCLID/CCD273/CR/data/BAM\_0000*.fits'}}{}
+Find all files that match the ID.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- a logger instance
+
+\item {} 
+\textbf{fileID} (\emph{str}) -- identification with a wild card to find the files
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+a list containing all files matching the wild card.
+
+\item[{Return type}] \leavevmode
+lst
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{generateBAMdatagridImage() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.generateBAMdatagridImage}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{generateBAMdatagridImage}}{}{}
+Generates an example plot showing the Gaia BAM detector geometry
+and binning used. A simple illustration.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{preProcessData() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.preProcessData}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{preProcessData}}{\emph{log}, \emph{data}, \emph{info}}{}
+Removes the first line, transposes the array, and subtracts the median (derived ADC offset).
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- a logger instance
+
+\item {} 
+\textbf{data} (\emph{lst}) -- a list of pixel data arrays to process
+
+\item {} 
+\textbf{info} (\emph{lst}) -- a list of dictionaries that contain the header information
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+list of pixel data arrays
+
+\item[{Return type}] \leavevmode
+lst
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{readData() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.readData}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{readData}}{\emph{log}, \emph{files}}{}
+Read data and gather information from the header from all files given.
+\begin{quote}\begin{description}
+\item[{Parameters}] \leavevmode\begin{itemize}
+\item {} 
+\textbf{log} (\emph{instance}) -- a logger instance
+
+\item {} 
+\textbf{files} (\emph{lst}) -- a list of FITS file names
+
+\end{itemize}
+
+\item[{Returns}] \leavevmode
+NumPy array contaning pixel data and a list containing dictionaries that hold header information
+
+\item[{Return type}] \leavevmode
+ndarray, lst
+
+\end{description}\end{quote}
+
+\end{fulllineitems}
+
+\index{runAll() (in module analysis.analyseGaiaBAMCosmicRayData)}
+
+\begin{fulllineitems}
+\phantomsection\label{analysis:analysis.analyseGaiaBAMCosmicRayData.runAll}\pysiglinewithargsret{\code{analysis.analyseGaiaBAMCosmicRayData.}\bfcode{runAll}}{\emph{deriveCDF=True}, \emph{examplePlot=True}}{}
+Run all steps from finding suitable Gaia BAM files to analysing them.
+\begin{quote}\begin{description}
+\item[{Returns}] \leavevmode
+None
+
+\end{description}\end{quote}
 
 \end{fulllineitems}
 
@@ -6966,6 +7105,7 @@ example usages:
 \item {\texttt{analysis.analyse}}, \pageref{analysis:module-analysis.analyse}
 \item {\texttt{analysis.analyseBackground}}, \pageref{reduction:module-analysis.analyseBackground}
 \item {\texttt{analysis.analyseBackgroundSubtraction}}, \pageref{reduction:module-analysis.analyseBackgroundSubtraction}
+\item {\texttt{analysis.analyseGaiaBAMCosmicRayData}}, \pageref{analysis:module-analysis.analyseGaiaBAMCosmicRayData}
 \item {\texttt{analysis.analyseGhosts}}, \pageref{reduction:module-analysis.analyseGhosts}
 \item {\texttt{analysis.analyseSpotMeasurements}}, \pageref{analysis:module-analysis.analyseSpotMeasurements}
 \item {\texttt{analysis.biasCalibration}}, \pageref{reduction:module-analysis.biasCalibration}
@@ -6986,7 +7126,6 @@ example usages:
 \indexspace
 \bigletter{e}
 \item {\texttt{ETC.ETC}}, \pageref{ETC:module-ETC.ETC}
-\item {\texttt{ETC.fluxEstimates}}, \pageref{ETC:module-ETC.fluxEstimates}
 \indexspace
 \bigletter{p}
 \item {\texttt{postproc.postprocessing}}, \pageref{postproc:module-postproc.postprocessing}

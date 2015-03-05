@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -265,100 +263,6 @@ should be used [default = False]</li>
 </dd></dl>
 
 </div>
-<span class="target" id="module-ETC.fluxEstimates"></span><p>This file provides simple functions to calculate wavelength dependent effects.</p>
-<p>The functions can also be used to estimate the Weak Lensing Channel ghosts as a function
-of spectral type.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">NumPy</td>
-</tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">pysynphot</td>
-</tr>
-<tr class="field-even field"><th class="field-name">version:</th><td class="field-body">0.1</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
-</tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
-</tr>
-</tbody>
-</table>
-<dl class="function">
-<dt id="ETC.fluxEstimates.ghostCalculations">
-<tt class="descclassname">ETC.fluxEstimates.</tt><tt class="descname">ghostCalculations</tt><big>(</big><em>sourceSpectrum</em>, <em>title</em>, <em>output</em><big>)</big><a class="headerlink" href="#ETC.fluxEstimates.ghostCalculations" title="Permalink to this definition">¶</a></dt>
-<dd><p>Weak Lensing Channel Ghost calculations.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>sourceSpectrum</strong> (<em>object</em>) &#8211; pysynphot spectrum object</li>
-<li><strong>title</strong> (<em>str</em>) &#8211; title of the plot</li>
-<li><strong>output</strong> (<em>str</em>) &#8211; name of the output file</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">pysynphot observation object for VIS and Ghost</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of objects</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ETC.fluxEstimates.ghostResults">
-<tt class="descclassname">ETC.fluxEstimates.</tt><tt class="descname">ghostResults</tt><big>(</big><big>)</big><a class="headerlink" href="#ETC.fluxEstimates.ghostResults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the VIS channel ghost contribution.</p>
-<p>Synphot table for the Pickles stellar library:
-<a class="reference external" href="http://www.stsci.edu/hst/HST_overview/documents/synphot/AppA_Catalogs5.html">http://www.stsci.edu/hst/HST_overview/documents/synphot/AppA_Catalogs5.html</a></p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ETC.fluxEstimates.testFlatSpectrum">
-<tt class="descclassname">ETC.fluxEstimates.</tt><tt class="descname">testFlatSpectrum</tt><big>(</big><em>mag=18</em><big>)</big><a class="headerlink" href="#ETC.fluxEstimates.testFlatSpectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Test the pysynphot flat spectra, how to make flat in lambda and nu.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mag</strong> &#8211; </td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="ETC.fluxEstimates.throughputs">
-<tt class="descclassname">ETC.fluxEstimates.</tt><tt class="descname">throughputs</tt><big>(</big><em>output='throughputs.pdf'</em><big>)</big><a class="headerlink" href="#ETC.fluxEstimates.throughputs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot throughputs, compares to HST WFC3 UVIS F600LP</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>output</strong> (<em>str</em>) &#8211; name of the output file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
 </div>
 
 

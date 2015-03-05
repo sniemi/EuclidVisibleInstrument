@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -416,7 +414,8 @@ of the CCD. The routine assumes that the CCD is using four amplifiers.</p>
 </tbody>
 </table>
 <p>To execute:</p>
-<div class="highlight-python"><pre>python tileCCD.py -f 'Q*science.fits' -e 1</pre>
+<div class="highlight-python"><div class="highlight"><pre>python tileCCD.py -f &#39;Q*science.fits&#39; -e 1
+</pre></div>
 </div>
 <p>where -f argument defines the input files to be tiled and the -e argument marks the
 FITS extension from which the imaging data are being read.</p>
@@ -522,7 +521,8 @@ which quadrant is being processed so that the extra regions are subtracted corre
 </tbody>
 </table>
 <p>To execute:</p>
-<div class="highlight-python"><pre>python tileFPA.py -f 'CCD*science.fits' -e 1</pre>
+<div class="highlight-python"><div class="highlight"><pre>python tileFPA.py -f &#39;CCD*science.fits&#39; -e 1
+</pre></div>
 </div>
 <p>where -f argument defines the input files to be tiled and the -e argument marks the
 FITS extension from which the imaging data are being read.</p>

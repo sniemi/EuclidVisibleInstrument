@@ -48,3 +48,6 @@ VIS data analysis tools
 
 .. automodule:: analysis.saturatedArea
     :members:
+
+.. automodule:: analysis.analyseGaiaBAMCosmicRayData
+    :members:

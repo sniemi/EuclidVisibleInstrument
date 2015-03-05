@@ -2,9 +2,9 @@ Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation
 ================================================================================
 
 :Author: Sami-Matias Niemi
-:Contact: s.niemi@ucl.ac.uk
-:issue: 1.1
-:version: 1.3
+:Contact: s.niemi@icloud.com
+:issue: 1.2
+:version: 1.4
 :date: |today|
 
 
@@ -21,8 +21,7 @@ The documentation is also available in PDF format, please download the `VIS Pyth
 Installation
 ============
 
-The VIS Python Package (VIS-PP) is held in a GIT repository. You can download or fork the repository
-`here <https://bitbucket.org/niemi/vissim-python/overview>`_. The package contains a mixture of classes
+The VIS Python Package (VIS-PP) is held in a GIT repository. The package contains a mixture of classes
 and scripts divided in subpackages based on the usage. Unfortunately, there is no official or preferred
 installation instructions yet. To get most scripts working you should place
 the path to the root directory of the package to your PYTHONPATH environment variable. In addition, it is

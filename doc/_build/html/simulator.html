@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -194,13 +192,13 @@ please report any weird or inconsistent simulations to the author.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.6)</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">PyFITS (tested with 3.0.6 and 3.3)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1, 1.7.1, and 1.8.0)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">NumPy (tested with 1.6.1, 1.7.1, 1.8.0, 1.9.1, and 1.9.2)</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">numexpr (tested with 2.0.1)</td>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">numexpr (tested with 2.0.1 and 2.3.1)</td>
 </tr>
-<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1, 0.12, and 0.13)</td>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">SciPy (tested with 0.10.1, 0.12, 0.13, 0.14, and 0.15.1)</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">vissim-python package</td>
 </tr>
@@ -227,7 +225,8 @@ possible.</p>
 cdm03bidir.f90 Fortran code using f2py (f2py -c -m cdm03bidir cdm03bidir.f90) and the the .so is present in
 the CTI folder. For testing,
 please run the unittest as follows:</p>
-<div class="highlight-python"><pre>python simulator.py -t</pre>
+<div class="highlight-python"><div class="highlight"><pre>python simulator.py -t
+</pre></div>
 </div>
 <p>This will run the unittest and compare the result to a previously calculated image.
 Please inspect the standard output for results.</p>
@@ -240,17 +239,19 @@ any noise or cosmic rays.</p>
 <div class="section" id="benchmarking">
 <h3>Benchmarking<a class="headerlink" href="#benchmarking" title="Permalink to this headline">¶</a></h3>
 <p>A minimal benchmarking has been performed using the TESTSCIENCE1X section of the test.config input file:</p>
-<div class="highlight-python"><pre>Galaxy: 26753/26753 magnitude=26.710577 intscale=177.489159281 FWHM=0.117285374813 arc sec
+<div class="highlight-python"><div class="highlight"><pre>Galaxy: 26753/26753 magnitude=26.710577 intscale=185.424955025 FWHM=0.117285374813 arc sec
 7091 objects were place on the detector
 
-real        1m40.464s
-user        1m38.389s
-sys         0m1.749s</pre>
+real        0m53.545s
+user        0m51.249s
+sys         0m2.228s
+</pre></div>
 </div>
 <p>These numbers have been obtained with my desktop (3.4 GHz Intel Core i7 with 32GB 1600MHz DDR3) with
 64-bit Python 2.7.3 installation. Further speed testing can be performed using the cProfile module
 as follows:</p>
-<div class="highlight-python"><pre>python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X</pre>
+<div class="highlight-python"><div class="highlight"><pre>python -m cProfile -o vissim.profile simulator.py -c data/test.config -s TESTSCIENCE3X
+</pre></div>
 </div>
 <p>and then analysing the results with e.g. snakeviz or RunSnakeRun.</p>
 <p>The result above was obtained with nominally sampled PSF, however, that is only good for
@@ -258,14 +259,16 @@ testing purposes. If instead one uses say four times over sampled PSF (TESTSCIEN
 execution time may increases substantially. This is mostly due to the fact that convolution
 becomes rather expensive when done in the finely sampled PSF domain. If the four times oversampled case
 is run on CPU using SciPy.signal.fftconvolve for the convolution the run time is:</p>
-<div class="highlight-python"><pre>real        22m48.456s
+<div class="highlight-python"><div class="highlight"><pre>real        22m48.456s
 user        21m58.730s
-sys         0m50.171s</pre>
+sys         0m50.171s
+</pre></div>
 </div>
 <p>Instead, if we use an NVIDIA GPU for the convolution (and code that has not been optimised), the run time is:</p>
-<div class="highlight-python"><pre>real        12m7.745s
+<div class="highlight-python"><div class="highlight"><pre>real        12m7.745s
 user        11m55.047s
-sys         0m9.535s</pre>
+sys         0m9.535s
+</pre></div>
 </div>
 </div>
 <div class="section" id="change-log">
@@ -274,12 +277,12 @@ sys         0m9.535s</pre>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.32</td>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.4</td>
 </tr>
 </tbody>
 </table>
 <p>Version and change logs:</p>
-<div class="highlight-python"><pre>0.1: pre-development backbone.
+<div class="highlight-python"><div class="highlight"><pre>0.1: pre-development backbone.
 0.4: first version with most pieces together.
 0.5: this version has all the basic features present, but not fully tested.
 0.6: implemented pre/overscan, fixed a bug when an object was getting close to the upper right corner of an
@@ -310,8 +313,8 @@ sys         0m9.535s</pre>
       the fact that the ghost depends on the focal plane position. Fixed an issue with image coordinates
       (zero indexing). Now input catalogue values agree with DS9 peak pixel locations.
 1.27: Convolution can now be performed using a GPU using CUDA if the hardware is available. Convolution mode
-      is now controlled using a single parameter. Change from 'full' to 'same' as full provides no valid information
-      over 'same'. In principle the 'valid' mode would give all valid information, but in practise it leads to
+      is now controlled using a single parameter. Change from &#39;full&#39; to &#39;same&#39; as full provides no valid information
+      over &#39;same&#39;. In principle the &#39;valid&#39; mode would give all valid information, but in practise it leads to
       truncated convolved galaxy images if the image and the kernel are of similar size.
 1.28: Moved the cosmic ray event generation to a separate class for easier management. Updated the code to
       generate more realistic looking cosmic rays. Included a charge diffusion smoothing to the cosmic rays
@@ -320,11 +323,13 @@ sys         0m9.535s</pre>
       the CCD, while cosmic rays can come from any direction and penetrate to any depth).
 1.29: Fixed a bug in the object pixel coordinates for simulations other than the 0, 0 CCD. The FPA gaps
       were incorrectly taken into account (forcing the objects to be about 100 pixels of per gap).
-1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information['mode']
+1.30: now nocti files contain ADC offset and readnoise, the same as the true output if CTI is simulated.self.information[&#39;mode&#39;]
 1.31: now a single FOLDER variable at the beginning of the program that should be set to
       point to the location of the vissim-python. Modified the ghost function, a fixed offset from the source, but
       more suitable for the correct input model.
-1.32: option to fix the random number generator seed using -f flag.</pre>
+1.32: option to fix the random number generator seed using -f flag.
+1.4: included an option to simulate an image with the shutter open leading to readout trails.
+</pre></div>
 </div>
 </div>
 <div class="section" id="future-work">
@@ -350,7 +355,7 @@ sys         0m9.535s</pre>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
 </tr>
-<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;ucl&#46;ac&#46;uk">s<span>&#46;</span>niemi<span>&#64;</span>ucl<span>&#46;</span>ac<span>&#46;</span>uk</a></td>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;icloud&#46;com">s<span>&#46;</span>niemi<span>&#64;</span>icloud<span>&#46;</span>com</a></td>
 </tr>
 </tbody>
 </table>
@@ -436,6 +441,15 @@ orientation, in these images the regions are mirrored.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="simulator.simulator.VISsimulator.addReadoutTrails">
+<tt class="descname">addReadoutTrails</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.addReadoutTrails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add readout trails resulting from reading out the shutter open.</p>
+<p>Quadrants assumed to be numbered:
+2 3
+0 1</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="simulator.simulator.VISsimulator.applyBias">
 <tt class="descname">applyBias</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyBias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds a bias level to the image being constructed.</p>
@@ -508,7 +522,7 @@ the sky. Thus, in case of a single quadrant (x, y) = (2048, 2066).</p>
 <dt id="simulator.simulator.VISsimulator.applyRadiationDamage">
 <tt class="descname">applyRadiationDamage</tt><big>(</big><big>)</big><a class="headerlink" href="#simulator.simulator.VISsimulator.applyRadiationDamage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies CDM03 radiation model to the image being constructed.</p>
-<div class="admonition-see-also admonition seealso">
+<div class="admonition seealso">
 <p class="first admonition-title">See also</p>
 <p class="last">Class :<cite>CDM03</cite></p>
 </div>
@@ -624,6 +638,7 @@ defined by the argument max.</p>
 <span class="n">magzero</span> <span class="o">=</span> <span class="mf">15182880871.225231</span>
 <span class="n">exposures</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">exptime</span> <span class="o">=</span> <span class="mf">565.0</span>
+<span class="n">readouttime</span> <span class="o">=</span> <span class="mf">78.0</span>
 <span class="n">rdose</span> <span class="o">=</span> <span class="mf">8.0e9</span>
 <span class="n">RA</span> <span class="o">=</span> <span class="mf">145.95</span>
 <span class="n">DEC</span> <span class="o">=</span> <span class="o">-</span><span class="mf">38.16</span>
@@ -647,6 +662,7 @@ defined by the argument max.</p>
 <span class="n">random</span> <span class="o">=</span> <span class="n">yes</span>
 <span class="n">background</span> <span class="o">=</span> <span class="n">yes</span>
 <span class="n">ghosts</span> <span class="o">=</span> <span class="n">no</span>
+<span class="n">shutterOpen</span> <span class="o">=</span> <span class="n">no</span>
 </pre></div>
 </div>
 <p>For explanation of each field, see /data/test.config. Note that if an input field does not exist,

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '1.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -69,6 +67,7 @@
 <li><a class="reference internal" href="#psf-fitting">PSF Fitting</a></li>
 <li><a class="reference internal" href="#impact-of-cti-trailing-on-shear-power-spectrum">Impact of CTI Trailing on Shear Power Spectrum</a></li>
 <li><a class="reference internal" href="#saturated-imaging-area">Saturated Imaging Area</a></li>
+<li><a class="reference internal" href="#cosmic-rays">Cosmic Rays</a></li>
 </ul>
 </li>
 </ul>
@@ -191,10 +190,11 @@ saves to self.sources. x and y coordinates are also available directly in self.x
 <tt class="descname">writeResults</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.analyse.analyseVISdata.writeResults" title="Permalink to this definition">¶</a></dt>
 <dd><p>Outputs results to an ascii file defined in self.settings. This ascii file
 is in SExtractor format and contains the following columns:</p>
-<div class="highlight-python"><pre>1. X coordinate
+<div class="highlight-python"><div class="highlight"><pre>1. X coordinate
 2. Y coordinate
 3. ellipticity
-4. R_{2}</pre>
+4. R_{2}
+</pre></div>
 </div>
 </dd></dl>
 
@@ -271,10 +271,11 @@ saves to self.sources. x and y coordinates are also available directly in self.x
 <tt class="descname">writeResults</tt><big>(</big><big>)</big></dt>
 <dd><p>Outputs results to an ascii file defined in self.settings. This ascii file
 is in SExtractor format and contains the following columns:</p>
-<div class="highlight-python"><pre>1. X coordinate
+<div class="highlight-python"><div class="highlight"><pre>1. X coordinate
 2. Y coordinate
 3. ellipticity
-4. R_{2}</pre>
+4. R_{2}
+</pre></div>
 </div>
 </dd></dl>
 
@@ -1160,7 +1161,8 @@ The default input PSF is 12 times over-sampled with 1 micron pixel.</p>
 <tt class="descclassname">analysis.PSFproperties.</tt><tt class="descname">parseName</tt><big>(</big><em>file</em><big>)</big><a class="headerlink" href="#analysis.PSFproperties.parseName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse information from the input file name.</p>
 <p>Example name:</p>
-<div class="highlight-python"><pre>detector_jitter-1_TOL05_MC_T0074_50arcmin2_grid_Nim=16384x16384_pixsize=1.000um_lbda=800nm_fieldX=-0.306_fieldY=1.042.fits</pre>
+<div class="highlight-python"><div class="highlight"><pre>detector_jitter-1_TOL05_MC_T0074_50arcmin2_grid_Nim=16384x16384_pixsize=1.000um_lbda=800nm_fieldX=-0.306_fieldY=1.042.fits
+</pre></div>
 </div>
 </dd></dl>
 
@@ -1490,7 +1492,7 @@ Otherwise they will be the average.</li>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Requires :</th><td class="field-body">pyMC</td>
+<tr class="field-odd field"><th class="field-name">Requires:</th><td class="field-body">pyMC</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
 </tr>
@@ -1732,7 +1734,8 @@ None, which then uses the center of the image (including fractional pixels).</li
 <dt id="analysis.CTIpower.plotCTIeffect">
 <tt class="descclassname">analysis.CTIpower.</tt><tt class="descname">plotCTIeffect</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#analysis.CTIpower.plotCTIeffect" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function plots the CTI impact on shear. The Data is assumed to be in the following format:</p>
-<div class="highlight-python"><pre>x [deg]     y [deg] g1_parallel   g1_serial    g1_total    g2_total</pre>
+<div class="highlight-python"><div class="highlight"><pre>x [deg]     y [deg] g1_parallel   g1_serial    g1_total    g2_total
+</pre></div>
 </div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1849,6 +1852,207 @@ None, which then uses the center of the image (including fractional pixels).</li
 <tt class="descclassname">analysis.saturatedArea.</tt><tt class="descname">pixelsImpacted</tt><big>(</big><em>magnitude</em>, <em>exptime=565</em>, <em>pixelFractions=(0.65</em>, <em>0.4</em>, <em>0.35</em>, <em>0.18</em>, <em>0.09</em>, <em>0.05)</em>, <em>star=False</em>, <em>lookup=True</em><big>)</big><a class="headerlink" href="#analysis.saturatedArea.pixelsImpacted" title="Permalink to this definition">¶</a></dt>
 <dd><p>This potentially overestimates because does not consider the fact that bleeding is along the column
 and hence some saturated pixels may be double counted.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-analysis.analyseGaiaBAMCosmicRayData"></span><div class="section" id="cosmic-rays">
+<h2>Cosmic Rays<a class="headerlink" href="#cosmic-rays" title="Permalink to this headline">¶</a></h2>
+<p>This scripts derives simple cosmic ray statististics from Gaia BAM data.
+Note that the Gaia BAM data are binned 4 x 1 leading to pixel geometries
+that are 120 x 10 microns. One can derive a statistical correction to
+take into account the binning. Further corrections are needed to scale
+e.g. to VIS CCD273 pixels, which are 12 x 12 microns. Thus, the results
+will necessarily contain some uncertainties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">pyfits (tested with 3.3)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">numpy (tested with 1.9.2)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">scipy (tested with 0.15.1)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">matplotlib (tested with 1.4.3)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">skimage (scikit-image, tested with 0.10.1)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">sklearn (scikit-learn, tested with 0.15.2)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">requires:</th><td class="field-body">statsmodels (tested with 0.6.1)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">requires:</th><td class="field-body">vissim-python</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">author:</th><td class="field-body">Sami-Matias Niemi</td>
+</tr>
+<tr class="field-even field"><th class="field-name">contact:</th><td class="field-body"><a class="reference external" href="mailto:s&#46;niemi&#37;&#52;&#48;icloud&#46;com">s<span>&#46;</span>niemi<span>&#64;</span>icloud<span>&#46;</span>com</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">version:</th><td class="field-body">1.0</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.analyseData">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">analyseData</tt><big>(</big><em>log</em>, <em>files</em>, <em>data</em>, <em>info</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.analyseData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyse all BAM data held in files.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; a logger instance</li>
+<li><strong>files</strong> (<em>lst</em>) &#8211; a list of file names</li>
+<li><strong>data</strong> (<em>lst</em>) &#8211; a list of pixel data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parama info:</th><td class="field-body"><p class="first">a list of meta data dictionaries</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.deriveCumulativeFunctionsforBinning">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">deriveCumulativeFunctionsforBinning</tt><big>(</big><em>xbin=4</em>, <em>ybin=1</em>, <em>xsize=1</em>, <em>ysize=1</em>, <em>mc=100000</em>, <em>dx=0.1</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.deriveCumulativeFunctionsforBinning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Because the original BAM data are binned 4 x 1, we do not know the track lengths.
+One can try to derive a statistical correction by randomizing the position and the
+angle a cosmic ray may have arrived. This function derives a probability density
+function for the track lengths by Monte Carloing over the random locations and 
+angles.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xbin</strong> (<em>int</em>) &#8211; number of pixels binned in x-direction</li>
+<li><strong>ybin</strong> (<em>int</em>) &#8211; number of pixels binned in y-direction</li>
+<li><strong>xsize</strong> (<em>int</em>) &#8211; how many binned pixels to use in the derivation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:param ysize:how many binned pixels to use in the derivation
+:type ysize: int
+:param mc: number of random realisations to generate
+:type mc: int
+:param dx: size of the steps to adopt when deriving CDF
+:type dx: float</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.findFiles">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">findFiles</tt><big>(</big><em>log</em>, <em>fileID='/Users/sammy/EUCLID/CCD273/CR/data/BAM_0000*.fits'</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.findFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find all files that match the ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; a logger instance</li>
+<li><strong>fileID</strong> (<em>str</em>) &#8211; identification with a wild card to find the files</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a list containing all files matching the wild card.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">lst</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.generateBAMdatagridImage">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">generateBAMdatagridImage</tt><big>(</big><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.generateBAMdatagridImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an example plot showing the Gaia BAM detector geometry
+and binning used. A simple illustration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.preProcessData">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">preProcessData</tt><big>(</big><em>log</em>, <em>data</em>, <em>info</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.preProcessData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the first line, transposes the array, and subtracts the median (derived ADC offset).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; a logger instance</li>
+<li><strong>data</strong> (<em>lst</em>) &#8211; a list of pixel data arrays to process</li>
+<li><strong>info</strong> (<em>lst</em>) &#8211; a list of dictionaries that contain the header information</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of pixel data arrays</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">lst</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.readData">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">readData</tt><big>(</big><em>log</em>, <em>files</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.readData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data and gather information from the header from all files given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log</strong> (<em>instance</em>) &#8211; a logger instance</li>
+<li><strong>files</strong> (<em>lst</em>) &#8211; a list of FITS file names</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">NumPy array contaning pixel data and a list containing dictionaries that hold header information</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray, lst</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="analysis.analyseGaiaBAMCosmicRayData.runAll">
+<tt class="descclassname">analysis.analyseGaiaBAMCosmicRayData.</tt><tt class="descname">runAll</tt><big>(</big><em>deriveCDF=True</em>, <em>examplePlot=True</em><big>)</big><a class="headerlink" href="#analysis.analyseGaiaBAMCosmicRayData.runAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all steps from finding suitable Gaia BAM files to analysing them.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

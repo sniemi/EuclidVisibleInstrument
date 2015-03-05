@@ -61,9 +61,9 @@ Dependencies
 This script depends on the following packages:
 
 :requires: PyFITS (tested with 3.0.6 and 3.3)
-:requires: NumPy (tested with 1.6.1, 1.7.1, 1.8.0, and 1.9.1)
-:requires: numexpr (tested with 2.0.1 and 2.4)
-:requires: SciPy (tested with 0.10.1, 0.12, 0.13, and 0.14)
+:requires: NumPy (tested with 1.6.1, 1.7.1, 1.8.0, 1.9.1, and 1.9.2)
+:requires: numexpr (tested with 2.0.1 and 2.3.1)
+:requires: SciPy (tested with 0.10.1, 0.12, 0.13, 0.14, and 0.15.1)
 :requires: vissim-python package
 
 .. Note:: This class is not Python 3 compatible. For example, xrange does not exist
@@ -208,7 +208,7 @@ Contact Information
 -------------------
 
 :author: Sami-Matias Niemi
-:contact: s.niemi@ucl.ac.uk
+:contact: s.niemi@icloud.com
 """
 import os, sys, datetime, math, pprint, unittest
 import ConfigParser
@@ -317,7 +317,7 @@ class VISsimulator():
                                      injection=45000.0,
                                      ghostCutoff=22.0,
                                      ghostRatio=5.e-5,
-                                     coveringFraction=1.4,  #CR: 1.4 is for 565s exposure
+                                     coveringFraction=3.0,  #CR: 3.0% is for 565s exposure
                                      flatflux=FOLDER+'data/VIScalibrationUnitflux.fits',
                                      cosmicraylengths=FOLDER+'data/cdf_cr_length.dat',
                                      cosmicraydistance=FOLDER+'data/cdf_cr_total.dat',

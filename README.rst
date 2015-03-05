@@ -5,7 +5,7 @@ Welcome to Euclid Visible InStrument (VIS) Python Package (VIS-PP) Documentation
 :Contact: s.niemi@icloud.com
 :issue: 1.2
 :version: 1.4
-:date: |today|
+:date: 5th of March 2015
 
 
 This Python package VIS-PP provides subpackages and methods related to generating mock data and reducing it, the main

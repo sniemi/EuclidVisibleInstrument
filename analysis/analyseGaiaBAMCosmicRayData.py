@@ -22,7 +22,7 @@ will necessarily contain some uncertainties.
 :author: Sami-Matias Niemi
 :contact: s.niemi@icloud.com
 
-:version: 0.9
+:version: 1.0
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -340,6 +340,8 @@ def analyseData(log, files, data, info):
     kde_skl = KernelDensity(kernel='gaussian', bandwidth=0.1)
     kde_skl.fit(d2d)
     log_pdfe = kde_skl.score_samples(x_gride[:, np.newaxis])
+    epdf = np.exp(log_pdfe)
+    np.savetxt('CRenergyPDF.txt', np.vstack([x_gride, epdf]).T)
 
     #KDE for track lengts
     d2d = tracks[:, np.newaxis]
@@ -347,13 +349,15 @@ def analyseData(log, files, data, info):
     kde_skl = KernelDensity(kernel='gaussian', bandwidth=0.05)
     kde_skl.fit(d2d)
     log_pdft = kde_skl.score_samples(x_gridt[:, np.newaxis])
+    tpdf = np.exp(log_pdft)
+    np.savetxt('CRtrackPDF.txt', np.vstack([x_gridt, tpdf]).T)
 
     #energy and track lengths
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
     ax1.hist(energies, bins=esample, normed=True, alpha=0.2)
-    ax1.plot(x_gride, np.exp(log_pdfe), lw=3, c='r')
+    ax1.plot(x_gride, epdf, lw=3, c='r')
     ax2.hist(tracks, bins=tsample, normed=True, alpha=0.2)
-    ax2.plot(x_gridt, np.exp(log_pdft), lw=3, c='r')    
+    ax2.plot(x_gridt, tpdf, lw=3, c='r')    
     ax1.set_xlabel('$\log_{10}(\Sigma$Energy [e$^{-}$]$)$')
     ax1.set_xlim(2.5, 7.)
     ax1.set_ylabel('PDF')
@@ -506,7 +510,7 @@ def deriveCumulativeFunctionsforBinning(xbin=4, ybin=1, xsize=1, ysize=1, mc=100
     plt.close()
     
 
-def runAll(deriveCDF=False, examplePlot=False):
+def runAll(deriveCDF=True, examplePlot=True):
     """
     Run all steps from finding suitable Gaia BAM files to analysing them.
     

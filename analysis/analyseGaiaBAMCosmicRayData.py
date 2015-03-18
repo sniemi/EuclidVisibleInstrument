@@ -14,7 +14,6 @@ will necessarily contain some uncertainties.
 :requires: numpy (tested with 1.9.2)
 :requires: scipy (tested with 0.15.1)
 :requires: matplotlib (tested with 1.4.3)
-:requires: skimage (scikit-image, tested with 0.10.1)
 :requires: sklearn (scikit-learn, tested with 0.15.2)
 :requires: statsmodels (tested with 0.6.1)
 :requires: vissim-python

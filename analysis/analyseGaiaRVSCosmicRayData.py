@@ -16,7 +16,7 @@ This scripts derives simple cosmic ray statististics from Gaia RVS data.
 :author: Sami-Matias Niemi
 :contact: s.niemi@icloud.com
 
-:version: 0.1
+:version: 0.2
 """
 import matplotlib
 matplotlib.use('pdf')
@@ -238,10 +238,10 @@ def _findCosmicRays(array, output, sigma=5., gain=1.):
     #label the pixels
     labels, numb = ndimage.label(thresholded)
     print 'Found %i cosmic rays' % numb
-    
+
+    #if no CRs found, then return zero arrays so that fluence calculations take these into account    
     if numb < 1:
-        #if no CRs found, then return None
-        return None
+        return np.asarray([0,]), np.asarray([0,]), np.asarray([0,]), np.asarray([0,])
         
     #find locations    
     locations = ndimage.measurements.find_objects(labels)
@@ -261,12 +261,12 @@ def _findCosmicRays(array, output, sigma=5., gain=1.):
     energy = np.asarray(energy) * gain
     
     if tracks.max() < 2:
-        #single pixel event
-        return None
-    
+        #a single pixel event, likely to be a noise spike rather than CR
+        return np.asarray([0,]), np.asarray([0,]), np.asarray([0,]), np.asarray([0,])        
+        
     #calculate statitics
     sm = float(tracks.sum())
-    rate = sm / (4.4) /array.size
+    rate = sm / (4.42) /array.size
     fluence = rate / (10.*30.) / 1e-8 / tracks.mean()
 
     print 'The longest track covers %i pixels' % tracks.max()
@@ -311,7 +311,9 @@ def analyseData(files):
     
     #take a log10, better for visualisation and comparison against Stardust modelling
     tracks = np.log10(tracks)
-    energies = np.log10(energies)    
+    tracks = tracks[np.isfinite(tracks)] #because return zeros if no CR found, then after log -inf
+    energies = np.log10(energies) 
+    energies = energies[np.isfinite(energies)] #because return zeros if no CR found, then after log -inf
     
     #histogram bins
     esample = np.linspace(0., 7, 30)

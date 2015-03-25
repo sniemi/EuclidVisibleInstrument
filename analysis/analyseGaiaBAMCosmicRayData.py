@@ -46,7 +46,7 @@ import glob as g
 from support import logger as lg
 
 
-def findFiles(log, fileID='/Users/sammy/EUCLID/CCD273/CR/data/BAM_0000*.fits'):
+def findFiles(log, fileID='data/*/*.fits'):
     """
     Find all files that match the ID.
     
